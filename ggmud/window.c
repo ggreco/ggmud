@@ -123,6 +123,7 @@ GtkWidget *create_new_window(char *title, int width, int height)
 
     gtk_widget_show(win);
 
+
     return list;
 }
 
@@ -141,6 +142,7 @@ window_entry *create_new_entry(char *title, int width, int height)
         free(entry);
         return NULL;
     }
+    gtk_widget_grab_focus (GTK_WIDGET(mud->ent));
 
     return entry;
 }
