@@ -115,10 +115,15 @@ static void trigger_selection_made (GtkWidget *clist, gint row, gint column,
         gtk_clist_get_text ((GtkCList*) data, row, 1, &text);
         gtk_entry_set_text (GTK_ENTRY (textreplace), text);
         gtk_clist_get_text ((GtkCList*) data, row, 2, &text);
-        gtk_entry_set_text (GTK_ENTRY (textpri), atoi(text));
+        gtk_entry_set_text (GTK_ENTRY (textpri), text);
     }
     
     return;
+}
+
+void triggerclass_window(GtkWidget *widget, gpointer data )
+{
+    // TODO
 }
 
 static void add_trigger(const char *a, const char *b, const char *class)

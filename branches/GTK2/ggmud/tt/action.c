@@ -31,11 +31,8 @@ This program is protected under the GNU GPL (See COPYING)
 #include "config.h"
 #include "tintin.h"
 
-#if defined(HAVE_STRING_H)
 #include <string.h>
-#elif defined(HAVE_STRINGS_H)
-#include <strings.h>
-#endif
+#include <stdlib.h>
 
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
@@ -110,7 +107,7 @@ static int enable_class(const char *name, int enable)
     trigger_class *cl = get_class(name);
 
     if (cl) {
-        cl->enable = enable;
+        cl->enabled = enable;
 
         return 0;
     }
