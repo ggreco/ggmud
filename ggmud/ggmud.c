@@ -144,7 +144,6 @@ int main(int argc, char **argv)
     init_colors();
     load_font();
     load_wizard();
-    load_triggers();
 
     hist_add(""); /* Needed to get rid of a blank line in history list */
 
@@ -157,11 +156,12 @@ int main(int argc, char **argv)
 
     ttmain(argc, argv);
 
-// placed here since it needs the initializations of tt++.
+// placed here since thos needs the initializations of tt++ underlying structures.
     load_aliases();
     load_variables();
     load_highlights();
     load_gags();
+    load_triggers();
 
     gtk_main();
 	

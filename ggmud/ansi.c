@@ -196,6 +196,8 @@ void init_colors ()
     default_color_black 		= color_black;		//default_color_white 	= color_white;
     default_color_lightblack 	= color_lightblack;	//default_color_white 	= color_white;
 
+    prefs.DefaultColor = color_white;
+    prefs.BackgroundColor = color_black;
     /* Hmm, why is this here??? CHECK IT OUT */
     if ( !font.FontName ) {
 #ifdef WIN32
