@@ -58,6 +58,43 @@ int timetilltick(void)
   return(ttt);
 }
 
+void do_timer(char *arg, struct session *ses)
+{
+    extern char *get_arg_in_braces(char *s, char *arg, int flag);
+    timerdata *d;
+    int length;
+    char left[BUFFER_SIZE], right[BUFFER_SIZE];
+    
+    arg = get_arg_in_braces(arg, left, 0);
+
+    if(!*left) {
+        tintin_puts("#YOU SHOULD SPECIFY A TIMER PERIOD\n", ses);
+        return;
+    }
+    
+    arg = get_arg_in_braces(arg, right, 0);
+    
+    length = atoi(left);
+
+    if (length < 1 || length > 7200) {
+        tintin_puts("#TIMER PERIOD TOO BIG OR TOO SMALL\n", ses);
+        return;
+    }
+    
+    if (d = malloc(sizeof(timerdata))) {
+        char buffer[200];
+        
+        d->last = 0;
+        d->string = strdup(right);
+        d->finish = time(NULL) + length;
+
+        mud->timers = g_list_append(mud->timers, d);
+
+        sprintf(buffer, "#NEW TIMER %s (%d seconds)\n", d->string, length);
+        tintin_puts(buffer, ses);        
+    }
+}
+
 int checktick(void)
 {
     extern int use_tickcounter;
@@ -65,6 +102,46 @@ int checktick(void)
     static int last = -1, ttt = -1, using_tickcounter = 0; /* ttt = time to tick */
     int now, found = 0;
 
+    now = time(0);
+
+    GList *l = mud->timers;
+    
+    while (l) {
+        timerdata *d = (timerdata *) l->data;
+
+        l = l->next;
+
+        if (d->last > 0 && d->last < now) {
+            time_t l = d->finish;
+
+            l -= now;
+
+            if (l == 0) {
+                char buffer[BUFFER_SIZE];
+                
+                sprintf(buffer, "#TIMER %s EXPIRED\n", d->string);
+                do_one_line(buffer, mud->activesession);
+
+                textfield_add(mud->text, buffer, MESSAGE_TICK);
+
+                free(d->string); free(d);
+                
+                mud->timers = g_list_remove(mud->timers, d);
+            }
+            else if (l == 10) {
+                char buffer[BUFFER_SIZE];
+                
+                sprintf(buffer, "#TIMER %s WILL EXPIRE IN 10 SECONDS\n", d->string);
+                do_one_line(buffer, mud->activesession);
+
+                textfield_add(mud->text, buffer, MESSAGE_TICK);
+                d->last = now;
+            }
+        }
+        else
+         d->last = now;
+    }
+    
     if(!use_tickcounter) {
         if(using_tickcounter) {
             gtk_label_set_text(mud->tick_counter, "OFF");
@@ -75,9 +152,7 @@ int checktick(void)
 
     if(time0 <= 0)
         return TRUE;	/* big number */
-
-    now = time(0);
-
+ 
     if(last > 0) {
         while(last <= now) {
             ttt = (++last - time0) % tick_size;
