@@ -27,6 +27,15 @@
 
 #include "font.h"
 
+/* Global variables */
+SYSTEM_DATA font;
+GtkWidget   *font_window;
+GtkWidget   *font_button_save;
+GtkWidget   *entry_fontname;
+GtkWidget *menu_Option_font;
+GdkFont  *font_normal;
+GtkStyle *style;
+
 void set_style() {
     style = gtk_widget_get_default_style();
     if (style) {

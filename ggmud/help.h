@@ -22,20 +22,4 @@
 void do_about (GtkWidget *widget, gpointer data);
 void do_manual (GtkWidget *widget, gpointer data);
 
-
-/* About txt */
-const char * ABOUT_MESSAGE = "\n\n Author:\n"
-"    Gabriele Greco (gabriele.greco@aruba.it)\n"
-"\n"
-" SClient authors:\n"
-"    P.E. Segolsson, Fredrik Andersson\n"
-"\n"
-" TinTin++ authors:\n"
-"    Bill Reiss, David A. Wagner, Rob Ellsworth,\n"
-"    Jeremy C. Jack, Davin Chan\n"
-"\n"  
-" WWW:\n" 
-"    http://ggmud.sourceforge.net\n" 
-"\n";
-
 #endif /* _HELP_H_ */

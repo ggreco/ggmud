@@ -30,6 +30,15 @@
 
 #define ALIAS_FILE "aliases"
 
+/* Global variables for alias */
+GtkWidget *textalias;
+GtkWidget *textreplace;
+GtkWidget *alias_window;
+gint      alias_selected_row    = -1;
+gint      alias_selected_column = -1;
+
+ALIAS_DATA *alias_list;
+
 void save_aliases (GtkWidget *button, gpointer data) {
     FILE *fp;
     gint done = FALSE;

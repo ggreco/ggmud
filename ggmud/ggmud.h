@@ -29,7 +29,7 @@
 #define MESSAGE_SENT	4
 
 typedef struct {
-    GtkWidget *window, *menu, *hostentry, *portentry, *vbox;
+    GtkWidget *window, *menu, *hostentry, *portentry, *vbox, *macrobuttons;
     GtkText *text;
     GtkEntry *ent;
     GtkLabel *tick_counter;
@@ -47,17 +47,6 @@ typedef struct {
     struct session *activesession;
     int input_monitor;
 } ggmud;
-
-/* menu items */
-GtkWidget *menu_File_Connect;
-GtkWidget *menu_File_DisConnect;
-
-/* statusbar */
-GtkWidget *statusbar;
-gint statusbar_id;
-
-/* Global macro list */
-gchar **macro_list;
 
 typedef struct alias_data  ALIAS_DATA;
 typedef struct system_data SYSTEM_DATA;
@@ -97,7 +86,6 @@ struct wizard_data {
     gint       autologin;
 };
 
-
 /* alias.c */
 extern void  load_aliases    ( void );
 extern void  window_alias    (GtkWidget *widget, gpointer data);
@@ -106,6 +94,12 @@ extern void  window_alias    (GtkWidget *widget, gpointer data);
 extern void  load_triggers    ( void );
 extern void triggers_window ();
 
+extern ggmud *mud;
+extern gchar **macro_list;
+extern GtkWidget *menu_File_Connect;
+extern GtkWidget *menu_File_DisConnect;
+extern GtkWidget *statusbar;
+extern gint statusbar_id;
 
 /* wiz.c */
 extern void  load_wizard        ( void );
@@ -130,8 +124,6 @@ extern void hist_clear();
 extern void  load_macro    ( void );
 extern void  window_macro    (GtkWidget *widget, gpointer data);
 
-/* ggmud.c */
-ggmud *mud;
 
 /* win.c */
 extern GtkWidget *spawn_gui( void );
@@ -175,7 +167,6 @@ extern GdkFont  *font_bold;
 extern GdkFont  *font_normal;
 
 /* prefs.c */
-void load_misc_prefs ( void );
 void  load_prefs ( void );
 void  window_prefs ( GtkWidget *widget, gpointer data );
 void color_prefs (GtkWidget *widget, GtkWidget *dummy);
