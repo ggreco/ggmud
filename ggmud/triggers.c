@@ -321,14 +321,84 @@ static void trigger_button_delete (GtkWidget *button, gpointer data) {
 
 }
 
+static int
+do_find(GtkCList *clist, const char *match)
+{
+    char *text;
+    int i, j;
+
+    for (i = 0; i < clist->rows; i++) {
+        for (j = 0; j < clist->columns; j++) {
+
+            if(gtk_clist_get_text (clist, i, j, &text)) {
+                if (strstr(text, match))
+                    return i;
+            }
+        }
+    }
+
+    return -1;
+}
+
+static void 
+emit_response(GtkEntry *entry, GtkDialog *d)
+{
+    const char *text = gtk_entry_get_text(entry);
+    
+    if (text && *text)
+        gtk_dialog_response(d, GTK_RESPONSE_ACCEPT);
+}
+
+void 
+find_in_list(GtkWidget *widget, GtkCList *clist)
+{
+     GtkWidget *dialog = gtk_dialog_new_with_buttons ("Find...",
+                                                  GTK_WINDOW(gtk_widget_get_toplevel(widget)),
+                                                  GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                  GTK_STOCK_OK,
+                                                  GTK_RESPONSE_ACCEPT,
+                                                  GTK_STOCK_CANCEL,
+                                                  GTK_RESPONSE_REJECT,
+                                                  NULL);
+    GtkWidget *label = gtk_label_new("Insert the string you want to search for:");
+    GtkWidget *entry = gtk_entry_new();
+    
+    gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox),
+                      label);
+    gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox),
+                      entry);
+
+    gtk_signal_connect (GTK_OBJECT (entry), "activate", 
+            GTK_SIGNAL_FUNC (emit_response), dialog);
+    
+    gtk_widget_show_all (dialog);
+    
+    if (gtk_dialog_run((GtkDialog *)dialog) == GTK_RESPONSE_ACCEPT) {
+        const char *finding =  gtk_entry_get_text(GTK_ENTRY(entry));
+
+        if (finding && *finding) {
+            int row = do_find(clist, finding);
+
+            if (row < 0)
+                popup_window("Unable to find '%s' in this list.", finding);
+            else {
+                // I hope this will trigger the cbk.
+                gtk_clist_select_row(clist, row, 0);
+            }
+        }
+    }
+
+    gtk_widget_destroy(dialog);
+}
+
 void triggers_window(GtkWidget *widget, gpointer data)
 {
-    GtkWidget *vbox;
+    GtkWidget *vbox; 
     GtkWidget *hbox;
     GtkWidget *hbox2;
     GtkWidget *hbox3;
     GtkWidget *clist;
-    GtkWidget *label;
+    GtkWidget *label, *but;
 //    GtkTooltips *tooltip;
     GtkWidget *scrolled_window;
 
@@ -352,7 +422,6 @@ void triggers_window(GtkWidget *widget, gpointer data)
     vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
     gtk_container_add (GTK_CONTAINER (trig_window), vbox);
-    gtk_widget_show (vbox);
 
     /* create a new scrolled window. */
     scrolled_window = gtk_scrolled_window_new (NULL, NULL);
@@ -360,7 +429,6 @@ void triggers_window(GtkWidget *widget, gpointer data)
     gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_window),
                                     GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
     gtk_box_pack_start (GTK_BOX (vbox), scrolled_window, TRUE, TRUE, 0);
-    gtk_widget_show (scrolled_window);
 
     clist = gtk_clist_new_with_titles (4, titles);
     gtk_signal_connect_object (GTK_OBJECT (clist), "select_row",
@@ -379,44 +447,44 @@ void triggers_window(GtkWidget *widget, gpointer data)
 
     gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (scrolled_window), clist);
 
-    gtk_widget_show (clist);
-
-    hbox3 = gtk_table_new(2, 2, FALSE);
+    hbox3 = gtk_table_new(4, 2, FALSE);
 
     gtk_box_pack_start (GTK_BOX (vbox), hbox3, FALSE, FALSE, 0);
-    gtk_widget_show (hbox3);
 
     
     label = gtk_label_new ("Trigger");
-    gtk_table_attach(GTK_TABLE(hbox3), label, 0, 1, 0, 1,
+    gtk_table_attach(GTK_TABLE(hbox3), label, 1, 2, 0, 1,
                         GTK_EXPAND|GTK_FILL, /*GTK_FILL*/ 0L, 2, 2);
-    gtk_widget_show (label);
     
     label = gtk_label_new ("Commands");
-    gtk_table_attach(GTK_TABLE(hbox3), label, 1, 2, 0, 1,
+    gtk_table_attach(GTK_TABLE(hbox3), label, 2, 3, 0, 1,
                         GTK_FILL | GTK_EXPAND, /*GTK_FILL*/ 0L, 2, 2);
-    gtk_widget_show (label);
 
     label = gtk_label_new ("Class");
-    gtk_table_attach(GTK_TABLE(hbox3), label, 2, 3, 0, 1,
+    gtk_table_attach(GTK_TABLE(hbox3), label, 3, 4, 0, 1,
                         0L, /*GTK_FILL*/ 0L, 2, 2);
-    gtk_widget_show (label);
+
+    but = gtk_button_new();
+    label = gtk_image_new_from_stock(GTK_STOCK_FIND, GTK_ICON_SIZE_SMALL_TOOLBAR);
+    gtk_container_add(GTK_CONTAINER(but), label);
+    gtk_table_attach(GTK_TABLE(hbox3), but, 0, 1, 1, 2,
+                         0L, /*GTK_FILL*/ 0L, 2, 2);
+    gtk_signal_connect (GTK_OBJECT (but), "clicked",
+                       GTK_SIGNAL_FUNC (find_in_list), clist);
 
     textalias   = gtk_entry_new ();
-    gtk_table_attach(GTK_TABLE(hbox3), textalias, 0, 1, 1, 2,
+    gtk_table_attach(GTK_TABLE(hbox3), textalias, 1, 2, 1, 2,
                          GTK_EXPAND|GTK_FILL, /*GTK_FILL*/ 0L, 2, 2);
-    gtk_widget_show (textalias  );
 
 
+    
     textreplace = gtk_entry_new ();
-    gtk_table_attach(GTK_TABLE(hbox3), textreplace, 1, 2, 1, 2,
+    gtk_table_attach(GTK_TABLE(hbox3), textreplace, 2, 3, 1, 2,
                         GTK_FILL | GTK_EXPAND, /*GTK_FILL*/ 0L, 2, 2);
-    gtk_widget_show (textreplace);
     
     textpri = gtk_entry_new();
-    gtk_table_attach(GTK_TABLE(hbox3), textpri, 2, 3, 1, 2,
+    gtk_table_attach(GTK_TABLE(hbox3), textpri, 3, 4, 1, 2,
                         0L, /*GTK_FILL*/ 0L, 2, 2);
-    gtk_widget_show (textpri);
 
     AddButtonBar(vbox, (gpointer)clist,
             GTK_SIGNAL_FUNC(trigger_button_add),
@@ -424,6 +492,6 @@ void triggers_window(GtkWidget *widget, gpointer data)
             GTK_SIGNAL_FUNC(save_triggers));
 
     insert_triggers  (GTK_CLIST(clist)  );
-    gtk_widget_show (trig_window );
+    gtk_widget_show_all (trig_window );
 
 }

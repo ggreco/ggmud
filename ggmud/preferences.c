@@ -169,7 +169,7 @@ void save_all_prefs(void)
         c = "./";
     
     strcpy(buffer, c);
-    strcat(buffer, CONFIG_NAME);
+    strcat(buffer, "/" CONFIG_NAME);
     write_command(buffer, NULL);
     
     sprintf(buffer, "Configuration written to: %s" CONFIG_NAME , c);
