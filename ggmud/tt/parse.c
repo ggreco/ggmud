@@ -302,6 +302,9 @@ struct session *parse_tintin_command(const char *command, char *arg,
   else if(is_abbrev(command, "cr"))
     cr_command(ses); 
 
+  else if (is_abbrev(command, "clr")) 
+    clr_command(arg);
+  
   else if(is_abbrev(command, "echo"))
     echo_command(ses);
 
@@ -372,10 +375,8 @@ struct session *parse_tintin_command(const char *command, char *arg,
 
   else if(is_abbrev(command, "mark")) 
     mark_command(ses);
-
   else if(is_abbrev(command, "message"))
-    message_command(arg, ses);
-    
+    mess_command(arg, ses);
   else if(is_abbrev(command, "path")) 
     path_command(ses);
   
@@ -512,13 +513,15 @@ struct session *parse_tintin_command(const char *command, char *arg,
 
   else if(is_abbrev(command, "variable"))
     var_command(arg, ses);
-
+  else if(is_abbrev(command, "verbosity"))
+    message_command(arg, ses);
+    
   else if(is_abbrev(command, "version"))
     version_command();
 
   else if(is_abbrev(command, "unvariable"))
     unvar_command(arg, ses);
-
+ 
   else if(is_abbrev(command, "window"))
     window_command(arg, ses);
   else if(is_abbrev(command, "wizlist")) 

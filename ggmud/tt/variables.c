@@ -100,7 +100,7 @@ void var_command(const char *arg, struct session *ses)
       deletenode_list(tempvars, ln);
     insertnode_list(tempvars, left, right, "0", ALPHA);
     varnum++;
-    if (mesvar[5]) {
+    if (mesvar[5] && verbose) {
       sprintf(arg2, "#Ok. $%s is now set to {%s}.",left, right);
       tintin_puts2(arg2, ses);
     }
@@ -119,7 +119,7 @@ void unvar_command(const char *arg, struct session *ses)
   temp=tempvars;
   arg=get_arg_in_braces(arg,left,1);
   while ((ln=search_node_with_wild(temp, left))!=NULL) {
-    if (mesvar[5]) {
+    if (mesvar[5] && verbose) {
       sprintf(result, "#Ok. $%s is no longer a variable.", ln->left);
       tintin_puts2(result, ses);
     }
