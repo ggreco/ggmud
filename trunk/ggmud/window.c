@@ -42,6 +42,13 @@ GtkWidget *btn_toolbar_connect;
 GtkWidget *menu_File_Connect;
 GtkWidget *menu_File_DisConnect;
 
+
+
+typedef struct {
+    char name[32];
+    GtkWidget *listptr;    
+} window_entry;
+
 GList *windows_list = NULL;
 
 /******************************/
@@ -50,38 +57,8 @@ GList *windows_list = NULL;
 
 extern char *get_arg_in_braces(char *s, char *arg, int flag);
 
-void showme_command(char *arg, struct session *ses)
-{
-  char left[BUFFER_SIZE], result[BUFFER_SIZE], *d;
 
-  get_arg_in_braces(arg, left, 1);
-  prepare_actionalias(left, result, ses);
-  d = ParseAnsiColors(result);
-
-  strcat(d, "\n");
-  
-  textfield_add(mud->text, d, MESSAGE_ANSI);
-}
-
-
-typedef struct {
-    char name[32];
-    GtkWidget *listptr;    
-} window_entry;
-
-window_entry *in_window_list(char *tag)
-{
-    GList *l = windows_list;
-
-    while(l) {
-        if(!strcmp(((window_entry *)l->data)->name, tag))
-            return (window_entry *)l->data;
-        
-        l = l->next;
-    }
-
-    return NULL;
-}
+GtkText *new_view(char *name, GtkWidget *parent);
 
 void destroy_a_window(GtkWidget *w)
 {
@@ -98,8 +75,6 @@ void destroy_a_window(GtkWidget *w)
         l = l->next;
     }
 }
-
-GtkText *new_view(char *name, GtkWidget *parent);
 
 GtkWidget *create_new_window(char *title, int width, int height)
 {
@@ -147,6 +122,96 @@ window_entry *create_new_entry(char *title, int width, int height)
     return entry;
 }
 
+void load_win_pos()
+{
+    FILE *f;
+
+    if((f = fileopen("winpositions", "r"))) {
+        char name[100];
+        int x,y,w,h;
+
+        while(!feof(f)) {
+            if (fscanf(f, "%s %d,%d %dx%d\n", name, &x, &y, &w, &h) == 5) {
+
+//                printf("%s %d %d -> %d %d\n", name, x, y, w, h);
+
+                if(!strcmp(name, "main")) {
+                    gdk_window_move_resize(gtk_widget_get_toplevel(mud->window)->window, x, y, w, h);
+                }
+                else {
+                    window_entry * e = create_new_entry(name, w, h); // creo la nuova finestra nel caso non ci sia
+                    gdk_window_move_resize(gtk_widget_get_toplevel(e->listptr)->window, x, y, w, h);
+                }
+            }
+        }
+        fclose(f);
+    }
+    gtk_window_activate_focus(GTK_WINDOW(mud->window));
+}
+
+void write_win_pos(char *name, FILE *dest, GtkWidget *widget)
+{
+    int x,y, w, h;
+
+    widget = gtk_widget_get_toplevel(widget);
+
+//    gdk_window_get_position(widget->window, &x, &y);
+    gdk_window_get_root_origin(widget->window, &x, &y);
+    gdk_window_get_size(widget->window, &w, &h);
+    fprintf(dest, "%s %d,%d %dx%d\n", name, x, y, w, h);    
+}
+
+void save_win_pos()
+{
+    FILE *f;
+
+    if(!mud->window)
+        return;
+
+    if((f = fileopen("winpositions", "w"))) {
+        GList *l = windows_list;
+
+        write_win_pos("main", f, mud->window);
+
+        while(l) {
+            window_entry *e = (window_entry *)l->data;
+
+            write_win_pos(e->name, f, e->listptr);
+
+            l = l->next;
+        }
+
+        fclose(f);
+    }
+}
+
+void showme_command(char *arg, struct session *ses)
+{
+  char left[BUFFER_SIZE], result[BUFFER_SIZE], *d;
+
+  get_arg_in_braces(arg, left, 1);
+  prepare_actionalias(left, result, ses);
+  d = ParseAnsiColors(result);
+
+  strcat(d, "\n");
+  
+  textfield_add(mud->text, d, MESSAGE_ANSI);
+}
+
+window_entry *in_window_list(char *tag)
+{
+    GList *l = windows_list;
+
+    while(l) {
+        if(!strcmp(((window_entry *)l->data)->name, tag))
+            return (window_entry *)l->data;
+        
+        l = l->next;
+    }
+
+    return NULL;
+}
+
 void clear_text_widget(GtkText *w)
 {
     int l = gtk_text_get_length(w);
@@ -179,6 +244,7 @@ void clr_command(char *arg, struct session *s)
         
         if(!(entry = in_window_list(left))) {
             create_new_entry(left, width, height); // creo la nuova finestra nel caso non ci sia
+            gtk_window_activate_focus(GTK_WINDOW(mud->window));
         }
         else
             clear_text_widget(GTK_TEXT(entry->listptr));
@@ -217,8 +283,11 @@ void window_command(char *arg, struct session *s)
         int width = 400, height = 300;
 // anche qui metto la possibilita' di settare le dimensioni?        
         entry = create_new_entry(left, width, height);
+
+        gtk_window_activate_focus(GTK_WINDOW(mud->window));
     }
 
+    
     if(right && *right && entry) {
         char *result;
         substitute_myvars(right, left, s);
@@ -575,10 +644,10 @@ spawn_gui()
 
   /* create the main window */
   mud->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_widget_set_usize (mud->window, 695, 480);
+//  gtk_widget_set_usize (mud->window, 695, 480);
   gtk_container_border_width (GTK_CONTAINER (mud->window), 3);
   gtk_window_set_title (GTK_WINDOW (mud->window), "GGMud "VERSION"");
-  gtk_window_set_policy (GTK_WINDOW (mud->window), FALSE, TRUE, FALSE);
+//  gtk_window_set_policy (GTK_WINDOW (mud->window), FALSE, TRUE, FALSE);
 
   /* handlers so we can quit the close the app */
   gtk_signal_connect (GTK_OBJECT (mud->window), "delete_event", GTK_SIGNAL_FUNC (quit), NULL);
@@ -701,6 +770,16 @@ spawn_gui()
   gtk_container_add (GTK_CONTAINER (menu_Options_menu), separator2);
   gtk_signal_connect (GTK_OBJECT (separator2), "activate",
                       GTK_SIGNAL_FUNC (load_tt_prefs),
+                      NULL);
+  separator2 = gtk_menu_item_new();
+  gtk_widget_show (separator2);
+  gtk_container_add (GTK_CONTAINER (menu_Options_menu), separator2);
+
+  separator2 = gtk_menu_item_new_with_label ("Save windows positions");
+  gtk_widget_show (separator2);
+  gtk_container_add (GTK_CONTAINER (menu_Options_menu), separator2);
+  gtk_signal_connect (GTK_OBJECT (separator2), "activate",
+                      GTK_SIGNAL_FUNC (save_win_pos),
                       NULL);
   separator2 = gtk_menu_item_new_with_label ("Save settings");
   gtk_widget_show (separator2);

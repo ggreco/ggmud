@@ -152,6 +152,8 @@ int main(int argc, char **argv)
 
     gtk_widget_show(mud->window);
 
+    load_win_pos();
+
     g_timeout_add(500, (GSourceFunc)checktick, NULL);
 
     ttmain(argc, argv);
