@@ -80,18 +80,24 @@ void load_triggers()
 
 #include "include/llist.h"
 
-static void  insert_triggers  (GtkWidget *clist)
+static void  insert_triggers  (GtkCList *clist)
 {
     extern struct listnode *common_actions;
     gchar *text[3];
     struct listnode *list = mud->activesession ? mud->activesession->actions : common_actions;
 
+    gtk_clist_clear (clist);
+
+    gtk_clist_freeze(clist);
+    
     while ( list = list->next ) {
         text[0] = list->left;
         text[1] = list->right;
         text[2] = list->pr;
-        gtk_clist_prepend (GTK_CLIST (clist), text);
+        gtk_clist_prepend (clist, text);
     }
+
+    gtk_clist_thaw(clist);
 }
 
 static void trigger_selection_made (GtkWidget *clist, gint row, gint column,
@@ -123,7 +129,7 @@ static void add_trigger(char *a, char *b, int pri)
     parse_input(buffer, NULL);
 }
 
-static void trigger_button_add (GtkWidget *button, gpointer data)
+static void trigger_button_add (GtkWidget *button, GtkCList *data)
 {
     gchar *text[3], buffer[20];
     gint   i;
@@ -149,9 +155,9 @@ static void trigger_button_add (GtkWidget *button, gpointer data)
     
     i = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(textpri));
 
-    sprintf(buffer, "%d", i);
-    gtk_clist_append ((GtkCList *) data, text);
     add_trigger (text[0], text[1], i);
+
+    insert_triggers(data);
 }
 
 static void trigger_button_delete (GtkWidget *button, gpointer data) {
@@ -275,7 +281,7 @@ void triggers_window(GtkWidget *widget, gpointer data)
             GTK_SIGNAL_FUNC(trigger_button_delete),
             GTK_SIGNAL_FUNC(save_triggers));
 
-    insert_triggers  (clist        );
+    insert_triggers  (GTK_CLIST(clist)  );
     gtk_widget_show (trig_window );
 
 }

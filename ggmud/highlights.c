@@ -183,6 +183,8 @@ static void  insert_highlights  (GtkCList *clist)
 
     gtk_clist_clear (clist);
 
+    gtk_clist_freeze(clist);
+
     while ( list = list->next ) {
         text[0] = list->left;
         
@@ -230,6 +232,8 @@ static void  insert_highlights  (GtkCList *clist)
         
         gtk_clist_prepend (clist, text);
     }
+    gtk_clist_thaw(clist);
+
 }
 
 static void high_button_add (GtkWidget *button, GtkCList * data)
