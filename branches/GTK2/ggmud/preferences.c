@@ -109,7 +109,13 @@ static void tt_file_ok(GtkWidget *w, GtkFileSelection *fs)
 void update_widget_color(color_struct *col)
 {
     if(col->widget) {
+#ifdef HAS_GTK24
         gtk_color_button_set_color(GTK_COLOR_BUTTON(col->widget), col->color);
+#else
+        gtk_widget_modify_bg(col->widget, GTK_STATE_NORMAL, col->color);
+        gtk_widget_modify_bg(col->widget, GTK_STATE_SELECTED, col->color);
+        gtk_widget_modify_bg(col->widget, GTK_STATE_PRELIGHT, col->color);
+#endif
         update_color_tags(col->color);
     }
 }
@@ -400,15 +406,55 @@ void check_Statusbar (GtkWidget *widget, GtkWidget *check_button_statusbar)
       gtk_widget_hide (statusbar);
 }
 
+#ifdef HAS_GTK24
 void color_ok (GtkColorButton *widget, color_struct *col)
 {
     gtk_color_button_get_color(widget, col->color);
-    
+
     if(!strcmp("background color",col->name))
         text_bg(mud->text, prefs.BackgroundGdkColor);
 
     update_widget_color(col);
 }
+#else
+void color_ok (GtkWidget *widget, GtkWidget *color_sel)
+{
+    color_struct *col = (color_struct *)
+        gtk_object_get_data(GTK_OBJECT(color_sel), "color");
+    
+    gtk_color_selection_get_current_color (
+            GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG(color_sel)->colorsel),
+				   col->color);
+
+    if(!strcmp("background color",col->name))
+        text_bg(mud->text, prefs.BackgroundGdkColor);
+
+    update_widget_color(col);
+
+    gtk_widget_destroy(color_sel);
+}
+
+void color_callback (GtkWidget *widget, color_struct *color)
+{
+    GtkWidget *color_sel;
+    char str[255];
+
+    sprintf(str, "Set color for %s", color->name);
+    color_sel = gtk_color_selection_dialog_new (str);
+    gtk_color_selection_set_current_color (
+            GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG(color_sel)->colorsel),
+				   color->color);
+    gtk_object_set_data (GTK_OBJECT (color_sel), "color", color);
+    gtk_signal_connect( GTK_OBJECT(GTK_COLOR_SELECTION_DIALOG(color_sel)->ok_button),
+			"clicked", GTK_SIGNAL_FUNC(color_ok),
+			color_sel);
+    gtk_signal_connect( GTK_OBJECT(GTK_COLOR_SELECTION_DIALOG(color_sel)->cancel_button),
+			"clicked", GTK_SIGNAL_FUNC(close_window),
+			color_sel);
+    gtk_widget_show(color_sel);
+}
+
+#endif
     
 void color_reset_to_default (GtkWidget *button, gpointer data)
 {
@@ -478,13 +524,18 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy)
   /* Make buttons for all the colors */
   while(color_arr[i].color) {     
       color_row = gtk_hbox_new(TRUE, 0);
-      color_arr[i].widget =  gtk_color_button_new_with_color(color_arr[i].color);
-
       sprintf(tmp, "Color for %s", color_arr[i].name);
+#ifdef HAS_GTK24
+      color_arr[i].widget =  gtk_color_button_new_with_color(color_arr[i].color);
       gtk_color_button_set_title(GTK_COLOR_BUTTON(color_arr[i].widget), tmp);
-      color_label = gtk_label_new(tmp);
       gtk_signal_connect (GTK_OBJECT (color_arr[i].widget), "color-set",
 			  GTK_SIGNAL_FUNC (color_ok), (gpointer) &color_arr[i]);
+#else
+      color_arr[i].widget =  gtk_button_new();
+      gtk_signal_connect (GTK_OBJECT (color_arr[i].widget), "clicked",
+			  GTK_SIGNAL_FUNC (color_callback), (gpointer) &color_arr[i]);
+#endif
+      color_label = gtk_label_new(tmp);
       tooltip = gtk_tooltips_new ();
 //      gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
       sprintf(tmp, "You can use this button to change the %s color", color_arr[i].name);
@@ -495,9 +546,9 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy)
       gtk_box_pack_start (GTK_BOX (color_row), color_arr[i].widget, TRUE, TRUE, 3);
       gtk_box_pack_start (GTK_BOX (color_row), color_label, TRUE, TRUE, 1);
       gtk_box_pack_start (GTK_BOX(color_box), color_row, TRUE, TRUE, 1);
-
-      //update_widget_color(&color_arr[i]);
-      
+#ifndef HAS_GTK24
+      update_widget_color(&color_arr[i]);
+#endif
       i++;
   }
 
@@ -764,10 +815,10 @@ void window_prefs (GtkWidget *widget, gpointer data)
   gtk_widget_show(hbox);
   gtk_box_pack_start (GTK_BOX (vbox3), hbox, TRUE, TRUE, 0);
  
-  temp = gtk_label_new("Review size:");
+  temp = gtk_label_new("Review lines:");
   gtk_widget_show(temp);
   gtk_box_pack_start (GTK_BOX (hbox), temp, TRUE, TRUE, 0);
-  temp = (GtkWidget *)gtk_adjustment_new (mud->maxlines, 2000, 1000000, 500, 10000, 10000);
+  temp = (GtkWidget *)gtk_adjustment_new (mud->maxlines, 1000, 1000000, 100, 10000, 10000);
   entry_ReviewSize = gtk_spin_button_new (GTK_ADJUSTMENT (temp), 1, 0);
 
   gtk_signal_connect(GTK_OBJECT(entry_ReviewSize), "changed", 
@@ -775,33 +826,14 @@ void window_prefs (GtkWidget *widget, gpointer data)
   gtk_widget_show(entry_ReviewSize);
 
   gtk_tooltips_set_tip(tooltip, entry_ReviewSize,
-          "The size in bytes of the review buffer, use about 50 x number of lines you need.",
+          "The size in lines of the review buffer.",
           NULL);
   gtk_box_pack_start (GTK_BOX (hbox), entry_ReviewSize, TRUE, TRUE, 0);
   
 // button box
-  prefs_hbuttonbox = gtk_hbutton_box_new ();
-  gtk_widget_show (prefs_hbuttonbox);
-  gtk_box_pack_start (GTK_BOX (vbox), prefs_hbuttonbox, TRUE, TRUE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (prefs_hbuttonbox), 7);
-  gtk_button_box_set_spacing (GTK_BUTTON_BOX (prefs_hbuttonbox), 10);
-  gtk_button_box_set_child_ipadding (GTK_BUTTON_BOX (prefs_hbuttonbox), 5, 0);
-
-  save_button = gtk_button_new_with_label ("Save");
-  gtk_signal_connect_object (GTK_OBJECT (save_button), "clicked",
-                             GTK_SIGNAL_FUNC (save_prefs),
-                             NULL);
-  gtk_widget_show (save_button);
-  gtk_container_add (GTK_CONTAINER (prefs_hbuttonbox), save_button);
-  gtk_container_border_width (GTK_CONTAINER (save_button), 3);
-
-  close_button = gtk_button_new_with_label ("Close");
-  gtk_signal_connect (GTK_OBJECT (close_button), "clicked",
-                             GTK_SIGNAL_FUNC (close_window), prefs_window);
-  gtk_widget_show (close_button);
-  gtk_container_add (GTK_CONTAINER (prefs_hbuttonbox), close_button);
-  gtk_container_border_width (GTK_CONTAINER (close_button), 3);
-
+  AddSimpleBar(vbox, NULL, 
+          GTK_SIGNAL_FUNC(save_prefs), GTK_SIGNAL_FUNC(close_window));
+  
   gtk_widget_show (prefs_window);
 }
 
