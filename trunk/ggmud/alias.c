@@ -89,12 +89,14 @@ static void  insert_aliases  (GtkCList *clist)
     struct listnode *list = mud->activesession ? mud->activesession->aliases : common_aliases;
 
     gtk_clist_clear(clist);
+    gtk_clist_freeze(clist);
             
     while ( list = list->next ) {
         text[0] = list->left;
         text[1] = list->right;
         gtk_clist_prepend (clist, text);
     }
+    gtk_clist_thaw(clist);
 }
 
 static void alias_selection_made (GtkWidget *clist, gint row, gint column,

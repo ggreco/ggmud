@@ -61,11 +61,13 @@ insert_gags  (GtkCList *clist)
     struct listnode *list = mud->activesession ? mud->activesession->subs : common_subs;
 
     gtk_clist_clear(clist);
-    
+    gtk_clist_freeze(clist);
+ 
     while ( list = list->next ) {
         text[0] = list->left;
         gtk_clist_prepend (GTK_CLIST (clist), text);
     }
+    gtk_clist_thaw(clist);
 }
 
 static void

@@ -36,17 +36,22 @@ save_variables (GtkWidget *button, gpointer data) {
 }
 
 static void
-insert_variables  (GtkWidget *clist)
+insert_variables  (GtkCList *clist)
 {
     extern struct listnode *common_myvars;
     gchar *text[2];
     struct listnode *list = mud->activesession ? mud->activesession->myvars : common_myvars;
+
+    gtk_clist_clear(clist);
+    gtk_clist_freeze(clist);
 
     while ( list = list->next ) {
         text[0] = list->left;
         text[1] = list->right;
         gtk_clist_prepend (GTK_CLIST (clist), text);
     }
+
+    gtk_clist_thaw(clist);
 }
 
 static void variable_selection_made (GtkWidget *clist, gint row, gint column,
@@ -85,7 +90,7 @@ void load_variables ()
 }
 
 
-static void variable_button_add (GtkWidget *button, gpointer data)
+static void variable_button_add (GtkWidget *button, GtkCList *data)
 {
     gchar *text[2];
     gint   i;
@@ -115,8 +120,9 @@ static void variable_button_add (GtkWidget *button, gpointer data)
         return;
     }
 
-    gtk_clist_append ((GtkCList *) data, text);
     add_variable (text[0], text[1]);
+
+    insert_variables(data);
 }
 
 static void variable_button_delete (GtkWidget *button, gpointer data) {
@@ -229,7 +235,7 @@ variables_window(GtkWidget *w, gpointer data)
             GTK_SIGNAL_FUNC(variable_button_delete),
             GTK_SIGNAL_FUNC(save_variables));
 
-    insert_variables  (clist        );
+    insert_variables  ( GTK_CLIST(clist) );
     gtk_widget_show (variable_window );
 }
 

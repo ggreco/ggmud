@@ -101,13 +101,13 @@ void destroy_a_window(GtkWidget *w)
 
 GtkText *new_view(char *name, GtkWidget *parent);
 
-GtkWidget *create_new_window(char *title)
+GtkWidget *create_new_window(char *title, int width, int height)
 {
     GtkWidget *win, *vbox;
     GtkWidget *list;
 
     win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_widget_set_usize(win, 400, 300);
+    gtk_widget_set_usize(win, width, height);
     gtk_window_set_title(GTK_WINDOW(win), title);
     gtk_container_border_width(GTK_CONTAINER(win), 4);
 
@@ -126,7 +126,7 @@ GtkWidget *create_new_window(char *title)
     return list;
 }
 
-window_entry *create_new_entry(char *title)
+window_entry *create_new_entry(char *title, int width, int height)
 {
     window_entry *entry;
     
@@ -135,7 +135,7 @@ window_entry *create_new_entry(char *title)
 
     strncpy(entry->name, title, 31);
 
-    if((entry->listptr = create_new_window(title)))
+    if((entry->listptr = create_new_window(title, width, height)))
         windows_list = g_list_append(windows_list, entry);
     else {
         free(entry);
@@ -154,7 +154,7 @@ void clear_text_widget(GtkText *w)
 
 void clr_command(char *arg, struct session *s)
 {
-    char left[BUFFER_SIZE];
+    char left[BUFFER_SIZE], right[BUFFER_SIZE];
     window_entry *entry = NULL;
     
     arg = get_arg_in_braces(arg, left, 0);
@@ -163,8 +163,20 @@ void clr_command(char *arg, struct session *s)
         clear_text_widget(mud->text);
     }
     else {
+        int width = 400, height = 300;
+        arg = get_arg_in_braces(arg, right, 0);
+        
+        if(*right) {
+            int t1, t2;
+            
+            if(sscanf(right, "%dx%d", &t1, &t2) == 2) {
+                width = t1;
+                height = t2;
+            }
+        }
+        
         if(!(entry = in_window_list(left))) {
-            create_new_entry(left); // creo la nuova finestra nel caso non ci sia
+            create_new_entry(left, width, height); // creo la nuova finestra nel caso non ci sia
         }
         else
             clear_text_widget(GTK_TEXT(entry->listptr));
@@ -200,7 +212,9 @@ void window_command(char *arg, struct session *s)
         return;
 
     if(!(entry = in_window_list(left))) {
-        entry = create_new_entry(left);
+        int width = 400, height = 300;
+// anche qui metto la possibilita' di settare le dimensioni?        
+        entry = create_new_entry(left, width, height);
     }
 
     if(right && *right && entry) {
