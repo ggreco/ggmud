@@ -1271,16 +1271,16 @@ spawn_gui()
 		       (GtkAttachOptions) GTK_EXPAND | GTK_FILL, 0, 0);
       /* Macro buttons with accel. keys F1-F12 */
       macro_button = gtk_button_new();
-      gtk_signal_connect (GTK_OBJECT (macro_button), "clicked",
-                          GTK_SIGNAL_FUNC (macro_send), (gpointer) i);
       gtk_widget_show (macro_button);
       gtk_table_attach (GTK_TABLE (table), macro_button, 1, 2, i, i+1,
                        (GtkAttachOptions) GTK_EXPAND | GTK_FILL,
 		       (GtkAttachOptions) GTK_EXPAND, 0, 0);
       gtk_widget_set_usize (macro_button, 65, 26);
       gtk_container_border_width (GTK_CONTAINER (macro_button), 3);
+      gtk_signal_connect (GTK_OBJECT (macro_button), "clicked",
+                          GTK_SIGNAL_FUNC (macro_send), (gpointer) i);
       gtk_widget_add_accelerator (macro_button, "clicked", accel_group,
-                                  key++, 0, GTK_ACCEL_VISIBLE);
+                                  key++, 0, 0 /*GTK_ACCEL_VISIBLE*/);
       btnLabel[i] = gtk_label_new(macro_list[i]);
       gtk_container_add (GTK_CONTAINER(macro_button), btnLabel[i]);
       gtk_widget_show(btnLabel[i]);
