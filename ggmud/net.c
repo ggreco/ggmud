@@ -466,7 +466,7 @@ void send_to_connection (GtkWidget *widget, gpointer data)
         gtk_adjustment_set_value(mud->text->vadj, (mud->text->vadj->upper - mud->text->vadj->page_size));
     
     //textfield_add ( "\n", MESSAGE_NONE);
-    if ( prefs.KeepText )
+    if ( prefs.KeepText && !hide_input)
         gtk_entry_select_region (mud->ent, 0,
                 mud->ent->text_length);
     else
