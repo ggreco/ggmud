@@ -28,7 +28,7 @@
 
 #include "tintin.h"
 
-#define ALIAS_FILE "aliases"
+extern struct session *activesession;
 
 void save_aliases (GtkWidget *button, gpointer data) {
     FILE *fp;
@@ -36,7 +36,7 @@ void save_aliases (GtkWidget *button, gpointer data) {
     gchar *alias, *replace;
     gint  row = 0;
 
-    if (fp = fileopen (ALIAS_FILE, "w")) {
+    if (fp = fileopen ("aliases", "w")) {
     	while ( !done && (GtkCList*) data) {
             if ( !gtk_clist_get_text ((GtkCList*) data, row, 0, &alias)
                 || !gtk_clist_get_text ((GtkCList*) data, row, 1, &replace) )
@@ -58,7 +58,7 @@ void load_aliases () {
     gchar line[REPL_LEN+ALIAS_LEN+5];
     gchar alias[ALIAS_LEN], replace[REPL_LEN];
     
-    if (fp = fileopen (ALIAS_FILE, "r")) {
+    if (fp = fileopen ("aliases", "r")) {
     	while (fgets (line, REPL_LEN+ALIAS_LEN+5, fp)) {
             sscanf (line, "%s %[^\n]", alias, replace);
             add_alias (alias, replace);
@@ -73,7 +73,7 @@ void  add_alias (char *alias, char *replacement)
     
     sprintf(buffer, "#alias {%s} {%s}", alias, replacement);
 
-    parse_input(buffer, mud->activesession);
+    parse_input(buffer, activesession);
 }
 
 #include "tintin.h"
@@ -81,9 +81,10 @@ void  add_alias (char *alias, char *replacement)
 
 void  insert_aliases  (GtkWidget *clist)
 {
+    extern struct session *activesession;  
     extern struct listnode *common_aliases;
     gchar *text[2];
-    struct listnode *list = mud->activesession ? mud->activesession->aliases : common_aliases;
+    struct listnode *list = activesession ? activesession->aliases : common_aliases;
 
     while ( list = list->next ) {
         text[0] = list->left;
@@ -164,7 +165,7 @@ void alias_button_delete (GtkWidget *button, gpointer data) {
         gtk_clist_remove ((GtkCList*) data, alias_selected_row);
         alias_selected_row = -1;
 
-        parse_input(buffer, mud->activesession);
+        parse_input(buffer, activesession);
     }
 
 }

@@ -41,16 +41,16 @@ void load_font () {
     gchar line[255], pref[25], value[250];
 
 #ifndef WIN32
-    font.FontName = strdup ("-adobe-courier-medium-r-normal-*-*-120-*-*-m-*-iso8859-1"); //("fixed");
+    font.FontName = g_strdup ("-adobe-courier-medium-r-normal-*-*-120-*-*-m-*-iso8859-1"); //("fixed");
 #else
-	font.FontName = strdup ("fixed");
+	font.FontName = g_strdup ("fixed");
 #endif
     if (fp = fileopen ("font", "r")) {
     	while (fgets (line, 80, fp)) {
             sscanf (line, "%s %[^\n]", pref, value);
             if (!strcmp (pref, "FontName")) {
-				free(font.FontName);
-				font.FontName = strdup (value);
+				g_free(font.FontName);
+				font.FontName = g_strdup (value);
 			}
     	}
     	font_normal = gdk_font_load (font.FontName);
@@ -75,13 +75,13 @@ void font_font_selected (GtkWidget *button, GtkFontSelectionDialog *fs) {
 
     temp = gtk_font_selection_get_font_name (GTK_FONT_SELECTION (fs->fontsel));
     if (temp) {
-        free (font.FontName);
-        font.FontName = strdup (temp);
-        font_normal = gdk_font_load (font.FontName);
-        set_style();
-        free (temp);
-        save_font();
-        gtk_widget_destroy (GTK_WIDGET (fs));
+	g_free (font.FontName);
+	font.FontName = g_strdup (temp);
+	font_normal = gdk_font_load (font.FontName);
+	set_style();
+	g_free (temp);
+	save_font();
+	gtk_widget_destroy (GTK_WIDGET (fs));
     } else {
         sprintf (buf, "The selected Font isn't valid, be sure to select a font that does exist.");
         popup_window (buf);

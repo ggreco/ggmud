@@ -44,8 +44,7 @@ typedef struct {
     gboolean LOGGING;		/* Are we logging? */
     FILE *LOG_FILE;		/* File ptr to write to. */
     gchar *log_filename;	/* The name of the Log File. */
-    struct session *activesession;
-    int input_monitor;
+
 } ggmud;
 
 /* menu items */

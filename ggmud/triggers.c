@@ -127,8 +127,8 @@ void trigger_button_add (GtkWidget *button, gpointer data) {
 	    	if (!trigger_list || !trigger_list->data) {
     			gtk_clist_select_row ((GtkCList *) data, 0, 0);
 	    	}
-	    	w = (TRIGGER_DATA *) calloc(sizeof(TRIGGER_DATA), 1);
-	    	w->trigger = strdup (gtk_entry_get_text (GTK_ENTRY (entry_trigger)));
+	    	w = (TRIGGER_DATA *) g_malloc0(sizeof(TRIGGER_DATA));
+	    	w->trigger = g_strdup (gtk_entry_get_text (GTK_ENTRY (entry_trigger)));
 		} else {
 	    	popup_window("Can't add an existing trigger.");
 		}
@@ -209,9 +209,6 @@ void triggers_window () {
     GtkWidget *button_cancel;
     GtkTooltips *tooltip;
 
-    popup_window("Triggers window is in the TODO list :)");
-    return;
-
     /* create tooltips */
     tooltip = gtk_tooltips_new ();
     gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
@@ -275,19 +272,19 @@ void triggers_window () {
     gtk_box_pack_start (GTK_BOX (vbox2), hseparator1, TRUE, TRUE, 5);
     
     for (i = 0; i < 5; i++) {
-        text = malloc(18);
-        strcpy(text, " st line to send:");
-        text[0] = i + 49;
-        label_send = gtk_label_new (text);
-        gtk_widget_show (label_send);
-        gtk_box_pack_start (GTK_BOX (vbox2), label_send, TRUE, TRUE, 3);
-        entry_send[i] = gtk_entry_new ();
-        gtk_widget_show (entry_send[i]);
-        gtk_box_pack_start (GTK_BOX (vbox2), entry_send[i], TRUE, TRUE, 0);
-        gtk_tooltips_set_tip (tooltip, entry_send[i],
-                "This is the string of text that will be sent to the mud,"
-                " when the trigger is activated.", NULL);
-        free(text);		      
+    	text = g_malloc(18);
+    	strcpy(text, " st line to send:");
+    	text[0] = i + 49;
+  	label_send = gtk_label_new (text);
+  	gtk_widget_show (label_send);
+  	gtk_box_pack_start (GTK_BOX (vbox2), label_send, TRUE, TRUE, 3);
+  	entry_send[i] = gtk_entry_new ();
+  	gtk_widget_show (entry_send[i]);
+  	gtk_box_pack_start (GTK_BOX (vbox2), entry_send[i], TRUE, TRUE, 0);
+  	gtk_tooltips_set_tip (tooltip, entry_send[i],
+	                      "This is the string of text that will be sent to the mud,"
+			      " when the trigger is activated.", NULL);
+	g_free(text);		      
     }
     hbuttonbox1 = gtk_hbutton_box_new ();
     gtk_widget_show (hbuttonbox1);

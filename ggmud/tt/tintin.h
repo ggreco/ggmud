@@ -81,7 +81,7 @@ This program is protected under the GNU GPL (See COPYING)
 #define CONFIG_FILE "tt.conf" /* tt's configuration file DSC */
 
 #ifndef DEFAULT_HELP_FILE
-#define DEFAULT_HELP_FILE "gg_help.txt" /* Default name for the help file */
+#define DEFAULT_HELP_FILE ".tt_help.txt" /* Default name for the help file */
 #endif
 
 #define HISTORY_FILE ".tt_history" /* The name of the tintin history file */

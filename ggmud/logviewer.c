@@ -54,8 +54,8 @@ void FileOk (GtkWidget *w, gpointer data)
 
     sTempFile = gtk_file_selection_get_filename (GTK_FILE_SELECTION (filew));
 
-    if (sFilename) free (sFilename);
-    sFilename = strdup (sTempFile); 
+    if (sFilename) g_free (sFilename);
+    sFilename = g_strdup (sTempFile); 
     (*(localdata->func)) (sFilename);
     gtk_widget_destroy (filew);
 }
@@ -64,7 +64,7 @@ static void destroy (GtkWidget *widget, gpointer *data)
 {
     gtk_grab_remove (widget);
 
-    free (data);
+    g_free (data);
 }
 
 void GetFilename (char *sTitle, void (*callback) (char *))
@@ -74,7 +74,7 @@ void GetFilename (char *sTitle, void (*callback) (char *))
 
     filew = gtk_file_selection_new (sTitle);
 
-    data = malloc (sizeof (typFileSelectionData));
+    data = g_malloc (sizeof (typFileSelectionData));
     data->func = callback;
     data->filesel = filew;
 
@@ -446,7 +446,7 @@ void FindFunction (GtkWidget *widget, gpointer data)
     szHaystack = GetText ();
 
     if (szNeedle) {
-        free (szNeedle);
+        g_free (szNeedle);
     }
     szNeedle = gtk_editable_get_chars (
                  	GTK_EDITABLE (entry), 0, -1);
@@ -467,7 +467,7 @@ void FindFunction (GtkWidget *widget, gpointer data)
         ShowMessage ("Find...", "Not found.  Reached the end of the file.");
     }
 
-    free (szHaystack);
+    g_free (szHaystack);
 }
 
 int LookForString (char *szHaystack, char *szNeedle, int nStart)

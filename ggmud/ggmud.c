@@ -46,6 +46,7 @@ int timetilltick(void)
 int checktick(void)
 {
     extern int show_pretick;
+    extern struct session *activesession;
     static int last = -1, ttt = -1; /* ttt = time to tick */
     int now, found = 0;
     char buffer[20];
@@ -60,12 +61,12 @@ int checktick(void)
             ttt = (++last - time0) % tick_size;
             ttt = (tick_size - ttt) % tick_size;
             if(!ttt || ttt == 10)
-                if(mud->activesession && mud->activesession->tickstatus)
+                if(activesession && activesession->tickstatus)
                 {
                     if (!ttt)
-                        tintin_puts("#TICK!!!", mud->activesession);
+                        tintin_puts("#TICK!!!", activesession);
                     else if (show_pretick)
-                        tintin_puts("#10 SECONDS TO TICK!!!", mud->activesession);
+                        tintin_puts("#10 SECONDS TO TICK!!!", activesession);
                     /*	    tintin_puts(!ttt ? "#TICK!!!" : "#10 SECONDS TO TICK!!!", s); */
                 }
         }
@@ -78,7 +79,7 @@ int checktick(void)
     sprintf(buffer, "%d",ttt);
 
     // aggiornamento del campo coi secondi con ttt
-    if(mud->activesession)
+    if(activesession)
         gtk_label_set_text(mud->tick_counter, buffer);
 
     return TRUE;
@@ -92,15 +93,17 @@ int main(int argc, char **argv)
     gtk_init (&argc, &argv);
     gdk_init (&argc, &argv);
     
-    mud = calloc(sizeof(ggmud), 1);
+    mud=g_malloc(sizeof(ggmud));
+    memset(mud, 0, sizeof(ggmud));
 
-    mud->hist=calloc(sizeof(struct ggmud_history),1);
+    mud->hist=g_malloc(sizeof(struct ggmud_history));
     mud->hist->size=0;
     mud->hist->max=20;
     mud->hist->cur=0;
     mud->hist->pos=0;
     mud->hist->cyclic=1;
-    mud->hist->list=calloc(sizeof(gpointer), (mud->hist->max+1));
+    mud->hist->list=g_malloc(sizeof(gpointer)*(mud->hist->max+1));
+    memset(mud->hist->list, 0, sizeof(gpointer)*(mud->hist->max+1));
     mud->disp_font_name="fixed";
     mud->lines=0;
     mud->maxlines = 300 * 70;	// This will be an option
@@ -127,6 +130,9 @@ int main(int argc, char **argv)
     gtk_widget_show(mud->window);
 
     g_timeout_add(500, checktick, NULL);
+
+    gdk_window_set_background(mud->text->text_area,
+			      &(prefs.BackgroundColor));
 
     ttmain(argc, argv);
 

@@ -47,7 +47,39 @@ This program is protected under the GNU GPL (See COPYING)
 
 FILE *check_file(const char *filestring)
 {
-  return fopen(filestring, "r");
+ #ifndef WIN32
+  FILE *myfile;
+  char buf[BUFFER_SIZE];
+
+ if((myfile = fopen(filestring, "r"))) {
+    fclose(myfile);
+    sprintf(buf, "%s %s", DEFAULT_CAT_STR, filestring);
+    return(popen(buf, "r"));
+  }
+ 
+  sprintf(buf, "%s%s", filestring, DEFAULT_BZIP_EXT);
+  if ((myfile = fopen(buf, "r"))) {
+    fclose(myfile);
+    sprintf(buf, "%s %s%s", DEFAULT_BUNZIP_STR, filestring, DEFAULT_BZIP_EXT);
+    return(popen(buf, "r"));
+  }
+
+  sprintf(buf, "%s%s", filestring, DEFAULT_GZIP_EXT);
+  if((myfile = fopen(buf, "r"))) {
+    fclose(myfile);
+    sprintf(buf, "%s %s%s", DEFAULT_GUNZIP_STR, filestring, DEFAULT_GZIP_EXT);
+    return(popen(buf, "r"));
+  }
+
+  sprintf(buf, "%s%s", filestring, DEFAULT_COMPRESS_EXT);
+  if((myfile = fopen(buf, "r"))) {
+    fclose(myfile);
+    sprintf(buf, "%s %s%s",
+	    DEFAULT_UNCOMPRESS_STR, filestring, DEFAULT_COMPRESS_EXT);
+    return(popen(buf, "r"));
+  }
+#endif
+  return(NULL);
 }
 
 /*********************/
@@ -56,66 +88,68 @@ FILE *check_file(const char *filestring)
 
 void help_command(const char *arg)
 {
-    FILE *myfile = NULL;
-    char *cptr, text[80], line[80], filestring[500];
-    int flag = TRUE, counter = 0;
+  FILE *myfile = NULL;
+  char *cptr, text[80], line[80], filestring[500];
+  int flag = TRUE, counter = 0;
 
-    if (getenv("TINTIN_HELP") == NULL)
-        sprintf(filestring, "%s/%s", getenv("HOME"), DEFAULT_HELP_FILE);
-    else
-        sprintf(filestring, "%s/%s", getenv("TINTIN_HELP"), DEFAULT_HELP_FILE);
+  if (getenv("TINTIN_HELP") == NULL)
+    sprintf(filestring, "%s/%s", getenv("HOME"), DEFAULT_HELP_FILE);
+  else
+    sprintf(filestring, "%s/%s", getenv("TINTIN_HELP"), DEFAULT_HELP_FILE);
+  myfile = check_file(filestring);
+
+  if(!myfile && strcmp(DEFAULT_FILE_DIR, "HOME")) {
+    sprintf(filestring, "%s/%s", DEFAULT_FILE_DIR, DEFAULT_HELP_FILE);
     myfile = check_file(filestring);
+  }
 
-    if(!myfile && strcmp(DEFAULT_FILE_DIR, "HOME")) {
-        sprintf(filestring, "%s/%s", DEFAULT_FILE_DIR, DEFAULT_HELP_FILE);
-        myfile = check_file(filestring);
-    }
-
-    if(!myfile ) {
-        sprintf(filestring, "./%s", DEFAULT_HELP_FILE);
-        myfile = check_file(filestring);
-    }
-
-    if(!myfile) {
-        tintin_puts2("#Help file '" DEFAULT_HELP_FILE "' not found - no help available.", NULL);
-        prompt(NULL);
-        return;
-    }
-
-    if(*arg) {
-        sprintf(text, "~%s", arg);
-        cptr = text;
-
-        while(*++cptr)
-            *cptr = toupper(*cptr);
-
-        while(flag && fgets(line, sizeof(line), myfile))
-            if(*line == '~') {
-                if(line[1] == '*') {
-                    tintin_puts2("#Sorry, no help on that word.", NULL);
-                    flag = FALSE;
-                }
-                else if(is_abbrev(text, line)) {
-                    while(flag && fgets(line, sizeof(line), myfile)) {
-                        if(*line == '~') {
-                            flag = FALSE;
-                        } else {
-                            line[strlen(line)-1] = '\0';
-                            tintin_puts2(line, NULL);
-                        }
-                    }
-                }
-            }
-    }
-    else
-        while(fgets(line, sizeof(line), myfile))
-            if(*line == '~') 
-                break;
-            else {
-                line[strlen(line)-1] = '\0';
-                tintin_puts2(line, NULL);
-            }
-
+  if(!myfile) {
+    tintin_puts2("#Help file '" DEFAULT_HELP_FILE "' not found - no help available.", NULL);
     prompt(NULL);
-    fclose(myfile);
+    return;
+  }
+
+  if(*arg) {
+    sprintf(text, "~%s", arg);
+    cptr = text;
+
+    while(*++cptr)
+      *cptr = toupper(*cptr);
+
+    while(flag && fgets(line, sizeof(line), myfile))
+      if(*line == '~') {
+        if(line[1] == '*') {
+          tintin_puts2("#Sorry, no help on that word.", NULL);
+          flag = FALSE;
+        }
+        else if(is_abbrev(text, line)) {
+          while(flag && fgets(line, sizeof(line), myfile)) {
+            if(*line == '~') {
+              flag = FALSE;
+            } else {
+              line[strlen(line)-1] = '\0';
+              tintin_puts2(line, NULL);
+            }
+            if(flag && counter++ > 21) {
+              tintin_puts2("[ -- Press return to continue -- ]", NULL);
+	      getchar();
+              counter = 0;
+            }
+          }
+	}
+      }
+  }
+  else
+    while(fgets(line, sizeof(line), myfile))
+      if(*line == '~') 
+	break;
+      else {
+	line[strlen(line)-1] = '\0';
+	tintin_puts2(line, NULL);
+      }
+
+  prompt(NULL);
+#ifndef WIN32
+  pclose(myfile);
+#endif
 }

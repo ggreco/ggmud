@@ -33,6 +33,7 @@ extern void search_triggers (gchar *incomming);
  * Global Variables
  */
 int connected;
+gint input_monitor;
 
 extern GtkWidget *btn_toolbar_disconnect;
 extern GtkWidget *btn_toolbar_connect;
