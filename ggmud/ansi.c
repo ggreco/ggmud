@@ -198,21 +198,6 @@ void init_colors ()
 
     prefs.DefaultColor = color_white;
     prefs.BackgroundColor = color_black;
-    /* Hmm, why is this here??? CHECK IT OUT */
-    if ( !font.FontName ) {
-#ifdef WIN32
-		font.FontName = strdup("-*-*-normal-r-normal--*-100-*-*-m-*-iso8859-1");
-#else
-        font.FontName = strdup ("fixed");
-#endif
-	}
-    if ( ( font_normal = gdk_font_load (font.FontName) ) == NULL )
-    {
-        g_error ("Can't load font... Using default.\n");
-        free ( font.FontName );
-        font.FontName = strdup ("fixed");
-        save_font ();
-    }
 }
 
 static int
