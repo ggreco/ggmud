@@ -14,7 +14,8 @@ export GLOBAL_CFLAGS
 PROJECTNAME = ggmud
 
 C_SRCS = alias.c ansi.c font.c fileopen.c help.c history.c log.c logviewer.c \
-         macro.c net.c preferences.c ggmud.c triggers.c window.c wizard.c
+         macro.c net.c preferences.c ggmud.c triggers.c window.c wizard.c \
+         variables.c highlights.c gags.c
 
 DEP_SRCS = $(CXX_SRCS) $(C_SRCS)
 
@@ -29,9 +30,9 @@ CROSSCFLAGS = $(INCDIR) -I$(CROSSDIR)/include/glib-2.0 -mwindows \
 
 CROSSLIBS = -s -L../lib_w32 -Ltt -lttw32 -lgtk.dll -lgdk.dll -lgmodule-2.0.dll -lglib-2.0.dll -lws2_32
 
-all: $(PROJECTNAME) 
+all: depend $(PROJECTNAME) 
 
-win32: $(PROJECTNAME).exe
+win32: depend $(PROJECTNAME).exe
 
 $(OBJDIR)%.o: %.c
 	$(CC) $(CFLAGS) -o $@ -c $<
@@ -62,6 +63,13 @@ $(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a
 
 clean: 
 	cd tt && make clean && cd ..
-	rm -f $(WINOBJS) $(OBJS) $(PROJECTNAME) $(PROJECTNAME).exe 
+	rm -f $(WINOBJS) $(OBJS) $(PROJECTNAME) $(PROJECTNAME).exe depend 
 
-
+depend:	$(C_SRCS) *.h
+	for i in $(C_SRCS); do \
+		$(CC) $(CFLAGS) -c -M $$i; \
+	done >  deptemp
+	sed -f mkdep.sed deptemp >depend
+	rm deptemp
+        
+-include depend

@@ -30,9 +30,12 @@
 #include <unistd.h>
 #endif
 
+extern GtkWidget *btn_toolbar_disconnect;
+extern GtkWidget *btn_toolbar_connect;
+
 #include <stdlib.h>
 #include <stdio.h>
-#include "tintin.h"
+#include "ggmud.h"
 /*
  * Added by Michael Stevens
  */
@@ -71,7 +74,6 @@
 #define sockclose(x) closesocket(x)
 #endif
 
-#include "net.h"
 
 struct session *new_session(char *, char *, struct session *);
 struct session *newactive_session();

@@ -16,7 +16,6 @@
 
 #include <gtk/gtk.h>
 #include "ggmud.h"
-#include "tintin.h"
 #include "include/ticks.h"
 #include <stdlib.h>
 #include <time.h>
@@ -47,6 +46,8 @@ quitmsg(char *s)
     
     exit(0);
 }
+
+int use_tickcounter = 0;
 
 int timetilltick(void)
 {
@@ -152,7 +153,7 @@ int main(int argc, char **argv)
 
     gtk_widget_show(mud->window);
 
-    g_timeout_add(500, checktick, NULL);
+    g_timeout_add(500, (GSourceFunc)checktick, NULL);
 
     ttmain(argc, argv);
 

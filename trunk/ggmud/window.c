@@ -16,12 +16,21 @@
 
 #include <glib.h>
 
-#include "window.h"
+#include "ggmud.h"
 #include "config.h"
 #include "pixmaps.h"	// ToolBar Icons
 
+extern void log_viewer();
+extern void alt_send_to_connection  (gchar *text);
+
+typedef enum { F1, F2, F3, F4, F5, F6, F7, F8, F9, F10 } BUTTON;
+#define LorC(L)		(strlen(L) < 10 ? 0.5 : 0)
+
+/* External variables used */
+extern gchar *keys[];
+
 /* Global variables */
-GtkWidget *win;
+static GtkWidget *win;
 GtkWidget *btnLabel[12];
 GtkWidget *menu_Tools_Logger;
 GtkWidget *handlebox;
@@ -241,6 +250,17 @@ void toggle_logger (GtkWidget *menuitem, gpointer data)
     gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(btn_toolbar_logger), GTK_CHECK_MENU_ITEM(menuitem)->active);
 }
 
+/* Change Macro buttons labels
+ */
+void macro_btnLabel_change() {
+    gint i;
+    
+    for (i = 0; i < 12; i++) {
+       gtk_label_set_text(GTK_LABEL(btnLabel[i]), macro_list[i]);
+       gtk_misc_set_alignment (GTK_MISC(btnLabel[i]), LorC(macro_list[i]), 0.5);
+    }
+}
+
 /*
  * This Function creates the main window
  */
@@ -355,7 +375,6 @@ GtkWidget *spawn_gui()
   gtk_container_add (GTK_CONTAINER (menu_File_menu), separator1);
 
   menu_File_Connect = gtk_menu_item_new_with_label ("Connect");
-  gtk_object_set_data (GTK_OBJECT (window), "menu_File_Connect", menu_File_Connect);
   gtk_widget_show (menu_File_Connect);
   gtk_container_add (GTK_CONTAINER (menu_File_menu), menu_File_Connect);
   gtk_signal_connect (GTK_OBJECT (menu_File_Connect), "activate",
@@ -365,7 +384,6 @@ GtkWidget *spawn_gui()
                               GDK_C, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
 
   menu_File_DisConnect = gtk_menu_item_new_with_label ("DisConnect");
-  gtk_object_set_data (GTK_OBJECT (window), "menu_File_DisConnect", menu_File_DisConnect);
   gtk_widget_show (menu_File_DisConnect);
   gtk_container_add (GTK_CONTAINER (menu_File_menu), menu_File_DisConnect);
   gtk_signal_connect (GTK_OBJECT (menu_File_DisConnect), "activate",
@@ -375,12 +393,10 @@ GtkWidget *spawn_gui()
                               GDK_D, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
 
   separator2 = gtk_menu_item_new ();
-  gtk_object_set_data (GTK_OBJECT (window), "separator2", separator2);
   gtk_widget_show (separator2);
   gtk_container_add (GTK_CONTAINER (menu_File_menu), separator2);
 
   menu_File_Quit = gtk_menu_item_new_with_label ("Quit");
-  gtk_object_set_data (GTK_OBJECT (window), "menu_File_Quit", menu_File_Quit);
   gtk_widget_show (menu_File_Quit);
   gtk_container_add (GTK_CONTAINER (menu_File_menu), menu_File_Quit);
   gtk_signal_connect (GTK_OBJECT (menu_File_Quit), "activate",
@@ -393,16 +409,13 @@ GtkWidget *spawn_gui()
 
   /* options menu */
   menu_Options = gtk_menu_item_new_with_label ("Options");
-  gtk_object_set_data (GTK_OBJECT (window), "menu_Options", menu_Options);
   gtk_widget_show (menu_Options);
   gtk_container_add (GTK_CONTAINER (menubar), menu_Options);
 
   menu_Options_menu = gtk_menu_new ();
-  gtk_object_set_data (GTK_OBJECT (window), "menu_Options_menu", menu_Options_menu);
   gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_Options), menu_Options_menu);
 
   menu_Options_Fonts = gtk_menu_item_new_with_label ("Fonts");
-  gtk_object_set_data (GTK_OBJECT (window), "menu_Options_Fonts", menu_Options_Fonts);
   gtk_widget_show (menu_Options_Fonts);
   gtk_container_add (GTK_CONTAINER (menu_Options_menu), menu_Options_Fonts);
   gtk_signal_connect (GTK_OBJECT (menu_Options_Fonts), "activate",
@@ -412,7 +425,6 @@ GtkWidget *spawn_gui()
                               GDK_F, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
 
   menu_Options_Colors = gtk_menu_item_new_with_label ("Colors");
-  gtk_object_set_data (GTK_OBJECT (window), "menu_Options_Colors", menu_Options_Colors);
   gtk_widget_show (menu_Options_Colors);
   gtk_container_add (GTK_CONTAINER (menu_Options_menu), menu_Options_Colors);
   gtk_signal_connect (GTK_OBJECT (menu_Options_Colors), "activate",
@@ -422,7 +434,6 @@ GtkWidget *spawn_gui()
                               GDK_O, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
 
   menu_Options_Preference = gtk_menu_item_new_with_label ("Preferences");
-  gtk_object_set_data (GTK_OBJECT (window), "menu_Options_Preference", menu_Options_Preference);
   gtk_widget_show (menu_Options_Preference);
   gtk_container_add (GTK_CONTAINER (menu_Options_menu), menu_Options_Preference);
   gtk_signal_connect (GTK_OBJECT (menu_Options_Preference), "activate",
@@ -433,16 +444,13 @@ GtkWidget *spawn_gui()
 
   /* tools menu */
   menu_Tools = gtk_menu_item_new_with_label ("Tools");
-  gtk_object_set_data (GTK_OBJECT (window), "menu_Tools", menu_Tools);
   gtk_widget_show (menu_Tools);
   gtk_container_add (GTK_CONTAINER (menubar), menu_Tools);
 
   menu_Tools_menu = gtk_menu_new ();
-  gtk_object_set_data (GTK_OBJECT (window), "menu_Tools_menu", menu_Tools_menu);
   gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_Tools), menu_Tools_menu);
 
   menu_Tools_Macro = gtk_menu_item_new_with_label ("Macro's");
-  gtk_object_set_data (GTK_OBJECT (window), "menu_Tools_Macro", menu_Tools_Macro);
   gtk_widget_show (menu_Tools_Macro);
   gtk_container_add (GTK_CONTAINER (menu_Tools_menu), menu_Tools_Macro);
   gtk_signal_connect (GTK_OBJECT (menu_Tools_Macro), "activate",
@@ -453,7 +461,6 @@ GtkWidget *spawn_gui()
 
 
   menu_Tools_Alias = gtk_menu_item_new_with_label ("Aliases");
-  gtk_object_set_data (GTK_OBJECT (window), "menu_Tools_Alias", menu_Tools_Alias);
   gtk_widget_show (menu_Tools_Alias);
   gtk_container_add (GTK_CONTAINER (menu_Tools_menu), menu_Tools_Alias);
   gtk_signal_connect (GTK_OBJECT (menu_Tools_Alias), "activate",
@@ -463,15 +470,45 @@ GtkWidget *spawn_gui()
                               GDK_A, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
 
   menu_Tools_Trigger = gtk_menu_item_new_with_label ("Triggers");
-  gtk_object_set_data (GTK_OBJECT (window), "menu_Tools_Trigger", menu_Tools_Trigger);
   gtk_widget_show (menu_Tools_Trigger);
   gtk_container_add (GTK_CONTAINER (menu_Tools_menu), menu_Tools_Trigger);
   gtk_signal_connect (GTK_OBJECT (menu_Tools_Trigger), "activate",
                       GTK_SIGNAL_FUNC (triggers_window),
 		      NULL);
-
   gtk_widget_add_accelerator (menu_Tools_Trigger, "activate", accel_group,
                               GDK_T, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
+
+  
+  menu_Tools_Highlight = gtk_menu_item_new_with_label ("Highlights");
+  gtk_widget_show (menu_Tools_Highlight);
+  gtk_container_add (GTK_CONTAINER (menu_Tools_menu), menu_Tools_Highlight);
+  gtk_signal_connect (GTK_OBJECT (menu_Tools_Highlight), "activate",
+                      GTK_SIGNAL_FUNC (highlights_window),
+		      NULL);
+  gtk_widget_add_accelerator (menu_Tools_Highlight, "activate", accel_group,
+                              GDK_H, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
+  
+  menu_Tools_Gag = gtk_menu_item_new_with_label ("Gags");
+  gtk_widget_show (menu_Tools_Gag);
+  gtk_container_add (GTK_CONTAINER (menu_Tools_menu), menu_Tools_Gag);
+  gtk_signal_connect (GTK_OBJECT (menu_Tools_Gag), "activate",
+                      GTK_SIGNAL_FUNC (gags_window),
+		      NULL);
+  gtk_widget_add_accelerator (menu_Tools_Gag, "activate", accel_group,
+                              GDK_G, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
+  
+  menu_Tools_Variable = gtk_menu_item_new_with_label ("Variables");
+  gtk_widget_show (menu_Tools_Variable);
+  gtk_container_add (GTK_CONTAINER (menu_Tools_menu), menu_Tools_Variable);
+  gtk_signal_connect (GTK_OBJECT (menu_Tools_Variable), "activate",
+                      GTK_SIGNAL_FUNC (variables_window),
+		      NULL);
+  gtk_widget_add_accelerator (menu_Tools_Variable, "activate", accel_group,
+                              GDK_V, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
+
+  separator2 = gtk_menu_item_new ();
+  gtk_widget_show (separator2);
+  gtk_container_add (GTK_CONTAINER (menu_Tools_menu), separator2);
 
   menu_Tools_Logger = gtk_check_menu_item_new_with_label ("Logger");
   gtk_check_menu_item_set_show_toggle(GTK_CHECK_MENU_ITEM(menu_Tools_Logger), TRUE);
@@ -864,23 +901,32 @@ GtkWidget *spawn_gui()
 
   statusbar_id = gtk_statusbar_get_context_id(GTK_STATUSBAR(statusbar), "Statusbar");
   gtk_statusbar_push (GTK_STATUSBAR(statusbar), statusbar_id, "Ready");
-  macro_btnLabel_change;
+  macro_btnLabel_change();
 
   return window;
 }
 
-/* Change Macro buttons labels
- */
-void macro_btnLabel_change() {
-    gint i;
+static int scrolled_up;
+
+/* FOR THE WINDOW BUFFER FUNCTION */
+void clear_backbuffer()
+{
     
-    for (i = 0; i < 12; i++) {
-       gtk_label_set_text(GTK_LABEL(btnLabel[i]), macro_list[i]);
-       gtk_misc_set_alignment (GTK_MISC(btnLabel[i]), LorC(macro_list[i]), 0.5);
+    if (mud->maxlines > 0) {
+        int n;
+
+        n= gtk_text_get_length (GTK_TEXT (mud->text));
+        
+        if( n < mud->maxlines)
+            return;
+
+//        gtk_text_freeze (GTK_TEXT (mud->text));
+        gtk_text_set_point (GTK_TEXT (mud->text), n - mud->maxlines);
+        gtk_text_backward_delete (GTK_TEXT (mud->text), n - mud->maxlines);
+        gtk_text_set_point (GTK_TEXT (mud->text), mud->maxlines);
+//        gtk_text_thaw (GTK_TEXT (mud->text));
     }
 }
-
-static int scrolled_up;
 
 void textfield_freeze()
 {
@@ -946,25 +992,6 @@ void clear(int n, GtkText *target)
     gtk_text_thaw (target);
 }	
 
-/* FOR THE WINDOW BUFFER FUNCTION */
-void clear_backbuffer()
-{
-    
-    if (mud->maxlines > 0) {
-        int n;
-
-        n= gtk_text_get_length (GTK_TEXT (mud->text));
-        
-        if( n < mud->maxlines)
-            return;
-
-//        gtk_text_freeze (GTK_TEXT (mud->text));
-        gtk_text_set_point (GTK_TEXT (mud->text), n - mud->maxlines);
-        gtk_text_backward_delete (GTK_TEXT (mud->text), n - mud->maxlines);
-        gtk_text_set_point (GTK_TEXT (mud->text), mud->maxlines);
-//        gtk_text_thaw (GTK_TEXT (mud->text));
-    }
-}
 
 void popup_window (const gchar *message)
 {

@@ -19,8 +19,7 @@
 #include <gdk/gdkkeysyms.h>
 #include <string.h>
 #include <stdlib.h>
-#include "history.h"
-#include "tintin.h"
+#include "ggmud.h"
 
 void hist_add (char *x)
 {
@@ -52,7 +51,7 @@ void hist_add (char *x)
     mud->hist->cur=mud->hist->pos;
 }
 
-void hist_prev ()
+static void hist_prev ()
 {
     if (mud->hist->cyclic == 1)
         if((mud->hist->pos+1)%mud->hist->size==mud->hist->cur)  return;
@@ -70,7 +69,7 @@ void hist_prev ()
     gtk_entry_set_text(mud->ent, mud->hist->list[mud->hist->cur]);
 }
 
-void hist_next ()
+static void hist_next ()
 {
     if (mud->hist->cyclic == 1)
         if(mud->hist->cur == mud->hist->pos)
@@ -87,7 +86,8 @@ void hist_next ()
     gtk_entry_set_text(mud->ent,mud->hist->list[mud->hist->cur]);
 }
 
-void hist_clear ()
+#ifdef UNDEF
+static void hist_clear ()
 {
     int x;
 
@@ -98,6 +98,7 @@ void hist_clear ()
         }
     mud->hist->cur = mud->hist->pos = 0;
 }
+#endif
 
 gint change_focus(GtkWidget *w, GdkEventKey *event, gpointer data)
 {
