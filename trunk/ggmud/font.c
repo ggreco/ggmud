@@ -50,21 +50,30 @@ void load_font () {
     gchar line[255], pref[25], value[250];
 
 #ifndef WIN32
-    font.FontName = strdup ("-adobe-courier-medium-r-normal-*-*-120-*-*-m-*-iso8859-1"); //("fixed");
+    // font.FontName = strdup("-*-*-normal-r-normal--*-100-*-*-m-*-iso8859-1");
+
+    font.FontName = strdup ("-adobe-courier-medium-r-normal-*-*-100-*-*-m-*-iso8859-1");
 #else
 	font.FontName = strdup ("fixed");
 #endif
+    
     if (fp = fileopen ("font", "r")) {
-    	while (fgets (line, 80, fp)) {
+        while (fgets (line, 80, fp)) {
             sscanf (line, "%s %[^\n]", pref, value);
             if (!strcmp (pref, "FontName")) {
-				free(font.FontName);
-				font.FontName = strdup (value);
-			}
-    	}
-    	font_normal = gdk_font_load (font.FontName);
-		set_style();
-    	fclose (fp);
+                free(font.FontName);
+                font.FontName = strdup (value);
+            }
+        }
+
+        if ( ( font_normal = gdk_font_load (font.FontName) ) == NULL ) {
+            g_error ("Can't load font... Using default.\n");
+            free ( font.FontName );
+            font.FontName = strdup ("fixed");
+            save_font ();
+        }
+        set_style();
+        fclose (fp);
     }	
 }
 

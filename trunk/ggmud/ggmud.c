@@ -70,12 +70,12 @@ int main(int argc, char **argv)
 
 
     /* load the stuff that needs to be loaded before the GUI comes up! */
+    init_colors();
     load_prefs();
 
     /* Spawn the Graphical User Interface */
     load_macro();
     spawn_gui();
-    init_colors();
     load_font();
     load_wizard();
 

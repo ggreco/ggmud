@@ -21,7 +21,6 @@
 /* Funktion prototypes */
 gushort  convert_color (unsigned color);
 void     extract_color (GdkColor *color, unsigned red, unsigned green, unsigned blue);
-void     init_colors ();
 
 extern GdkColor color_lightwhite;	/* BOLD white  */
 extern GdkColor color_white;		/* LOW white */
