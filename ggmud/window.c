@@ -192,6 +192,16 @@ void load_win_pos()
     gdk_window_raise(gtk_widget_get_toplevel(mud->window)->window);
 }
 
+void setup_pixmaps()
+{
+    extern GdkPixmap *enabled_pixmap, *disabled_pixmap;
+    extern GdkBitmap *enabled_mask, *disabled_mask;
+   
+    enabled_pixmap = gdk_pixmap_create_from_xpm_d ( mud->window->window, &enabled_mask, &mud->window->style->white, yes_xpm );
+    disabled_pixmap = gdk_pixmap_create_from_xpm_d ( mud->window->window, &disabled_mask, &mud->window->style->white, no_xpm );
+
+}
+
 void write_win_pos(char *name, FILE *dest, GtkWidget *widget)
 {
     int x,y, w, h;
@@ -401,42 +411,12 @@ void window_command(char *arg, struct session *s)
 }
 
 GtkWidget *
-MakeButton(char *name, char **image, GtkSignalFunc func, gpointer data, GtkAccelGroup *accel_group)
+MakeButton(const char *image, GtkSignalFunc func, gpointer data)
 {
-    GdkPixmap *icon;
-    GdkBitmap *mask;
-    GtkWidget *hbox, *label, *button;
-    guint key;
- 
-    button = gtk_button_new();
-    hbox = gtk_hbox_new(FALSE, 0);
-    gtk_widget_show(hbox);
-    gtk_container_add(GTK_CONTAINER(button), hbox);
-
-    if (icon = gdk_pixmap_colormap_create_from_xpm_d ( NULL, cmap, 
-            &mask, NULL, image )) {
-        GtkWidget *pixmap = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
-
-        gdk_pixmap_unref(icon);
-        gdk_bitmap_unref(mask);
-        
-        gtk_widget_show(pixmap);
-        gtk_box_pack_start (GTK_BOX (hbox), pixmap, FALSE, FALSE, 0);
-    }    
-
-    label = gtk_label_new("");
-    key = gtk_label_parse_uline(GTK_LABEL(label), name);
-    gtk_widget_show(label);
-    gtk_box_pack_start (GTK_BOX (hbox), label, TRUE, FALSE, 0);
-    
+    GtkWidget *button = gtk_button_new_from_stock(image);
     gtk_signal_connect (GTK_OBJECT (button), "clicked",
                                func,
                                data );
-    
-    gtk_widget_add_accelerator (button, "clicked", accel_group,
-                              key, GDK_MOD1_MASK,
-                              0);
-    
 
     gtk_widget_show(button);
 
@@ -452,17 +432,11 @@ void AddSimpleBar(GtkWidget *vbox, gpointer *data,
   gtk_widget_show (hbuttonbox);
   
   gtk_box_pack_start (GTK_BOX (vbox), hbuttonbox, FALSE, TRUE, 5);
-  button = MakeButton("_Save", save_xpm, save_func, 
-          data, accel_group);
-  
-  gtk_container_add (GTK_CONTAINER (hbuttonbox), button);
+  button = MakeButton(GTK_STOCK_SAVE, save_func, data);
+  gtk_box_pack_start (GTK_BOX (hbuttonbox), button,    TRUE, TRUE, 15);
 
-  button   = MakeButton("_Close", cross_xpm,
-            close_func, 
-            gtk_widget_get_toplevel(vbox),
-            accel_group);
-
-  gtk_container_add (GTK_CONTAINER (hbuttonbox), button);
+  button = MakeButton(GTK_STOCK_CANCEL, close_func, gtk_widget_get_toplevel(vbox));
+  gtk_box_pack_start (GTK_BOX (hbuttonbox), button,    TRUE, TRUE, 15);
 
   gtk_window_add_accel_group(
             GTK_WINDOW(gtk_widget_get_toplevel(vbox)), 
@@ -492,13 +466,11 @@ void AddButtonBar(GtkWidget *vbox, gpointer *data,
     gtk_widget_show (hbox);
 
     
-    button_add    = MakeButton("_Add", new_xpm, add_func, data, accel_group);    
-    button_delete = MakeButton("_Delete", remove_xpm, del_func, data, accel_group);
-    button_save   = MakeButton("_Save", save_xpm, save_func, data, accel_group);
-    button_quit   = MakeButton("_Close", cross_xpm,
-            GTK_SIGNAL_FUNC(close_window), 
-            gtk_widget_get_toplevel(vbox),
-            accel_group);
+    button_add    = MakeButton(GTK_STOCK_ADD  , add_func, data);    
+    button_delete = MakeButton(GTK_STOCK_DELETE, del_func, data);
+    button_save   = MakeButton(GTK_STOCK_SAVE, save_func, data);
+    button_quit   = MakeButton(GTK_STOCK_CANCEL, GTK_SIGNAL_FUNC(close_window), 
+            gtk_widget_get_toplevel(vbox));
 
     gtk_box_pack_start (GTK_BOX (hbox), button_add,    TRUE, TRUE, 15);
     gtk_box_pack_start (GTK_BOX (hbox), button_delete, TRUE, TRUE, 15);
@@ -751,7 +723,36 @@ static GtkWidget * add_menu_item(GtkWidget *father, GtkAccelGroup *group,
     return item;
 }
 
+static GtkWidget * add_stock_item(GtkWidget *father, GtkAccelGroup *group, 
+        const char *icon, GtkSignalFunc cbk)
+{
+    GtkWidget *item;
+    
+    item = gtk_image_menu_item_new_from_stock (icon, group);
+            
+    gtk_signal_connect (GTK_OBJECT (item), "activate", cbk, NULL);
+
+    gtk_widget_show (item);
+    gtk_container_add (GTK_CONTAINER (father), item);
+
+    return item;
+}
+
 #define add_separator(x) add_menu_item(x, NULL, NULL, NULL, 0, 0)
+
+static GtkWidget * review_toggle;
+
+void toggle_review(void)
+{
+    if (GTK_WIDGET_VISIBLE(mud->review)) {
+        gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (review_toggle), FALSE);
+        gtk_widget_hide(mud->review);
+    }
+    else {
+        gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (review_toggle), TRUE);
+        gtk_widget_show(mud->review);
+    }
+}
 
 void
 spawn_gui()
@@ -825,15 +826,19 @@ spawn_gui()
   gtk_widget_set_sensitive (menu_File_DisConnect, FALSE);
   menu_File_Reconnect = add_menu_item(menu, accel_group, "Reconnect", GTK_SIGNAL_FUNC(reconnect),  GDK_R, GDK_MOD1_MASK);
   add_separator(menu);
-  add_menu_item(menu, accel_group, "Quit", GTK_SIGNAL_FUNC(quit),  GDK_Q, GDK_MOD1_MASK);
-
+//  add_menu_item(menu, accel_group, "Quit", GTK_SIGNAL_FUNC(quit),  GDK_Q, GDK_MOD1_MASK);
+  add_stock_item(menu, accel_group, GTK_STOCK_QUIT, GTK_SIGNAL_FUNC(quit));
 
   /* options menu */
   menu = add_menu (menubar, "Options");
   
-  add_menu_item(menu, accel_group, "Fonts", GTK_SIGNAL_FUNC(window_font),  GDK_F, GDK_MOD1_MASK);
-  add_menu_item(menu, accel_group, "Colors", GTK_SIGNAL_FUNC(color_prefs),  GDK_O, GDK_MOD1_MASK);
-  add_menu_item(menu, accel_group, "Preferences", GTK_SIGNAL_FUNC(window_prefs),  GDK_P, GDK_MOD1_MASK);
+//  add_menu_item(menu, accel_group, "Fonts", GTK_SIGNAL_FUNC(window_font),  GDK_F, GDK_MOD1_MASK);
+//  add_menu_item(menu, accel_group, "Colors", GTK_SIGNAL_FUNC(color_prefs),  GDK_O, GDK_MOD1_MASK);
+//  add_menu_item(menu, accel_group, "Preferences", GTK_SIGNAL_FUNC(window_prefs),  GDK_P, GDK_MOD1_MASK);
+  add_stock_item(menu, accel_group, GTK_STOCK_SELECT_FONT, GTK_SIGNAL_FUNC(window_font));
+  add_stock_item(menu, accel_group, GTK_STOCK_SELECT_COLOR, GTK_SIGNAL_FUNC(color_prefs));
+  add_stock_item(menu, accel_group, GTK_STOCK_PREFERENCES, GTK_SIGNAL_FUNC(window_prefs));
+
   add_separator(menu);
   add_menu_item(menu, NULL, "Load TT++ command file...", GTK_SIGNAL_FUNC(load_tt_prefs), 0, 0);
   add_menu_item(menu, NULL, "Import ZMud configuration...", GTK_SIGNAL_FUNC(load_zmud_prefs), 0, 0);
@@ -864,7 +869,7 @@ spawn_gui()
   /* help menu */
   menu = add_menu (menubar, "Help");
   gtk_menu_item_right_justify (GTK_MENU_ITEM (gtk_menu_get_attach_widget(GTK_MENU(menu))));
-  add_menu_item(menu, accel_group, "Manual", GTK_SIGNAL_FUNC(do_manual),  GDK_H, GDK_MOD1_MASK);
+  add_stock_item(menu, accel_group, GTK_STOCK_HELP, GTK_SIGNAL_FUNC(do_manual));
   add_separator(menu);
   add_menu_item(menu, accel_group, "About", GTK_SIGNAL_FUNC(do_about),  GDK_B, GDK_MOD1_MASK);
 
@@ -926,10 +931,7 @@ spawn_gui()
                                            NULL );
   gtk_toolbar_append_space ( GTK_TOOLBAR ( toolbar ) ); 			/* space after item */
 
-  /* our next item is <Font> button */
-  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_font );
-  iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
-  gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
+  iconw = gtk_image_new_from_stock(GTK_STOCK_SELECT_FONT, GTK_ICON_SIZE_SMALL_TOOLBAR);
   
   btn_toolbar_font = gtk_toolbar_append_item ( GTK_TOOLBAR (toolbar), 		/* our toolbar */
                                            NULL,               			/* button label */
@@ -939,10 +941,7 @@ spawn_gui()
                                            GTK_SIGNAL_FUNC (window_font), 	/* a signal */
                                            NULL );
 
-  /* our next item is <Colors> button */
-  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_colors );
-  iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
-  gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
+  iconw = gtk_image_new_from_stock(GTK_STOCK_SELECT_COLOR, GTK_ICON_SIZE_SMALL_TOOLBAR);
 
   btn_toolbar_colors = gtk_toolbar_append_item ( GTK_TOOLBAR (toolbar),		/* our toolbar */
                                            NULL,               			/* button label */
@@ -952,10 +951,7 @@ spawn_gui()
                                            GTK_SIGNAL_FUNC (color_prefs), 	/* a signal */
                                            NULL );
 
-  /* our next item is <Preferences> button */
-  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_prefs );
-  iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
-  gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
+  iconw = gtk_image_new_from_stock(GTK_STOCK_PREFERENCES, GTK_ICON_SIZE_SMALL_TOOLBAR);
 
   btn_toolbar_prefs = gtk_toolbar_append_item ( GTK_TOOLBAR (toolbar), 		/* our toolbar */
                                            NULL,               			/* button label */
@@ -1037,10 +1033,7 @@ spawn_gui()
                                            NULL );
   gtk_toolbar_append_space ( GTK_TOOLBAR ( toolbar ) );			 	/* space after item */
 
-  /* our next item is <help> button */
-  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_help );
-  iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
-  gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
+  iconw = gtk_image_new_from_stock(GTK_STOCK_HELP, GTK_ICON_SIZE_SMALL_TOOLBAR);
 
   btn_toolbar_help = gtk_toolbar_append_item ( GTK_TOOLBAR (toolbar), 		/* our toolbar */
                                            NULL,               			/* button label */
@@ -1176,6 +1169,17 @@ spawn_gui()
 
   gtk_signal_connect (GTK_OBJECT (toggle1), "toggled",
                        GTK_SIGNAL_FUNC (toggle_parsing), NULL);
+  gtk_box_pack_start (GTK_BOX (hbox2), toggle1, FALSE, FALSE, 4);
+
+  iconw = gtk_image_new_from_stock(GTK_STOCK_JUSTIFY_LEFT, GTK_ICON_SIZE_BUTTON);
+  review_toggle = toggle1 = gtk_toggle_button_new();
+  gtk_container_add(GTK_CONTAINER(toggle1), iconw);
+  gtk_widget_show_all(toggle1);
+  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (toggle1), FALSE);
+  GTK_WIDGET_UNSET_FLAGS (toggle1, GTK_CAN_FOCUS|GTK_CAN_DEFAULT);
+
+  gtk_signal_connect (GTK_OBJECT (toggle1), "toggled",
+                       GTK_SIGNAL_FUNC (toggle_review), NULL);
   gtk_box_pack_start (GTK_BOX (hbox2), toggle1, FALSE, FALSE, 4);
 
   // tick counter

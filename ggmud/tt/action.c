@@ -51,15 +51,7 @@ int use_triggers = 1;
 static int var_len[10];
 static const char *var_ptr[10];
 
-typedef struct _trigclass
-{
-    const char *name;
-    int how_many;
-    struct _trigclass *next;
-    char enabled;    
-} trigger_class;
-
-static trigger_class *trigger_classes = NULL;
+trigger_class *trigger_classes = NULL;
 
 
 /***********************/
@@ -102,18 +94,21 @@ static trigger_class * get_class(const char *name)
     return NULL;
 }
 
-static int enable_class(const char *name, int enable)
+static int enable_class(trigger_class *cl, int enable, struct session *ses)
 {
-    trigger_class *cl = get_class(name);
+     struct listnode *myactions = (ses ? ses->actions : common_actions);
 
-    if (cl) {
-        cl->enabled = enable;
+     cl->enabled = enable;
 
-        return 0;
-    }
-    
-    return -1;
+     while ((myactions = myactions->next)) {
+         if (!myactions->pr)
+             continue;
+
+         if (!strcmp(myactions -> pr, cl->name))
+             myactions-> enabled = enable;
+     }
 }
+
 
 void action_command(const char *arg, struct session *ses)
 {
@@ -121,6 +116,30 @@ void action_command(const char *arg, struct session *ses)
   char pr[BUFFER_SIZE];
   struct listnode *myactions, *ln;
   trigger_class *cl;
+ 
+  while (*arg == ' ')
+      arg++;
+  
+  if (*arg == '+' || *arg == '-') {
+      trigger_class *t;
+      char *c = left, d = *arg++;
+      
+      while (*arg > ' ')
+        *c++ = *arg++;    
+      
+      *c = 0;
+
+      if (!(t = get_class(left))) {
+          sprintf(result, "#Undefined trigger class [%s]\n", left);
+          tintin_puts2(result, ses);
+      }
+      else {
+          enable_class(t, (d == '+'), ses);
+          sprintf(result, "#%s trigger class [%s]\n", 
+                  d == '+' ? "Enabled" : "Disabled", left);
+      }
+      return;
+  }
   
   myactions = (ses ? ses->actions : common_actions);
   arg = get_arg_in_braces(arg, left, 0);
@@ -305,6 +324,9 @@ void check_all_actions(const char *line, struct session *ses)
 
   ln = (ses ? ses->actions : common_actions);
   while((ln = ln->next)) {
+    if (!ln->enabled)
+        continue;
+
     if(check_one_action(linebuf, ln->left, ses)) {
       char buffer[BUFFER_SIZE], strng[BUFFER_SIZE];
 
