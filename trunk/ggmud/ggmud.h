@@ -241,5 +241,9 @@ extern ALIAS_DATA *alias_list;
 extern WIZARD_DATA *wizard_connection_list;
 
 
-
+extern void AddButtonBar(GtkWidget *vbox, gpointer *data,
+        GtkSignalFunc add_func,
+        GtkSignalFunc del_func,
+        GtkSignalFunc save_func
+        );
 #endif /* _GGMUD_H_ */

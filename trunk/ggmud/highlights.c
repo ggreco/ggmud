@@ -174,61 +174,15 @@ add_highlight(char *string, color_options *bg, color_options *fg)
     parse_input(buffer, NULL);
 }
 
-static void high_button_add (GtkWidget *button, gpointer data)
-{
-    gchar *text[3];
-    gint   i, j;
-
-    text[0]   = gtk_entry_get_text (GTK_ENTRY (textalias  ));
-
-    i = get_optionmenu_active(bgwidget);
-    j = get_optionmenu_active(fgwidget);
-    
-    text[1] = bg_options[i].name;
-    text[2] = fg_options[j].name;
-    
-    if ( text[0][0] == '\0'  )
-    {
-        popup_window ("Please insert some text first.");
-        return;
-    }
-
-    if ( strlen (text[0]) > ALIAS_LEN)
-    {
-        popup_window ("String too big.");
-        return;
-    }
-    
-    gtk_clist_append ((GtkCList *) data, text);
-    add_highlight (text[0], &bg_options[i], &fg_options[j]);
-}
-
-static void high_button_delete (GtkWidget *button, gpointer data) {
-    gchar *word;
-    
-    if ( high_selected_row == -1 ) {
-        popup_window ("No selection made.");
-    }
-    else {
-        char buffer[ALIAS_LEN + 20];
-        
-        gtk_clist_get_text ((GtkCList*) data, high_selected_row, 0, &word);
-        sprintf(buffer, "#unhigh {%s}", word);
-        gtk_clist_remove ((GtkCList*) data, high_selected_row);
-        high_selected_row = -1;
-
-        parse_input(buffer, mud->activesession);
-    }
-
-}
-
-static void  insert_highlights  (GtkWidget *clist)
+static void  insert_highlights  (GtkCList *clist)
 {
     gchar *text[3];
     struct listnode *list = mud->activesession ? mud->activesession->highs : common_highs;
     int i, j;
-    char buffer[200], *c, *d;
-    
+    char buffer[200], *c;
+
+    gtk_clist_clear (clist);
+
     while ( list = list->next ) {
         text[0] = list->left;
         
@@ -260,10 +214,9 @@ static void  insert_highlights  (GtkWidget *clist)
             if( (i = get_options_tt(e, bg_options)) < 0)
                 j = get_options_tt(e, fg_options);
         }
-        
-        if( (i = get_options_tt(buffer, bg_options)) < 0)
+
+        if( (i = get_options_tt(buffer, bg_options)) < 0 && j < 0)
             j = get_options_tt(buffer, fg_options);
-        
 
         if(i >= 0)
             text[1] = bg_options[i].name;
@@ -275,8 +228,53 @@ static void  insert_highlights  (GtkWidget *clist)
         else
             text[2] = "None";
         
-        gtk_clist_prepend (GTK_CLIST (clist), text);
+        gtk_clist_prepend (clist, text);
     }
+}
+
+static void high_button_add (GtkWidget *button, GtkCList * data)
+{
+    gchar *text;
+    gint   i, j;
+
+    text   = gtk_entry_get_text (GTK_ENTRY (textalias  ));
+
+    i = get_optionmenu_active(bgwidget);
+    j = get_optionmenu_active(fgwidget);
+    
+    if ( text[0] == '\0'  ) {
+        popup_window ("Please insert some text first.");
+        return;
+    }
+
+    if ( strlen (text) > ALIAS_LEN) {
+        popup_window ("String too big.");
+        return;
+    }
+    
+    add_highlight (text, &bg_options[i], &fg_options[j]);
+
+    insert_highlights(data);
+}
+
+
+
+static void high_button_delete (GtkWidget *button, GtkCList * data) {
+    gchar *word;
+    
+    if ( high_selected_row == -1 ) {
+        popup_window ("No selection made.");
+    }
+    else {
+        char buffer[ALIAS_LEN + 20];
+        
+        gtk_clist_get_text (data, high_selected_row, 0, &word);
+        sprintf(buffer, "#unhigh {%s}", word);
+        parse_input(buffer, mud->activesession);
+        high_selected_row = -1;
+        insert_highlights(data);
+    }
+
 }
 
 static void append_options(GtkWidget *w, color_options *options)
@@ -427,7 +425,7 @@ void highlights_window (GtkWidget *widget, gpointer data)
     gtk_widget_show (button_delete);
     gtk_widget_show (button_save  );
 
-    insert_highlights  (clist        );
+    insert_highlights  (GTK_CLIST(clist)        );
     gtk_widget_show (high_window );
 
 }
