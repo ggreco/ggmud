@@ -24,12 +24,17 @@ OBJS = $(patsubst %.c, $(OBJDIR)%.o, $(C_SRCS))
 
 WINOBJS = $(OBJDIR)icon.w $(patsubst %.c, $(OBJDIR)%.w, $(C_SRCS))
 
-CROSSCFLAGS = $(INCDIR) -I$(CROSSDIR)/include/glib-2.0 -mwindows \
-			-I$(CROSSDIR)/include/gtk -mno-cygwin -mms-bitfields $(GLOBAL_CFLAGS)
+CROSSCFLAGS = $(INCDIR) -I$(CROSSDIR)/include/glib-2.0  -I$(CROSSDIR)/lib/glib-2.0/include/ \
+			-I$(CROSSDIR)/include/gtk-2.0 -I$(CROSSDIR)/include/atk-1.0 \
+            -I$(CROSSDIR)/include/pango-1.0 -I$(CROSSDIR)/lib/gtk-2.0/include \
+            
+            -mwindows -mno-cygwin -mms-bitfields $(GLOBAL_CFLAGS)
 
 # -fnative-struct corrispondente di -mms-bifields nel vecchio mingw32 -s
 
-CROSSLIBS = -s -L../lib_w32 -Ltt -lttw32 -lgtk.dll -lgdk.dll -lgmodule-2.0.dll -lglib-2.0.dll -lws2_32
+CROSSLIBS = -s -Ltt -lttw32 -lgtk-win32-2.0.dll -lgdk-win32-2.0.dll \
+            -latk-1.0.dll -lgdk_pixbuf-2.0.dll -lpango-1.0.dll -lpangowin32-1.0.dll \
+            -lgmodule-2.0.dll -lglib-2.0.dll -lws2_32
 
 all: depend $(PROJECTNAME) 
 
