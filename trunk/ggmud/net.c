@@ -349,6 +349,10 @@ void send_to_connection (GtkWidget *widget, gpointer data)
     mud->activesession = parse_input(buffer, mud->activesession); // can change active session
     hist_add(entry_text);
 
+    
+    if(mud->text->vadj->value < (mud->text->vadj->upper - mud->text->vadj->page_size))
+        gtk_adjustment_set_value(mud->text->vadj, (mud->text->vadj->upper - mud->text->vadj->page_size));
+    
     //textfield_add ( "\n", MESSAGE_NONE);
     if ( prefs.KeepText )
         gtk_entry_select_region (mud->ent, 0,
