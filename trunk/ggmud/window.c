@@ -704,7 +704,11 @@ spawn_gui()
   GtkWidget *menu_Tools_Macro;
   GtkWidget *menu_Tools_Alias;
   GtkWidget *menu_Tools_Trigger;
+  GtkWidget *menu_Tools_Highlight;
+  GtkWidget *menu_Tools_Variable;
+  GtkWidget *menu_Tools_TabComplete;
   GtkWidget *menu_Tools_LogViewer;
+  GtkWidget *menu_Tools_Gag;
   GtkWidget *menu_Help;
   GtkWidget *menu_Help_menu;
   GtkWidget *menu_Help_About;
@@ -958,6 +962,13 @@ spawn_gui()
 		      NULL);
   gtk_widget_add_accelerator (menu_Tools_Gag, "activate", accel_group,
                               GDK_G, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
+  
+  menu_Tools_TabComplete = gtk_menu_item_new_with_label ("Tab complete");
+  gtk_widget_show (menu_Tools_TabComplete);
+  gtk_container_add (GTK_CONTAINER (menu_Tools_menu), menu_Tools_TabComplete);
+  gtk_signal_connect (GTK_OBJECT (menu_Tools_TabComplete), "activate",
+                      GTK_SIGNAL_FUNC (create_complete_window),
+		      NULL);
   
   menu_Tools_Variable = gtk_menu_item_new_with_label ("Variables");
   gtk_widget_show (menu_Tools_Variable);

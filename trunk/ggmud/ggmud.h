@@ -113,6 +113,7 @@ extern GtkWidget *statusbar;
 extern gint statusbar_id;
 
 /* extprefs.c */
+extern void  create_complete_window    (GtkWidget *widget, gpointer data);
 extern void  gags_window    (GtkWidget *widget, gpointer data);
 extern void  highlights_window    (GtkWidget *widget, gpointer data);
 extern void  variables_window    (GtkWidget *widget, gpointer data);
@@ -173,14 +174,6 @@ extern GtkWidget *menu_File_wiz;
 extern GtkWidget *menu_Option_Font;	
 extern GtkWidget *menu_Option_Preference;
 GtkWidget *menu_Option_Colors;
-extern GtkWidget *menu_Tools_Alias;	
-extern GtkWidget *menu_Tools_Macro;
-extern GtkWidget *menu_Tools_Trigger;
-extern GtkWidget *menu_Tools_Variable;	
-extern GtkWidget *menu_Tools_Highlight;
-extern GtkWidget *menu_Tools_Gag;
-extern GtkWidget *menu_Tools_Logger;
-extern GtkWidget *menu_Tools_Logview;
 extern void do_menu(GtkWidget *);
 
 extern void popup_window ( const gchar *message );

@@ -1,7 +1,5 @@
 #include "ggmud.h"
 
-GtkWidget *menu_Tools_Gag;	
-
 #define GAG_FILE "gag"
 #define GAG_LEN 128
 
@@ -48,9 +46,6 @@ load_gags()
         fclose(fp);
     }
 }
-static GtkWidget *gag_window;
-static GtkWidget *textgag;
-static int gag_selected_row = -1;
 
 
 static void
@@ -74,6 +69,8 @@ static void
 gag_button_add (GtkWidget *button, GtkCList * data)
 {
     gchar *text;
+    GtkWidget *textgag = (GtkWidget *)
+                gtk_object_get_data(GTK_OBJECT(data), "entry");
 
     text   = gtk_entry_get_text (GTK_ENTRY (textgag  ));
 
@@ -98,15 +95,16 @@ gag_button_add (GtkWidget *button, GtkCList * data)
 
 static void gag_button_delete (GtkWidget *button, GtkCList * data) {
     gchar *word;
+    int selected_row = (int) gtk_object_get_user_data(GTK_OBJECT(data));
     
-    if (gag_selected_row == -1 ) {
+    if (selected_row == -1 ) {
         popup_window ("No selection made.");
     }
     else {
         char buffer[GAG_LEN + 20];
         
-        gtk_clist_get_text (data, gag_selected_row, 0, &word);
-        gag_selected_row = -1;
+        gtk_clist_get_text (data, selected_row, 0, &word);
+        gtk_object_set_user_data(GTK_OBJECT(data), (void *) -1);
 
         sprintf(buffer, "#ungag {%s}", word);
 
@@ -122,10 +120,13 @@ static void gag_selection_made (GtkWidget *clist, gint row, gint column,
 {
     gchar *text;
     
-    gag_selected_row    = row;
+    if ( GTK_CLIST(data) ) {
+        GtkWidget *textgag = (GtkWidget *)
+                gtk_object_get_data(GTK_OBJECT(data), "entry");
+                
+        gtk_object_set_user_data(GTK_OBJECT(clist), (void *) row);
 
-    if ( (GtkCList*) data ) {
-        gtk_clist_get_text ((GtkCList*) data, row, 0, &text);
+        gtk_clist_get_text (GTK_CLIST(data), row, 0, &text);
         gtk_entry_set_text (GTK_ENTRY (textgag), text);
     }
 }
@@ -133,6 +134,7 @@ static void gag_selection_made (GtkWidget *clist, gint row, gint column,
 void
 gags_window(GtkWidget *w, gpointer data)
 {
+    GtkWidget *gag_window, *textgag;
     GtkWidget *vbox;
     GtkWidget *hbox3;
     GtkWidget *clist;
@@ -189,6 +191,8 @@ gags_window(GtkWidget *w, gpointer data)
     gtk_widget_show (textgag  );
     gtk_container_add(GTK_CONTAINER(hbox3), textgag);
 
+    gtk_object_set_data(GTK_OBJECT(clist), "entry", textgag);
+    gtk_object_set_user_data(GTK_OBJECT(clist), (void *) -1);
 
     AddButtonBar(vbox, (gpointer)clist,
             GTK_SIGNAL_FUNC(gag_button_add),

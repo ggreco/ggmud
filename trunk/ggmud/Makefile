@@ -16,7 +16,7 @@ PROJECTNAME = ggmud
 
 C_SRCS = alias.c ansi.c font.c fileopen.c help.c history.c log.c logviewer.c \
          macro.c net.c preferences.c ggmud.c triggers.c window.c wizard.c \
-         variables.c highlights.c gags.c timers.c
+         variables.c highlights.c gags.c timers.c complete.c
 
 DEP_SRCS = $(CXX_SRCS) $(C_SRCS)
 

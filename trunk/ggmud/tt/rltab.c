@@ -46,16 +46,9 @@ This program is protected under the GNU GPL (See COPYING)
 #include "include/rltab.h"
 #include "include/utils.h"
 
-#define COMPLETE_FILE "complete"
-
-typedef struct list_s {
-  char *word;
-  struct list_s *next;
-} list_t;
-
 extern FILE *fileopen (char *filename, char *mode);
 
-static list_t *complist = 0;	/* tab completion list */
+list_t *complist = 0;	/* tab completion list */
 
 /*
  * the completion generation function for readline.

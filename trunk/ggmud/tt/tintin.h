@@ -83,6 +83,11 @@ This program is protected under the GNU GPL (See COPYING)
 #ifndef DEFAULT_HELP_FILE
 #define DEFAULT_HELP_FILE "gg_help.txt" /* Default name for the help file */
 #endif
+#define COMPLETE_FILE "complete"
+typedef struct list_s {
+  char *word;
+  struct list_s *next;
+} list_t;
 
 #define HISTORY_FILE ".tt_history" /* The name of the tintin history file */
 #define DEFAULT_CAT_STR "cat "                 /* for unix:     cat */
