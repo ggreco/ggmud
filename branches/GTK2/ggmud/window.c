@@ -1433,12 +1433,13 @@ void textfield_add(GtkTextView *txt, const char *message, int colortype)
     GtkTextIter iter;
     GtkTextBuffer *tbuf;
     GtkTextMark *mark;
+    GtkTextTag *tag;
     extern GtkTextTag *fg_colors[2][8];
+    extern GtkTextTag *blink_colors[2][8];
 
     
     if (!*message)
         return;
-    GtkTextTag *tag = prefs.DefaultColor;
     
     switch (colortype) {
         case MESSAGE_ANSI:
@@ -1462,10 +1463,12 @@ void textfield_add(GtkTextView *txt, const char *message, int colortype)
             tag = fg_colors[0][1]; // red
             break;
         case MESSAGE_TICK:
+            tag = blink_colors[1][6]; // cyan
             break;
         default:
             if (mud->LOGGING) /* Loging */
                 fprintf(mud->LOG_FILE, message);
+            tag = prefs.DefaultColor;
     }
     
     tbuf = gtk_text_view_get_buffer(txt);
@@ -1544,7 +1547,9 @@ GtkWidget *create_tv(GtkTextBuffer *buffer, GtkTextView **view)
     gtk_widget_modify_base((GtkWidget *)text, GTK_STATE_NORMAL, &prefs.BackgroundGdkColor);
     gtk_widget_modify_text ((GtkWidget *)text, GTK_STATE_NORMAL, &prefs.DefaultGdkColor); 
 
-    gtk_text_view_set_wrap_mode(text, GTK_WRAP_CHAR);
+    gtk_text_view_set_wrap_mode(text, 
+            prefs.WordWrap ? GTK_WRAP_CHAR : GTK_WRAP_NONE);
+
     gtk_text_view_set_cursor_visible(text, FALSE);
     gtk_text_view_set_left_margin(text, 3);
 

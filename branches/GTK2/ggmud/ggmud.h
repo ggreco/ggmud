@@ -71,6 +71,7 @@ struct prefs_data {
     gint       KeepText;
     gint       EchoText;
     gint       WordWrap;
+    gint       Blinking;
     gint       DoBeep;
     gint       Toolbar;
     gint       Macrobuttons;

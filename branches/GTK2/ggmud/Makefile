@@ -12,7 +12,7 @@ VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )
 
 export GLOBAL_CFLAGS
 
-PROJECTNAME = ggmud2
+PROJECTNAME = ggmud
 
 C_SRCS = alias.c ansi.c font.c fileopen.c help.c history.c log.c logviewer.c \
          macro.c net.c preferences.c ggmud.c triggers.c window.c wizard.c \
