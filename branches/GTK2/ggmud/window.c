@@ -1508,7 +1508,7 @@ GtkWidget *create_tv(GtkTextBuffer *buffer, GtkTextView **view)
     GtkWidget *sw = gtk_scrolled_window_new (NULL, NULL);
 
     gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
-            GTK_POLICY_NEVER,
+            GTK_POLICY_AUTOMATIC,
             GTK_POLICY_ALWAYS);
     gtk_widget_show(sw);
     text = (GtkTextView *)gtk_text_view_new_with_buffer (buffer);
@@ -1567,9 +1567,13 @@ GtkTextView *new_view(char *name, GtkWidget *parent, int ismain)
   gtk_signal_connect(GTK_OBJECT(t1),"key_press_event",GTK_SIGNAL_FUNC(change_focus), mud);
   gtk_signal_connect(GTK_OBJECT(t2),"key_press_event",GTK_SIGNAL_FUNC(change_focus), mud);
 
-  if (ismain)
+  if (ismain) {
     mud->review = sw;
-      
+    gtk_text_view_set_wrap_mode((GtkTextView *)t2, 
+            prefs.WordWrap ? GTK_WRAP_CHAR : GTK_WRAP_NONE
+            );
+  }
+  
   return (GtkTextView *)t2;
 }
 

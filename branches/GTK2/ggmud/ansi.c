@@ -226,6 +226,26 @@ void init_colors ()
     }
 }
 
+void update_color_tags(GdkColor *color)
+{
+    int i, j;
+    
+    if (color == &prefs.BackgroundGdkColor) {
+        g_object_set(prefs.BackgroundColor, "background-gdk", color, NULL);        
+    }
+    else if (color == &prefs.DefaultGdkColor) {
+        g_object_set(prefs.DefaultColor, "foreground-gdk", color, NULL);
+    }
+    else for (i = 0; i < 8; i++) {
+        for (j = 0; j < 2; j++) {
+            if (orig_colors[j][i] == color) {
+                g_object_set(fg_colors[j][i], "foreground-gdk", color, NULL);
+                g_object_set(bg_colors[j][i], "background-gdk", color, NULL);
+            }
+        }
+    }
+}
+
 static int
 get_first(int in)
 {

@@ -109,17 +109,8 @@ static void tt_file_ok(GtkWidget *w, GtkFileSelection *fs)
 void update_widget_color(color_struct *col)
 {
     if(col->widget) {
-        GtkStyle *style = gtk_style_copy(gtk_widget_get_style(col->widget));
-
-        if(style) {
-            style->bg[GTK_STATE_NORMAL] = *(col->color);
-            style->bg[GTK_STATE_SELECTED] = *(col->color);
-            style->bg[GTK_STATE_PRELIGHT] = *(col->color);
-
-            gtk_widget_set_style(col->widget, style);
-
-            gtk_style_unref(style);
-        }
+        gtk_color_button_set_color(GTK_COLOR_BUTTON(col->widget), col->color);
+        update_color_tags(col->color);
     }
 }
 
@@ -348,7 +339,8 @@ void check_wrap (GtkWidget *widget, GtkWidget *wrap_button)
 /* wordwrapper for the main textwindow */
 void text_toggle_word_wrap (GtkWidget *checkbutton_wrap, GtkWidget *text)
 {
-  gtk_text_set_word_wrap(mud->text, GTK_TOGGLE_BUTTON(checkbutton_wrap)->active);
+  gtk_text_set_word_wrap(mud->text, GTK_TOGGLE_BUTTON(checkbutton_wrap)->active ? 
+          GTK_WRAP_CHAR : GTK_WRAP_NONE);
 }
 
 void check_beep (GtkWidget *widget, GtkWidget *check_button)
@@ -533,7 +525,7 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy)
   /* Make buttons for all the colors */
   while(color_arr[i].color) {     
       color_row = gtk_hbox_new(TRUE, 0);
-      color_arr[i].widget =  gtk_button_new();
+      color_arr[i].widget =  gtk_color_button_new_with_color(color_arr[i].color);
 
       sprintf(tmp, "Color for %s", color_arr[i].name);
       color_label = gtk_label_new(tmp);
@@ -550,7 +542,7 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy)
       gtk_box_pack_start (GTK_BOX (color_row), color_label, TRUE, TRUE, 1);
       gtk_box_pack_start (GTK_BOX(color_box), color_row, TRUE, TRUE, 1);
 
-      update_widget_color(&color_arr[i]);
+      //update_widget_color(&color_arr[i]);
       
       i++;
   }
