@@ -28,6 +28,7 @@
 #include <string.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#include <sys/ioctl.h>
 #endif
 
 extern GtkWidget *btn_toolbar_disconnect;
@@ -166,9 +167,13 @@ void open_connection (const char *name, const char *host, const char *port)
 {
     struct hostent *he;
     struct sockaddr_in their_addr;
-    int sockfd;
+    int sockfd, onoff = 1, retries = 0;
 
 #ifdef WIN32
+
+#define ioctl ioctlsocket
+#define EINPROGRESS WSAEINPROGRESS
+
     static int winsock_initted = 0;
 
     if(!winsock_initted) {
@@ -194,6 +199,7 @@ void open_connection (const char *name, const char *host, const char *port)
     /* strerror(3) */
     if ( ( he = gethostbyname (host) ) == NULL )
     {
+        popup_window("Host not found or host name not valid");
         return;
     }
 
@@ -208,12 +214,31 @@ void open_connection (const char *name, const char *host, const char *port)
     their_addr.sin_addr   = *((struct in_addr *)he->h_addr);
     bzero (&(their_addr.sin_zero), 8);
 
-    if (connect (sockfd, (struct sockaddr *)&their_addr,
-                 sizeof (struct sockaddr)) == -1 )
-    {
-        textfield_add (mud->text, strerror(errno), MESSAGE_ERR);
-        return;
+    ioctl(sockfd, FIONBIO, (char *)&onoff);
+    
+    while (connect (sockfd, (struct sockaddr *)&their_addr,
+                 sizeof (struct sockaddr)) == -1 ) {
+        if (errno == EINPROGRESS) {
+            if (retries++ < 100) {
+                textfield_add(mud->text, ".", MESSAGE_ANSI);
+                sleep(1);
+            }
+            else {
+                textfield_add(mud->text, "\nCONNECTION TIMEOUT\n.", MESSAGE_ERR);
+                close(sockfd);
+                return;
+            }
+        }
+        else {
+            textfield_add (mud->text, strerror(errno), MESSAGE_ERR);
+            close(sockfd);
+            return;
+        }
     }
+
+    onoff = 0;
+    
+    ioctl(sockfd, FIONBIO, (char *)&onoff);
 
     textfield_add (mud->text, "\n*** Connection established.\n", MESSAGE_NORMAL);
 
