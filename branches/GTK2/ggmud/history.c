@@ -129,9 +129,15 @@ gint change_focus(GtkWidget *w, GdkEventKey *event, gpointer data)
           else
               gtk_widget_show(mud->review);
       }
+     
+      if (gtk_widget_get_toplevel(mud->ent) !=
+          gtk_widget_get_toplevel(w)) {
+          // TODO
+          return 1;
+      }
       
-      gtk_widget_grab_focus (GTK_WIDGET(mud->ent));
       gtk_widget_grab_default (GTK_WIDGET(mud->ent));
+      gtk_widget_grab_focus (GTK_WIDGET(mud->ent));
 
       gtk_signal_emit_by_name(GTK_OBJECT(mud->ent), "key_press_event", event, data);
 

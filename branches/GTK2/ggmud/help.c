@@ -45,23 +45,50 @@ const char * ABOUT_MESSAGE = "\n\n Author:\n"
 
 
 /* Wizard txt */
-const char * WIZARD_MESSAGE = "TODO";
+const char * WIZARD_MESSAGE = 
+"The connection wizard let you save a list of the mud and the characters you have\n"
+"and let you login automatically on a particular mud with a particular character.\n";
 
 /* Macro txt */
-const char * MACROS_MESSAGE = "TODO";
+const char * MACROS_MESSAGE = 
+"Actually macros are shortcuts assigned to keys from F1 to F12, you can call them\n"
+"with a single keypress and this will not affect the contents of your input line.\n";
 
 
 /* Logger txt */
-const char * LOGGER_MESSAGE = "TODO";
+const char * LOGGER_MESSAGE = 
+"You have three ways of logging text in GGMud:\n\n"
+"- The input line command:\n"
+"  #log <filename>\n"
+"  ...see more info with #help log, it logs text with full ANSI codes.\n\n"
+"- The menu option Tools -> Logger.\n"
+"  This one strips ANSI codes from the text and let you choose\n"
+"  your output file in a file browser.\n\n"
+"- Configuring a HIGH number of lines in the review buffer and then saving\n"
+"  them with the menu option Options -> Save review.\n"
+"  This is the suggested method if you have a lot of memory since you don't\n"
+"  have to specify a filename in advance.\n";
 
 /* Logviewer txt */
-const char * LOGVIEWER_MESSAGE ="TODO";
+const char * LOGVIEWER_MESSAGE =
+"This tool is quite broken, it will be useful in the future to examine log\n"
+"files without having to use an external editor. For the moment just stick\n"
+"with your favorite text editor (PS: GVIM rulez :-0 )";
 
 /* Font txt */
-const char * FONT_MESSAGE = "TODO";
+const char * FONT_MESSAGE = 
+"You can select any font on your system, if you don't see the font you need in\n"
+"the font selection widget, maybe you need to modify your /etc/fonts/fonts.conf\n"
+"to be sure the path where the font is located it's listed.\n\n"
+"Use monospace fonts for better results.\n\n"
+"To change font use the Options -> Font menu (shortcut ALT+F).\n";
 
 /* Color txt */
-const char * COLOR_MESSAGE = "TODO";
+const char * COLOR_MESSAGE = 
+"GGMud by default uses the 16 colors ansi mode, it supports blinking text too.\n\n"
+"You can change any color with the Options -> Colors menu (shortcut ALT+C). \n"
+"To disable blinking if you don't like it or if it slow down the output untick\n"
+"Options -> Preferences -> Blinking.";
 
 void do_about (GtkWidget *widget, gpointer data)
 {
@@ -89,6 +116,7 @@ void do_about (GtkWidget *widget, gpointer data)
   gtk_frame_set_label_align (GTK_FRAME (frame), 0.03, 0.5);
 
   text_about = gtk_text_view_new ();
+  gtk_object_set_user_data(GTK_OBJECT(text_about), NULL), 
   gtk_widget_show (text_about);
   gtk_container_add (GTK_CONTAINER (frame), text_about);
 
@@ -146,9 +174,11 @@ void do_manual(GtkWidget *widget, gpointer data)
   GtkWidget *done_button;
   GtkTextView *oldtext = mud->text;
   GtkTextTag *oldcolor = prefs.DefaultColor;
-  
+  extern GtkTextTagTable *tag_table;
+ 
   prefs.DefaultColor = gtk_text_tag_new(NULL);
   g_object_set(prefs.DefaultColor, "foreground-gdk", &color_black, NULL);
+  gtk_text_tag_table_add(tag_table, prefs.DefaultColor);
  
   man_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_set_usize (man_window, 550, 550);
@@ -166,7 +196,8 @@ void do_manual(GtkWidget *widget, gpointer data)
   gtk_notebook_append_page(GTK_NOTEBOOK (notebook), scrolledwindow_contents, gtk_label_new ("Contents"));
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_contents), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-  text_contents = gtk_text_view_new ();
+  text_contents = gtk_text_view_new_with_buffer (gtk_text_buffer_new(tag_table));
+  gtk_object_set_user_data(GTK_OBJECT(text_contents), NULL), 
   gtk_widget_show (text_contents);
   gtk_container_add (GTK_CONTAINER (scrolledwindow_contents), text_contents);
   gtk_widget_realize (text_contents);
@@ -180,6 +211,7 @@ void do_manual(GtkWidget *widget, gpointer data)
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_wizard), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_wizard = gtk_text_view_new ();
+  gtk_object_set_user_data(GTK_OBJECT(text_wizard), NULL), 
   gtk_widget_show (text_wizard);
   gtk_container_add (GTK_CONTAINER (scrolledwindow_wizard), text_wizard);
   text_insert(text_wizard, WIZARD_MESSAGE);
@@ -190,6 +222,7 @@ void do_manual(GtkWidget *widget, gpointer data)
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_macros), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_macros = gtk_text_view_new ();
+  gtk_object_set_user_data(GTK_OBJECT(text_macros), NULL), 
   gtk_widget_show (text_macros);
   gtk_container_add (GTK_CONTAINER (scrolledwindow_macros), text_macros);
   text_insert(text_macros, MACROS_MESSAGE);
@@ -199,7 +232,9 @@ void do_manual(GtkWidget *widget, gpointer data)
   gtk_notebook_append_page(GTK_NOTEBOOK (notebook), scrolledwindow_alias, gtk_label_new ("Aliases"));
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_alias), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-  text_alias = gtk_text_view_new ();
+  text_alias = gtk_text_view_new_with_buffer (gtk_text_buffer_new(tag_table));
+  gtk_object_set_user_data(GTK_OBJECT(text_alias), NULL), 
+
   gtk_widget_show (text_alias);
   gtk_container_add (GTK_CONTAINER (scrolledwindow_alias), text_alias);
 
@@ -211,7 +246,8 @@ void do_manual(GtkWidget *widget, gpointer data)
   gtk_notebook_append_page(GTK_NOTEBOOK (notebook), scrolledwindow_triggers, gtk_label_new ("Triggers"));
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_triggers), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-  text_triggers = gtk_text_view_new ();
+  text_triggers = gtk_text_view_new_with_buffer (gtk_text_buffer_new(tag_table));
+  gtk_object_set_user_data(GTK_OBJECT(text_triggers), NULL), 
   gtk_widget_show (text_triggers);
   gtk_container_add (GTK_CONTAINER (scrolledwindow_triggers), text_triggers);
 
@@ -224,6 +260,7 @@ void do_manual(GtkWidget *widget, gpointer data)
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_logger), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_logger = gtk_text_view_new ();
+  gtk_object_set_user_data(GTK_OBJECT(text_logger), NULL), 
   gtk_widget_show (text_logger);
   gtk_container_add (GTK_CONTAINER (scrolledwindow_logger), text_logger);
   text_insert(text_logger, LOGGER_MESSAGE);
@@ -234,6 +271,7 @@ void do_manual(GtkWidget *widget, gpointer data)
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_logviewer), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_logviewer = gtk_text_view_new ();
+  gtk_object_set_user_data(GTK_OBJECT(text_logviewer), NULL), 
   gtk_widget_show (text_logviewer);
   gtk_container_add (GTK_CONTAINER (scrolledwindow_logviewer), text_logviewer);
   text_insert(text_logviewer, LOGVIEWER_MESSAGE);
@@ -244,6 +282,7 @@ void do_manual(GtkWidget *widget, gpointer data)
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_font), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_font = gtk_text_view_new ();
+  gtk_object_set_user_data(GTK_OBJECT(text_font), NULL), 
   gtk_widget_show (text_font);
   gtk_container_add (GTK_CONTAINER (scrolledwindow_font), text_font);
   text_insert(text_font, FONT_MESSAGE);
@@ -254,6 +293,7 @@ void do_manual(GtkWidget *widget, gpointer data)
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_color), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_color = gtk_text_view_new ();
+  gtk_object_set_user_data(GTK_OBJECT(text_color), NULL), 
   gtk_widget_show (text_color);
   gtk_container_add (GTK_CONTAINER (scrolledwindow_color), text_color);
   text_insert(text_color, COLOR_MESSAGE);
@@ -272,6 +312,7 @@ void do_manual(GtkWidget *widget, gpointer data)
   gtk_container_add (GTK_CONTAINER (hbuttonbox), done_button);
 
   gtk_widget_show (man_window);
+  gtk_text_tag_table_remove(tag_table, prefs.DefaultColor);
   g_object_unref(prefs.DefaultColor);
   mud->text = oldtext;
   prefs.DefaultColor = oldcolor;
