@@ -4,14 +4,12 @@ GtkWidget *menu_Tools_Variable;
 static GtkWidget *variable_window;
 static GtkWidget *textvariable;
 static GtkWidget *textvariablevalue;
-static int variable_selected_row;
-static int variable_selected_column;
+static int variable_selected_row = -1;
 
 #define VARIABLE_FILE "variable"
 
 #define VAR_LEN 56
 #define VALUE_LEN 200
-
 
 static void
 save_variables (GtkWidget *button, gpointer data) {
@@ -57,7 +55,6 @@ static void variable_selection_made (GtkWidget *clist, gint row, gint column,
     gchar *text;
     
     variable_selected_row    = row;
-    variable_selected_column = column;
 
     if ( (GtkCList*) data )
     {
@@ -66,8 +63,6 @@ static void variable_selection_made (GtkWidget *clist, gint row, gint column,
         gtk_clist_get_text ((GtkCList*) data, row, 1, &text);
         gtk_entry_set_text (GTK_ENTRY (textvariablevalue), text);
     }
-    
-    return;
 }
 
 static void  add_variable (char *alias, char *replacement)
@@ -78,6 +73,22 @@ static void  add_variable (char *alias, char *replacement)
 
     parse_input(buffer, mud->activesession);
 }
+
+void load_variables ()
+{
+    FILE *fp;
+    gchar line[VAR_LEN+VALUE_LEN+5];
+    gchar alias[VAR_LEN], replace[VALUE_LEN];
+    
+    if (fp = fileopen (VARIABLE_FILE, "r")) {
+    	while (fgets (line, sizeof(line) - 1, fp)) {
+            sscanf (line, "%s %[^\n]", alias, replace);
+            add_variable (alias, replace);
+        }
+        fclose (fp);
+    }    
+}
+
 
 static void variable_button_add (GtkWidget *button, gpointer data)
 {

@@ -106,6 +106,9 @@ extern gint statusbar_id;
 extern void  gags_window    (GtkWidget *widget, gpointer data);
 extern void  highlights_window    (GtkWidget *widget, gpointer data);
 extern void  variables_window    (GtkWidget *widget, gpointer data);
+extern void  load_aliases    ( void );
+extern void  load_variables    ( void );
+extern void  load_highlights    ( void );
 
 /* wiz.c */
 extern void  load_wizard        ( void );
@@ -132,7 +135,7 @@ extern void  window_macro    (GtkWidget *widget, gpointer data);
 
 
 /* win.c */
-extern GtkWidget *spawn_gui( void );
+extern void spawn_gui( void );
 extern void textfield_add(const char *, int);
 extern void textfield_freeze();
 extern void textfield_unfreeze();
@@ -179,6 +182,8 @@ extern GdkFont  *font_normal;
 void  load_prefs ( void );
 void  window_prefs ( GtkWidget *widget, gpointer data );
 void color_prefs (GtkWidget *widget, GtkWidget *dummy);
+void load_tt_prefs(void);
+void save_all_prefs(void);
 
 /* help.c */
 extern void do_about();

@@ -22,8 +22,25 @@
  * widgets.
  */
 
-#include "triggers.h"
+#include "ggmud.h"
 #include <string.h>
+
+typedef struct trigger_data TRIGGER_DATA;
+
+struct trigger_data {
+    TRIGGER_DATA *next;
+    gchar *trigger;
+};
+
+struct trig_d {
+    gchar *name;
+    gchar *tooltip;
+};
+
+struct trig_d trigger_desc[] = {
+    {"The Trigger", "This is the text that will cause the trigger to be activated.\n"
+      "NOTE: The trigger string is CaSe SeNsItIvE!"}
+};
 
 /* Global Variables */
 gint         trigger_selected_row;

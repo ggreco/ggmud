@@ -77,7 +77,7 @@ void load_aliases () {
     gchar alias[ALIAS_LEN], replace[REPL_LEN];
     
     if (fp = fileopen (ALIAS_FILE, "r")) {
-    	while (fgets (line, REPL_LEN+ALIAS_LEN+5, fp)) {
+    	while (fgets (line, sizeof(line) - 1, fp)) {
             sscanf (line, "%s %[^\n]", alias, replace);
             add_alias (alias, replace);
         }

@@ -148,18 +148,15 @@ void cbox()
     GtkWidget *button_cancel;
     
     con_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    gtk_object_set_data (GTK_OBJECT (con_window), "con_window", con_window);
     gtk_window_set_title (GTK_WINDOW (con_window), "GGMud Connection");
     gtk_window_set_policy (GTK_WINDOW (con_window), TRUE, TRUE, FALSE);
 
     table_main = gtk_table_new (2, 1, FALSE);
-    gtk_object_set_data (GTK_OBJECT (con_window), "table_main", table_main);
     gtk_widget_show (table_main);
     gtk_container_add (GTK_CONTAINER (con_window), table_main);
     gtk_container_set_border_width (GTK_CONTAINER (table_main), 3);
 
     frame = gtk_frame_new ("Connect To");
-    gtk_object_set_data (GTK_OBJECT (con_window), "frame", frame);
     gtk_widget_show (frame);
     gtk_table_attach (GTK_TABLE (table_main), frame, 0, 1, 0, 1,
                      (GtkAttachOptions) GTK_EXPAND | GTK_FILL, (GtkAttachOptions) GTK_EXPAND | GTK_FILL, 0, 0);
@@ -167,7 +164,6 @@ void cbox()
     gtk_frame_set_label_align (GTK_FRAME (frame), 0.03, 0.5);
 
     table_frame = gtk_table_new (2, 2, FALSE);
-    gtk_object_set_data (GTK_OBJECT (con_window), "table_frame", table_frame);
     gtk_widget_show (table_frame);
     gtk_container_add (GTK_CONTAINER (frame), table_frame);
     gtk_container_set_border_width (GTK_CONTAINER (table_frame), 5);
@@ -175,38 +171,32 @@ void cbox()
     gtk_table_set_col_spacings (GTK_TABLE (table_frame), 4);
 
     label_host = gtk_label_new ("Host");
-    gtk_object_set_data (GTK_OBJECT (con_window), "label_host", label_host);
     gtk_widget_show (label_host);
     gtk_table_attach (GTK_TABLE (table_frame), label_host, 0, 1, 0, 1,
                      (GtkAttachOptions) GTK_EXPAND | GTK_FILL, (GtkAttachOptions) GTK_EXPAND | GTK_FILL, 0, 0);
 
     label_port = gtk_label_new ("Port");
-    gtk_object_set_data (GTK_OBJECT (con_window), "label_port", label_port);
     gtk_widget_show (label_port);
     gtk_table_attach (GTK_TABLE (table_frame), label_port, 0, 1, 1, 2,
                      (GtkAttachOptions) GTK_EXPAND | GTK_FILL, (GtkAttachOptions) GTK_EXPAND | GTK_FILL, 0, 0);
 
     mud->portentry = gtk_entry_new ();
-    gtk_object_set_data (GTK_OBJECT (con_window), "mud->portentry", mud->portentry);
     gtk_widget_show (mud->portentry);
     gtk_table_attach (GTK_TABLE (table_frame), mud->portentry, 1, 2, 1, 2,
                     (GtkAttachOptions) GTK_EXPAND | GTK_FILL, (GtkAttachOptions) GTK_EXPAND | GTK_FILL, 0, 0);
 
     mud->hostentry = gtk_entry_new ();
-    gtk_object_set_data (GTK_OBJECT (con_window), "mud->hostentry", mud->hostentry);
     gtk_widget_show (mud->hostentry);
     gtk_table_attach (GTK_TABLE (table_frame), mud->hostentry, 1, 2, 0, 1,
                      (GtkAttachOptions) GTK_EXPAND | GTK_FILL, (GtkAttachOptions) GTK_EXPAND | GTK_FILL, 0, 0);
 
     table_button = gtk_table_new (1, 1, FALSE);
-    gtk_object_set_data (GTK_OBJECT (con_window), "table_button", table_button);
     gtk_widget_show (table_button);
     gtk_table_attach (GTK_TABLE (table_main), table_button, 0, 1, 1, 2,
                      (GtkAttachOptions) GTK_EXPAND | GTK_FILL, (GtkAttachOptions) GTK_EXPAND | GTK_FILL, 2, 0);
     gtk_container_set_border_width (GTK_CONTAINER (table_button), 4);
 
     hbuttonbox = gtk_hbutton_box_new ();
-    gtk_object_set_data (GTK_OBJECT (con_window), "hbuttonbox", hbuttonbox);
     gtk_widget_show (hbuttonbox);
     gtk_table_attach (GTK_TABLE (table_button), hbuttonbox, 0, 1, 0, 1,
                      (GtkAttachOptions) GTK_EXPAND | GTK_FILL, (GtkAttachOptions) GTK_EXPAND | GTK_FILL, 0, 0);
@@ -215,9 +205,8 @@ void cbox()
     gtk_button_box_set_child_size (GTK_BUTTON_BOX (hbuttonbox), 72, 25);
 
     button_connect = gtk_button_new_with_label ("Connect");
-    gtk_object_set_data (GTK_OBJECT (con_window), "button_connect", button_connect);
     gtk_signal_connect (GTK_OBJECT (button_connect), "clicked",
-                        GTK_SIGNAL_FUNC (do_con), &mud);
+                        GTK_SIGNAL_FUNC (do_con), mud);
     gtk_signal_connect (GTK_OBJECT (button_connect), "clicked",
                         GTK_SIGNAL_FUNC (close_window), con_window);
     gtk_widget_show (button_connect);
@@ -225,7 +214,6 @@ void cbox()
     gtk_container_border_width (GTK_CONTAINER (button_connect), 3);
 
     button_cancel = gtk_button_new_with_label ("Cancel");
-    gtk_object_set_data (GTK_OBJECT (con_window), "button_cancel", button_cancel);
     gtk_signal_connect (GTK_OBJECT(button_cancel), "clicked", 
                         GTK_SIGNAL_FUNC (close_window), con_window);
     gtk_widget_show (button_cancel);
@@ -264,11 +252,11 @@ void macro_btnLabel_change() {
 /*
  * This Function creates the main window
  */
-GtkWidget *spawn_gui()
+void
+spawn_gui()
 {
   gint i = 0;
   gint key = 0xFFBE; /* F1 key */
-  GtkWidget *window=mud->window;
   GtkWidget *vbox1;
   GtkWidget *menubar;
   GtkWidget *menu_File;
@@ -323,44 +311,38 @@ GtkWidget *spawn_gui()
   /*** ToolBar End ***/
 
   /* create the main window */
-  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_object_set_data (GTK_OBJECT (window), "window", window);
-  gtk_widget_set_usize (window, 695, 450);
-  gtk_container_border_width (GTK_CONTAINER (window), 3);
-  gtk_window_set_title (GTK_WINDOW (window), "GGMud "VERSION"");
-  gtk_window_set_policy (GTK_WINDOW (window), FALSE, TRUE, FALSE);
+  mud->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_widget_set_usize (mud->window, 695, 480);
+  gtk_container_border_width (GTK_CONTAINER (mud->window), 3);
+  gtk_window_set_title (GTK_WINDOW (mud->window), "GGMud "VERSION"");
+  gtk_window_set_policy (GTK_WINDOW (mud->window), FALSE, TRUE, FALSE);
 
   /* handlers so we can quit the close the app */
-  gtk_signal_connect (GTK_OBJECT (window), "delete_event", GTK_SIGNAL_FUNC (quit), NULL);
-  gtk_signal_connect (GTK_OBJECT (window), "destroy", GTK_SIGNAL_FUNC (quit), NULL);
+  gtk_signal_connect (GTK_OBJECT (mud->window), "delete_event", GTK_SIGNAL_FUNC (quit), NULL);
+  gtk_signal_connect (GTK_OBJECT (mud->window), "destroy", GTK_SIGNAL_FUNC (quit), NULL);
 
   /* create the accel_group for the keyboard bindings */
   accel_group = gtk_accel_group_new ();
-  gtk_window_add_accel_group (GTK_WINDOW (window), accel_group);
+  gtk_window_add_accel_group (GTK_WINDOW (mud->window), accel_group);
 
   vbox1 = gtk_vbox_new (FALSE, 0);
-  gtk_object_set_data (GTK_OBJECT (window), "vbox1", vbox1);
   gtk_widget_show (vbox1);
-  gtk_container_add (GTK_CONTAINER (window), vbox1);
+  gtk_container_add (GTK_CONTAINER (mud->window), vbox1);
 
   /* menu bar */
   menubar = gtk_menu_bar_new ();
-  gtk_object_set_data (GTK_OBJECT (window), "menubar", menubar);
   gtk_widget_show (menubar);
   gtk_box_pack_start (GTK_BOX (vbox1), menubar, FALSE, TRUE, 3);
 
   /* file menu */
   menu_File = gtk_menu_item_new_with_label ("File");
-  gtk_object_set_data (GTK_OBJECT (window), "menu_File", menu_File);
   gtk_widget_show (menu_File);
   gtk_container_add (GTK_CONTAINER (menubar), menu_File);
 
   menu_File_menu = gtk_menu_new ();
-  gtk_object_set_data (GTK_OBJECT (window), "menu_File_menu", menu_File_menu);
   gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_File), menu_File_menu);
 
   menu_File_Connection_Wizard = gtk_menu_item_new_with_label ("Connection Wizard");
-  gtk_object_set_data (GTK_OBJECT (window), "menu_File_Connection_Wizard", menu_File_Connection_Wizard);
   gtk_widget_show (menu_File_Connection_Wizard);
   gtk_container_add (GTK_CONTAINER (menu_File_menu), menu_File_Connection_Wizard);
   gtk_signal_connect (GTK_OBJECT (menu_File_Connection_Wizard), "activate",
@@ -370,7 +352,6 @@ GtkWidget *spawn_gui()
                               GDK_W, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
 
   separator1 = gtk_menu_item_new ();
-  gtk_object_set_data (GTK_OBJECT (window), "separator1", separator1);
   gtk_widget_show (separator1);
   gtk_container_add (GTK_CONTAINER (menu_File_menu), separator1);
 
@@ -433,7 +414,7 @@ GtkWidget *spawn_gui()
   gtk_widget_add_accelerator (menu_Options_Colors, "activate", accel_group,
                               GDK_O, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
 
-  menu_Options_Preference = gtk_menu_item_new_with_label ("Preferences");
+    menu_Options_Preference = gtk_menu_item_new_with_label ("Preferences");
   gtk_widget_show (menu_Options_Preference);
   gtk_container_add (GTK_CONTAINER (menu_Options_menu), menu_Options_Preference);
   gtk_signal_connect (GTK_OBJECT (menu_Options_Preference), "activate",
@@ -441,6 +422,25 @@ GtkWidget *spawn_gui()
                       NULL);
   gtk_widget_add_accelerator (menu_Options_Preference, "activate", accel_group,
                               GDK_P, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
+
+  separator2 = gtk_menu_item_new ();
+  gtk_widget_show (separator2);
+  gtk_container_add (GTK_CONTAINER (menu_Options_menu), separator2);
+
+  separator2 = gtk_menu_item_new_with_label ("Load TT++ command file...");
+  gtk_widget_show (separator2);
+  gtk_container_add (GTK_CONTAINER (menu_Options_menu), separator2);
+  gtk_signal_connect (GTK_OBJECT (separator2), "activate",
+                      GTK_SIGNAL_FUNC (load_tt_prefs),
+                      NULL);
+  separator2 = gtk_menu_item_new_with_label ("Save settings");
+  gtk_widget_show (separator2);
+  gtk_container_add (GTK_CONTAINER (menu_Options_menu), separator2);
+  gtk_signal_connect (GTK_OBJECT (separator2), "activate",
+                      GTK_SIGNAL_FUNC (save_all_prefs),
+                      NULL);
+
+  
 
   /* tools menu */
   menu_Tools = gtk_menu_item_new_with_label ("Tools");
@@ -512,7 +512,6 @@ GtkWidget *spawn_gui()
 
   menu_Tools_Logger = gtk_check_menu_item_new_with_label ("Logger");
   gtk_check_menu_item_set_show_toggle(GTK_CHECK_MENU_ITEM(menu_Tools_Logger), TRUE);
-  gtk_object_set_data (GTK_OBJECT (window), "menu_Tools_Logger", menu_Tools_Logger);
   gtk_widget_show (menu_Tools_Logger);
   gtk_container_add (GTK_CONTAINER (menu_Tools_menu), menu_Tools_Logger);
   gtk_signal_connect (GTK_OBJECT (menu_Tools_Logger), "activate",
@@ -522,7 +521,6 @@ GtkWidget *spawn_gui()
                               GDK_L, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
 
   menu_Tools_LogViewer = gtk_menu_item_new_with_label ("Log Viewer");
-  gtk_object_set_data (GTK_OBJECT (window), "menu_Tools_LogViewer", menu_Tools_LogViewer);
   gtk_widget_show (menu_Tools_LogViewer);
   gtk_container_add (GTK_CONTAINER (menu_Tools_menu), menu_Tools_LogViewer);
   gtk_signal_connect (GTK_OBJECT (menu_Tools_LogViewer), "activate",
@@ -533,17 +531,14 @@ GtkWidget *spawn_gui()
 
   /* help menu */
   menu_Help = gtk_menu_item_new_with_label ("Help");
-  gtk_object_set_data (GTK_OBJECT (window), "menu_Help", menu_Help);
   gtk_widget_show (menu_Help);
   gtk_container_add (GTK_CONTAINER (menubar), menu_Help);
   gtk_menu_item_right_justify (GTK_MENU_ITEM (menu_Help));
 
   menu_Help_menu = gtk_menu_new ();
-  gtk_object_set_data (GTK_OBJECT (window), "menu_Help_menu", menu_Help_menu);
   gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_Help), menu_Help_menu);
 
   menu_Help_Manual = gtk_menu_item_new_with_label ("Manual");
-  gtk_object_set_data (GTK_OBJECT (window), "menu_Help_Manual", menu_Help_Manual);
   gtk_widget_show (menu_Help_Manual);
   gtk_container_add (GTK_CONTAINER (menu_Help_menu), menu_Help_Manual);
   gtk_signal_connect (GTK_OBJECT (menu_Help_Manual), "activate",
@@ -553,12 +548,10 @@ GtkWidget *spawn_gui()
                               GDK_H, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
 
   separator3 = gtk_menu_item_new ();
-  gtk_object_set_data (GTK_OBJECT (window), "separator3", separator3);
   gtk_widget_show (separator3);
   gtk_container_add (GTK_CONTAINER (menu_Help_menu), separator3);
 
   menu_Help_About = gtk_menu_item_new_with_label ("About");
-  gtk_object_set_data (GTK_OBJECT (window), "menu_Help_About", menu_Help_About);
   gtk_widget_show (menu_Help_About);
   gtk_container_add (GTK_CONTAINER (menu_Help_menu), menu_Help_About);
   gtk_signal_connect (GTK_OBJECT (menu_Help_About), "activate",
@@ -570,7 +563,7 @@ GtkWidget *spawn_gui()
 /*** ToolBar ***/
   /* we need to realize the window because we use pixmaps for 
    * items on the toolbar in the context of it */
-  gtk_widget_realize ( window );
+  gtk_widget_realize ( mud->window );
 
   /* to make it nice we'll put the toolbar into the handle box, 
    * so that it can be detached from the main window */
@@ -589,7 +582,7 @@ GtkWidget *spawn_gui()
   /* our first item is <Connection Wizard> button */
   /* now we create icon with mask: we'll reuse it to create
    * icon widgets for toolbar items */
-  icon = gdk_pixmap_create_from_xpm_d ( window->window, &mask, &window->style->white, SC_wizard );
+  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_wizard );
   iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
   gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
 
@@ -603,7 +596,7 @@ GtkWidget *spawn_gui()
   gtk_toolbar_append_space ( GTK_TOOLBAR ( toolbar ) ); 			/* space after item */
 
   /* our next item is <Connect> button */
-  icon = gdk_pixmap_create_from_xpm_d ( window->window, &mask, &window->style->white, SC_connect );
+  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_connect );
   iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
   gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
   
@@ -616,7 +609,7 @@ GtkWidget *spawn_gui()
                                            NULL );
 
   /* our next item is <DisConnect> button */
-  icon = gdk_pixmap_create_from_xpm_d ( window->window, &mask, &window->style->white, SC_disconnect );
+  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_disconnect );
   iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
   btn_toolbar_disconnect = gtk_toolbar_append_item ( GTK_TOOLBAR (toolbar), 	/* our toolbar */
                                            NULL,               			/* button label */
@@ -628,7 +621,7 @@ GtkWidget *spawn_gui()
   gtk_toolbar_append_space ( GTK_TOOLBAR ( toolbar ) ); 			/* space after item */
 
   /* our next item is <Font> button */
-  icon = gdk_pixmap_create_from_xpm_d ( window->window, &mask, &window->style->white, SC_font );
+  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_font );
   iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
   gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
   
@@ -641,7 +634,7 @@ GtkWidget *spawn_gui()
                                            NULL );
 
   /* our next item is <Colors> button */
-  icon = gdk_pixmap_create_from_xpm_d ( window->window, &mask, &window->style->white, SC_colors );
+  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_colors );
   iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
   gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
 
@@ -654,7 +647,7 @@ GtkWidget *spawn_gui()
                                            NULL );
 
   /* our next item is <Preferences> button */
-  icon = gdk_pixmap_create_from_xpm_d ( window->window, &mask, &window->style->white, SC_prefs );
+  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_prefs );
   iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
   gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
 
@@ -668,7 +661,7 @@ GtkWidget *spawn_gui()
   gtk_toolbar_append_space ( GTK_TOOLBAR ( toolbar ) ); 			/* space after item */
 
   /* our next item is <Alias> button */
-  icon = gdk_pixmap_create_from_xpm_d ( window->window, &mask, &window->style->white, SC_alias );
+  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_alias );
   iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
   gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
 
@@ -681,7 +674,7 @@ GtkWidget *spawn_gui()
                                            NULL );
 
   /* our next item is <macros> button */
-  icon = gdk_pixmap_create_from_xpm_d ( window->window, &mask, &window->style->white, SC_macros );
+  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_macros );
   iconw = gtk_pixmap_new ( icon, mask );				 	/* icon widget */
   gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
 
@@ -694,7 +687,7 @@ GtkWidget *spawn_gui()
                                            NULL );
 
   /* our next item is <trigger> button */
-  icon = gdk_pixmap_create_from_xpm_d ( window->window, &mask, &window->style->white, SC_triggers );
+  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_triggers );
   iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
   gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
 
@@ -709,7 +702,7 @@ GtkWidget *spawn_gui()
   gtk_toolbar_append_space ( GTK_TOOLBAR ( toolbar ) ); 		    	/* space after item */
 
   /* our next item is <Logger> button */
-  icon = gdk_pixmap_create_from_xpm_d ( window->window, &mask, &window->style->white, SC_logger );
+  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_logger );
   iconw = gtk_pixmap_new ( icon, mask ); /* icon widget */
   gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
   
@@ -725,7 +718,7 @@ GtkWidget *spawn_gui()
   //gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tooltips_button), FALSE);
 
   /* our next item is <LogViewer> button */
-  icon = gdk_pixmap_create_from_xpm_d ( window->window, &mask, &window->style->white, SC_logviewer );
+  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_logviewer );
   iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
   gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
 
@@ -739,7 +732,7 @@ GtkWidget *spawn_gui()
   gtk_toolbar_append_space ( GTK_TOOLBAR ( toolbar ) );			 	/* space after item */
 
   /* our next item is <help> button */
-  icon = gdk_pixmap_create_from_xpm_d ( window->window, &mask, &window->style->white, SC_help );
+  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_help );
   iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
   gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
 
@@ -818,7 +811,6 @@ GtkWidget *spawn_gui()
   }
   /* just a empty label we use as a fillblock so it should look nice */
   fill_block2 = gtk_label_new ("");
-  gtk_object_set_data (GTK_OBJECT (window), "fill_block2", fill_block2);
   gtk_widget_show (fill_block2);
   gtk_box_pack_start (GTK_BOX (mud->macrobuttons), fill_block2, FALSE, TRUE, 0);
 
@@ -832,7 +824,6 @@ GtkWidget *spawn_gui()
 #endif
   
   hbox2 = gtk_hbox_new (FALSE, 0);
-  gtk_object_set_data (GTK_OBJECT (window), "hbox2", hbox2);
   gtk_widget_show (hbox2);
   gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, TRUE, 3);
 
@@ -849,7 +840,7 @@ GtkWidget *spawn_gui()
 
   
   // toggle triggers & parsing buttons
-  icon = gdk_pixmap_create_from_xpm_d ( window->window, &mask, &window->style->white, SC_triggers );
+  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_triggers );
   iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
   gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
   gtk_widget_show(iconw);
@@ -864,7 +855,7 @@ GtkWidget *spawn_gui()
                        GTK_SIGNAL_FUNC (toggle_triggers), NULL);
   gtk_box_pack_start (GTK_BOX (hbox2), toggle1, FALSE, FALSE, 4);
 
-  icon = gdk_pixmap_create_from_xpm_d ( window->window, &mask, &window->style->white, SC_parsing );
+  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_parsing );
   iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
   gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
   gtk_widget_show(iconw);
@@ -890,7 +881,6 @@ GtkWidget *spawn_gui()
   
   /* status bar wich can be used for displaying information */
   statusbar = gtk_statusbar_new ();
-  gtk_object_set_data (GTK_OBJECT (window), "statusbar", statusbar);
   gtk_box_pack_start (GTK_BOX (vbox1), statusbar, FALSE, TRUE, 0);
   gtk_container_border_width (GTK_CONTAINER (statusbar), 3);
 
@@ -903,7 +893,6 @@ GtkWidget *spawn_gui()
   gtk_statusbar_push (GTK_STATUSBAR(statusbar), statusbar_id, "Ready");
   macro_btnLabel_change();
 
-  return window;
 }
 
 static int scrolled_up;

@@ -168,7 +168,7 @@ int ttmain(int argc, char **argv)
   else {
 #ifndef WIN32
     sprintf(temp, "%s", homepath);
-    strcat(temp, "/.tintinrc");
+    strcat(temp, "/.ggmudrc");
 #else
     strcpy(temp, "./ggmud.cfg");
 #endif
@@ -180,7 +180,7 @@ int ttmain(int argc, char **argv)
       if((strptr = (char *)getenv("HOME"))) {
         sprintf(homepath, "%s", strptr);
         sprintf(temp, "%s", homepath);
-        strcat(temp, "/.tintinrc");
+        strcat(temp, "/.ggmudrc");
         if((fd = fopen(temp, "r")) > 0) { /* Check if it exists */
           fclose(fd);
           activesession = read_command(temp, NULL);

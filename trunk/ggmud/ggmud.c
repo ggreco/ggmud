@@ -140,7 +140,7 @@ int main(int argc, char **argv)
 
     /* Spawn the Graphical User Interface */
     load_macro();
-    mud->window = spawn_gui();
+    spawn_gui();
     init_colors();
     load_font();
     load_wizard();
@@ -159,6 +159,9 @@ int main(int argc, char **argv)
 
 // placed here since it needs the initializations of tt++.
     load_aliases();
+    load_variables();
+    load_highlights();
+    load_gags();
 
     gtk_main();
 	
