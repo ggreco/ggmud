@@ -239,6 +239,9 @@ void swap_blinks(void)
         return;
     
     if (blink == 0) {
+        if (!prefs.Blinking)
+            return;
+
         for (i = 0; i < 8; i++) {
             for (j = 0; j < 2; j++) {
                 g_object_set(blink_colors[j][i], "foreground-gdk", &prefs.BackgroundGdkColor, NULL);

@@ -200,13 +200,15 @@ void load_prefs ()
 //    prefs.DefaultColor = color_white;
 
     if (fp = fileopen(PREFS_FILE, "r")) {
-        prefs.KeepText = prefs.EchoText  = prefs.WordWrap = prefs.DoBeep = TRUE;
+        prefs.Blinking = prefs.KeepText = prefs.EchoText  = prefs.WordWrap = prefs.DoBeep = TRUE;
 
         while (fgets (line, sizeof(line) - 1, fp)) {
             sscanf (line, "%[^=]=%[^\n]", pref, value);
             if (!strcmp(value, "Off")) {
                 if (!strcmp (pref, "KeepText")) {
                     prefs.KeepText = FALSE;
+                } else if (!strcmp (pref, "Blinking")) {
+                    prefs.Blinking = FALSE;
                 } else if (!strcmp (pref, "EchoText")) {
                     prefs.EchoText = FALSE;
                 } else if (!strcmp (pref, "Wordwrap")) {
@@ -275,6 +277,7 @@ void save_prefs (GtkWidget *button, gpointer data)
         CFGW("KeepText", prefs.KeepText);
     	CFGW("EchoText", prefs.EchoText);
         CFGW("Wordwrap", prefs.WordWrap);
+        CFGW("Blinking", prefs.Blinking);
     	CFGW("Beep", prefs.DoBeep);
         CFGW("Toolbar", prefs.Toolbar);
         CFGW("Macrobuttons", prefs.Macrobuttons);
@@ -340,6 +343,14 @@ void check_wrap (GtkWidget *widget, GtkWidget *wrap_button)
         prefs.WordWrap = TRUE;
     else
         prefs.WordWrap = FALSE;
+}
+
+void check_blinking (GtkWidget *widget, GtkWidget *blinking_button)
+{
+    if ( GTK_TOGGLE_BUTTON (blinking_button)->active )
+        prefs.Blinking = TRUE;
+    else
+        prefs.Blinking = FALSE;
 }
 
 /* wordwrapper for the main textwindow */
@@ -604,6 +615,7 @@ void window_prefs (GtkWidget *widget, gpointer data)
   GtkWidget *frame_text;
   GtkWidget *frame_vbox_text;
   GtkWidget *checkbutton_wrap;
+  GtkWidget *checkbutton_blinking;
   GtkWidget *checkbutton_beep;
   GtkWidget *frame_misc, *frame_new;
   GtkWidget *frame_vbox_misc;
@@ -692,6 +704,17 @@ void window_prefs (GtkWidget *widget, gpointer data)
   gtk_widget_show (checkbutton_wrap);
   gtk_box_pack_start (GTK_BOX (frame_vbox_text), checkbutton_wrap, TRUE, TRUE, 0);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_wrap), prefs.WordWrap);
+
+  checkbutton_blinking = gtk_check_button_new_with_label ("Text blinking");
+  gtk_signal_connect (GTK_OBJECT (checkbutton_blinking), "toggled",
+                      GTK_SIGNAL_FUNC (check_blinking), checkbutton_blinking);
+
+  gtk_tooltips_set_tip (tooltip, checkbutton_blinking,
+                        "Enable/disable text blinking.",
+                        NULL);
+  gtk_widget_show (checkbutton_blinking);
+  gtk_box_pack_start (GTK_BOX (frame_vbox_text), checkbutton_blinking, TRUE, TRUE, 0);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_blinking), prefs.Blinking);
 
   checkbutton_beep = gtk_check_button_new_with_label ("Emit Beeps");
   gtk_signal_connect (GTK_OBJECT (checkbutton_beep), "toggled",
