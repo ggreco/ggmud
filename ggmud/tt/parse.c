@@ -519,6 +519,8 @@ struct session *parse_tintin_command(const char *command, char *arg,
   else if(is_abbrev(command, "unvariable"))
     unvar_command(arg, ses);
 
+  else if(is_abbrev(command, "window"))
+    window_command(arg, ses);
   else if(is_abbrev(command, "wizlist")) 
     wizlist_command(ses);
 

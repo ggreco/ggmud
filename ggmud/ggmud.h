@@ -138,7 +138,7 @@ extern void  window_macro    (GtkWidget *widget, gpointer data);
 
 /* win.c */
 extern void spawn_gui( void );
-extern void textfield_add(const char *, int);
+extern void textfield_add(GtkText *, const char *, int);
 extern void textfield_freeze();
 extern void textfield_unfreeze();
 extern void clear(int,GtkText *);
@@ -246,4 +246,6 @@ extern void AddButtonBar(GtkWidget *vbox, gpointer *data,
         GtkSignalFunc del_func,
         GtkSignalFunc save_func
         );
+
+extern char *ParseAnsiColors(char *);
 #endif /* _GGMUD_H_ */

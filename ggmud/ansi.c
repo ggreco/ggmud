@@ -471,3 +471,187 @@ void disp_ansi(int size, const char *in, GtkText *target)
 #endif
 }
 
+#define MOD_NORMAL	"0"
+#define MOD_BOLD	"1"
+#define MOD_FAINT	"2"
+#define MOD_UNDERLINE	"4"
+#define MOD_BLINK	"5"
+#define MOD_REVERSE	"7"
+
+#define FG_BLACK	"30"
+#define FG_RED		"31"
+#define FG_GREEN	"32"
+#define FG_BROWN	"33"
+#define FG_BLUE		"34"
+#define FG_MAGENTA	"35"
+#define FG_CYAN		"36"
+#define FG_LT_GRAY	"37"
+#define FG_DK_GRAY	"1;30"
+#define FG_LT_RED	"1;31"
+#define FG_LT_GREEN	"1;32"
+#define FG_YELLOW	"1;33"
+#define FG_LT_BLUE	"1;34"
+#define FG_LT_MAGENTA	"1;35"
+#define FG_LT_CYAN	"1;36"
+#define FG_WHITE	"1;37"
+
+#define BK_BLACK	"40"
+#define BK_RED		"41"
+#define BK_GREEN	"42"
+#define BK_BROWN	"43"
+#define BK_BLUE		"44"
+#define BK_MAGENTA	"45"
+#define BK_CYAN		"46"
+#define BK_LT_GRAY	"47"
+
+char *ansi_parse(char *code )
+{
+
+    /* FF: Cambiamo il sistema di costruzione delle stringhe ansi, in modo
+       da far funzionare anche i modi */
+
+    static char s[MAX_STRING_LENGTH]; /* increased from 255 to MAX 2-18 msw */
+    char m[128], b[128], f[128];
+
+    if (!code)
+        return(""); /* changed this from NULL to "" 2-18 msw */
+
+    /* do modifier */
+    switch(code[0]) {
+        case '0':sprintf(m,"%s",MOD_NORMAL);
+                 break;
+        case '1':sprintf(m,"%s",MOD_BOLD);
+                 break;
+        case '2':sprintf(m,"%s",MOD_FAINT);
+                 break;
+                 /* not used in ansi that I know of */
+        case '3':sprintf(m,"%s",MOD_NORMAL);
+                 break;
+        case '4':sprintf(m,"%s",MOD_UNDERLINE);
+                 break;
+        case '5': sprintf(m,"%s",MOD_BLINK);
+                  break;
+
+        case '6': sprintf(m,"%s",MOD_REVERSE);
+                  break;
+
+        default: sprintf(m,"%s",MOD_NORMAL);
+                 break;
+    }
+
+    /* do back ground color */
+    switch(code[1]) {
+        case '0': sprintf(b,"%s",BK_BLACK);
+                  break;
+        case '1': sprintf(b,"%s",BK_RED);
+                  break;
+        case '2': sprintf(b,"%s",BK_GREEN);
+                  break;
+        case '3': sprintf(b,"%s",BK_BROWN);
+                  break;
+        case '4': sprintf(b,"%s",BK_BLUE);
+                  break;
+        case '5': sprintf(b,"%s",BK_MAGENTA);
+                  break;
+        case '6': sprintf(b,"%s",BK_CYAN);
+                  break;
+        case '7': sprintf(b,"%s",BK_LT_GRAY);
+                  break;
+        default:sprintf(b,"%s",BK_BLACK);
+                break;
+    }
+
+    /* do foreground color */
+    switch(code[2]) {     
+        case '0':  	
+            switch(code[3]) {  		/* 00-09 */
+                case '0': sprintf(f,"%s",FG_BLACK);
+                          break;
+                case '1': sprintf(f,"%s",FG_RED);
+                          break;
+                case '2': sprintf(f,"%s",FG_GREEN);
+                          break;
+                case '3': sprintf(f,"%s",FG_BROWN);
+                          break;
+                case '4': sprintf(f,"%s",FG_BLUE);
+                          break;
+                case '5': sprintf(f,"%s",FG_MAGENTA);
+                          break;
+                case '6': sprintf(f,"%s",FG_CYAN);
+                          break;
+                case '7': sprintf(f,"%s",FG_LT_GRAY);
+                          break;
+                case '8': sprintf(f,"%s",FG_DK_GRAY);
+                          break;
+                case '9': sprintf(f,"%s",FG_LT_RED);
+                          break;
+                default: sprintf(f,"%s",FG_DK_GRAY);
+                         break;
+            } break;
+
+        case '1':  	
+            switch(code[3]) {  		/* 10-15 */
+                case '0': sprintf(f,"%s",FG_LT_GREEN);
+                          break;
+                case '1': sprintf(f,"%s",FG_YELLOW);
+                          break;
+                case '2': sprintf(f,"%s",FG_LT_BLUE);
+                          break;
+                case '3': sprintf(f,"%s",FG_LT_MAGENTA);
+                          break;
+                case '4': sprintf(f,"%s",FG_LT_CYAN);
+                          break;
+                case '5': sprintf(f,"%s",FG_WHITE);
+                          break;
+                default: sprintf(f,"%s",FG_LT_GREEN);
+                         break;
+            } break;
+
+        default : sprintf(f,"%s",FG_LT_RED);
+                  break;  				
+    }
+
+    sprintf( s, "\033[%s;%s;%sm", m,b,f );
+    return(s);
+}
+
+char *ParseAnsiColors( char *txt)
+{
+  static char buf[BUFFER_SIZE*2];
+  char tmp[256];
+  register int i,l,f=0;
+
+  *buf = 0;
+
+  for(i=0,l=0;*txt;) {
+    if(*txt=='$' && (toupper(*(txt+1)) == 'C' || 
+                    (*(txt+1)=='$' && toupper(*(txt+2)) == 'C'))) {
+      if(*(txt+1)=='$')
+        txt+=3;
+      else
+        txt+=2;
+      
+      strncpy(tmp,txt,4);
+      
+      tmp[4] = 0;
+      
+      strcat(buf,ansi_parse(tmp));
+      
+      txt+=4;
+      l=strlen(buf);
+      f++;
+    } /* LC: Usiamo il backslash come escape */
+	else if (*txt=='\\' && txt[1]) {
+		buf[l++]=*++txt;
+		++txt;
+	} else {
+      buf[l++]=*txt++;
+    }
+    buf[l]=0;
+  }
+  if(f)
+    strcat(buf,ansi_parse("0007"));
+ 
+  return buf;
+}
+

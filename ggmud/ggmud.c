@@ -86,9 +86,9 @@ int checktick(void)
                 if(mud->activesession && mud->activesession->tickstatus)
                 {
                     if (!ttt)
-                        textfield_add("#TICK!!!\n", MESSAGE_TICK);
+                        textfield_add(mud->text, "#TICK!!!\n", MESSAGE_TICK);
                     else if (show_pretick)
-                        textfield_add("#10 SECONDS TO TICK!!!\n", MESSAGE_TICK);
+                        textfield_add(mud->text, "#10 SECONDS TO TICK!!!\n", MESSAGE_TICK);
                     /*	    tintin_puts(!ttt ? "#TICK!!!" : "#10 SECONDS TO TICK!!!", s); */
                 }
         }
