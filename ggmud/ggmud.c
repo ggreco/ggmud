@@ -39,6 +39,18 @@ gchar **macro_list;
 gchar *keys[] = {"F1", "F2", "F3", "F4", "F5",
 	         "F6", "F7", "F8", "F9", "F10", "F11", "F12", NULL};
 
+gint        snoop_keys              (GtkWidget *grab_widget,
+                                             GdkEventKey *event,
+                                             ggmud *mud)
+{
+   if (event->type == GDK_KEY_PRESS &&
+       event->keyval >= GDK_F1 && event->keyval <= GDK_F12) {
+       macro_send(NULL , event->keyval - GDK_F1);
+       return TRUE;
+   }
+   else
+       return FALSE;
+}
 
 int main(int argc, char **argv)
 {
@@ -99,6 +111,7 @@ int main(int argc, char **argv)
     load_triggers();
     load_tabs();
 
+    gtk_key_snooper_install(snoop_keys, mud);
     gtk_main();
 	
     return 0;

@@ -1305,8 +1305,10 @@ spawn_gui()
       gtk_container_border_width (GTK_CONTAINER (macro_button), 3);
       gtk_signal_connect (GTK_OBJECT (macro_button), "clicked",
                           GTK_SIGNAL_FUNC (macro_send), (gpointer) i);
+#if 0      
       gtk_widget_add_accelerator (macro_button, "clicked", accel_group,
                                   key++, 0, 0 /*GTK_ACCEL_VISIBLE*/);
+#endif
       btnLabel[i] = gtk_label_new(macro_list[i]);
       gtk_container_add (GTK_CONTAINER(macro_button), btnLabel[i]);
       gtk_widget_show(btnLabel[i]);
@@ -1422,9 +1424,14 @@ void textfield_freeze()
 
 void textfield_unfreeze()
 {
+    GtkTextMark *mark = gtk_object_get_user_data(GTK_OBJECT(mud->text));
+    
+    if (!mark)
+        return;
+
     clear_backbuffer();
   
-    gtk_text_view_scroll_mark_onscreen(mud->text, gtk_object_get_user_data(GTK_OBJECT(mud->text)));
+    gtk_text_view_scroll_mark_onscreen(mud->text, mark);
 }
 
 void textfield_add(GtkTextView *txt, const char *message, int colortype)
@@ -1476,7 +1483,7 @@ void textfield_add(GtkTextView *txt, const char *message, int colortype)
     gtk_text_buffer_insert_with_tags(tbuf, &iter, message, -1, tag, NULL);
 
     if ((mark = gtk_object_get_user_data(GTK_OBJECT(txt))))
-        gtk_text_view_scroll_mark_onscreen(txt, gtk_object_get_user_data(GTK_OBJECT(txt)));
+        gtk_text_view_scroll_mark_onscreen(txt, mark);
 }
 
 
@@ -1562,6 +1569,8 @@ GtkWidget *create_tv(GtkTextBuffer *buffer, GtkTextView **view)
     if (font_normal)
         gtk_widget_modify_font((GtkWidget *)text, font_normal);
 
+    gtk_signal_connect(GTK_OBJECT(text),"key_press_event",GTK_SIGNAL_FUNC(change_focus), mud);
+
     return sw;
 }
 
@@ -1595,15 +1604,9 @@ GtkTextView *new_view(char *name, GtkWidget *parent, int ismain)
   gtk_paned_add1(GTK_PANED(paned), sw);
   
   gtk_paned_add2(GTK_PANED(paned), create_tv(buf, &t2));
-  gtk_signal_connect(GTK_OBJECT(t1),"key_press_event",GTK_SIGNAL_FUNC(change_focus), mud);
-  gtk_signal_connect(GTK_OBJECT(t2),"key_press_event",GTK_SIGNAL_FUNC(change_focus), mud);
 
-  if (ismain) {
+  if (ismain) 
     mud->review = sw;
-    gtk_text_view_set_wrap_mode((GtkTextView *)t2, 
-            prefs.WordWrap ? GTK_WRAP_CHAR : GTK_WRAP_NONE
-            );
-  }
   
   return (GtkTextView *)t2;
 }
