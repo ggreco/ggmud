@@ -1,0 +1,7 @@
+The Windows version of GGMud needs the GTK toolkit, if you don't have it
+you can download it from the GGMud project page: 
+
+http://sourceforge.net/projects/ggmud
+
+Place the libraries in the ggmud drawer.
+
