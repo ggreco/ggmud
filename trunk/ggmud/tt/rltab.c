@@ -61,23 +61,21 @@ static list_t *complist = 0;	/* tab completion list */
  * it returns a pointer to a match each time, and a
  * (char *) 0 pointer when it's done.
  */
-char *rltab_generate(const char *s, int state)
+char *tab_complete(const char *s, int state)
 {
   static list_t *p;
-  char *match;
-
+  int len = strlen(s);
+  
   if(!state) {
     if(!complist)
       return(0);
     p = complist->next;
   }
+  else p = p -> next;
 
   for(; p; p = p->next)
-    if(!strncasecmp(s, p->word, strlen(s))) {
-      match = mystrdup(p->word);
-      p = 0;                            /* Only want the first matching word */
-/*    p = p->next; */
-      return(match);
+    if(!strncasecmp(s, p->word, len)) {
+      return(p->word);
     }
   return(0);
 }
