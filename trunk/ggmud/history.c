@@ -74,9 +74,11 @@ static void hist_prev ()
 static void hist_next ()
 {
     if (mud->hist->cyclic == 1)
-        if(mud->hist->cur == mud->hist->pos)
+        if(mud->hist->cur == mud->hist->pos) { // it seems enough to have a line clear similar to zmud one
+            gtk_entry_set_text(mud->ent,"");
             return;
-
+        }
+    
     if (mud->hist->list[mud->hist->cur])
         free(mud->hist->list[mud->hist->cur]);
 
