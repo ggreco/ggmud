@@ -42,7 +42,7 @@ wildcard        wizlist          write
 writesession    zap              zombion            
 zombioff        helpversion      window
 verbosity       beep             help            
-togglesubs      substitute        
+togglesubs      substitute       wait  
 
 
 ~ALIAS
@@ -1384,5 +1384,20 @@ Example:
 #alias {mysanc} {#gettimer secs SANCTIMER;gt I have $secs seconds of sanc!}
 
 See also: TIMER, STOPTIMER
+
+~WAIT
+
+format: #wait msecs
+
+Waits for a specified number of milliseconds before performing an action.
+
+This command works asyncronously, soo you can use it to build very complex 
+triggers.
+
+Example:
+#alias {explore} {e;#wait 500;n;#wait 500;w;#wait 500;s;#wait 500;#say
+$c0015BACK TO START POSITION$c0007}
+
+This alias explore a 2x2 square section staying 500msec in every room.
 
 ~*EOF* 
