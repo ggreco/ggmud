@@ -26,7 +26,6 @@ extern int timeofday;
 extern char *rltab_generate(const char *s, int state);
 extern void rltab_delete(const char *word);
 extern void rltab_list(void);
-extern void rltab_read(void);
 extern void do_tabadd(const char *arg);
 extern void do_tabdel(const char *arg);
 extern void do_tabsave(void);

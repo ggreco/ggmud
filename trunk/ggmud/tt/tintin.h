@@ -208,6 +208,7 @@ This program is protected under the GNU GPL (See COPYING)
 *****************************************/
 #define BLOCK_SIZE 500
 
+extern void load_tabs(void);
 
 int timeofday;
 /************************ structures *********************/

@@ -393,7 +393,7 @@ struct session *parse_tintin_command(const char *command, char *arg,
     removestring_command(arg, ses);
 
   else if(is_abbrev(command, "retab"))
-    rltab_read();
+    load_tabs();
 
   else if(is_abbrev(command, "return"))
     return_command(ses);
