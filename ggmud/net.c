@@ -151,6 +151,7 @@ void disconnect ( void )
     gtk_widget_set_sensitive (menu_File_DisConnect, FALSE);
     gtk_widget_set_sensitive (btn_toolbar_disconnect, FALSE);
     gtk_window_set_title (GTK_WINDOW (mud->window), "GGMud "VERSION"");
+    mud->activesession = NULL;
 }
 
 void open_connection (const char *name, const char *host, const char *port)

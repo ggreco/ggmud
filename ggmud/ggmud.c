@@ -116,7 +116,6 @@ int main(int argc, char **argv)
     load_font();
     load_wizard();
     load_prefs();
-    load_aliases();
     load_triggers();
 
     hist_add(""); /* Needed to get rid of a blank line in history list */
@@ -130,6 +129,8 @@ int main(int argc, char **argv)
 
     ttmain(argc, argv);
 
+// placed here since it needs the initializations of tt++.
+    load_aliases();
 
     gtk_main();
 	
