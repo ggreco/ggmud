@@ -39,14 +39,6 @@ gchar **macro_list;
 gchar *keys[] = {"F1", "F2", "F3", "F4", "F5",
 	         "F6", "F7", "F8", "F9", "F10", "F11", "F12", NULL};
 
-void
-quitmsg(char *s)
-{
-    fputs(s,stderr);
-    
-    exit(0);
-}
-
 
 int main(int argc, char **argv)
 {
@@ -106,6 +98,7 @@ int main(int argc, char **argv)
     load_highlights();
     load_gags();
     load_triggers();
+    load_tabs();
 
     gtk_main();
 	

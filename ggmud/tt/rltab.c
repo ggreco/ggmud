@@ -23,6 +23,7 @@ This program is protected under the GNU GPL (See COPYING)
 
 /* all the tab completion support is here in this one file */
 
+
 #include "config.h"
 #include "tintin.h"
 
@@ -45,10 +46,14 @@ This program is protected under the GNU GPL (See COPYING)
 #include "include/rltab.h"
 #include "include/utils.h"
 
+#define COMPLETE_FILE "complete"
+
 typedef struct list_s {
   char *word;
   struct list_s *next;
 } list_t;
+
+extern FILE *fileopen (char *filename, char *mode);
 
 static list_t *complist = 0;	/* tab completion list */
 
@@ -182,13 +187,13 @@ static void rltab_purge(void)
 /* the #retab command */
 /**********************/
 
-void rltab_read(void)
+void load_tabs(void)
 {
   FILE *f;
   char *s, *t, line[128];
 
-  if(!(f = fopen("tab.txt", "r"))) {
-    tintin_puts("#Couldn't open tab.txt", 0);
+  if(!(f = fileopen(COMPLETE_FILE, "r"))) {
+    tintin_puts("#Couldn't open " COMPLETE_FILE, 0);
     return;
   }
 
@@ -204,7 +209,7 @@ void rltab_read(void)
     rltab_add(s);
   }
   fclose(f);
-  tintin_puts("#Read tab.txt, completion list initialized.", 0);
+//  tintin_puts("#Read , completion list initialized.", 0);
 }
 
 /***********************/
@@ -256,13 +261,13 @@ void do_tabsave(void)
     return;
   }
 
-  if(!(f = fopen("tab.txt", "w"))) {
-    tintin_puts("#Couldn't open tab.txt", 0);
+  if(!(f = fileopen(COMPLETE_FILE, "w"))) {
+    tintin_puts("#Couldn't open " COMPLETE_FILE, 0);
     return;
   }
 
   for(p = complist->next; p; p = p->next)
     fprintf(f, "%s\n", p->word);
   fclose(f);
-  tintin_puts("#Saved to tab.txt.", 0);
+//  tintin_puts("#Saved to ", 0);
 }

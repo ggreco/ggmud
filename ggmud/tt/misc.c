@@ -331,7 +331,7 @@ void end_command(const char *command, struct session *ses)
   if(strcmp(command, "end"))
     tintin_puts("#YOU HAVE TO WRITE #end - NO LESS, TO END!", ses);
   else
-    quitmsg(NULL);
+    exit(0);
 }
 
 /***********************/

@@ -96,16 +96,16 @@ void syserr(const char *msg)
 {
   extern int errno;
 
-  char s[128], *syserrmsg;
+  char *syserrmsg;
 
   syserrmsg = strerror(errno);
 
   if(syserrmsg)
-    sprintf(s, "ERROR: %s (%d: %s)", msg, errno, syserrmsg);
+    fprintf(stderr, "ERROR: %s (%d: %s)", msg, errno, syserrmsg);
   else
-    sprintf(s, "ERROR: %s (%d)", msg, errno);
+    fprintf(stderr, "ERROR: %s (%d)", msg, errno);
 
-  quitmsg(s);
+  exit(0);
 }
 
  /* Whoops, strcasecmp wasn't found. */
