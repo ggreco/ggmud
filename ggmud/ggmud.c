@@ -56,6 +56,7 @@ int main(int argc, char **argv)
 {
     char *display;
     extern int checktick(void);
+    extern void save_vars(void);
 
 #ifndef WIN32
     if(!(display = getenv("DISPLAY")) || !*display) {
@@ -90,6 +91,8 @@ int main(int argc, char **argv)
     spawn_gui();
     load_wizard();
 
+    atexit(save_vars);
+    
     hist_add(""); /* Needed to get rid of a blank line in history list */
 
     mud->curr_color=prefs.DefaultColor;

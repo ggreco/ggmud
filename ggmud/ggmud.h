@@ -81,6 +81,7 @@ struct prefs_data {
     GtkTextTag *DefaultColor; /* Red, Green, Blue */
     GdkColor BackgroundGdkColor; /* Red, Green, Blue */
     GdkColor DefaultGdkColor; /* Red, Green, Blue */
+    gint       SaveVars;
 };
 
 #define text_insert(w, text) gtk_text_buffer_set_text(gtk_text_view_get_buffer(GTK_TEXT_VIEW(w)), text, -1)
