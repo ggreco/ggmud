@@ -247,6 +247,7 @@ void load_prefs ()
                                 &(color_arr[i].color->red),
                                 &(color_arr[i].color->green),
                                 &(color_arr[i].color->blue));
+
                         if(!gdk_color_alloc(gdk_colormap_get_system(), color_arr[i].color)) {
                             g_error("Couldn't allocate background color - reverting to black\n");
                             color_arr[i].color->pixel = color_black.pixel;
@@ -254,6 +255,9 @@ void load_prefs ()
                             color_arr[i].color->green = color_black.green;
                             color_arr[i].color->blue = color_black.blue;
                         }
+
+                        update_color_tags(color_arr[i].color);
+                        
                         break;
                     }
                     i++;

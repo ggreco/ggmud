@@ -33,7 +33,7 @@ static GtkWidget *textalias;
 static GtkWidget *textreplace;
 static GtkWidget *textpri;
 static gint      trigger_selected_row    = -1;
-static GtkListStore *classes_store = NULL;
+static GList *classes_store = NULL;
 
 #define ALIAS_LEN 128
 #define REPL_LEN 512
@@ -213,7 +213,7 @@ static void trigger_selection_made (GtkCList *clist, gint row, gint column,
         gtk_clist_get_text (clist, row, 1, &text);
         gtk_entry_set_text (GTK_ENTRY (textreplace), text);
         gtk_clist_get_text (clist, row, 2, &text);
-        gtk_entry_set_text (GTK_ENTRY (textpri), text);
+        gtk_entry_set_text (GTK_ENTRY (GTK_COMBO(textpri)->entry), text);
     }
     
     return;
@@ -299,17 +299,18 @@ update_classes()
         insert_trigger_classes(GTK_CLIST(
                     gtk_object_get_user_data(GTK_OBJECT(class_window))));
 
-    if (!classes_store)
-        classes_store = gtk_list_store_new(1, G_TYPE_STRING);
-    else
-        gtk_list_store_clear(classes_store);
-
+    if (classes_store) {
+        g_list_free(classes_store);
+        classes_store = NULL;
+    }
+    
     while (cl) {
-        gtk_list_store_insert_before(classes_store, &it, NULL);
-        gtk_list_store_set(classes_store, &it, 0, cl->name, -1);
-
+        classes_store = g_list_append(classes_store, (void *)cl->name);
+        
         cl = cl->next;
     }
+
+    gtk_combo_set_popdown_strings (GTK_COMBO (textpri), classes_store);
 }
 
 static void add_trigger(const char *a, const char *b, const char *class)
@@ -329,7 +330,7 @@ static void trigger_button_add (GtkWidget *button, GtkCList *data)
 
     text[0]   = gtk_entry_get_text (GTK_ENTRY (textalias  ));
     text[1]   = gtk_entry_get_text (GTK_ENTRY (textreplace));
-    text[2]   = gtk_entry_get_text (GTK_ENTRY (textpri));
+    text[2]   = gtk_entry_get_text (GTK_ENTRY (GTK_COMBO(textpri)->entry));
     
     if ( text[0][0] == '\0' || text[1][0] == '\0' ) {
         popup_window ("Please complete the trigger first.");
@@ -539,14 +540,12 @@ void triggers_window(GtkWidget *widget, gpointer data)
                         GTK_FILL | GTK_EXPAND, /*GTK_FILL*/ 0L, 2, 2);
    
 
+    textpri = gtk_combo_new();
+
     update_classes();
     
-    but = gtk_combo_box_entry_new_with_model (GTK_TREE_MODEL(classes_store), 0);
-    
-    gtk_table_attach(GTK_TABLE(hbox3), but, 3, 4, 1, 2,
+    gtk_table_attach(GTK_TABLE(hbox3), textpri, 3, 4, 1, 2,
                         0L, /*GTK_FILL*/ 0L, 2, 2);
-
-    textpri = GTK_BIN(but)->child;
 
     AddButtonBar(vbox, (gpointer)clist,
             GTK_SIGNAL_FUNC(trigger_button_add),
