@@ -253,5 +253,9 @@ extern void AddButtonBar(GtkWidget *vbox, gpointer *data,
         GtkSignalFunc save_func
         );
 
+extern void AddSimpleBar(GtkWidget *vbox, gpointer *data,
+        GtkSignalFunc save_func, GtkSignalFunc close_func
+        );
+
 extern char *ParseAnsiColors(char *);
 #endif /* _GGMUD_H_ */

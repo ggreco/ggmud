@@ -110,6 +110,7 @@ GdkColor *orig_colors[2][8] =
 
 GtkTextTag *fg_colors[2][8];
 GtkTextTag *bg_colors[2][8];
+GtkTextTag *blink_colors[2][8];
 GtkTextTagTable *tag_table = NULL;
 
 /* from bezerk */
@@ -209,11 +210,14 @@ void init_colors ()
             for (j = 0; j < 2; j++) {
                 fg_colors[j][i] = gtk_text_tag_new(NULL);
                 g_object_set(fg_colors[j][i], "foreground-gdk", orig_colors[j][i], NULL);
+                blink_colors[j][i] = gtk_text_tag_new(NULL);
+                g_object_set(blink_colors[j][i], "foreground-gdk", orig_colors[j][i], NULL);
                 bg_colors[j][i] = gtk_text_tag_new(NULL);            
                 g_object_set(bg_colors[j][i], "background-gdk", orig_colors[j][i], NULL);
 
                 gtk_text_tag_table_add(tag_table, fg_colors[j][i]);
                 gtk_text_tag_table_add(tag_table, bg_colors[j][i]);
+                gtk_text_tag_table_add(tag_table, blink_colors[j][i]);
             }
         }
         fg_col = prefs.DefaultColor = gtk_text_tag_new(NULL);
@@ -224,6 +228,29 @@ void init_colors ()
         gtk_text_tag_table_add(tag_table, bg_col);
         gtk_text_tag_table_add(tag_table, fg_col);
     }
+}
+
+void swap_blinks(void)
+{
+    static int blink = 0;
+    int i,j;
+    
+    if (blink == 0) {
+        for (i = 0; i < 8; i++) {
+            for (j = 0; j < 2; j++) {
+                g_object_set(blink_colors[j][i], "foreground-gdk", &prefs.BackgroundGdkColor, NULL);
+            }
+        }
+    }
+    else {
+        for (i = 0; i < 8; i++) {
+            for (j = 0; j < 2; j++) {
+                g_object_set(blink_colors[j][i], "foreground-gdk", orig_colors[j][i], NULL);
+            }
+        }        
+    }
+    
+    blink ^= 1;
 }
 
 void update_color_tags(GdkColor *color)
@@ -338,14 +365,18 @@ parse6chars:
 // with 11 chars ansi codes
         case 11:
                 if (tmp[3] == '4') {
-                    if(tmp[1] == '1' && tmp[4] == '0') // lasciamo lo sfondo nero
+                    if( (tmp[1] == '1' || tmp[1] == '5') && 
+                            tmp[4] == '0') // lasciamo lo sfondo nero
                         bg_col = bg_colors[0][0]; // black;
                     else {
                         bg_col = bg_colors[get_first(tmp[1])][get_second(tmp[4])];
                     }
                 }
                 if (tmp[8] == '3') {
-                    fg_col = fg_colors[get_first(tmp[6])][get_second(tmp[9])];
+                    if (tmp[1] == '5')
+                        fg_col = blink_colors[get_first(tmp[6])][get_second(tmp[9])];
+                    else
+                        fg_col = fg_colors[get_first(tmp[6])][get_second(tmp[9])];
                 }
                 return;
         case 9:
