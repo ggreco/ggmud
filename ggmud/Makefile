@@ -8,6 +8,7 @@ INCDIR = -Itt
 COMMONLIBS = -Ltt -ltt
 CFLAGS = $(INCDIR) `gtk-config --cflags` $(GLOBAL_CFLAGS)
 LIBS = $(COMMONLIBS) `gtk-config --libs`
+VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )
 
 export GLOBAL_CFLAGS
 
@@ -68,13 +69,13 @@ clean:
 dist: dist-osx dist-linux dist-win32
     
 dist-osx: ggmud
-	tar czf ggmud-osx.tgz ggmud gg_help.txt README README.OSX
+	tar czf ../ggmud-osx-$(VERSION).tgz ggmud gg_help.txt README README.OSX
 
-dist-linux: ggmud.exe ggmud
-	tar czf ggmud-linux.tgz ggmud gg_help.txt README
+dist-linux: ggmud
+	tar czf ../ggmud-linux-$(VERSION).tgz ggmud gg_help.txt README
 
-dist-win32: ggmud.exe ggmud
-	zip -9 ggmud-win32.zip ggmud.exe gg_help.txt README README.W32
+dist-win32: ggmud.exe
+	zip -9 ../ggmud-win32-$(VERSION).zip ggmud.exe gg_help.txt README README.W32
 
 depend:	$(C_SRCS) *.h
 	for i in $(C_SRCS); do \
