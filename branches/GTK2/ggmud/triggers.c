@@ -30,7 +30,6 @@
 static GtkWidget *textalias;
 static GtkWidget *textreplace;
 static GtkWidget *textpri;
-static GtkWidget *trig_window;
 static gint      trigger_selected_row    = -1;
 
 #define ALIAS_LEN 128
@@ -79,13 +78,21 @@ void load_triggers()
     }
 }
 
+GdkPixmap *enabled_pixmap = NULL, *disabled_pixmap = NULL;
+GdkBitmap *enabled_mask = NULL, *disabled_mask = NULL;
+
+extern void setup_pixmaps();
+
+
 #include "include/llist.h"
 
 static void  insert_triggers  (GtkCList *clist)
 {
     extern struct listnode *common_actions;
-    gchar *text[3];
+    gchar *text[4];
     struct listnode *list = mud->activesession ? mud->activesession->actions : common_actions;
+    if (!enabled_pixmap)
+        setup_pixmaps();
 
     gtk_clist_clear (clist);
 
@@ -95,10 +102,71 @@ static void  insert_triggers  (GtkCList *clist)
         text[0] = list->left;
         text[1] = list->right;
         text[2] = list->pr;
+        text[3] = "";
         gtk_clist_prepend (clist, text);
+
+        if (list->enabled)
+            gtk_clist_set_pixmap(clist, 0, 3, enabled_pixmap, enabled_mask);
+        else
+            gtk_clist_set_pixmap(clist, 0, 3, disabled_pixmap, disabled_mask);
+
     }
 
     gtk_clist_thaw(clist);
+}
+
+static void save_triggerclass_state(void)
+{
+}
+
+static void insert_trigger_classes(GtkCList *clist)
+{
+    const char *text[2];
+    extern trigger_class *trigger_classes;
+    trigger_class *cl = trigger_classes;
+    int row;
+   
+    if (!enabled_pixmap)
+        setup_pixmaps();
+
+    gtk_clist_clear (clist);
+
+    gtk_clist_freeze(clist);
+
+    while (cl) {
+        text[0] = cl->name;
+        text[1] = "";
+        row = gtk_clist_append(clist, (gchar **)text);
+
+        if (cl->enabled)
+            gtk_clist_set_pixmap(clist, row, 1, enabled_pixmap, enabled_mask);
+        else
+            gtk_clist_set_pixmap(clist, row, 1, disabled_pixmap, disabled_mask);
+            
+        cl = cl->next;
+    }
+
+    gtk_clist_thaw(clist);
+}
+static void trigger_class_toggle (GtkCList *clist, gint row, gint column,
+                           GdkEventButton *event, gpointer data)
+{
+    GdkPixmap *pixmap;
+    GdkBitmap *mask;
+    gchar *text;
+    char buffer[1024];
+    
+    gtk_clist_get_text (clist, row, 0, &text);
+    gtk_clist_get_pixmap(clist, row, 1, &pixmap, &mask);
+            
+    if (pixmap == disabled_pixmap)
+        sprintf(buffer, "#action +%s", text);
+    else
+        sprintf(buffer, "#action -%s", text);
+
+    parse_input(buffer, NULL);
+
+    insert_trigger_classes(clist);
 }
 
 static void trigger_selection_made (GtkWidget *clist, gint row, gint column,
@@ -123,7 +191,66 @@ static void trigger_selection_made (GtkWidget *clist, gint row, gint column,
 
 void triggerclass_window(GtkWidget *widget, gpointer data )
 {
-    // TODO
+    GtkWidget *window;
+    GtkWidget *vbox;
+    GtkWidget *clist;
+    GtkWidget *label;
+//    GtkTooltips *tooltip;
+    GtkWidget *scrolled_window;
+
+    gchar     *titles[2] = { "Trigger class", "State"};
+
+//    tooltip = gtk_tooltips_new ();
+//    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
+
+
+    window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title (GTK_WINDOW (window), "Trigger Classes");
+    gtk_signal_connect (GTK_OBJECT (window), "destroy",
+                               GTK_SIGNAL_FUNC(close_window), window );
+    
+    gtk_widget_set_usize (window, 400, 350);			       
+    vbox = gtk_vbox_new (FALSE, 5);
+    gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
+    gtk_container_add (GTK_CONTAINER (window), vbox);
+    gtk_widget_show (vbox);
+
+    /* create a new scrolled window. */
+    scrolled_window = gtk_scrolled_window_new (NULL, NULL);
+    gtk_container_set_border_width (GTK_CONTAINER (scrolled_window), 0);
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_window),
+                                    GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+    gtk_box_pack_start (GTK_BOX (vbox), scrolled_window, TRUE, TRUE, 0);
+    gtk_widget_show (scrolled_window);
+
+    clist = gtk_clist_new_with_titles (2, titles);
+    gtk_signal_connect_object (GTK_OBJECT (clist), "select_row",
+                               GTK_SIGNAL_FUNC (trigger_class_toggle),
+                               (gpointer) clist);
+    gtk_clist_column_titles_passive (GTK_CLIST (clist));
+    gtk_clist_set_shadow_type (GTK_CLIST (clist), GTK_SHADOW_IN);
+    gtk_clist_set_column_width (GTK_CLIST (clist), 0, 250);
+    gtk_clist_set_column_width (GTK_CLIST (clist), 1, 50);
+    gtk_clist_set_column_justification (GTK_CLIST (clist), 0, GTK_JUSTIFY_LEFT);
+    gtk_clist_set_column_justification (GTK_CLIST (clist), 1, GTK_JUSTIFY_LEFT);
+
+    gtk_clist_column_titles_show (GTK_CLIST (clist));
+
+    gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (scrolled_window), clist);
+
+    gtk_widget_show (clist);
+
+    label = gtk_label_new(" Click on a row to enable/disable a trigger class it lists. ");
+    gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
+    gtk_widget_show (label);
+
+
+    AddSimpleBar(vbox, (gpointer)clist,
+            GTK_SIGNAL_FUNC(save_triggerclass_state),
+            GTK_SIGNAL_FUNC(close_window));
+
+    insert_trigger_classes  (GTK_CLIST(clist)  );
+    gtk_widget_show (window );
 }
 
 static void add_trigger(const char *a, const char *b, const char *class)
@@ -189,24 +316,19 @@ static void trigger_button_delete (GtkWidget *button, gpointer data) {
 
 void triggers_window(GtkWidget *widget, gpointer data)
 {
-    GtkWidget *temp;
     GtkWidget *vbox;
     GtkWidget *hbox;
     GtkWidget *hbox2;
     GtkWidget *hbox3;
     GtkWidget *clist;
-    GtkWidget *button_add;
-    GtkWidget *button_quit;
-    GtkWidget *button_delete;
-    GtkWidget *button_save;
     GtkWidget *label;
-    GtkWidget *separator;
-    GtkTooltips *tooltip;
+//    GtkTooltips *tooltip;
     GtkWidget *scrolled_window;
+    GtkWidget *trig_window;
 
-    gchar     *titles[3] = { "Trigger string", "Commands", "Class" };
+    gchar     *titles[4] = { "Trigger string", "Commands", "Class", "State" };
 
-    tooltip = gtk_tooltips_new ();
+//    tooltip = gtk_tooltips_new ();
 //    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
 
 
@@ -228,15 +350,16 @@ void triggers_window(GtkWidget *widget, gpointer data)
     gtk_box_pack_start (GTK_BOX (vbox), scrolled_window, TRUE, TRUE, 0);
     gtk_widget_show (scrolled_window);
 
-    clist = gtk_clist_new_with_titles (3, titles);
+    clist = gtk_clist_new_with_titles (4, titles);
     gtk_signal_connect_object (GTK_OBJECT (clist), "select_row",
                                GTK_SIGNAL_FUNC (trigger_selection_made),
                                (gpointer) clist);
     gtk_clist_column_titles_passive (GTK_CLIST (clist));
     gtk_clist_set_shadow_type (GTK_CLIST (clist), GTK_SHADOW_IN);
-    gtk_clist_set_column_width (GTK_CLIST (clist), 0, 220);
+    gtk_clist_set_column_width (GTK_CLIST (clist), 0, 200);
     gtk_clist_set_column_width (GTK_CLIST (clist), 1, 360);
-    gtk_clist_set_column_width (GTK_CLIST (clist), 2, 40);
+    gtk_clist_set_column_width (GTK_CLIST (clist), 2, 80);
+    gtk_clist_set_column_width (GTK_CLIST (clist), 3, 40);
     gtk_clist_set_column_justification (GTK_CLIST (clist), 0, GTK_JUSTIFY_LEFT);
     gtk_clist_set_column_justification (GTK_CLIST (clist), 1, GTK_JUSTIFY_LEFT);
 

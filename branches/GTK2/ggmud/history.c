@@ -119,18 +119,18 @@ gint change_focus(GtkWidget *w, GdkEventKey *event, gpointer data)
       if(event->keyval == GDK_c ||
          event->keyval == GDK_C ) {
 //        textfield_add(mud->text, "Grabbato ctrl+c\n", MESSAGE_NORMAL);
-        gtk_editable_copy_clipboard(GTK_EDITABLE(w)); // it was mud->text
+//        gtk_editable_copy_clipboard(GTK_EDITABLE(w)); // it was mud->text
+      
+        gtk_text_buffer_copy_clipboard(gtk_text_view_get_buffer(GTK_TEXT_VIEW(w)),
+                gtk_clipboard_get(gdk_atom_intern("CLIPBOARD", TRUE)));
       }
       return 0;
   } else {
       if (event->keyval == GDK_Tab) {
-          if (GTK_WIDGET_VISIBLE(mud->review))
-              gtk_widget_hide(mud->review);
-          else
-              gtk_widget_show(mud->review);
+          toggle_review();
       }
      
-      if (gtk_widget_get_toplevel(mud->ent) !=
+      if (gtk_widget_get_toplevel((GtkWidget *)mud->ent) !=
           gtk_widget_get_toplevel(w)) {
           // TODO
           return 1;
