@@ -195,7 +195,7 @@ void window_alias (GtkWidget *widget, gpointer data)
     gchar     *titles[2] = { "Alias", "Replacement" };
 
     tooltip = gtk_tooltips_new ();
-    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
+//    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
 
 
     alias_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);

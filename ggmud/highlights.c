@@ -316,7 +316,7 @@ void highlights_window (GtkWidget *widget, gpointer data)
     gchar     *titles[3] = { "Highlight", "Background/Effect", "Foreground" };
 
     tooltip = gtk_tooltips_new ();
-    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
+//    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
 
 
     high_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
