@@ -124,9 +124,20 @@ GtkWidget *create_new_window(char *title, int width, int height)
 void
 input_line_visible(int state)
 {
-    if(state == FALSE) {
-        gtk_entry_set_text(mud->ent, "");
+    if (state == hide_input) {
+       char *temp = gtk_entry_get_text(mud->ent);
+       int pos = mud->hist->pos;
+       
+       pos--;
 
+       if(pos < 0)
+           pos = mud->hist->size - 1;
+
+       if(!strcmp(temp, mud->hist->list[pos])) 
+           gtk_entry_set_text(mud->ent, "");
+    }
+    
+    if(state == FALSE) {
         hide_input = TRUE;
     }
     else
@@ -281,6 +292,59 @@ void clr_command(char *arg, struct session *s)
         else
             clear_text_widget(GTK_TEXT(entry->listptr));
     }
+}
+
+
+void
+review_ok(GtkWidget *w, GtkFileSelection *fs)
+{
+    int len = gtk_text_get_length(mud->text);
+    char *buffer = gtk_editable_get_chars(GTK_EDITABLE(mud->text), 0, len);
+    FILE *f;
+    
+    if( f = fopen(gtk_file_selection_get_filename(fs), "w") ) {
+        if (buffer) {
+            fwrite(buffer, 1, len, f);
+            g_free(buffer);
+        }
+        else
+            popup_window("Unable to lock review buffer!");
+        
+        fclose(f);
+    }
+    else {
+        char temp[100];
+
+        sprintf(temp, "Unable to open %s for reading.", 
+                gtk_file_selection_get_filename(fs));
+
+        popup_window(temp);
+    }
+
+    gtk_widget_destroy(GTK_WIDGET(fs));
+}
+
+void
+save_review(void)
+{
+    GtkWidget *filew = gtk_file_selection_new ("Save Log file as");
+
+    gtk_signal_connect (GTK_OBJECT (filew), "destroy",
+            (GtkSignalFunc) gtk_widget_destroy, filew);
+
+    /* Connect the ok_button to file_ok_sel function */
+    gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (filew)->ok_button),
+            "clicked", (GtkSignalFunc) review_ok, filew );
+
+    /* Connect the cancel_button to destroy the widget */
+    gtk_signal_connect_object (GTK_OBJECT (GTK_FILE_SELECTION (filew)->cancel_button),
+            "clicked", (GtkSignalFunc) gtk_widget_destroy,
+            GTK_OBJECT (filew));
+
+    /* Hide the file managment buttons */
+    gtk_file_selection_hide_fileop_buttons(GTK_FILE_SELECTION (filew));
+
+    gtk_widget_show(filew);
 }
 
 void mess_command(char *arg, struct session *s)
@@ -827,6 +891,15 @@ spawn_gui()
   gtk_container_add (GTK_CONTAINER (menu_Options_menu), separator2);
   gtk_signal_connect (GTK_OBJECT (separator2), "activate",
                       GTK_SIGNAL_FUNC (save_all_prefs),
+                      NULL);
+  separator2 = gtk_menu_item_new ();
+  gtk_widget_show (separator2);
+  gtk_container_add (GTK_CONTAINER (menu_Options_menu), separator2);
+  separator2 = gtk_menu_item_new_with_label ("Save review buffer...");
+  gtk_widget_show (separator2);
+  gtk_container_add (GTK_CONTAINER (menu_Options_menu), separator2);
+  gtk_signal_connect (GTK_OBJECT (separator2), "activate",
+                      GTK_SIGNAL_FUNC (save_review),
                       NULL);
 
   

@@ -23,7 +23,9 @@
 
 void hist_add (char *x)
 {
-    if (mud->hist->max < 1)
+    extern int hide_input;
+
+    if (mud->hist->max < 1 || hide_input)
         return;
 
 
@@ -115,7 +117,7 @@ gint change_focus(GtkWidget *w, GdkEventKey *event, gpointer data)
       if(event->keyval == GDK_c ||
          event->keyval == GDK_C ) {
 //        textfield_add(mud->text, "Grabbato ctrl+c\n", MESSAGE_NORMAL);
-        gtk_editable_copy_clipboard(GTK_EDITABLE(mud->text));
+        gtk_editable_copy_clipboard(GTK_EDITABLE(w)); // it was mud->text
       }
       return 0;
   } else {
