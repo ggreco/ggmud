@@ -149,8 +149,8 @@ void make_connection (char *name, char *host, char *port)
 
 void disconnect ( void )
 {
-    cleanup_session(mud->activesession);
     gdk_input_remove (mud->input_monitor);
+    gtk_main_iteration(); // to ensure the input is removed
     textfield_add ( "\n*** Connection closed.\n", MESSAGE_NORMAL);
     connected = FALSE;
     gtk_widget_set_sensitive (menu_File_Connect, TRUE);
@@ -158,6 +158,7 @@ void disconnect ( void )
     gtk_widget_set_sensitive (menu_File_DisConnect, FALSE);
     gtk_widget_set_sensitive (btn_toolbar_disconnect, FALSE);
     gtk_window_set_title (GTK_WINDOW (mud->window), "GGMud "VERSION"");
+    cleanup_session(mud->activesession);
     mud->activesession = NULL;
 }
 
@@ -313,7 +314,7 @@ static void readmud(struct session *s)
             if(*next_line == '\r')			/* ignore \r's */
                 next_line++;
         }
-        sprintf(linebuf, "%s", line);
+        strcpy(linebuf, line);
         do_one_line(linebuf, s);		/* changes linebuf */
 
         /* added by DasI */
