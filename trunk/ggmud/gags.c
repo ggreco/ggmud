@@ -12,7 +12,7 @@ save_gags (GtkWidget *button, gpointer data) {
     gchar *gag;
     gint  row = 0;
 
-    if (fp = fileopen (GAG_FILE, "w")) {
+    if ((fp = fileopen (GAG_FILE, "w"))) {
     	while ( !done && (GtkCList*) data) {
             if ( !gtk_clist_get_text ((GtkCList*) data, row, 0, &gag))
                 break;
@@ -63,7 +63,7 @@ insert_gags  (GtkCList *clist)
     gtk_clist_clear(clist);
     gtk_clist_freeze(clist);
  
-    while ( list = list->next ) {
+    while ( (list = list->next) ) {
         text[0] = list->left;
         gtk_clist_prepend (GTK_CLIST (clist), text);
     }
@@ -134,12 +134,8 @@ void
 gags_window(GtkWidget *w, gpointer data)
 {
     GtkWidget *vbox;
-    GtkWidget *hbox;
-    GtkWidget *hbox2;
     GtkWidget *hbox3;
     GtkWidget *clist;
-    GtkWidget *label;
-    GtkWidget *separator;
     GtkTooltips *tooltip;
     GtkWidget *scrolled_window;
 

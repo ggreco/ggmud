@@ -41,6 +41,7 @@
 typedef struct {
     GdkColor *color;
     gchar *name;
+    GtkWidget *widget;
 } color_struct;
 
 extern GtkWidget *handlebox;
@@ -74,24 +75,24 @@ static GtkWidget *entry_ReviewSize;
 #endif
 
 color_struct color_arr[] = {
-      {&color_white, "white"},
-      {&color_lightwhite, "light white"},
-      {&color_blue, "blue"},
-      {&color_lightblue, "light blue"},
-      {&color_red, "red"},
-      {&color_lightred, "light red"},
-      {&color_green, "green"},
-      {&color_lightgreen, "light green"},
-      {&color_yellow, "yellow"},
-      {&color_lightyellow, "light yellow"},
-      {&color_cyan, "cyan"},
-      {&color_lightcyan, "light cyan"},
-      {&color_magenta, "magenta"},
-      {&color_lightmagenta, "light magenta"},
-      {&color_black, "black"},
-      {&color_lightblack, "light black"},
-      {&prefs.BackgroundColor, "background color"},
-      {&prefs.DefaultColor, "default color"},      
+      {&color_white, "white", NULL},
+      {&color_lightwhite, "light white", NULL},
+      {&color_blue, "blue", NULL},
+      {&color_lightblue, "light blue", NULL},
+      {&color_red, "red", NULL},
+      {&color_lightred, "light red", NULL},
+      {&color_green, "green", NULL},
+      {&color_lightgreen, "light green", NULL},
+      {&color_yellow, "yellow", NULL},
+      {&color_lightyellow, "light yellow", NULL},
+      {&color_cyan, "cyan", NULL},
+      {&color_lightcyan, "light cyan", NULL},
+      {&color_magenta, "magenta", NULL},
+      {&color_lightmagenta, "light magenta", NULL},
+      {&color_black, "black", NULL},
+      {&color_lightblack, "light black", NULL},
+      {&prefs.BackgroundColor, "background color", NULL},
+      {&prefs.DefaultColor, "default color", NULL},      
       {NULL,NULL}
 };
 
@@ -103,6 +104,23 @@ static void tt_file_ok(GtkWidget *w, GtkFileSelection *fs)
         read_command(name, NULL);
 
     gtk_widget_destroy(GTK_WIDGET(fs));
+}
+
+void update_widget_color(color_struct *col)
+{
+    if(col->widget) {
+        GtkStyle *style = gtk_style_copy(gtk_widget_get_style(col->widget));
+
+        if(style) {
+            style->bg[GTK_STATE_NORMAL] = *(col->color);
+            style->bg[GTK_STATE_SELECTED] = *(col->color);
+            style->bg[GTK_STATE_PRELIGHT] = *(col->color);
+
+            gtk_widget_set_style(col->widget, style);
+
+            gtk_style_unref(style);
+        }
+    }
 }
 
 void load_zmud_prefs(void)
@@ -395,33 +413,34 @@ void color_ok (GtkWidget *widget, GtkWidget *color_sel)
     gdouble fcolor[3];
     color_struct *color;
     GdkColor new_color;
-    
+
     gtk_color_selection_get_color(GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG(color_sel)->colorsel), fcolor);
     /* FIXME: Need to make the change take effect at once */
     color = (color_struct *)gtk_object_get_data (GTK_OBJECT(color_sel), "color");
+    
     new_color.red = 65535 * fcolor[0];
     new_color.green = 65535 * fcolor[1];
     new_color.blue = 65535 * fcolor[2];
+    
     if(!gdk_color_alloc(cmap,&new_color)) {
-	g_error("Couldn't allocate color - keeping old color\n");
+        g_error("Couldn't allocate color - keeping old color\n");
     } else {
-	color->color->red = new_color.red;
-	color->color->blue = new_color.blue;
-	color->color->green = new_color.green;
-	color->color->pixel = new_color.pixel;
+        color->color->red = new_color.red;
+        color->color->blue = new_color.blue;
+        color->color->green = new_color.green;
+        color->color->pixel = new_color.pixel;
     }
+
     if(!strcmp("background color",color->name))
-	gdk_window_set_background(mud->text->text_area, &prefs.BackgroundColor);
+        gdk_window_set_background(mud->text->text_area, &prefs.BackgroundColor);
+
+    update_widget_color(color);
 
     gtk_widget_destroy(color_sel);
 }
 
 void color_cancel (GtkWidget *widget, GtkWidget *color_sel)
 {
-    char *str;
-    
-    str = (char *) gtk_object_get_data(GTK_OBJECT(color_sel), "name");
-    free(str);
     gtk_widget_destroy(color_sel);
 }
 
@@ -429,7 +448,7 @@ void color_callback (GtkWidget *widget, color_struct *color)
 {
     GtkWidget *color_sel;
     gdouble *fcolor;
-    char *str = malloc(255);
+    char str[255];
 
     sprintf(str, "Set color for %s", color->name);
     color_sel = gtk_color_selection_dialog_new (str);
@@ -437,7 +456,6 @@ void color_callback (GtkWidget *widget, color_struct *color)
     gtk_color_selection_set_color (GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG(color_sel)->colorsel),
 				   fcolor);
     gtk_object_set_data (GTK_OBJECT (color_sel), "color", color);
-    gtk_object_set_data (GTK_OBJECT (color_sel), "name", str);
     gtk_signal_connect( GTK_OBJECT(GTK_COLOR_SELECTION_DIALOG(color_sel)->ok_button),
 			"clicked", GTK_SIGNAL_FUNC(color_ok),
 			color_sel);
@@ -445,11 +463,11 @@ void color_callback (GtkWidget *widget, color_struct *color)
 			"clicked", GTK_SIGNAL_FUNC(color_cancel),
 			color_sel);
     gtk_widget_show(color_sel);
-    free(fcolor);
 }
 
 void color_reset_to_default (GtkWidget *button, gpointer data)
 {
+    int i = 0;
 
     color_white		= default_color_white;
     color_lightwhite	= default_color_lightwhite;
@@ -472,10 +490,23 @@ void color_reset_to_default (GtkWidget *button, gpointer data)
 
     gdk_window_set_background(mud->text->text_area, &prefs.BackgroundColor);
 
+    while (color_arr[i].color) {
+        update_widget_color(&color_arr[i]);
+
+        i++;
+    }
+
 }
 
 void color_prefs_done (GtkWidget *widget, GtkWidget *dialog)
 {
+    int i = 0;
+    
+    while(color_arr[i].color) {
+        color_arr[i].widget = NULL;
+        i++;
+    }
+
     gtk_widget_destroy(dialog);
 }    
 
@@ -501,36 +532,26 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy)
 
   /* Make buttons for all the colors */
   while(color_arr[i].color) {     
-      GtkStyle *style;
-      
       color_row = gtk_hbox_new(TRUE, 0);
-      color_button = gtk_button_new();
+      color_arr[i].widget =  gtk_button_new();
 
       sprintf(tmp, "Color for %s", color_arr[i].name);
-      gtk_object_set_data (GTK_OBJECT (color_button), "color", &color_arr[i]);
       color_label = gtk_label_new(tmp);
-      gtk_signal_connect (GTK_OBJECT (color_button), "clicked",
+      gtk_signal_connect (GTK_OBJECT (color_arr[i].widget), "clicked",
 			  GTK_SIGNAL_FUNC (color_callback), (gpointer) &color_arr[i]);
       tooltip = gtk_tooltips_new ();
 //      gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
       sprintf(tmp, "You can use this button to change the %s color", color_arr[i].name);
-      gtk_tooltips_set_tip (tooltip, color_button, tmp, NULL);
-      gtk_widget_show (color_button);
+      gtk_tooltips_set_tip (tooltip, color_arr[i].widget, tmp, NULL);
+      gtk_widget_show (color_arr[i].widget);
       gtk_widget_show (color_label);
       gtk_widget_show (color_row);
-      gtk_box_pack_start (GTK_BOX (color_row), color_button, TRUE, TRUE, 3);
+      gtk_box_pack_start (GTK_BOX (color_row), color_arr[i].widget, TRUE, TRUE, 3);
       gtk_box_pack_start (GTK_BOX (color_row), color_label, TRUE, TRUE, 1);
       gtk_box_pack_start (GTK_BOX(color_box), color_row, TRUE, TRUE, 1);
-      
-      style = gtk_style_copy(gtk_widget_get_style(color_button));
-      
-      style->bg[GTK_STATE_NORMAL] = *color_arr[i].color;
-      style->bg[GTK_STATE_SELECTED] = *color_arr[i].color;
-      style->bg[GTK_STATE_PRELIGHT] = *color_arr[i].color;
 
-      gtk_widget_set_style(color_button, style);
-
-      gtk_style_unref(style);
+      update_widget_color(&color_arr[i]);
+      
       i++;
   }
 
