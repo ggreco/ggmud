@@ -5,6 +5,9 @@
 #include <time.h>
 #include <string.h>
 
+// #alias {celepath} {e;#wait 500;e;#wait 500;s;#wait 500;s;#wait 500;e;#wait 500;n;#wait 500;e;#wait 500;e;#wait 500;e;#wait 500;w;#wait 500;w;#wait 500;s;#wait 500;e;#wait 500}
+
+extern struct session *parse_input(char *, struct session *);
 extern char *get_arg_in_braces(char *s, char *arg, int flag);
 
 int use_tickcounter = 0;
@@ -97,6 +100,42 @@ void do_stoptimer(char *arg, struct session *ses)
         sprintf(buffer, "#TIMER %s NOT FOUND.\n", left);
 
     tintin_puts(buffer, ses);        
+}
+
+int
+put_command(char *line)
+{
+    mud->activesession = parse_input(line, mud->activesession);
+    free(line);
+
+    return FALSE;
+}
+
+void 
+wait_command(struct session *ses, char *arg, char *line)
+{
+    char temp[BUFFER_SIZE];
+    int msec;
+    
+    arg = get_arg_in_braces(arg, temp, 0);
+
+    if (!*temp) {
+        tintin_puts("#WAIT NEEDS AT LEAST A PARAMETER, LINE SKIPPED\n", ses);
+        return;
+    }
+
+    if (*arg) {
+        tintin_puts("#WAIT NEEDS ONLY ONE ARGUMENT, EXTRA ARGS SKIPPED\n", ses); 
+    }
+    
+    msec = atoi(temp);
+
+    if (msec < 100 || msec > 1000000) {
+        tintin_puts("#WAIT MUST BE BETWEEN 100 AND 1000000 MSECS\n", ses);
+        return;
+    }
+        
+    g_timeout_add(msec, (GSourceFunc)put_command, strdup(line));
 }
 
 void do_timer(char *arg, struct session *ses)
