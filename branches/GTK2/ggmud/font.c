@@ -42,7 +42,7 @@ void set_style()
         return;
 
     if (mud->text) {
-        gtk_widget_modify_font(mud->text, font_normal);
+        gtk_widget_modify_font(GTK_WIDGET(mud->text), font_normal);
     }
 }
 
