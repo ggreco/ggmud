@@ -23,6 +23,7 @@
 #include "config.h"
 
 #include <sys/types.h>
+#include <sys/time.h>
 #include <gtk/gtk.h>
 #include <errno.h>
 #include <string.h>
@@ -71,8 +72,11 @@ extern GtkWidget *btn_toolbar_connect;
 #endif
 #else
 #include <winsock2.h>
-
+#define errno WSAGetLastError()
 #define sockclose(x) closesocket(x)
+#define ioctl ioctlsocket
+#define EINPROGRESS WSAEWOULDBLOCK
+#define EISCONN WSAEISCONN
 #endif
 
 
@@ -86,6 +90,7 @@ extern int prompt_on;
  * Global Variables
  */
 int connected;
+static int connecting = 0;
 
 static void printline(const char *str, int isaprompt)
 {
@@ -163,6 +168,59 @@ void disconnect ( void )
     mud->activesession = NULL;
 }
 
+struct tempdata
+{
+    char name[80];
+    char hostport[200];
+    int sock;
+    GtkWidget *window;
+};
+
+void
+connection_part_two(int sockfd, struct tempdata *mystr)
+{
+    int onoff = 0;
+    
+    ioctl(sockfd, FIONBIO, (char *)&onoff);
+
+    textfield_add (mud->text, "\n*** Connection established.\n", MESSAGE_NORMAL);
+
+    {
+        if ((mud->activesession = new_session(mystr->name, mystr->hostport, mud->activesession)))
+            mud->activesession->socket = sockfd;
+    }
+    
+    mud->input_monitor = gdk_input_add (sockfd, GDK_INPUT_READ,
+    				   read_from_connection,
+    				   mud->activesession );
+    connected = TRUE;
+    gtk_widget_set_sensitive (menu_File_Connect, FALSE);
+    gtk_widget_set_sensitive (btn_toolbar_connect, FALSE);
+    gtk_widget_set_sensitive (menu_File_DisConnect, TRUE);
+    gtk_widget_set_sensitive (btn_toolbar_disconnect, TRUE);
+}
+
+void stop_connecting(GtkWidget *widget, struct tempdata *data)
+{
+    connecting = 0;
+    gdk_input_remove(mud->input_monitor);
+    sockclose(data->sock);
+    textfield_add(mud->text, "\n*** connection ABORTED.\n",
+            MESSAGE_NORMAL);
+    
+    gtk_widget_destroy(data->window);
+    free(data);
+}
+
+void connection_cbk (gpointer data, gint source, GdkInputCondition condition)
+{
+    gdk_input_remove (mud->input_monitor);
+    connecting = 0;
+    gtk_widget_destroy(((struct tempdata *)data)->window);
+    connection_part_two(source, (struct tempdata *)data);
+    free(data);
+}
+
 void open_connection (const char *name, const char *host, const char *port)
 {
     struct hostent *he;
@@ -170,24 +228,27 @@ void open_connection (const char *name, const char *host, const char *port)
     int sockfd, onoff = 1, retries = 0;
 
 #ifdef WIN32
-
-#define ioctl ioctlsocket
-#define EINPROGRESS WSAEINPROGRESS
-#define EISCONN WSAEISCONN
-
     static int winsock_initted = 0;
 
-    if(!winsock_initted) {
+    if (!winsock_initted) {
         WSADATA datas;
+
+        winsock_initted = 1;
 
 		if(WSAStartup(2,&datas)){
             fprintf(stderr, "Non riesco a inizializzare Winsock 2+\n");
 			exit(0);
         }
     }
-    
 #endif
 
+    if(connecting) {
+        textfield_add(mud->text,
+                "\n...Connection already in progress...\n",
+                MESSAGE_ANSI);
+        return;
+    }
+    
     if(connected) {
 #ifdef USE_NOTEBOOK
         new_view(name);
@@ -204,8 +265,7 @@ void open_connection (const char *name, const char *host, const char *port)
         return;
     }
 
-    if ( ( sockfd = socket (AF_INET, SOCK_STREAM, 0)) == -1 )
-    {
+    if ( ( sockfd = socket (AF_INET, SOCK_STREAM, 0)) == -1 ) {
         textfield_add (mud->text, strerror(errno), MESSAGE_ERR);
         return;
     }
@@ -217,70 +277,67 @@ void open_connection (const char *name, const char *host, const char *port)
 
     ioctl(sockfd, FIONBIO, (char *)&onoff);
     
-    while (connect (sockfd, (struct sockaddr *)&their_addr,
+    if (connect (sockfd, (struct sockaddr *)&their_addr,
                  sizeof (struct sockaddr)) == -1 ) {
+
         if (errno == EINPROGRESS) {
-            if (retries++ < 100) {
-                fd_set wr;
-                struct timeval to = {1L, 0};
-                
-                FD_SET(sockfd, &wr);
-                
-                select(sockfd+1, NULL, &wr, NULL, &to);
+            GtkWidget *window, *label, *box, *separator, *button;
+            char buffer[200];
+            struct tempdata *datas = malloc(sizeof(struct tempdata));
 
-                if(!FD_ISSET(sockfd, &wr)) {
-                    textfield_add(mud->text, ".", MESSAGE_ANSI);
+            strcpy(datas->name, name);
+            sprintf(datas->hostport, "%s %s", host, port);
+            datas->sock = sockfd;
 
-                    while(gtk_events_pending())
-                        gtk_main_iteration();
+            connecting = 1;
 
-                    gdk_flush();
+            mud->input_monitor = gdk_input_add (sockfd, GDK_INPUT_WRITE,
+                    connection_cbk,
+                    datas );
 
-                    sleep(1);
-                }
-                else
-                    break;
-            }
-            else if(errno == EISCONN) {
-                break;
-            }
-            else {
-                textfield_add(mud->text, "\nCONNECTION TIMEOUT\n.", MESSAGE_ERR);
-                close(sockfd);
-                return;
-            }
+            datas->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+            gtk_window_set_title (GTK_WINDOW (datas->window), "GGMud message");
+
+            box = gtk_vbox_new (FALSE, 5);
+            gtk_container_set_border_width (GTK_CONTAINER (box), 5);
+            gtk_container_add (GTK_CONTAINER (datas->window), box);
+
+            sprintf(buffer, " Connection to %s:%s in progress... ", host, port);
+            label = gtk_label_new (buffer);
+            gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 5);
+            gtk_widget_show (label);
+
+            separator = gtk_hseparator_new ();
+            gtk_box_pack_start (GTK_BOX (box), separator, TRUE, TRUE, 0);
+            gtk_widget_show (separator);
+
+            button = gtk_button_new_with_label (" Cancel ");
+            gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                    GTK_SIGNAL_FUNC (stop_connecting),
+                    datas);
+            gtk_box_pack_start (GTK_BOX (box), button, TRUE, TRUE, 5);
+            gtk_widget_show (button);
+
+            gtk_widget_show (box);
+            gtk_widget_show (datas->window);
+
+            return;
         }
-        else {
+        else if(errno != EISCONN) {
             textfield_add (mud->text, strerror(errno), MESSAGE_ERR);
-            close(sockfd);
+            sockclose(sockfd);
             return;
         }
     }
-
-    onoff = 0;
-    
-    ioctl(sockfd, FIONBIO, (char *)&onoff);
-
-    textfield_add (mud->text, "\n*** Connection established.\n", MESSAGE_NORMAL);
-
-    {
-        char buffer[200];
-
-        sprintf(buffer, "%s %s", host, port);
+    else {
+        struct tempdata datas;
         
-        if ((mud->activesession = new_session(name, buffer, mud->activesession)))
-            mud->activesession->socket = sockfd;
+        strcpy(datas.name, name);
+        sprintf(datas.hostport, "%s %s", host, port);
+        connection_part_two(sockfd, &datas);
     }
-    
-    mud->input_monitor = gdk_input_add (sockfd, GDK_INPUT_READ,
-    				   read_from_connection,
-    				   mud->activesession );
-    connected = TRUE;
-    gtk_widget_set_sensitive (menu_File_Connect, FALSE);
-    gtk_widget_set_sensitive (btn_toolbar_connect, FALSE);
-    gtk_widget_set_sensitive (menu_File_DisConnect, TRUE);
-    gtk_widget_set_sensitive (btn_toolbar_disconnect, TRUE);
 }
+
 
 int check_status(const char *buf, struct session *ses)
 {
