@@ -95,6 +95,64 @@ color_struct color_arr[] = {
       {NULL,NULL}
 };
 
+static void tt_file_ok(GtkWidget *w, GtkFileSelection *fs)
+{
+    char *name = gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs));
+
+    if(*name)
+        read_command(name, NULL);
+}
+
+void load_tt_prefs(void)
+{
+    /* Create a new file selection widget */
+    GtkWidget *filew = gtk_file_selection_new ("Save Log file as");
+
+    gtk_signal_connect (GTK_OBJECT (filew), "destroy",
+			(GtkSignalFunc) gtk_widget_destroy, filew);
+
+    /* Connect the ok_button to file_ok_sel function */
+    gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (filew)->ok_button),
+			"clicked", (GtkSignalFunc) tt_file_ok, filew );
+
+    /* Connect the cancel_button to destroy the widget */
+    gtk_signal_connect_object (GTK_OBJECT (GTK_FILE_SELECTION (filew)->cancel_button),
+			       "clicked", (GtkSignalFunc) gtk_widget_destroy,
+			       GTK_OBJECT (filew));
+
+    /* Hide the file managment buttons */
+    gtk_file_selection_hide_fileop_buttons(GTK_FILE_SELECTION (filew));
+
+    gtk_widget_show(filew);
+}
+
+#ifdef WIN32
+#define CONFIG_NAME "ggmud.cfg"
+#else
+#define CONFIG_NAME ".ggmudrc"
+#endif
+
+void save_all_prefs(void)
+{
+#ifdef WIN32
+    write_command(CONFIG_NAME, NULL);
+
+    popup_window("Configuration written to: " CONFIG_NAME);
+#else
+    char buffer[256], *c;
+
+    if (!(c = getenv("HOME")))
+        c = "./";
+    
+    strcpy(buffer, c);
+    strcat(buffer, CONFIG_NAME);
+    write_command(buffer, NULL);
+    
+    sprintf(buffer, "Configuration written to: %s" CONFIG_NAME , c);
+    popup_window(buffer);
+#endif
+}
+
 gdouble *gdk_color_to_gdouble (GdkColor *gdkcolor)
 {
     gdouble *color = malloc(sizeof(gdouble)*3);
