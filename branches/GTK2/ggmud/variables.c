@@ -33,6 +33,25 @@ save_variables (GtkWidget *button, gpointer data) {
     }    
 }
 
+void save_vars()
+{
+    extern struct listnode *common_myvars;
+    struct listnode *list = (mud && mud->activesession) ? mud->activesession->myvars : common_myvars;
+    FILE *fp;
+
+    if (!prefs.SaveVars)
+        return;
+
+    if (list) {
+        if (fp = fileopen (VARIABLE_FILE, "w")) {
+            while ( list = list->next ) {
+                fprintf (fp, "#var {%s} {%s}\n", list->left, list->right);
+            }
+            fclose(fp);
+        }
+    }
+}
+
 static void
 insert_variables  (GtkCList *clist)
 {

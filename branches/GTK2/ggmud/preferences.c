@@ -44,14 +44,11 @@ typedef struct {
     GtkWidget *widget;
 } color_struct;
 
-extern GtkWidget *handlebox;
-extern GtkWidget *statusbar;
-
 /* Global variables */
 extern GtkWidget *btnLabel[12];
 extern GtkWidget *menu_Tools_Logger;
 extern GtkWidget *handlebox;
-
+extern GtkWidget *statusbar;
 
 /* Global ToolBar stuff */
 extern GtkWidget *btn_toolbar_logger;
@@ -61,14 +58,6 @@ extern int use_tickcounter;
 
 /* Global variables */
 PREFS_DATA prefs;
-static GtkWidget   *prefs_window;
-static GtkWidget   *prefs_button_save;
-static GtkWidget *checkbutton_Toolbar;
-static GtkWidget *checkbutton_Macrobuttons;
-static GtkWidget *checkbutton_Statusbar;
-static GtkWidget *checkbutton_Tickcounter;
-static GtkWidget *entry_TickSize;
-static GtkWidget *entry_ReviewSize;
 
 #ifndef min
     #define min(x,y) ((x) > (y) ? (y) : (x))
@@ -200,13 +189,15 @@ void load_prefs ()
 //    prefs.DefaultColor = color_white;
 
     if (fp = fileopen(PREFS_FILE, "r")) {
-        prefs.Blinking = prefs.KeepText = prefs.EchoText  = prefs.WordWrap = prefs.DoBeep = TRUE;
+        prefs.SaveVars = prefs.Blinking = prefs.KeepText = prefs.EchoText  = prefs.WordWrap = prefs.DoBeep = TRUE;
 
         while (fgets (line, sizeof(line) - 1, fp)) {
             sscanf (line, "%[^=]=%[^\n]", pref, value);
             if (!strcmp(value, "Off")) {
                 if (!strcmp (pref, "KeepText")) {
                     prefs.KeepText = FALSE;
+                } else if (!strcmp (pref, "SaveVars")) {
+                    prefs.SaveVars = FALSE;
                 } else if (!strcmp (pref, "Blinking")) {
                     prefs.Blinking = FALSE;
                 } else if (!strcmp (pref, "EchoText")) {
@@ -290,6 +281,7 @@ void save_prefs (GtkWidget *button, gpointer data)
     	CFGW("EchoText", prefs.EchoText);
         CFGW("Wordwrap", prefs.WordWrap);
         CFGW("Blinking", prefs.Blinking);
+        CFGW("SaveVars", prefs.SaveVars);
     	CFGW("Beep", prefs.DoBeep);
         CFGW("Toolbar", prefs.Toolbar);
         CFGW("Macrobuttons", prefs.Macrobuttons);
@@ -319,17 +311,9 @@ void change_review_size (GtkWidget *widget, ggmud *mud)
     mud->maxlines = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 }
 
-void check_text_toggle (GtkWidget *widget, GtkWidget *button)
+void check_tickcounter (GtkWidget *widget, GtkWidget *entry_TickSize)
 {
-    if ( GTK_TOGGLE_BUTTON (button)->active )
-        prefs.KeepText = TRUE;
-    else
-        prefs.KeepText = FALSE;
-}
-
-void check_tickcounter (GtkWidget *widget, GtkWidget *button)
-{
-    if ( GTK_TOGGLE_BUTTON (button)->active ) {
+    if ( GTK_TOGGLE_BUTTON (widget)->active ) {
         tickon_command( mud->activesession);
         use_tickcounter = 1;
     }
@@ -338,31 +322,15 @@ void check_tickcounter (GtkWidget *widget, GtkWidget *button)
         use_tickcounter = 0;
     }
 
-    gtk_widget_set_sensitive(entry_TickSize, GTK_TOGGLE_BUTTON (button)->active);
+    gtk_widget_set_sensitive(entry_TickSize, GTK_TOGGLE_BUTTON (widget)->active);
 }
 
-void check_callback (GtkWidget *widget, GtkWidget *check_button)
+static void check_toggle (GtkWidget *widget, gint *var)
 {
-    if ( GTK_TOGGLE_BUTTON (check_button)->active )
-        prefs.EchoText = TRUE;
+    if ( GTK_TOGGLE_BUTTON (widget)->active )
+        *var = TRUE;
     else
-        prefs.EchoText = FALSE;
-}
-
-void check_wrap (GtkWidget *widget, GtkWidget *wrap_button)
-{
-    if ( GTK_TOGGLE_BUTTON (wrap_button)->active )
-        prefs.WordWrap = TRUE;
-    else
-        prefs.WordWrap = FALSE;
-}
-
-void check_blinking (GtkWidget *widget, GtkWidget *blinking_button)
-{
-    if ( GTK_TOGGLE_BUTTON (blinking_button)->active )
-        prefs.Blinking = TRUE;
-    else
-        prefs.Blinking = FALSE;
+        *var = FALSE;
 }
 
 /* wordwrapper for the main textwindow */
@@ -372,61 +340,12 @@ void text_toggle_word_wrap (GtkWidget *checkbutton_wrap, GtkWidget *text)
           GTK_WRAP_CHAR : GTK_WRAP_NONE);
 }
 
-void check_beep (GtkWidget *widget, GtkWidget *check_button)
+void toggle_visibility(GtkWidget *widget, GtkWidget *dest)
 {
-    if ( GTK_TOGGLE_BUTTON (check_button)->active )
-        prefs.DoBeep = TRUE;
-    else
-        prefs.DoBeep = FALSE;
-}
-
-/*
- * check to see if we should show or hide the toolbar
- */
-void check_Toolbar (GtkWidget *widget, GtkWidget *check_button_toolbar)
-{
-    if ( GTK_TOGGLE_BUTTON (check_button_toolbar)->active )
-        prefs.Toolbar = TRUE;
-    else
-        prefs.Toolbar = FALSE;
-
-  if ( GTK_TOGGLE_BUTTON (check_button_toolbar)->active )
-      gtk_widget_show(handlebox);
+  if ( GTK_TOGGLE_BUTTON (widget)->active )
+      gtk_widget_show(dest);
   else
-      gtk_widget_hide (handlebox);
-
-}
-
-/* 
- * check to see if we should show or hide the Macro buttons
- */
-void check_Macrobuttons (GtkWidget *widget, GtkWidget *check_button_macro)
-{
-    if ( GTK_TOGGLE_BUTTON (check_button_macro)->active )
-        prefs.Macrobuttons = TRUE;
-    else
-        prefs.Macrobuttons = FALSE;
-
-  if ( GTK_TOGGLE_BUTTON (check_button_macro)->active )
-      gtk_widget_show(mud->macrobuttons);
-  else
-      gtk_widget_hide (mud->macrobuttons);
-}
-
-/* 
- * check to see if we should show or hide the Statusbar
- */
-void check_Statusbar (GtkWidget *widget, GtkWidget *check_button_statusbar)
-{
-    if ( GTK_TOGGLE_BUTTON (check_button_statusbar)->active )
-        prefs.Statusbar = TRUE;
-    else
-        prefs.Statusbar = FALSE;
-
-  if ( GTK_TOGGLE_BUTTON (check_button_statusbar)->active )
-      gtk_widget_show(statusbar);
-  else
-      gtk_widget_hide (statusbar);
+      gtk_widget_hide (dest);
 }
 
 #ifdef HAS_GTK24
@@ -636,7 +555,14 @@ void window_prefs (GtkWidget *widget, gpointer data)
   GtkWidget *close_button;
   GtkWidget *temp;
   GtkTooltips *tooltip;
-
+  GtkWidget *checkbutton_Toolbar;
+  GtkWidget *checkbutton_Macrobuttons;
+  GtkWidget *checkbutton_Statusbar;
+  GtkWidget *checkbutton_savevars;
+  GtkWidget *checkbutton_Tickcounter;
+  GtkWidget *entry_TickSize;
+  GtkWidget *entry_ReviewSize;
+  
   prefs_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title (GTK_WINDOW (prefs_window), "Preferences");
   gtk_window_set_policy (GTK_WINDOW (prefs_window), TRUE, TRUE, TRUE);
@@ -666,8 +592,8 @@ void window_prefs (GtkWidget *widget, gpointer data)
 
   checkbutton_keep = gtk_check_button_new_with_label ("Keep Text Entered");
   gtk_signal_connect (GTK_OBJECT (checkbutton_keep), "toggled",
-                      GTK_SIGNAL_FUNC (check_text_toggle),
-                      checkbutton_keep);
+                      GTK_SIGNAL_FUNC (check_toggle),
+                      &prefs.KeepText);
   tooltip = gtk_tooltips_new ();
 //  gtk_tooltips_set_colors (tooltip1, &color_lightyellow, &color_black);
   gtk_tooltips_set_tip (tooltip, checkbutton_keep,
@@ -680,7 +606,7 @@ void window_prefs (GtkWidget *widget, gpointer data)
 
   checkbutton_echo = gtk_check_button_new_with_label ("Echo Text");
   gtk_signal_connect (GTK_OBJECT (checkbutton_echo), "toggled",
-                      GTK_SIGNAL_FUNC (check_callback), checkbutton_echo);
+                      GTK_SIGNAL_FUNC (check_toggle), &prefs.EchoText);
   
   gtk_tooltips_set_tip (tooltip, checkbutton_echo,
                         "With this toggled on, all the text you type and "
@@ -706,7 +632,7 @@ void window_prefs (GtkWidget *widget, gpointer data)
 
   checkbutton_wrap = gtk_check_button_new_with_label ("Word Wrap");
   gtk_signal_connect (GTK_OBJECT (checkbutton_wrap), "toggled",
-                      GTK_SIGNAL_FUNC (check_wrap), checkbutton_wrap);
+                      GTK_SIGNAL_FUNC (check_toggle), &prefs.WordWrap);
   gtk_signal_connect (GTK_OBJECT(checkbutton_wrap), "toggled",
 		      GTK_SIGNAL_FUNC(text_toggle_word_wrap), mud->text);
 
@@ -719,7 +645,7 @@ void window_prefs (GtkWidget *widget, gpointer data)
 
   checkbutton_blinking = gtk_check_button_new_with_label ("Text blinking");
   gtk_signal_connect (GTK_OBJECT (checkbutton_blinking), "toggled",
-                      GTK_SIGNAL_FUNC (check_blinking), checkbutton_blinking);
+                      GTK_SIGNAL_FUNC (check_toggle), &prefs.Blinking);
 
   gtk_tooltips_set_tip (tooltip, checkbutton_blinking,
                         "Enable/disable text blinking.",
@@ -730,8 +656,8 @@ void window_prefs (GtkWidget *widget, gpointer data)
 
   checkbutton_beep = gtk_check_button_new_with_label ("Emit Beeps");
   gtk_signal_connect (GTK_OBJECT (checkbutton_beep), "toggled",
-                      GTK_SIGNAL_FUNC (check_beep),
-                      checkbutton_beep);
+                      GTK_SIGNAL_FUNC (check_toggle),
+                      &prefs.DoBeep);
 
   gtk_tooltips_set_tip (tooltip, checkbutton_beep,
                         "If enabled SClient will emit the beep (system bell) sound.",
@@ -753,7 +679,10 @@ void window_prefs (GtkWidget *widget, gpointer data)
 
   checkbutton_Toolbar = gtk_check_button_new_with_label ("Show/Hide Toolbar");
   gtk_signal_connect (GTK_OBJECT (checkbutton_Toolbar),"toggled",
-                       GTK_SIGNAL_FUNC (check_Toolbar),checkbutton_Toolbar);
+                       GTK_SIGNAL_FUNC (check_toggle), &prefs.Toolbar);
+  gtk_signal_connect (GTK_OBJECT (checkbutton_Toolbar),"toggled",
+                       GTK_SIGNAL_FUNC (toggle_visibility), handlebox);
+
   gtk_tooltips_set_tip (tooltip, checkbutton_Toolbar,
                         "Toggle this on to hide the Toolbar.",
                         NULL);
@@ -764,7 +693,9 @@ void window_prefs (GtkWidget *widget, gpointer data)
 
   checkbutton_Macrobuttons = gtk_check_button_new_with_label ("Show/Hide Macro buttons");
   gtk_signal_connect (GTK_OBJECT (checkbutton_Macrobuttons),"toggled",
-                       GTK_SIGNAL_FUNC (check_Macrobuttons),checkbutton_Macrobuttons);
+                       GTK_SIGNAL_FUNC (check_toggle), &prefs.Macrobuttons);
+  gtk_signal_connect (GTK_OBJECT (checkbutton_Macrobuttons),"toggled",
+                       GTK_SIGNAL_FUNC (toggle_visibility), mud->macrobuttons);
 
   gtk_tooltips_set_tip (tooltip, checkbutton_Macrobuttons,
                         "Toggle this on to hide the Macro buttons.",
@@ -774,8 +705,11 @@ void window_prefs (GtkWidget *widget, gpointer data)
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_Macrobuttons), prefs.Macrobuttons);
 
   checkbutton_Statusbar = gtk_check_button_new_with_label ("Show/Hide Statusbar");
+  
   gtk_signal_connect (GTK_OBJECT (checkbutton_Statusbar),"toggled",
-                       GTK_SIGNAL_FUNC (check_Statusbar),checkbutton_Statusbar);
+                       GTK_SIGNAL_FUNC (check_toggle), &prefs.Statusbar);
+  gtk_signal_connect (GTK_OBJECT (checkbutton_Statusbar),"toggled",
+                       GTK_SIGNAL_FUNC (toggle_visibility), statusbar );
 
   gtk_tooltips_set_tip (tooltip, checkbutton_Statusbar,
                         "Toggle this on to hide the Statusbar.",
@@ -802,8 +736,6 @@ void window_prefs (GtkWidget *widget, gpointer data)
   
 // tickcounter
   checkbutton_Tickcounter = gtk_check_button_new_with_label ("Use TickCounter");
-  gtk_signal_connect (GTK_OBJECT (checkbutton_Tickcounter),"toggled",
-                       GTK_SIGNAL_FUNC (check_tickcounter),checkbutton_Tickcounter);
 
   gtk_tooltips_set_tip (tooltip, checkbutton_Tickcounter,
                         "Toggle this to enable/disable the builtin tickcounter.",
@@ -825,7 +757,9 @@ void window_prefs (GtkWidget *widget, gpointer data)
   gtk_signal_connect(GTK_OBJECT(entry_TickSize), "changed", 
                         GTK_SIGNAL_FUNC(change_tick_size), mud);
   
-//  entry_TickSize = gtk_entry_new();
+  gtk_signal_connect (GTK_OBJECT (checkbutton_Tickcounter),"toggled",
+                       GTK_SIGNAL_FUNC (check_tickcounter), entry_TickSize);
+  
   gtk_widget_show(entry_TickSize);
 
   if (use_tickcounter)
@@ -853,6 +787,17 @@ void window_prefs (GtkWidget *widget, gpointer data)
   temp = gtk_label_new("Review lines:");
   gtk_widget_show(temp);
   gtk_box_pack_start (GTK_BOX (hbox), temp, TRUE, TRUE, 0);
+  checkbutton_savevars = gtk_check_button_new_with_label ("Save variables");
+  gtk_signal_connect (GTK_OBJECT (checkbutton_savevars), "toggled",
+                      GTK_SIGNAL_FUNC (check_toggle), &prefs.SaveVars);
+
+  gtk_tooltips_set_tip (tooltip, checkbutton_savevars,
+                        "Save variable values on program exit.",
+                        NULL);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_savevars), prefs.SaveVars);
+  gtk_widget_show (checkbutton_savevars);
+  gtk_box_pack_start (GTK_BOX (vbox3), checkbutton_savevars, TRUE, TRUE, 0);
+  
   temp = (GtkWidget *)gtk_adjustment_new (mud->maxlines, 1000, 1000000, 100, 10000, 10000);
   entry_ReviewSize = gtk_spin_button_new (GTK_ADJUSTMENT (temp), 1, 0);
 
