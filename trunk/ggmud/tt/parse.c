@@ -271,7 +271,7 @@ struct session *parse_tintin_command(const char *command, char *arg,
     return(ses);
   }
 
-  else if(is_abbrev(command, "action"))
+  else if(is_abbrev(command, "action") || is_abbrev(command, "trigger"))
     action_command(arg, ses);
    
   else if(is_abbrev(command, "alias"))
@@ -286,7 +286,7 @@ struct session *parse_tintin_command(const char *command, char *arg,
   else if (is_abbrev(command, "appendlog"))
     append_log_command(ses);
 
-  else if(is_abbrev(command, "bell"))
+  else if(is_abbrev(command, "bell") || is_abbrev(command, "beep"))
     bell_command(ses);
 
   else if(is_abbrev(command, "boss")) 
@@ -474,10 +474,10 @@ struct session *parse_tintin_command(const char *command, char *arg,
   else if(is_abbrev(command, "tickon")) 
     tickon_command(ses);
 
-  else if(is_abbrev(command, "tickset"))
+  else if(is_abbrev(command, "tickset") || is_abbrev(command, "tz") )
     tickset_command(ses);
 
-  else if(is_abbrev(command, "ticksize")) 
+  else if(is_abbrev(command, "ticksize") || is_abbrev(command, "ts") ) 
     ticksize_command(arg, ses);
 
   else if(is_abbrev(command, "tolower"))

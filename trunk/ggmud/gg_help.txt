@@ -1,47 +1,50 @@
+To call the help system use:
 
-help available on the following:
+#help <topic>
 
-action                  alias                   all
-antisubstitute          bell                    boss
-brokentelnet		call			char                    
-chat			chatall			clearprompt		
-chatname		chatpriv		chattransfer
-chat.conf		cinfo			cr
-echo			emote			emoteall
-end                     filecancel		filestat
-fixedmath		forall			function		
-gag                     getwalkdirection	getvarvalue
-getlistlenght		getitemnr		help			
-highlight               history                 if			
-ifstrequal		ifexist			ifmatch			
-ignore                  info                    killall			
-log                     loop                    map			
-mark                    math                    message			
-nop			path                    pathdir			
-ping			presub			prepad			
-postpad			purist			random
-read                    redraw			request
-result			retab                   return			
-revstring		removestring		savepath		
-sendfile		setprompt		session                 
-showme			sleep			snoop			
-speedwalk               split                   substitute		
-suspend                 system                  tabadd			
-tabdelete               tablist                 tabsave			
-textin			tick                    tickoff                 
-tickon			tickset			ticksize                
-timetry			tolower			togglesubs		
-toupper                 tries			unaction                
-unalias			unantisubstitute        unchat			
-unfunction		ungag			unhighlight		
-unpath			unpurist		unsplit                 
-unsubstitute		unvariable              variable                
-verbatim		version                 walk			
-walkback		walkinfo		walkon			
-walkoff			walkreset		walkset			
-wildcard		wizlist			write                   
-writesession            zap			zombion			
-zombioff		helpversion
+help available on the following topics:
+
+action          alias            all
+antisubstitute  bell             boss
+brokentelnet    call             char                    
+chat            chatall          clearprompt        
+chatname        chatpriv         chattransfer
+chat.conf       cinfo            cr
+echo            emote            emoteall
+end             filecancel       filestat
+fixedmath       forall           function        
+gag             getwalkdirection getvarvalue
+getlistlenght   getitemnr        help            
+highlight       history          if            
+ifstrequal      ifexist          ifmatch            
+ignore          info             killall            
+log             loop             map            
+mark            math             message            
+nop             path             pathdir            
+ping            presub           prepad            
+postpad         purist           random
+read            redraw           request
+result          retab            return            
+revstring       removestring     savepath        
+sendfile        setprompt        session                 
+showme          sleep            snoop            
+speedwalk       split            substitute        
+suspend         system           tabadd            
+tabdelete       tablist          tabsave            
+textin          tick             tickoff                 
+tickon          tickset          ticksize                
+timetry         tolower          togglesubs        
+toupper         tries            unaction                
+unalias         unantisubstitute unchat            
+unfunction      ungag            unhighlight        
+unpath          unpurist         unsplit                 
+unsubstitute    unvariable       variable                
+verbatim        version          walk            
+walkback        walkinfo         walkon            
+walkoff         walkreset        walkset            
+wildcard        wizlist          write                   
+writesession    zap              zombion            
+zombioff        helpversion
 
 
 ~ALIAS
@@ -179,7 +182,7 @@ first character it sees is set to your tintin char.
 
 ~CR
 
-format:	      #cr
+format:          #cr
 
 Sends a carriage return to the session.  Useful for aliases that nees carriage
 returns.
@@ -284,7 +287,7 @@ Toggle actions on and off. If off, no actions will be checked for.
 
 ~INFO
 
-format:		#info
+format:        #info
 
 Displays the number of actions, aliases, variables, substitues, 
 antisubstitutes, and highlights for the current session.  If no session
@@ -292,7 +295,7 @@ is active, then the statistics on the defaults are given.
 
 ~KILLALL
 
-format:		#killall
+format:        #killall
 
 Killall deletes all aliases, actions, subs, antisubs, highlights, variables
 in one fell swoop.  Useful now, so you don't have to exit tintin++ to 
@@ -411,7 +414,7 @@ Show your current path.
 
 ~PATHDIR
 
-format:	       #pathdir {odd_dir} {what speedwalk should interpret it as}
+format:           #pathdir {odd_dir} {what speedwalk should interpret it as}
 
 New for v1.5, this command will allow those player who play on muds that
 have diag./odd directions to use speedwalk. 
@@ -443,7 +446,7 @@ this variable is ignored.
 
 ~RETAB
 
-format:		#retab
+format:        #retab
 
 New for v1.5.  #retab allows you to re-load the tab completion file.
 
@@ -567,25 +570,25 @@ command can be changed in tintin.h for your security.
 
 ~TABADD
 
-format:	       #tabadd {word}
+format:           #tabadd {word}
 
 Adds a word to the end of the tab completion list.
 
 ~TABDELETE
 
-format:	       #tabdelete {word}
+format:           #tabdelete {word}
 
 Deletes a word from the tab completion list.
 
 ~TABLIST
 
-format:	       #tablist
+format:           #tablist
 
 Displays all words in the tab completion list.
 
 ~TEXTIN
 
-format:		#textin {filename}
+format:        #textin {filename}
 
 Textin now allows the user to read in a file, and send its contents directly 
 to the mud.  Useful for doing online creation, or message writting.
@@ -880,7 +883,7 @@ To return to tintin++, type "fg" at the shell prompt.
 
 ~WILDCARD
 
-format:		#command {regexp}
+format:        #command {regexp}
 
 You may use wildcards with certain commands such as #alias, #action,
 #substitute, #unalias, etc.  In commands like #alias, wildcards are
@@ -892,11 +895,11 @@ The wildcard meaning of * may be escaped using the backslash, \.
 Examples:
 
 #action {*miss*}
-	shows all actions which contain the word miss in them
+    shows all actions which contain the word miss in them
 #unaction {*miss*}
-	removes all actions which contain the word miss in them
+    removes all actions which contain the word miss in them
 #unaction {\*\*\* PRESS RETURN:}
-	removes the action which triggers on the line *** PRESS RETURN:
+    removes the action which triggers on the line *** PRESS RETURN:
 
 Many thanks to Spencer Sun for letting me steal some code for this...
 If anyone is interested in having full ls-style regexps, email me
@@ -904,7 +907,7 @@ and maybe it'll be included in 2.0.
 
 ~RANDOM
 
-format:		#random {<var_name>} {num}
+format:        #random {<var_name>} {num}
 
 Random will choose a random # from 1 to num, and store that value
 in <var_name>.  You can access <var_name> as you would any variable
@@ -912,7 +915,7 @@ in <var_name>.  You can access <var_name> as you would any variable
  
 ~SETPROMPT
 
-format:		#setprompt {string}
+format:        #setprompt {string}
 
 SetPrompt is a feature for split window mode (see #help split), which
 will take the status prompt from the mud, and display it on the status
@@ -921,7 +924,7 @@ would an action (see #help action).
 
 ~CLEARPROMPT
 
-format: 	#clearprompt
+format:     #clearprompt
 
 ClearPrompt will turn off the prompt display to the split window.
 
@@ -1060,52 +1063,52 @@ Example: #func {ftoc} {#math result (%0-32)*5/9;{#result $result degrees celsius
 ~BROKENTELNET
 
 Command: brokentelnet - for muds that do not like getting \n\r
-	 The command will toggle it on or off.  If you get like a double
-	 new line, this would indict this problem.
+     The command will toggle it on or off.  If you get like a double
+     new line, this would indict this problem.
 
 ~FIXEDMATH
 
 Command: fixedmath
-	 This command will toggle on the fixed versus old (broken) math.
-	 The old math function would give wrong answers at times.  It
-	 is recommanded that fixedmath be turned on.
+     This command will toggle on the fixed versus old (broken) math.
+     The old math function would give wrong answers at times.  It
+     is recommanded that fixedmath be turned on.
 
 ~TRIES
 Command: tries <number>
-	 This command will change the number of times tintin will try to
-	 keep trying to connect to a mud before giving up.
+     This command will change the number of times tintin will try to
+     keep trying to connect to a mud before giving up.
 
 ~TIMETRY
 Command: timetry <number>
-	 This command will change the time (in seconds) between reconnection
-	 attempts.
+     This command will change the time (in seconds) between reconnection
+     attempts.
 
 ~TICKON
 Command: tickon
-	 Thic command will enable the ticker to start counting.
+     Thic command will enable the ticker to start counting.
 
 ~SLEEP
 Command: sleep <number of seconds>
-	 This commands will wait the number of seconds before it will process
-	 any more commands.  This is useful if you want to do something X
-	 seconds later in time.
+     This commands will wait the number of seconds before it will process
+     any more commands.  This is useful if you want to do something X
+     seconds later in time.
 ~FORALL
-	HELPFILE NEEDS TO BE WRITTEN.  BUG THE DEVELOPERS!
+    HELPFILE NEEDS TO BE WRITTEN.  BUG THE DEVELOPERS!
 
 ~PURIST
-	HELPFILE NEEDS TO BE WRITTEN.  BUG THE DEVELOPERS!
+    HELPFILE NEEDS TO BE WRITTEN.  BUG THE DEVELOPERS!
 
 ~REMOVESTRING
-	HELPFILE NEEDS TO BE WRITTEN.  BUG THE DEVELOPERS!
+    HELPFILE NEEDS TO BE WRITTEN.  BUG THE DEVELOPERS!
 
 ~TABSAVE
-	HELPFILE NEEDS TO BE WRITTEN.  BUG THE DEVELOPERS!
+    HELPFILE NEEDS TO BE WRITTEN.  BUG THE DEVELOPERS!
 
 ~UNPURIST
-	HELPFILE NEEDS TO BE WRITTEN.  BUG THE DEVELOPERS!
+    HELPFILE NEEDS TO BE WRITTEN.  BUG THE DEVELOPERS!
 
 ~GETWALKDIRECTION
-	Syntax : #getwalkdirection {<variable-name>} [ {<position>}]
+    Syntax : #getwalkdirection {<variable-name>} [ {<position>}]
              Retrieves one pathdir from specified position within the 
              walk-path.
              <variable-name> specifies the variable to store retrieved 
@@ -1115,38 +1118,38 @@ Command: sleep <number of seconds>
              position for retrieval is the current walk position.
 
 ~WALK
-	Walk one step in the speedwalk.
+    Walk one step in the speedwalk.
 
 WALKBACK
-	Walk back one step in the speedwalk.
+    Walk back one step in the speedwalk.
 
 ~WALKINFO
-	Gives information on the current speedwalk that is being walked
-	through.  
+    Gives information on the current speedwalk that is being walked
+    through.  
 
 ~WALKON
-	Turn on the standstill flag.
+    Turn on the standstill flag.
 
 ~WALKOFF
-	Turn off the standstill flag.
+    Turn off the standstill flag.
 
 ~WALKRESET
-	Syntax : #walkreset[ {<num-skip>}]
-	An optional argument <num-skip> is the number of pathdirs
+    Syntax : #walkreset[ {<num-skip>}]
+    An optional argument <num-skip> is the number of pathdirs
         to be skipped from the beginning of the path alias.
         A negative number will be ignored.
 
 ~WALKSET
-	Syntax : #walkset {<alias-name>}
-	Starts using alias pointed by <alias-name> as a
+    Syntax : #walkset {<alias-name>}
+    Starts using alias pointed by <alias-name> as a
         path to walk through. The alias pointed by
         <alias-name> must be created by #savepath command.
 
 ~ZOMBION
-	Turn on Zombie mode.
+    Turn on Zombie mode.
 
 ~ZOMBIOFF
-	Turn off Zombie mode.
+    Turn off Zombie mode.
 
 ~CALL
 
@@ -1316,6 +1319,6 @@ person from your chat connection list.  If * is specified all connections
 will be disconnected.
 
 ~HELPVERSION
-	Help file was last modified on 7/21/00 by Davin Chan.
+    Help file was last modified on 7/21/00 by Davin Chan.
 
 ~*EOF* 

@@ -19,6 +19,7 @@
 #include "ggmud.h"
 #include "config.h"
 #include "pixmaps.h"	// ToolBar Icons
+#include "ansi.h"
 
 extern void log_viewer();
 extern void alt_send_to_connection  (gchar *text);
@@ -44,8 +45,10 @@ GtkWidget *menu_File_DisConnect;
 void new_view(char *, GtkWidget *);
 
 GtkWidget *
-MakeButton(char *name, GtkSignalFunc func, gpointer data, GtkAccelGroup *accel_group)
+MakeButton(char *name, char **image, GtkSignalFunc func, gpointer data, GtkAccelGroup *accel_group)
 {
+    GdkPixmap *icon;
+    GdkBitmap *mask;
     GtkWidget *hbox, *label, *button;
     guint key;
  
@@ -53,6 +56,17 @@ MakeButton(char *name, GtkSignalFunc func, gpointer data, GtkAccelGroup *accel_g
     hbox = gtk_hbox_new(FALSE, 0);
     gtk_widget_show(hbox);
     gtk_container_add(GTK_CONTAINER(button), hbox);
+
+    if (icon = gdk_pixmap_colormap_create_from_xpm_d ( NULL, cmap, 
+            &mask, NULL, image )) {
+        GtkWidget *pixmap = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
+
+        gdk_pixmap_unref(icon);
+        gdk_bitmap_unref(mask);
+        
+        gtk_widget_show(pixmap);
+        gtk_box_pack_start (GTK_BOX (hbox), pixmap, FALSE, FALSE, 0);
+    }    
 
     label = gtk_label_new("");
     key = gtk_label_parse_uline(GTK_LABEL(label), name);
@@ -66,6 +80,7 @@ MakeButton(char *name, GtkSignalFunc func, gpointer data, GtkAccelGroup *accel_g
     gtk_widget_add_accelerator (button, "clicked", accel_group,
                               key, GDK_MOD1_MASK,
                               0);
+    
 
     gtk_widget_show(button);
 
@@ -95,10 +110,10 @@ void AddButtonBar(GtkWidget *vbox, gpointer *data,
     gtk_widget_show (hbox);
 
     
-    button_add    = MakeButton("_Add", add_func, data, accel_group);    
-    button_delete = MakeButton("_Delete", del_func, data, accel_group);
-    button_save   = MakeButton("_Save", save_func, data, accel_group);
-    button_quit   = MakeButton("_Close", 
+    button_add    = MakeButton("_Add", new_xpm, add_func, data, accel_group);    
+    button_delete = MakeButton("_Delete", remove_xpm, del_func, data, accel_group);
+    button_save   = MakeButton("_Save", save_xpm, save_func, data, accel_group);
+    button_quit   = MakeButton("_Close", cross_xpm,
             GTK_SIGNAL_FUNC(close_window), 
             gtk_widget_get_toplevel(vbox),
             accel_group);
