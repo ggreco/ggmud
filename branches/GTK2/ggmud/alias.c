@@ -178,15 +178,11 @@ static void alias_button_delete (GtkWidget *button, gpointer data) {
 
 void window_alias (GtkWidget *widget, gpointer data)
 {
-    GtkWidget *vbox;
+    GtkWidget *vbox, *but;
     GtkWidget *hbox;
     GtkWidget *hbox2;
     GtkWidget *hbox3;
     GtkWidget *clist;
-    GtkWidget *button_add;
-    GtkWidget *button_quit;
-    GtkWidget *button_delete;
-    GtkWidget *button_save;
     GtkWidget *label;
     GtkWidget *separator;
 //    GtkTooltips *tooltip;
@@ -240,7 +236,7 @@ void window_alias (GtkWidget *widget, gpointer data)
 
     gtk_widget_show (clist);
 
-    hbox3 = gtk_table_new(2, 2, FALSE);
+    hbox3 = gtk_table_new(3, 2, FALSE);
 
     gtk_box_pack_start (GTK_BOX (vbox), hbox3, FALSE, FALSE, 0);
     gtk_widget_show (hbox3);
@@ -256,14 +252,22 @@ void window_alias (GtkWidget *widget, gpointer data)
                         GTK_FILL | GTK_EXPAND, /*GTK_FILL*/ 0L, 2, 2);
     gtk_widget_show (label);
 
+    but = gtk_button_new();
+    label = gtk_image_new_from_stock(GTK_STOCK_FIND, GTK_ICON_SIZE_SMALL_TOOLBAR);
+    gtk_container_add(GTK_CONTAINER(but), label);
+    gtk_table_attach(GTK_TABLE(hbox3), but, 0, 1, 1, 2,
+                         0L, /*GTK_FILL*/ 0L, 2, 2);
+    gtk_signal_connect (GTK_OBJECT (but), "clicked",
+                       GTK_SIGNAL_FUNC (find_in_list), clist);
+    
     textalias   = gtk_entry_new ();
-    gtk_table_attach(GTK_TABLE(hbox3), textalias, 0, 1, 1, 2,
+    gtk_table_attach(GTK_TABLE(hbox3), textalias, 1, 2, 1, 2,
                          0L, /*GTK_FILL*/ 0L, 2, 2);
     gtk_widget_show (textalias  );
 
 
     textreplace = gtk_entry_new ();
-    gtk_table_attach(GTK_TABLE(hbox3), textreplace, 1, 2, 1, 2,
+    gtk_table_attach(GTK_TABLE(hbox3), textreplace, 2, 3, 1, 2,
                         GTK_FILL | GTK_EXPAND, /*GTK_FILL*/ 0L, 2, 2);
     gtk_widget_show (textreplace);
     

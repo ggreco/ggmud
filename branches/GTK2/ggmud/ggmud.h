@@ -213,6 +213,7 @@ extern void TextCopy (GtkWidget *widget, gpointer data);
 
 
 /* win.c */
+extern void find_in_list(GtkWidget *widget, GtkCList *clist);
 extern void  close_window ( GtkWidget *widget, gpointer data );
 extern void  kill_window ( GtkWidget *widget, gpointer data );
 extern void init_colors();
