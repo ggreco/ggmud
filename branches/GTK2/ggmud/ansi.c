@@ -234,6 +234,9 @@ void swap_blinks(void)
 {
     static int blink = 0;
     int i,j;
+   
+    if (!tag_table)
+        return;
     
     if (blink == 0) {
         for (i = 0; i < 8; i++) {
