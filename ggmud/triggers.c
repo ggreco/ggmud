@@ -197,7 +197,7 @@ void triggers_window(GtkWidget *widget, gpointer data)
 
 
     trig_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title (GTK_WINDOW (trig_window), "Aliases");
+    gtk_window_set_title (GTK_WINDOW (trig_window), "Triggers (actions)");
     gtk_signal_connect (GTK_OBJECT (trig_window), "destroy",
                                GTK_SIGNAL_FUNC(close_window), trig_window );
     gtk_widget_set_usize (trig_window, 640, 450);			       

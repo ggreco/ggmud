@@ -43,8 +43,6 @@ const char * ABOUT_MESSAGE = "\n\n Author:\n"
 "\n";
 
 
-/* Contents txt */
-const char * CONTENTS_MESSAGE = "TODO";
 
 /* Wizard txt */
 const char * WIZARD_MESSAGE = "TODO";
@@ -52,11 +50,6 @@ const char * WIZARD_MESSAGE = "TODO";
 /* Macro txt */
 const char * MACROS_MESSAGE = "TODO";
 
-/* Alias txt */
-const char * ALIAS_MESSAGE = "TODO";
-
-/* Triggers txt */
-const char * TRIGGERS_MESSAGE = "TODO";
 
 /* Logger txt */
 const char * LOGGER_MESSAGE = "TODO";
@@ -89,7 +82,6 @@ void do_about (GtkWidget *widget, gpointer data)
   gtk_container_add (GTK_CONTAINER (about_window), vbox);
 
   frame = gtk_frame_new ("The GGMud Team");
-  gtk_object_set_data (GTK_OBJECT (about_window), "frame", frame);
   gtk_widget_show (frame);
   gtk_box_pack_start (GTK_BOX (vbox), frame, TRUE, TRUE, 5);
   gtk_widget_set_usize (frame, -1, 200);
@@ -168,190 +160,169 @@ void do_manual(GtkWidget *widget, gpointer data)
   GtkWidget *label_color;
   GtkWidget *hbuttonbox;
   GtkWidget *done_button;
-
+  GtkText *oldtext = mud->text;
+  GdkColor oldcolor = prefs.DefaultColor;
+  
+  prefs.DefaultColor = color_black;
+ 
   man_window = gtk_window_new (GTK_WINDOW_DIALOG);
-  gtk_object_set_data (GTK_OBJECT (man_window), "man_window", man_window);
   gtk_widget_set_usize (man_window, 550, 550);
   gtk_window_set_title (GTK_WINDOW (man_window), "GGMud "VERSION" Manual");
   gtk_window_set_policy (GTK_WINDOW (man_window), FALSE, FALSE, FALSE);
 
   vbox = gtk_vbox_new (FALSE, 0);
-  gtk_object_set_data (GTK_OBJECT (man_window), "vbox", vbox);
   gtk_widget_show (vbox);
   gtk_container_add (GTK_CONTAINER (man_window), vbox);
 
   notebook = gtk_notebook_new ();
-  gtk_object_set_data (GTK_OBJECT (man_window), "notebook", notebook);
   gtk_widget_show (notebook);
   gtk_box_pack_start (GTK_BOX (vbox), notebook, TRUE, TRUE, 0);
 
   scrolledwindow_contents = gtk_scrolled_window_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (man_window), "scrolledwindow_contents", scrolledwindow_contents);
   gtk_widget_show (scrolledwindow_contents);
   gtk_container_add (GTK_CONTAINER (notebook), scrolledwindow_contents);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_contents), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_contents = gtk_text_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (man_window), "text_contents", text_contents);
   gtk_widget_show (text_contents);
   gtk_container_add (GTK_CONTAINER (scrolledwindow_contents), text_contents);
   gtk_widget_realize (text_contents);
-  gtk_text_insert(GTK_TEXT(text_contents), NULL, NULL, NULL, CONTENTS_MESSAGE,-1);
+
+  mud->text = GTK_TEXT(text_contents);
+  parse_input("#help", NULL);
 
   scrolledwindow_wizard = gtk_scrolled_window_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (man_window), "scrolledwindow_wizard", scrolledwindow_wizard);
   gtk_widget_show (scrolledwindow_wizard);
   gtk_container_add (GTK_CONTAINER (notebook), scrolledwindow_wizard);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_wizard), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_wizard = gtk_text_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (man_window), "text_wizard", text_wizard);
   gtk_widget_show (text_wizard);
   gtk_container_add (GTK_CONTAINER (scrolledwindow_wizard), text_wizard);
   gtk_text_insert(GTK_TEXT(text_wizard), NULL, NULL, NULL, WIZARD_MESSAGE,-1);
 
   scrolledwindow_macros = gtk_scrolled_window_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (man_window), "scrolledwindow_macros", scrolledwindow_macros);
   gtk_widget_show (scrolledwindow_macros);
   gtk_container_add (GTK_CONTAINER (notebook), scrolledwindow_macros);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_macros), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_macros = gtk_text_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (man_window), "text_macros", text_macros);
   gtk_widget_show (text_macros);
   gtk_container_add (GTK_CONTAINER (scrolledwindow_macros), text_macros);
   gtk_text_insert(GTK_TEXT(text_macros), NULL, NULL, NULL, MACROS_MESSAGE,-1);
 
   scrolledwindow_alias = gtk_scrolled_window_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (man_window), "scrolledwindow_alias", scrolledwindow_alias);
   gtk_widget_show (scrolledwindow_alias);
   gtk_container_add (GTK_CONTAINER (notebook), scrolledwindow_alias);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_alias), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_alias = gtk_text_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (man_window), "text_alias", text_alias);
   gtk_widget_show (text_alias);
   gtk_container_add (GTK_CONTAINER (scrolledwindow_alias), text_alias);
-  gtk_text_insert(GTK_TEXT(text_alias), NULL, NULL, NULL, ALIAS_MESSAGE,-1);
+
+  mud->text = GTK_TEXT(text_alias);
+  parse_input("#help alias", NULL);
 
   scrolledwindow_triggers = gtk_scrolled_window_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (man_window), "scrolledwindow_triggers", scrolledwindow_triggers);
   gtk_widget_show (scrolledwindow_triggers);
   gtk_container_add (GTK_CONTAINER (notebook), scrolledwindow_triggers);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_triggers), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_triggers = gtk_text_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (man_window), "text_triggers", text_triggers);
   gtk_widget_show (text_triggers);
   gtk_container_add (GTK_CONTAINER (scrolledwindow_triggers), text_triggers);
-  gtk_text_insert(GTK_TEXT(text_triggers), NULL, NULL, NULL, TRIGGERS_MESSAGE,-1);
 
+  mud->text = GTK_TEXT(text_triggers);
+  parse_input("#help action", NULL);
 
   scrolledwindow_logger = gtk_scrolled_window_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (man_window), "scrolledwindow_logger", scrolledwindow_logger);
   gtk_widget_show (scrolledwindow_logger);
   gtk_container_add (GTK_CONTAINER (notebook), scrolledwindow_logger);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_logger), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_logger = gtk_text_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (man_window), "text_logger", text_logger);
   gtk_widget_show (text_logger);
   gtk_container_add (GTK_CONTAINER (scrolledwindow_logger), text_logger);
   gtk_text_insert(GTK_TEXT(text_logger), NULL, NULL, NULL, LOGGER_MESSAGE,-1);
 
   scrolledwindow_logviewer = gtk_scrolled_window_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (man_window), "scrolledwindow_logviewer", scrolledwindow_logviewer);
   gtk_widget_show (scrolledwindow_logviewer);
   gtk_container_add (GTK_CONTAINER (notebook), scrolledwindow_logviewer);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_logviewer), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_logviewer = gtk_text_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (man_window), "text_logviewer", text_logviewer);
   gtk_widget_show (text_logviewer);
   gtk_container_add (GTK_CONTAINER (scrolledwindow_logviewer), text_logviewer);
   gtk_text_insert(GTK_TEXT(text_logviewer), NULL, NULL, NULL, LOGVIEWER_MESSAGE,-1);
 
   scrolledwindow_font = gtk_scrolled_window_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (man_window), "scrolledwindow_font", scrolledwindow_font);
   gtk_widget_show (scrolledwindow_font);
   gtk_container_add (GTK_CONTAINER (notebook), scrolledwindow_font);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_font), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_font = gtk_text_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (man_window), "text_font", text_font);
   gtk_widget_show (text_font);
   gtk_container_add (GTK_CONTAINER (scrolledwindow_font), text_font);
   gtk_text_insert(GTK_TEXT(text_font), NULL, NULL, NULL, FONT_MESSAGE,-1);
 
   scrolledwindow_color = gtk_scrolled_window_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (man_window), "scrolledwindow_color", scrolledwindow_color);
   gtk_widget_show (scrolledwindow_color);
   gtk_container_add (GTK_CONTAINER (notebook), scrolledwindow_color);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_color), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_color = gtk_text_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (man_window), "text_color", text_color);
   gtk_widget_show (text_color);
   gtk_container_add (GTK_CONTAINER (scrolledwindow_color), text_color);
   gtk_text_insert(GTK_TEXT(text_color), NULL, NULL, NULL, COLOR_MESSAGE,-1);
 
   label_contents = gtk_label_new ("Contents");
-  gtk_object_set_data (GTK_OBJECT (man_window), "label_contents", label_contents);
   gtk_widget_show (label_contents);
   set_notebook_tab (notebook, 0, label_contents);
 
   label_wizard = gtk_label_new ("Connection Wizard");
-  gtk_object_set_data (GTK_OBJECT (man_window), "label_wizard", label_wizard);
   gtk_widget_show (label_wizard);
   set_notebook_tab (notebook, 1, label_wizard);
 
   label_Macros = gtk_label_new ("Macros");
-  gtk_object_set_data (GTK_OBJECT (man_window), "label_Macros", label_Macros);
   gtk_widget_show (label_Macros);
   set_notebook_tab (notebook, 2, label_Macros);
 
   label_alias = gtk_label_new ("Aliases");
-  gtk_object_set_data (GTK_OBJECT (man_window), "label_alias", label_alias);
   gtk_widget_show (label_alias);
   set_notebook_tab (notebook, 3, label_alias);
 
   label_triggers = gtk_label_new ("Triggers");
-  gtk_object_set_data (GTK_OBJECT (man_window), "label_triggers", label_triggers);
   gtk_widget_show (label_triggers);
   set_notebook_tab (notebook, 4, label_triggers);
 
   label_logger = gtk_label_new ("Logger");
-  gtk_object_set_data (GTK_OBJECT (man_window), "label_logger", label_logger);
   gtk_widget_show (label_logger);
   set_notebook_tab (notebook, 5, label_logger);
 
   label_logviewer = gtk_label_new ("LogViewer");
-  gtk_object_set_data (GTK_OBJECT (man_window), "label_logviewer", label_logviewer);
   gtk_widget_show (label_logviewer);
   set_notebook_tab (notebook, 6, label_logviewer);
 
   label_font = gtk_label_new ("Fonts");
-  gtk_object_set_data (GTK_OBJECT (man_window), "label_font", label_font);
   gtk_widget_show (label_font);
   set_notebook_tab (notebook, 7, label_font);
 
   label_color = gtk_label_new ("Colors");
-  gtk_object_set_data (GTK_OBJECT (man_window), "label_color", label_color);
   gtk_widget_show (label_color);
   set_notebook_tab (notebook, 8, label_color);
 
   hbuttonbox = gtk_hbutton_box_new ();
-  gtk_object_set_data (GTK_OBJECT (man_window), "hbuttonbox", hbuttonbox);
   gtk_widget_show (hbuttonbox);
   gtk_box_pack_start (GTK_BOX (vbox), hbuttonbox, FALSE, TRUE, 0);
   gtk_container_border_width (GTK_CONTAINER (hbuttonbox), 3);
 
   done_button = gtk_button_new_with_label ("Done");
-  gtk_object_set_data (GTK_OBJECT (man_window), "done_button", done_button);
   gtk_signal_connect (GTK_OBJECT (done_button), "clicked",
                       GTK_SIGNAL_FUNC (close_window), man_window);
   gtk_widget_show (done_button);
   gtk_container_add (GTK_CONTAINER (hbuttonbox), done_button);
 
   gtk_widget_show (man_window);
+  mud->text = oldtext;
+  prefs.DefaultColor = oldcolor;
 }
