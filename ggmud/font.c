@@ -94,10 +94,8 @@ void font_font_selected (GtkWidget *button, GtkFontSelectionDialog *fs) {
     gchar *temp, buf[256];
 
     temp = gtk_font_selection_get_font_name (GTK_FONT_SELECTION (fs->fontsel));
-    fprintf(stderr, "font: %s", temp);
 
     if (temp) {
-
         if ((font_normal = pango_font_description_from_string (temp))) {
             if (font.FontName)
                 free (font.FontName);

@@ -216,6 +216,7 @@ extern void init_colors();
 
 /* ansi.c */
 extern void disp_ansi(int, const char *, GtkTextView *);
+extern void update_color_tags(GdkColor *);
 
 /* BOLD = bright color. LOW = darkish color */
 extern GdkColor color_lightwhite;	/* BOLD white  */
