@@ -616,7 +616,7 @@ void window_prefs (GtkWidget *widget, gpointer data)
   GtkWidget *temp;
   GtkTooltips *tooltip;
 
-  prefs_window = gtk_window_new (GTK_WINDOW_POPUP);
+  prefs_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title (GTK_WINDOW (prefs_window), "Preferences");
   gtk_window_set_policy (GTK_WINDOW (prefs_window), TRUE, TRUE, TRUE);
   gtk_signal_connect (GTK_OBJECT (prefs_window), "destroy",

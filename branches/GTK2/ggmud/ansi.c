@@ -208,18 +208,18 @@ void init_colors ()
         for (i = 0; i < 8; i++) {
             for (j = 0; j < 2; j++) {
                 fg_colors[j][i] = gtk_text_tag_new(NULL);
-                g_object_set(fg_colors[j][i], "foreground-gdk", orig_colors[j][i]);
+                g_object_set(fg_colors[j][i], "foreground-gdk", orig_colors[j][i], NULL);
                 bg_colors[j][i] = gtk_text_tag_new(NULL);            
-                g_object_set(bg_colors[j][i], "background-gdk", orig_colors[j][i]);
+                g_object_set(bg_colors[j][i], "background-gdk", orig_colors[j][i], NULL);
 
                 gtk_text_tag_table_add(tag_table, fg_colors[j][i]);
                 gtk_text_tag_table_add(tag_table, bg_colors[j][i]);
             }
         }
         fg_col = prefs.DefaultColor = gtk_text_tag_new(NULL);
-        g_object_set(prefs.DefaultColor, "foreground-gdk", &color_white);
+        g_object_set(prefs.DefaultColor, "foreground-gdk", &color_white, NULL);
         bg_col = prefs.BackgroundColor = gtk_text_tag_new(NULL);
-        g_object_set(prefs.BackgroundColor, "background-gdk", &color_black);
+        g_object_set(prefs.BackgroundColor, "background-gdk", &color_black, NULL);
 
         gtk_text_tag_table_add(tag_table, bg_col);
         gtk_text_tag_table_add(tag_table, fg_col);

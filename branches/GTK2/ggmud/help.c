@@ -148,7 +148,7 @@ void do_manual(GtkWidget *widget, gpointer data)
   GtkTextTag *oldcolor = prefs.DefaultColor;
   
   prefs.DefaultColor = gtk_text_tag_new(NULL);
-  g_object_set(prefs.DefaultColor, "foreground-gdk", color_black);
+  g_object_set(prefs.DefaultColor, "foreground-gdk", &color_black, NULL);
  
   man_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_set_usize (man_window, 550, 550);
