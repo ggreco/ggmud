@@ -1,6 +1,6 @@
 CROSSDIR = /usr/local/cross-gcc33/i386-mingw32msvc/
 CROSSCC = $(CROSSDIR)/bin/gcc
-GLOBAL_CFLAGS = -O2
+GLOBAL_CFLAGS = -g
 OBJDIR = obj/
 CC = gcc
 CXX = g++
@@ -16,7 +16,7 @@ PROJECTNAME = ggmud
 
 C_SRCS = alias.c ansi.c font.c fileopen.c help.c history.c log.c logviewer.c \
          macro.c net.c preferences.c ggmud.c triggers.c window.c wizard.c \
-         variables.c highlights.c gags.c
+         variables.c highlights.c gags.c timers.c
 
 DEP_SRCS = $(CXX_SRCS) $(C_SRCS)
 

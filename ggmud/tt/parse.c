@@ -447,6 +447,10 @@ struct session *parse_tintin_command(const char *command, char *arg,
     read_file(arg, ses);  
   else if(is_abbrev(command, "timer"))
     do_timer(arg, ses);
+  else if(is_abbrev(command, "gettimer"))
+    do_gettimer(arg, ses);
+  else if(is_abbrev(command, "stoptimer"))
+    do_stoptimer(arg, ses);
   else if(is_abbrev(command, "timetry"))
     time_between_tries(arg, ses);
 

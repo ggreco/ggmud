@@ -135,9 +135,63 @@ gint change_focus(GtkWidget *w, GdkEventKey *event, gpointer data)
 
 gint hist_evt (GtkWidget* w, GdkEventKey* event, gpointer data)
 {
+    extern char *tab_complete(char *, int);
+    static int tabbing = 0;
     char keypress = 0;
     
     switch (event->keyval) {
+        case GDK_Tab:
+            {
+                char word[32], *result, *buf;
+                int i, pos = gtk_editable_get_position(GTK_EDITABLE(w));
+               
+                if(tabbing && pos > tabbing) {
+                    gtk_editable_delete_text(GTK_EDITABLE(w),
+                            pos - tabbing - 1, pos);
+
+                    pos = gtk_editable_get_position(GTK_EDITABLE(w));
+                }
+
+                
+                buf = gtk_editable_get_chars(GTK_EDITABLE(w), 0, pos);
+
+                i = pos - 1;
+                
+                while(i && buf[i] > ' ') i--;
+                
+                if(i == 0)
+                    strcpy(word, buf);
+                else {
+                    i++;
+                    strcpy(word, buf + i);
+                }
+                
+                if(!*word) {
+                    tabbing = 0;
+                    return 0;
+                }
+                
+                if ((result = tab_complete(word, tabbing))) {
+                    int temp = pos;
+ 
+                    result += strlen(word);
+                    
+                    gtk_editable_insert_text(GTK_EDITABLE(w),
+                            result, strlen(result), &temp);
+                    tabbing = strlen(result);
+
+                    temp = pos + tabbing;
+
+                    gtk_editable_insert_text(GTK_EDITABLE(w), 
+                            " ", 1, &temp);
+
+                    gtk_editable_set_position(GTK_EDITABLE(w), 
+                            pos + tabbing + 1);
+                }
+                else
+                    tabbing = 0;
+            }
+            break;
         case GDK_KP_2:
             keypress = 's';
             break;
@@ -181,6 +235,7 @@ gint hist_evt (GtkWidget* w, GdkEventKey* event, gpointer data)
         }
         default:
             /* normal handling */
+            tabbing = 0;
             return 0;
             break;
     }
