@@ -186,7 +186,7 @@ void load_tabs(void)
   char *s, *t, line[128];
 
   if(!(f = fileopen(COMPLETE_FILE, "r"))) {
-    tintin_puts("#Couldn't open " COMPLETE_FILE, 0);
+//    tintin_puts("#Couldn't open " COMPLETE_FILE, 0);
     return;
   }
 
