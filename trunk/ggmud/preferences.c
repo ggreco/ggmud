@@ -34,6 +34,11 @@
 #include "ansi.h"
 #include "preferences.h"	/* Needs to be after sclient.h */
 
+#ifdef WIN32
+#define PREFS_FILE "ggmud.prf"
+#else
+#define PREFS_FILE "Preference"
+#endif
 
 gdouble *gdk_color_to_gdouble (GdkColor *gdkcolor)
 {
@@ -56,7 +61,7 @@ void load_misc_prefs () {
     int off;
  
     prefs.Toolbar = prefs.Macrobuttons = prefs.Statusbar = TRUE;
-    if (fp = fileopen("Preference", "r")) {
+    if (fp = fileopen(PREFS_FILE, "r")) {
     	while (fgets (line, 80, fp)) {
             sscanf (line, "%[^=]=%[^\n]", pref, value);
             if (!(off = strcmp(value, "Off"))) {
@@ -88,7 +93,7 @@ void load_prefs () {
     prefs.DefaultColor = color_white;
     prefs.KeepText = prefs.EchoText  = prefs.WordWrap = prefs.DoBeep = TRUE;
 
-    if (fp = fileopen("Preference", "r")) {
+    if (fp = fileopen(PREFS_FILE, "r")) {
     	while (fgets (line, 80, fp)) {
             sscanf (line, "%[^=]=%[^\n]", pref, value);
             if (!(off = strcmp(value, "Off"))) {
@@ -136,7 +141,7 @@ void save_prefs (GtkWidget *button, gpointer data) {
     FILE *fp;
     gchar buf[256], i=0;
 
-    if (fp = fileopen ("Preference", "w")) {
+    if (fp = fileopen (PREFS_FILE, "w")) {
         if (prefs.KeepText) {
             fprintf (fp, "KeepText=On\n");
         } else {
@@ -391,7 +396,7 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy)
       gtk_signal_connect (GTK_OBJECT (color_button), "clicked",
 			  GTK_SIGNAL_FUNC (color_callback), (gpointer) &color_arr[i]);
       tooltip = gtk_tooltips_new ();
-      gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
+//      gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
       sprintf(tmp, "You can use this button to change the %s color", color_arr[i].name);
       gtk_tooltips_set_tip (tooltip, color_button, tmp, NULL);
       gtk_widget_show (color_button);
@@ -465,13 +470,7 @@ void window_prefs (GtkWidget *widget, gpointer data)
   GtkWidget *prefs_hbuttonbox;
   GtkWidget *save_button;
   GtkWidget *close_button;
-  GtkTooltips *tooltip1;
-  GtkTooltips *tooltip2;
-  GtkTooltips *tooltip3;
-  GtkTooltips *tooltip4;
-  GtkTooltips *tooltip5;
-  GtkTooltips *tooltip6;
-  GtkTooltips *tooltip7;
+  GtkTooltips *tooltip;
 
   prefs_window = gtk_window_new (GTK_WINDOW_DIALOG);
   gtk_object_set_data (GTK_OBJECT (prefs_window), "prefs_window", prefs_window);
@@ -503,9 +502,9 @@ void window_prefs (GtkWidget *widget, gpointer data)
   gtk_signal_connect (GTK_OBJECT (checkbutton_keep), "toggled",
                       GTK_SIGNAL_FUNC (check_text_toggle),
                       checkbutton_keep);
-  tooltip1 = gtk_tooltips_new ();
-  gtk_tooltips_set_colors (tooltip1, &color_lightyellow, &color_black);
-  gtk_tooltips_set_tip (tooltip1, checkbutton_keep,
+  tooltip = gtk_tooltips_new ();
+//  gtk_tooltips_set_colors (tooltip1, &color_lightyellow, &color_black);
+  gtk_tooltips_set_tip (tooltip, checkbutton_keep,
                         "With this toggled on, the text you have entered and sent "
                         "to the connection, will be left in the entry box but "
                         "seleceted.", NULL);
@@ -517,9 +516,8 @@ void window_prefs (GtkWidget *widget, gpointer data)
   gtk_object_set_data (GTK_OBJECT (prefs_window), "checkbutton_echo", checkbutton_echo);
   gtk_signal_connect (GTK_OBJECT (checkbutton_echo), "toggled",
                       GTK_SIGNAL_FUNC (check_callback), checkbutton_echo);
-  tooltip2 = gtk_tooltips_new ();
-  gtk_tooltips_set_colors (tooltip2, &color_lightyellow, &color_black);
-  gtk_tooltips_set_tip (tooltip2, checkbutton_echo,
+  
+  gtk_tooltips_set_tip (tooltip, checkbutton_echo,
                         "With this toggled on, all the text you type and "
                         "enter will be echoed on the connection so you can "
                         "control what you are sending."
@@ -549,9 +547,8 @@ void window_prefs (GtkWidget *widget, gpointer data)
                       GTK_SIGNAL_FUNC (check_wrap), checkbutton_wrap);
   gtk_signal_connect (GTK_OBJECT(checkbutton_wrap), "toggled",
 		      GTK_SIGNAL_FUNC(text_toggle_word_wrap), mud->text);
-  tooltip3 = gtk_tooltips_new ();
-  gtk_tooltips_set_colors (tooltip3, &color_lightyellow, &color_black);
-  gtk_tooltips_set_tip (tooltip3, checkbutton_wrap,
+
+  gtk_tooltips_set_tip (tooltip, checkbutton_wrap,
                         "Wordwrap the lines in the main window!",
                         NULL);
   gtk_widget_show (checkbutton_wrap);
@@ -563,9 +560,8 @@ void window_prefs (GtkWidget *widget, gpointer data)
   gtk_signal_connect (GTK_OBJECT (checkbutton_beep), "toggled",
                       GTK_SIGNAL_FUNC (check_beep),
                       checkbutton_beep);
-  tooltip4 = gtk_tooltips_new ();
-  gtk_tooltips_set_colors (tooltip4, &color_lightyellow, &color_black);
-  gtk_tooltips_set_tip (tooltip4, checkbutton_beep,
+
+  gtk_tooltips_set_tip (tooltip, checkbutton_beep,
                         "If enabled SClient will emit the beep (system bell) sound.",
                         NULL);
   gtk_widget_show (checkbutton_beep);
@@ -589,9 +585,7 @@ void window_prefs (GtkWidget *widget, gpointer data)
   gtk_object_set_data (GTK_OBJECT (prefs_window), "checkbutton_Toolbar", checkbutton_Toolbar);
   gtk_signal_connect (GTK_OBJECT (checkbutton_Toolbar),"toggled",
                        GTK_SIGNAL_FUNC (check_Toolbar),checkbutton_Toolbar);
-  tooltip5 = gtk_tooltips_new ();
-  gtk_tooltips_set_colors (tooltip5, &color_lightyellow, &color_black);
-  gtk_tooltips_set_tip (tooltip5, checkbutton_Toolbar,
+  gtk_tooltips_set_tip (tooltip, checkbutton_Toolbar,
                         "Toggle this on to hide the Toolbar.",
                         NULL);
   gtk_widget_show (checkbutton_Toolbar);
@@ -603,9 +597,8 @@ void window_prefs (GtkWidget *widget, gpointer data)
   gtk_object_set_data (GTK_OBJECT (prefs_window), "checkbutton_Macrobuttons", checkbutton_Macrobuttons);
   gtk_signal_connect (GTK_OBJECT (checkbutton_Macrobuttons),"toggled",
                        GTK_SIGNAL_FUNC (check_Macrobuttons),checkbutton_Macrobuttons);
-  tooltip6 = gtk_tooltips_new ();
-  gtk_tooltips_set_colors (tooltip6, &color_lightyellow, &color_black);
-  gtk_tooltips_set_tip (tooltip6, checkbutton_Macrobuttons,
+
+  gtk_tooltips_set_tip (tooltip, checkbutton_Macrobuttons,
                         "Toggle this on to hide the Macro buttons.",
                         NULL);
   gtk_widget_show (checkbutton_Macrobuttons);
@@ -616,9 +609,8 @@ void window_prefs (GtkWidget *widget, gpointer data)
   gtk_object_set_data (GTK_OBJECT (prefs_window), "checkbutton_Statusbar", checkbutton_Statusbar);
   gtk_signal_connect (GTK_OBJECT (checkbutton_Statusbar),"toggled",
                        GTK_SIGNAL_FUNC (check_Statusbar),checkbutton_Statusbar);
-  tooltip7 = gtk_tooltips_new ();
-  gtk_tooltips_set_colors (tooltip7, &color_lightyellow, &color_black);
-  gtk_tooltips_set_tip (tooltip7, checkbutton_Statusbar,
+
+  gtk_tooltips_set_tip (tooltip, checkbutton_Statusbar,
                         "Toggle this on to hide the Statusbar.",
                         NULL);
   gtk_widget_show (checkbutton_Statusbar);

@@ -26,12 +26,13 @@
 #include <errno.h>
 #include <stdlib.h>
 
+#ifndef WIN32
+
 int check_sclient_dir (gchar *dirname) {
 /* check if the specified directory exists, try to create it if it doesn't */
     struct stat file_stat;
     int return_val = 0;
     gchar buf[256];
-#ifndef WIN32
             
     if (!stat(dirname, &file_stat)) {
     /* can we stat ~/.sclient? */
@@ -56,15 +57,13 @@ int check_sclient_dir (gchar *dirname) {
             return_val = errno;
         }
     }
-#else
-    return_val = 1; // TODO
-#endif
     return (return_val);
 }
-                                                                                                                                                                                                                                           
+#endif
 
 FILE *fileopen (gchar *fname, gchar *mode) {
 /* Does all necessary checks and tries to open the specified file */
+#ifndef WIN32
     gchar *dir = "/.ggmud";
     gchar *home;
     gchar path[256] = "";
@@ -76,4 +75,7 @@ FILE *fileopen (gchar *fname, gchar *mode) {
     g_snprintf (path, 255, "%s%s/%s", home!= NULL ? home : "", dir, fname);
     fp = fopen (path, mode);
     return fp;
+#else
+    return fopen(fname, mode);
+#endif
 }

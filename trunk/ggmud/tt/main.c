@@ -166,8 +166,12 @@ int ttmain(int argc, char **argv)
   if(argc > arg_num && argv[arg_num])
     activesession = read_command(argv[arg_num], NULL);
   else {
+#ifndef WIN32
     sprintf(temp, "%s", homepath);
     strcat(temp, "/.tintinrc");
+#else
+    strcpy(temp, "./ggmud.cfg");
+#endif
     if((fd = fopen(temp, "r")) > 0) { /* Check if it exists */
       fclose(fd);
       activesession = read_command(temp, NULL);

@@ -22,12 +22,17 @@
 
 #include "macro.h"
 
+#define MACRO_FILE "macro"
+
 /* The callback function for the ok button */
 void button_ok_callback(GtkWidget *button, GtkWidget *entry[]) {
     gint i;
     
     for (i = 0; i <12; i++) {
-	macro_list[i] = g_strdup (gtk_entry_get_text(GTK_ENTRY(entry[i])));
+        if(macro_list[i])
+            free(macro_list[i]);
+        
+    	macro_list[i] = strdup (gtk_entry_get_text(GTK_ENTRY(entry[i])));
     }	
     macro_btnLabel_change();
     save_macro(NULL);
@@ -38,7 +43,7 @@ void save_macro (gpointer data) {
     FILE *fp;
     gint i = 0;
     
-    if (fp = fileopen ("macro", "w")) {
+    if (fp = fileopen (MACRO_FILE, "w")) {
 	while (keys[i]) {
 	    fprintf (fp, "%s %s\n", keys[i], macro_list[i]);
 	    i++;
@@ -53,24 +58,25 @@ void load_macro () {
     gchar line[255], macro[5], value[250];
     gint i;
     
-    if (!(macro_list = g_malloc(12 * sizeof (gchar *)))) return;
-    for (i = 0; i < 12; i++) if (!(macro_list[i] = g_malloc0(1))) return;
-    if (fp = fileopen ("macro", "r")) {
-	/* load in the macro's into the entry[] boxes */
-    	while (fgets (line, 80, fp)) {
-	    value[0] = 0;
+    if (!(macro_list = calloc(12, sizeof (gchar *)))) return;
+    for (i = 0; i < 12; i++) if (!(macro_list[i] = calloc(1, sizeof(char)))) return;
+    
+    if (fp = fileopen (MACRO_FILE, "r")) {
+        /* load in the macro's into the entry[] boxes */
+        while (fgets (line, sizeof(line) - 1, fp)) {
+            value[0] = 0;
             sscanf (line, "%s %[^\n]", macro, value);
-	    i = 0;
-	    while (keys[i]) {
-		if (!strcmp (macro, keys[i])) {
-		    if (!(macro_list[i] = g_realloc(macro_list[i],strlen(value) + 1))) return;
-		    strcpy(macro_list[i], value);
-		    break;
-		}
-		i++;
-	    }
-    	}    
-    	fclose (fp);
+            i = 0;
+            while (keys[i]) {
+                if (!strcmp (macro, keys[i])) {
+                    if (!(macro_list[i] = realloc(macro_list[i],strlen(value) + 1))) return;
+                    strcpy(macro_list[i], value);
+                    break;
+                }
+                i++;
+            }
+        }    
+        fclose (fp);
     }	
 }
 
