@@ -1402,10 +1402,10 @@ void textfield_unfreeze()
 
 void textfield_add(GtkTextView *txt, const char *message, int colortype)
 {
-    static GtkTextMark *mark = NULL;
     int numbytes;
     GtkTextIter iter;
     GtkTextBuffer *tbuf;
+    GtkTextMark *mark;
     extern GtkTextTag *fg_colors[2][8];
 
     
@@ -1419,9 +1419,10 @@ void textfield_add(GtkTextView *txt, const char *message, int colortype)
             
             disp_ansi(numbytes, message, txt);
 
-            if (txt != mud->text)
-                gtk_text_view_scroll_mark_onscreen(txt, gtk_object_get_user_data(GTK_OBJECT(txt)));
-            
+            if (txt != mud->text) {
+                if ((mark = gtk_object_get_user_data(GTK_OBJECT(txt))))
+                    gtk_text_view_scroll_mark_onscreen(txt, mark);
+            }
             return;
         case MESSAGE_SENT:
             if (mud->LOGGING) /* Loging */
@@ -1444,7 +1445,8 @@ void textfield_add(GtkTextView *txt, const char *message, int colortype)
     gtk_text_buffer_get_end_iter(tbuf, &iter);
     gtk_text_buffer_insert_with_tags(tbuf, &iter, message, -1, tag, NULL);
 
-    gtk_text_view_scroll_mark_onscreen(txt, gtk_object_get_user_data(GTK_OBJECT(txt)));
+    if ((mark = gtk_object_get_user_data(GTK_OBJECT(txt))))
+        gtk_text_view_scroll_mark_onscreen(txt, gtk_object_get_user_data(GTK_OBJECT(txt)));
 }
 
 

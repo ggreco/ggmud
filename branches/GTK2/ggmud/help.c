@@ -110,20 +110,6 @@ void do_about (GtkWidget *widget, gpointer data)
   text_insert(text_about, ABOUT_MESSAGE);
 }
 
-void set_notebook_tab (GtkWidget *notebook, gint page_num, GtkWidget *widget)
-{
-  GtkWidget *page;
-  GtkWidget *notebook_page;
-
-  page = gtk_notebook_get_nth_page(GTK_NOTEBOOK (notebook), page_num);
-  notebook_page = gtk_notebook_get_menu_label(GTK_NOTEBOOK (notebook), page);
-  gtk_widget_ref (notebook_page);
-  gtk_notebook_remove_page (GTK_NOTEBOOK (notebook), page_num);
-  gtk_notebook_insert_page (GTK_NOTEBOOK (notebook), notebook_page,
-                            widget, page_num);
-  gtk_widget_unref (notebook_page);
-}
-
 void do_manual(GtkWidget *widget, gpointer data)
 {
   GtkWidget *man_window;
@@ -174,12 +160,10 @@ void do_manual(GtkWidget *widget, gpointer data)
   gtk_container_add (GTK_CONTAINER (man_window), vbox);
 
   notebook = gtk_notebook_new ();
-  gtk_widget_show (notebook);
   gtk_box_pack_start (GTK_BOX (vbox), notebook, TRUE, TRUE, 0);
 
   scrolledwindow_contents = gtk_scrolled_window_new (NULL, NULL);
-  gtk_widget_show (scrolledwindow_contents);
-  gtk_container_add (GTK_CONTAINER (notebook), scrolledwindow_contents);
+  gtk_notebook_append_page(GTK_NOTEBOOK (notebook), scrolledwindow_contents, gtk_label_new ("Contents"));
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_contents), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_contents = gtk_text_view_new ();
@@ -192,7 +176,7 @@ void do_manual(GtkWidget *widget, gpointer data)
 
   scrolledwindow_wizard = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_show (scrolledwindow_wizard);
-  gtk_container_add (GTK_CONTAINER (notebook), scrolledwindow_wizard);
+  gtk_notebook_append_page(GTK_NOTEBOOK (notebook), scrolledwindow_wizard, gtk_label_new ("Connection Wizard"));
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_wizard), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_wizard = gtk_text_view_new ();
@@ -202,7 +186,7 @@ void do_manual(GtkWidget *widget, gpointer data)
 
   scrolledwindow_macros = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_show (scrolledwindow_macros);
-  gtk_container_add (GTK_CONTAINER (notebook), scrolledwindow_macros);
+  gtk_notebook_append_page(GTK_NOTEBOOK (notebook), scrolledwindow_macros, gtk_label_new ("Macros"));
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_macros), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_macros = gtk_text_view_new ();
@@ -212,7 +196,7 @@ void do_manual(GtkWidget *widget, gpointer data)
 
   scrolledwindow_alias = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_show (scrolledwindow_alias);
-  gtk_container_add (GTK_CONTAINER (notebook), scrolledwindow_alias);
+  gtk_notebook_append_page(GTK_NOTEBOOK (notebook), scrolledwindow_alias, gtk_label_new ("Aliases"));
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_alias), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_alias = gtk_text_view_new ();
@@ -224,7 +208,7 @@ void do_manual(GtkWidget *widget, gpointer data)
 
   scrolledwindow_triggers = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_show (scrolledwindow_triggers);
-  gtk_container_add (GTK_CONTAINER (notebook), scrolledwindow_triggers);
+  gtk_notebook_append_page(GTK_NOTEBOOK (notebook), scrolledwindow_triggers, gtk_label_new ("Triggers"));
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_triggers), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_triggers = gtk_text_view_new ();
@@ -236,7 +220,7 @@ void do_manual(GtkWidget *widget, gpointer data)
 
   scrolledwindow_logger = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_show (scrolledwindow_logger);
-  gtk_container_add (GTK_CONTAINER (notebook), scrolledwindow_logger);
+  gtk_notebook_append_page(GTK_NOTEBOOK (notebook), scrolledwindow_logger, gtk_label_new ("Logger"));
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_logger), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_logger = gtk_text_view_new ();
@@ -246,7 +230,7 @@ void do_manual(GtkWidget *widget, gpointer data)
 
   scrolledwindow_logviewer = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_show (scrolledwindow_logviewer);
-  gtk_container_add (GTK_CONTAINER (notebook), scrolledwindow_logviewer);
+  gtk_notebook_append_page(GTK_NOTEBOOK (notebook), scrolledwindow_logviewer, gtk_label_new ("Log Viewer"));
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_logviewer), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_logviewer = gtk_text_view_new ();
@@ -256,7 +240,7 @@ void do_manual(GtkWidget *widget, gpointer data)
 
   scrolledwindow_font = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_show (scrolledwindow_font);
-  gtk_container_add (GTK_CONTAINER (notebook), scrolledwindow_font);
+  gtk_notebook_append_page(GTK_NOTEBOOK (notebook), scrolledwindow_font, gtk_label_new ("Fonts"));
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_font), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_font = gtk_text_view_new ();
@@ -266,7 +250,7 @@ void do_manual(GtkWidget *widget, gpointer data)
 
   scrolledwindow_color = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_show (scrolledwindow_color);
-  gtk_container_add (GTK_CONTAINER (notebook), scrolledwindow_color);
+  gtk_notebook_append_page(GTK_NOTEBOOK (notebook), scrolledwindow_color, gtk_label_new ("Colors"));
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow_color), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
   text_color = gtk_text_view_new ();
@@ -274,41 +258,7 @@ void do_manual(GtkWidget *widget, gpointer data)
   gtk_container_add (GTK_CONTAINER (scrolledwindow_color), text_color);
   text_insert(text_color, COLOR_MESSAGE);
 
-  label_contents = gtk_label_new ("Contents");
-  gtk_widget_show (label_contents);
-  set_notebook_tab (notebook, 0, label_contents);
-
-  label_wizard = gtk_label_new ("Connection Wizard");
-  gtk_widget_show (label_wizard);
-  set_notebook_tab (notebook, 1, label_wizard);
-
-  label_Macros = gtk_label_new ("Macros");
-  gtk_widget_show (label_Macros);
-  set_notebook_tab (notebook, 2, label_Macros);
-
-  label_alias = gtk_label_new ("Aliases");
-  gtk_widget_show (label_alias);
-  set_notebook_tab (notebook, 3, label_alias);
-
-  label_triggers = gtk_label_new ("Triggers");
-  gtk_widget_show (label_triggers);
-  set_notebook_tab (notebook, 4, label_triggers);
-
-  label_logger = gtk_label_new ("Logger");
-  gtk_widget_show (label_logger);
-  set_notebook_tab (notebook, 5, label_logger);
-
-  label_logviewer = gtk_label_new ("LogViewer");
-  gtk_widget_show (label_logviewer);
-  set_notebook_tab (notebook, 6, label_logviewer);
-
-  label_font = gtk_label_new ("Fonts");
-  gtk_widget_show (label_font);
-  set_notebook_tab (notebook, 7, label_font);
-
-  label_color = gtk_label_new ("Colors");
-  gtk_widget_show (label_color);
-  set_notebook_tab (notebook, 8, label_color);
+  gtk_widget_show_all (notebook);
 
   hbuttonbox = gtk_hbutton_box_new ();
   gtk_widget_show (hbuttonbox);
