@@ -38,10 +38,7 @@ GtkStyle *style;
 
 void set_style() 
 {
-    if (!font_normal)
-        return;
-
-    if (mud->text) {
+    if (mud && mud->text && font_normal) {
         gtk_widget_modify_font(GTK_WIDGET(mud->text), font_normal);
     }
 }
@@ -51,7 +48,7 @@ void load_font () {
     gchar line[255], pref[25], value[250];
 
     font.FontName = strdup ("Monospace 12");
-
+#if 0
     if (fp = fileopen ("font", "r")) {
         while (fgets (line, 80, fp)) {
             sscanf (line, "%s %[^\n]", pref, value);
@@ -69,6 +66,7 @@ void load_font () {
     }
     else
         set_style();
+#endif
 }
 
 void save_font () {

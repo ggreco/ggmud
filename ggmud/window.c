@@ -690,7 +690,7 @@ void
 spawn_gui()
 {
   gint i = 0;
-  gint key = 0xFFBE; /* F1 key */
+  gint key = GDK_F1; /* F1 key */
   GtkWidget *vbox1;
   GtkWidget *menubar;
   GtkWidget *menu_File;
@@ -754,6 +754,7 @@ spawn_gui()
   gtk_container_border_width (GTK_CONTAINER (mud->window), 3);
   gtk_window_set_title (GTK_WINDOW (mud->window), "GGMud "VERSION"");
 //  gtk_window_set_policy (GTK_WINDOW (mud->window), FALSE, TRUE, FALSE);
+  gtk_widget_realize ( mud->window );
 
   /* handlers so we can quit the close the app */
   gtk_signal_connect (GTK_OBJECT (mud->window), "delete_event", GTK_SIGNAL_FUNC (quit), NULL);
@@ -761,8 +762,7 @@ spawn_gui()
 
   /* create the accel_group for the keyboard bindings */
   accel_group = gtk_accel_group_new ();
-  gtk_window_add_accel_group (GTK_WINDOW (mud->window), accel_group);
-
+ 
   vbox1 = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (vbox1);
   gtk_container_add (GTK_CONTAINER (mud->window), vbox1);
@@ -1042,8 +1042,7 @@ spawn_gui()
 /*** ToolBar ***/
   /* we need to realize the window because we use pixmaps for 
    * items on the toolbar in the context of it */
-  gtk_widget_realize ( mud->window );
-
+ 
   /* to make it nice we'll put the toolbar into the handle box, 
    * so that it can be detached from the main window */
   handlebox = gtk_handle_box_new ();
@@ -1367,6 +1366,8 @@ spawn_gui()
   else 
       gtk_widget_hide (statusbar);
 
+  gtk_window_add_accel_group (GTK_WINDOW (mud->window), accel_group);
+  
   statusbar_id = gtk_statusbar_get_context_id(GTK_STATUSBAR(statusbar), "Statusbar");
   gtk_statusbar_push (GTK_STATUSBAR(statusbar), statusbar_id, "Ready");
   macro_btnLabel_change();
@@ -1526,8 +1527,10 @@ GtkWidget *create_tv(GtkTextBuffer *buffer, GtkTextView **view)
     gtk_text_buffer_get_end_iter(buffer, &it);
     mark = gtk_text_buffer_create_mark(buffer, NULL, &it, FALSE);
     gtk_object_set_user_data(GTK_OBJECT(text), mark);
-    
-    gtk_widget_modify_font((GtkWidget *)text, font_normal);
+   
+    if (font_normal)
+        gtk_widget_modify_font((GtkWidget *)text, font_normal);
+
     return sw;
 }
 
