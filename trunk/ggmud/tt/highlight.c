@@ -427,13 +427,4 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
   
   strcat(result, line);
   strcat(result, DEFAULT_END_COLOR);
-  {
-      FILE *f;
-
-      if(f = fopen("test.log", "a")) {
-          fputs(result, f);
-          fclose(f);
-      }
-  }
-
 }
