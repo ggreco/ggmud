@@ -29,6 +29,7 @@ typedef enum { F1, F2, F3, F4, F5, F6, F7, F8, F9, F10 } BUTTON;
 
 /* External variables used */
 extern gchar *keys[];
+extern int hide_input;
 
 /* Global variables */
 GtkWidget *btnLabel[12];
@@ -118,6 +119,20 @@ GtkWidget *create_new_window(char *title, int width, int height)
 
 
     return list;
+}
+
+void
+input_line_visible(int state)
+{
+    if(state == FALSE) {
+        gtk_entry_set_text(mud->ent, "");
+
+        hide_input = TRUE;
+    }
+    else
+        hide_input = FALSE;
+            
+    gtk_entry_set_visibility(mud->ent, state);
 }
 
 window_entry *create_new_entry(char *title, int width, int height)
@@ -1314,7 +1329,7 @@ void textfield_unfreeze()
     else if(adj->value < (adj->upper - adj->page_size))
         gtk_adjustment_set_value(adj, (adj->upper - adj->page_size));
 
-    gtk_widget_grab_focus ((GtkWidget *)mud->ent);
+//    gtk_widget_grab_focus ((GtkWidget *)mud->ent); XXX serve?
 }
 
 void textfield_add(GtkText *txt, const char *message, int colortype)

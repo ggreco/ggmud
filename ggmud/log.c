@@ -233,70 +233,31 @@ void append_dialog (const gchar *filename)
  */
 void file_ok_sel (GtkWidget *w, GtkFileSelection *fs)
 {
-    gchar buf[256];
-    struct stat file_stat;
-
+    FILE *f;
+    
     /* Get the filename from file dialog */
     mud->log_filename = strdup(gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs)));
-#ifndef WIN32
+
     /* Check to see if mud->log_filename exists or not */
-    if (stat (mud->log_filename, &file_stat) == 0) {
-        /* If mud->log_filename a directory emit error */
-        if (S_ISDIR(file_stat.st_mode)) {
-            /* mud->log_filename is a directory and that's no good
-               so asume that the user wishes to view the directory
-               so set the file dialog to display it and return to
-               file dialog */
-            gtk_file_selection_set_filename (GTK_FILE_SELECTION (fs), mud->log_filename);
-            return;
-        }
-        /* Is it a regular file? */
-        if (!S_ISREG(file_stat.st_mode)) {
-            sprintf (buf, "File %s is not a regular file:\n\n %s", mud->log_filename, strerror (errno));
-            my_popup_window("GGMud Error", buf);
-            return;
-        }
-        /* Do we have write permision to mud->log_filename? */
-        if (access (mud->log_filename, W_OK)) {
-            sprintf (buf, "Can't open file %s for writing:\n\n %s", mud->log_filename, strerror (errno));
-            my_popup_window("GGMud Error", buf);
-            return;
-        }
-        /* mud->log_file is NOT a directory and we can write to it, so
-           ask user if they want to Overwrite or append to the file */
+    if (f = fopen (mud->log_filename, "r")) {
+        fclose(f);
         append_dialog(mud->log_filename);
         return;
     } else {
-        /* stat failed to check mud->log_filename */
-        switch (errno) {
-            case EBADF:
-            case EFAULT:
-            case EACCES:
-                    sprintf (buf, "Can't open %s:\n\n %s", mud->log_filename, strerror (errno));
-                    my_popup_window("GGMud Error", buf);
-                    return;
-                    break;
-            case ENAMETOOLONG:
-                    my_popup_window("GGMud Error", "File name is too long.");
-                    return;
-                    break;
-            case ENOENT:   /* mud->log_filename does NOT exist so open the file for writing */
-                    if ((mud->LOG_FILE = fopen(mud->log_filename, "w")) == NULL) {
-                        sprintf (buf, "Can't open file %s for writing:\n\n %s", mud->log_filename, strerror (errno));
-                        my_popup_window("GGMud Error", buf);
-                    }
-                    /* Is set to TRUE and therefor we are logging :) */
-                    mud->LOGGING = TRUE;
-                    /* Close the file dialog */
-                    gtk_grab_remove(file_dialog);
-                    gtk_widget_destroy (GTK_WIDGET (file_dialog));
-                    break;
-            default:
-                    break;
+        if ((mud->LOG_FILE = fopen(mud->log_filename, "w")) == NULL) {
+            char buf[256];
+            sprintf (buf, "Can't open file %s for writing:\n\n %s",
+                    mud->log_filename, strerror (errno));
+            
+            my_popup_window("GGMud Error", buf);
         }
-
+        else mud->LOGGING = TRUE;
+        /* Is set to TRUE and therefor we are logging :) */
+        /* Close the file dialog */
+        
+        gtk_grab_remove(file_dialog);
+        gtk_widget_destroy (GTK_WIDGET (file_dialog));
     }
-#endif
 }
 
 /*
