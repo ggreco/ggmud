@@ -214,6 +214,7 @@ extern void TextCopy (GtkWidget *widget, gpointer data);
 
 /* win.c */
 extern void  close_window ( GtkWidget *widget, gpointer data );
+extern void  kill_window ( GtkWidget *widget, gpointer data );
 extern void init_colors();
 
 /* ansi.c */

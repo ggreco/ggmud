@@ -535,6 +535,13 @@ void toggle_triggers(GtkToggleButton *togglebutton,
     }    
 }
 
+void kill_window (GtkWidget *widget, gpointer data)
+{
+    GtkWidget **w = (GtkWidget **)data;
+
+    *w = NULL;
+}
+
 void close_window (GtkWidget *widget, gpointer data)
 {
     gtk_widget_destroy (GTK_WIDGET (data));
@@ -846,7 +853,7 @@ spawn_gui()
   /* tools menu */
   menu = add_menu (menubar, "Tools");
   
-  add_menu_item(menu, accel_group, "Marcos", GTK_SIGNAL_FUNC(window_macro),  GDK_M, GDK_MOD1_MASK);
+  add_menu_item(menu, accel_group, "Macros", GTK_SIGNAL_FUNC(window_macro),  GDK_M, GDK_MOD1_MASK);
   add_menu_item(menu, accel_group, "Aliases", GTK_SIGNAL_FUNC(window_alias),  GDK_A, GDK_MOD1_MASK);
   add_menu_item(menu, accel_group, "Triggers", GTK_SIGNAL_FUNC(triggers_window),  GDK_T, GDK_MOD1_MASK);
   add_menu_item(menu, NULL, "Highlights", GTK_SIGNAL_FUNC(highlights_window),  0, 0);
