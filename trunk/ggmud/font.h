@@ -24,13 +24,5 @@ void save_font ();
 void font_font_selected (GtkWidget *button, GtkFontSelectionDialog *fs);
 void window_font    ( GtkWidget *widget, gpointer data   );
 
-/* Global variables */
-SYSTEM_DATA font;
-GtkWidget   *font_window;
-GtkWidget   *font_button_save;
-GtkWidget   *entry_fontname;
-GtkWidget *menu_Option_font;
-GdkFont  *font_normal;
-GtkStyle *style;
 
 #endif /* _FONT_H_ */

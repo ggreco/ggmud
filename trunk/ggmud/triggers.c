@@ -25,6 +25,15 @@
 #include "triggers.h"
 #include <string.h>
 
+/* Global Variables */
+gint         trigger_selected_row;
+static GSList *trigger_list;
+GtkWidget    *entry_trigger;
+GtkWidget    *entry_send[5];
+GtkWidget    *window_triggers;
+GtkWidget    *button_apply;
+GtkWidget    *button_delete;
+
 TRIGGER_DATA *trigger_get_trigger_data (gchar *text) {
     GSList       *tmp;
     TRIGGER_DATA *w;

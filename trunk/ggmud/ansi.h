@@ -23,49 +23,39 @@ gushort  convert_color (unsigned color);
 void     extract_color (GdkColor *color, unsigned red, unsigned green, unsigned blue);
 void     init_colors ();
 
-/* Glbal Variables */
-GtkWidget *text_field;
-GtkWidget *text_entry;
-GtkWidget *entry_host;
-GtkWidget *entry_port;
+extern GdkColor color_lightwhite;	/* BOLD white  */
+extern GdkColor color_white;		/* LOW white */
+extern GdkColor color_lightblue;	/* BOLD blue */
+extern GdkColor color_blue;		/* LOW blue */
+extern GdkColor color_lightgreen;	/* BOLD green */
+extern GdkColor color_green;		/* LOW green */
+extern GdkColor color_lightred;	/* BOLD red */
+extern GdkColor color_red;		/* LOW red */
+extern GdkColor color_lightyellow;	/* BOLD yellow */
+extern GdkColor color_yellow;		/* LOW yellow ( brown )*/
+extern GdkColor color_lightmagenta;	/* BOLD magenta ( pink ) */
+extern GdkColor color_magenta;		/* LOW magenta ( purple ) */
+extern GdkColor color_lightcyan;	/* BOLD cyan */
+extern GdkColor color_cyan;		/* LOW cyan */
+extern GdkColor color_lightblack;	/* BOLD grey (highlighted black) */
+extern GdkColor color_black;		/* LOW black */
 
-/* Colors */
-GdkColormap *cmap;		/* BOLD = bright color. LOW = darkish color */
-GdkColor color_lightwhite;	/* BOLD white  */
-GdkColor color_white;		/* LOW white */
-GdkColor color_lightblue;	/* BOLD blue */
-GdkColor color_blue;		/* LOW blue */
-GdkColor color_lightgreen;	/* BOLD green */
-GdkColor color_green;		/* LOW green */
-GdkColor color_lightred;	/* BOLD red */
-GdkColor color_red;		/* LOW red */
-GdkColor color_lightyellow;	/* BOLD yellow */
-GdkColor color_yellow;		/* LOW yellow ( brown )*/
-GdkColor color_lightmagenta;	/* BOLD magenta ( pink ) */
-GdkColor color_magenta;		/* LOW magenta ( purple ) */
-GdkColor color_lightcyan;	/* BOLD cyan */
-GdkColor color_cyan;		/* LOW cyan */
-GdkColor color_lightblack;	/* BOLD grey (highlighted black) */
-GdkColor color_black;		/* LOW black */
-
-GdkColor default_color_lightwhite;	/* BOLD white  */
-GdkColor default_color_white;		/* LOW white */
-GdkColor default_color_lightblue;	/* BOLD blue */
-GdkColor default_color_blue;		/* LOW blue */
-GdkColor default_color_lightgreen;	/* BOLD green */
-GdkColor default_color_green;		/* LOW green */
-GdkColor default_color_lightred;	/* BOLD red */
-GdkColor default_color_red;		/* LOW red */
-GdkColor default_color_lightyellow;	/* BOLD yellow */
-GdkColor default_color_yellow;		/* LOW yellow ( brown )*/
-GdkColor default_color_lightmagenta;	/* BOLD magenta ( pink ) */
-GdkColor default_color_magenta;		/* LOW magenta ( purple ) */
-GdkColor default_color_lightcyan;	/* BOLD cyan */
-GdkColor default_color_cyan;		/* LOW cyan */
-GdkColor default_color_lightblack;	/* BOLD grey (highlighted black) */
-GdkColor default_color_black;		/* LOW black */
-
-GdkColor fg_col;		/* Foreground color */
-GdkColor bg_col;		/* background color */
+extern GdkColor default_color_lightwhite;	/* BOLD white  */
+extern GdkColor default_color_white;		/* LOW white */
+extern GdkColor default_color_lightblue;	/* BOLD blue */
+extern GdkColor default_color_blue;		/* LOW blue */
+extern GdkColor default_color_lightgreen;	/* BOLD green */
+extern GdkColor default_color_green;		/* LOW green */
+extern GdkColor default_color_lightred;	/* BOLD red */
+extern GdkColor default_color_red;		/* LOW red */
+extern GdkColor default_color_lightyellow;	/* BOLD yellow */
+extern GdkColor default_color_yellow;		/* LOW yellow ( brown )*/
+extern GdkColor default_color_lightmagenta;	/* BOLD magenta ( pink ) */
+extern GdkColor default_color_magenta;		/* LOW magenta ( purple ) */
+extern GdkColor default_color_lightcyan;	/* BOLD cyan */
+extern GdkColor default_color_cyan;		/* LOW cyan */
+extern GdkColor default_color_lightblack;	/* BOLD grey (highlighted black) */
+extern GdkColor default_color_black;		/* LOW black */
+extern GdkColormap *cmap;
 
 #endif /* __ANSI_H__ */

@@ -25,7 +25,50 @@
 #include <glib.h>
 
 #include "help.h"
-#include "manual.h"
+
+
+/* About txt */
+const char * ABOUT_MESSAGE = "\n\n Author:\n"
+"    Gabriele Greco (gabriele.greco@aruba.it)\n"
+"\n"
+" SClient authors:\n"
+"    P.E. Segolsson, Fredrik Andersson\n"
+"\n"
+" TinTin++ authors:\n"
+"    Bill Reiss, David A. Wagner, Rob Ellsworth,\n"
+"    Jeremy C. Jack, Davin Chan\n"
+"\n"  
+" WWW:\n" 
+"    http://ggmud.sourceforge.net\n" 
+"\n";
+
+
+/* Contents txt */
+const char * CONTENTS_MESSAGE = "TODO";
+
+/* Wizard txt */
+const char * WIZARD_MESSAGE = "TODO";
+
+/* Macro txt */
+const char * MACROS_MESSAGE = "TODO";
+
+/* Alias txt */
+const char * ALIAS_MESSAGE = "TODO";
+
+/* Triggers txt */
+const char * TRIGGERS_MESSAGE = "TODO";
+
+/* Logger txt */
+const char * LOGGER_MESSAGE = "TODO";
+
+/* Logviewer txt */
+const char * LOGVIEWER_MESSAGE ="TODO";
+
+/* Font txt */
+const char * FONT_MESSAGE = "TODO";
+
+/* Color txt */
+const char * COLOR_MESSAGE = "TODO";
 
 void do_about (GtkWidget *widget, gpointer data)
 {

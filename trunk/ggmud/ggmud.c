@@ -22,6 +22,20 @@
 #include <time.h>
 #include <string.h>
 
+/* menu items */
+GtkWidget *menu_File_Connect;
+GtkWidget *menu_File_DisConnect;
+
+/* statusbar */
+GtkWidget *statusbar;
+gint statusbar_id;
+
+/* Global macro list */
+gchar **macro_list;
+
+/* ggmud.c */
+ggmud *mud;
+
 /* Initialize the list of keys */
 gchar *keys[] = {"F1", "F2", "F3", "F4", "F5",
 	         "F6", "F7", "F8", "F9", "F10", "F11", "F12", NULL};
@@ -45,13 +59,21 @@ int timetilltick(void)
 
 int checktick(void)
 {
+    extern int use_tickcounter;
     extern int show_pretick;
-    static int last = -1, ttt = -1; /* ttt = time to tick */
+    static int last = -1, ttt = -1, using_tickcounter = 0; /* ttt = time to tick */
     int now, found = 0;
-    char buffer[20];
+
+    if(!use_tickcounter) {
+        if(using_tickcounter) {
+            gtk_label_set_text(mud->tick_counter, "OFF");
+            using_tickcounter = 0;
+        }
+        return TRUE;
+    }
 
     if(time0 <= 0)
-        return(100);	/* big number */
+        return TRUE;	/* big number */
 
     now = time(0);
 
@@ -75,12 +97,18 @@ int checktick(void)
         ttt = (tick_size - ttt) % tick_size;
     }
 
-    sprintf(buffer, "%d",ttt);
 
     // aggiornamento del campo coi secondi con ttt
-    if(mud->activesession)
+    if(mud->activesession && use_tickcounter) {
+        char buffer[20];
+        
+        sprintf(buffer, "%d",ttt);
+        
         gtk_label_set_text(mud->tick_counter, buffer);
 
+        using_tickcounter = 1;
+    }
+    
     return TRUE;
 }
 
@@ -107,7 +135,7 @@ int main(int argc, char **argv)
 
 
     /* load the stuff that needs to be loaded before the GUI comes up! */
-    load_misc_prefs();
+    load_prefs();
 
     /* Spawn the Graphical User Interface */
     load_macro();
@@ -115,7 +143,6 @@ int main(int argc, char **argv)
     init_colors();
     load_font();
     load_wizard();
-    load_prefs();
     load_triggers();
 
     hist_add(""); /* Needed to get rid of a blank line in history list */

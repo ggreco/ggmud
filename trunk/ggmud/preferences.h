@@ -25,30 +25,7 @@ typedef struct {
     gchar *name;
 } color_struct;
 
-color_struct color_arr[] = {
-      {&color_white, "white"},
-      {&color_lightwhite, "light white"},
-      {&color_blue, "blue"},
-      {&color_lightblue, "light blue"},
-      {&color_red, "red"},
-      {&color_lightred, "light red"},
-      {&color_green, "green"},
-      {&color_lightgreen, "light green"},
-      {&color_yellow, "yellow"},
-      {&color_lightyellow, "light yellow"},
-      {&color_cyan, "cyan"},
-      {&color_lightcyan, "light cyan"},
-      {&color_magenta, "magenta"},
-      {&color_lightmagenta, "light magenta"},
-      {&color_black, "black"},
-      {&color_lightblack, "light black"},
-      {&prefs.BackgroundColor, "background color"},
-      {&prefs.DefaultColor, "default color"},      
-      {NULL,NULL}
-};
-
 /* Funktion prototypes */
-void load_misc_prefs ();
 void load_prefs ();
 void save_prefs (GtkWidget *button, gpointer data);
 void check_text_toggle (GtkWidget *widget, GtkWidget *button);
@@ -68,16 +45,19 @@ void color_reset_to_default (GtkWidget *button, gpointer data);
 void color_prefs_done (GtkWidget *widget, GtkWidget *dialog);
 void color_prefs (GtkWidget *widget, GtkWidget *dummy);
 
-/* Global variables */
-PREFS_DATA prefs;
-GtkWidget   *prefs_window;
-GtkWidget   *prefs_button_save;
-GtkWidget *checkbutton_Toolbar;
-GtkWidget *checkbutton_Macrobuttons;
-GtkWidget *checkbutton_Statusbar;
-extern   GtkWidget *handlebox;
-extern  GtkWidget *vbox3;
-extern  GtkWidget *statusbar;
+extern GtkWidget *handlebox;
+extern GtkWidget *statusbar;
 
+/* Global variables */
+extern GtkWidget *win;
+extern GtkWidget *btnLabel[12];
+extern GtkWidget *menu_Tools_Logger;
+extern GtkWidget *handlebox;
+
+
+/* Global ToolBar stuff */
+extern GtkWidget *btn_toolbar_logger;
+extern GtkWidget *btn_toolbar_disconnect;
+extern GtkWidget *btn_toolbar_connect;
 
 #endif /* _PREFERENCES_H_ */

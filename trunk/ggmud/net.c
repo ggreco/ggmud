@@ -79,6 +79,11 @@ struct session *parse_input(char *, struct session *);
 
 extern int prompt_on;
 
+/*
+ * Global Variables
+ */
+int connected;
+
 static void printline(const char *str, int isaprompt)
 {
     textfield_add(str, MESSAGE_ANSI);

@@ -20,6 +20,19 @@
 #include "config.h"
 #include "pixmaps.h"	// ToolBar Icons
 
+/* Global variables */
+GtkWidget *win;
+GtkWidget *btnLabel[12];
+GtkWidget *menu_Tools_Logger;
+GtkWidget *handlebox;
+
+/* Global ToolBar stuff */
+GtkWidget *btn_toolbar_logger;
+GtkWidget *btn_toolbar_disconnect;
+GtkWidget *btn_toolbar_connect;
+GtkWidget *menu_File_Connect;
+GtkWidget *menu_File_DisConnect;
+
 void new_view(char *, GtkWidget *);
 
 void toggle_parsing(GtkToggleButton *togglebutton,
@@ -408,7 +421,7 @@ GtkWidget *spawn_gui()
   gtk_widget_add_accelerator (menu_Options_Colors, "activate", accel_group,
                               GDK_O, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
 
-  menu_Options_Preference = gtk_menu_item_new_with_label ("Preference");
+  menu_Options_Preference = gtk_menu_item_new_with_label ("Preferences");
   gtk_object_set_data (GTK_OBJECT (window), "menu_Options_Preference", menu_Options_Preference);
   gtk_widget_show (menu_Options_Preference);
   gtk_container_add (GTK_CONTAINER (menu_Options_menu), menu_Options_Preference);
@@ -722,18 +735,18 @@ GtkWidget *spawn_gui()
   gtk_widget_show (hbox1);
   gtk_box_pack_start (GTK_BOX (vbox2), hbox1, TRUE, TRUE, 0);
 
-  vbox3 = gtk_vbox_new (FALSE, 0);
-  gtk_box_pack_start (GTK_BOX (hbox1), vbox3, FALSE, TRUE, 0);
+  mud->macrobuttons = gtk_vbox_new (FALSE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox1), mud->macrobuttons, FALSE, TRUE, 0);
 
   if (prefs.Macrobuttons)
-      gtk_widget_show (vbox3);
+      gtk_widget_show (mud->macrobuttons);
   else 
-      gtk_widget_hide (vbox3);
+      gtk_widget_hide (mud->macrobuttons);
 
   /* Macro frame */
   frame = gtk_frame_new ("Macros");
-//  gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (vbox3), frame, FALSE, FALSE, 0);
+  gtk_widget_show (frame);
+  gtk_box_pack_start (GTK_BOX (mud->macrobuttons), frame, FALSE, FALSE, 0);
   gtk_container_border_width (GTK_CONTAINER (frame), 3);
   gtk_frame_set_label_align (GTK_FRAME (frame), 0.03, 0.5);
 
@@ -770,7 +783,7 @@ GtkWidget *spawn_gui()
   fill_block2 = gtk_label_new ("");
   gtk_object_set_data (GTK_OBJECT (window), "fill_block2", fill_block2);
   gtk_widget_show (fill_block2);
-  gtk_box_pack_start (GTK_BOX (vbox3), fill_block2, FALSE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (mud->macrobuttons), fill_block2, FALSE, TRUE, 0);
 
 #ifdef USE_NOTEBOOK
   mud->notebook = (GtkNotebook *)gtk_notebook_new();

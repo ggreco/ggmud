@@ -29,11 +29,6 @@ void connection_send ( gchar *message );
 void alt_send_to_connection (gchar *text);
 extern void search_triggers (gchar *incomming);
 
-/*
- * Global Variables
- */
-int connected;
-
 extern GtkWidget *btn_toolbar_disconnect;
 extern GtkWidget *btn_toolbar_connect;
 

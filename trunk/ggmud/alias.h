@@ -29,15 +29,6 @@ void add_alias            (gchar *alias, gchar *replacement );
 void insert_aliases       (GtkWidget *clist );
 void window_alias         (GtkWidget *widget, gpointer data);
 
-/* Global variables for alias */
-GtkWidget *textalias;
-GtkWidget *textreplace;
-GtkWidget *alias_window;
-gint      alias_selected_row    = -1;
-gint      alias_selected_column = -1;
-
-ALIAS_DATA *alias_list;
-
 #define ALIAS_LEN	20
 #define REPL_LEN	1000
 

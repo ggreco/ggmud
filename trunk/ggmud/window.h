@@ -33,19 +33,6 @@ void popup_window (const gchar *message);
 extern void log_viewer();
 extern void alt_send_to_connection  (gchar *text);
 
-/* Global variables */
-GtkWidget *win;
-GtkWidget *btnLabel[10];
-GtkWidget *menu_Tools_Logger;
-GtkWidget *handlebox;
-GtkWidget *vbox3;
-
-
-/* Global ToolBar stuff */
-GtkWidget *btn_toolbar_logger;
-GtkWidget *btn_toolbar_disconnect;
-GtkWidget *btn_toolbar_connect;
-
 typedef enum { F1, F2, F3, F4, F5, F6, F7, F8, F9, F10 } BUTTON;
 #define LorC(L)		(strlen(L) < 10 ? 0.5 : 0)
 
