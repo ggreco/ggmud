@@ -28,9 +28,11 @@
 #define MESSAGE_ANSI    2
 #define MESSAGE_NONE    3
 #define MESSAGE_SENT	4
+#define MESSAGE_TICK    5
 
 typedef struct {
-    GtkWidget *window, *menu, *hostentry, *portentry, *vbox, *macrobuttons;
+    GtkWidget *menu, *hostentry, *portentry, *vbox, *macrobuttons;
+    GtkWidget *window;
     GtkText *text;
     GtkEntry *ent;
     GtkLabel *tick_counter;
@@ -205,7 +207,6 @@ extern void TextCopy (GtkWidget *widget, gpointer data);
 
 /* win.c */
 extern void  close_window ( GtkWidget *widget, gpointer data );
-extern void destructify();
 extern void init_colors();
 
 /* ansi.c */

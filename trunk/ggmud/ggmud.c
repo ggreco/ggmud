@@ -21,6 +21,8 @@
 #include <time.h>
 #include <string.h>
 
+ggmud *mud;
+
 /* menu items */
 GtkWidget *menu_File_Connect;
 GtkWidget *menu_File_DisConnect;
@@ -32,8 +34,6 @@ gint statusbar_id;
 /* Global macro list */
 gchar **macro_list;
 
-/* ggmud.c */
-ggmud *mud;
 
 /* Initialize the list of keys */
 gchar *keys[] = {"F1", "F2", "F3", "F4", "F5",
@@ -86,9 +86,9 @@ int checktick(void)
                 if(mud->activesession && mud->activesession->tickstatus)
                 {
                     if (!ttt)
-                        tintin_puts("#TICK!!!", mud->activesession);
+                        textfield_add("#TICK!!!\n", MESSAGE_TICK);
                     else if (show_pretick)
-                        tintin_puts("#10 SECONDS TO TICK!!!", mud->activesession);
+                        textfield_add("#10 SECONDS TO TICK!!!\n", MESSAGE_TICK);
                     /*	    tintin_puts(!ttt ? "#TICK!!!" : "#10 SECONDS TO TICK!!!", s); */
                 }
         }
