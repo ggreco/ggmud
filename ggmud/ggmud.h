@@ -192,7 +192,7 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy);
 void load_tt_prefs(void);
 void load_zmud_prefs(void);
 void save_all_prefs(void);
-
+void triggerclass_window(GtkWidget *widget, gpointer data );
 /* help.c */
 extern void do_about();
 extern void do_manual();
