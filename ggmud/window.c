@@ -30,7 +30,6 @@ typedef enum { F1, F2, F3, F4, F5, F6, F7, F8, F9, F10 } BUTTON;
 extern gchar *keys[];
 
 /* Global variables */
-static GtkWidget *win;
 GtkWidget *btnLabel[12];
 GtkWidget *menu_Tools_Logger;
 GtkWidget *handlebox;
@@ -100,12 +99,6 @@ void toggle_triggers(GtkToggleButton *togglebutton,
         gdk_pixmap_unref(icon);
         gdk_bitmap_unref(mask);
     }    
-}
-
-void destructify()
-{
-    gtk_widget_hide (win);
-    return;
 }
 
 void close_window (GtkWidget *widget, gpointer data)
@@ -904,16 +897,14 @@ void clear_backbuffer()
     if (mud->maxlines > 0) {
         int n;
 
-        n= gtk_text_get_length (GTK_TEXT (mud->text));
+        n= gtk_text_get_length (mud->text);
         
         if( n < mud->maxlines)
             return;
 
-//        gtk_text_freeze (GTK_TEXT (mud->text));
-        gtk_text_set_point (GTK_TEXT (mud->text), n - mud->maxlines);
-        gtk_text_backward_delete (GTK_TEXT (mud->text), n - mud->maxlines);
-        gtk_text_set_point (GTK_TEXT (mud->text), mud->maxlines);
-//        gtk_text_thaw (GTK_TEXT (mud->text));
+        gtk_text_set_point (mud->text, n - mud->maxlines);
+        gtk_text_backward_delete (mud->text, n - mud->maxlines);
+        gtk_text_set_point (mud->text, mud->maxlines);
     }
 }
 
@@ -934,7 +925,7 @@ void textfield_unfreeze()
 
     clear_backbuffer();
   
-    gtk_text_thaw (GTK_TEXT (mud->text));  
+    gtk_text_thaw (mud->text);  
   
     if (scrolled_up) {
         scrolled_up = FALSE;
@@ -947,29 +938,38 @@ void textfield_unfreeze()
 
 void textfield_add(const char *message, int colortype)
 {
-  int numbytes = strlen(message);
-	        
-  if (!numbytes)
-    return;
+    int numbytes;
 
-  if (colortype == MESSAGE_NONE || colortype == MESSAGE_NORMAL) {
-     if (mud->LOGGING) /* Loging */
-        fprintf(mud->LOG_FILE, message);
-     gtk_text_insert(mud->text, font_normal, &prefs.DefaultColor, NULL, message, -1);
-  }
-  if (colortype == MESSAGE_ERR) {
-     if (mud->LOGGING) /* Loging */
-        fprintf(mud->LOG_FILE, message);
-     gtk_text_insert(mud->text, font_normal, &color_red, NULL, message, -1);
-  }
-  if (colortype == MESSAGE_SENT) {
-     if (mud->LOGGING) /* Loging */
-        fprintf(mud->LOG_FILE, message);
-     gtk_text_insert(mud->text, font_normal, &color_lightyellow, NULL, message, -1);
-  }
-  if (colortype == MESSAGE_ANSI) {
-     disp_ansi(numbytes, message, mud->text);
-  }
+    if (!*message)
+        return;
+
+    switch (colortype) {
+        case MESSAGE_ANSI:
+            numbytes = strlen(message);
+            
+            disp_ansi(numbytes, message, mud->text);
+            break;
+        case MESSAGE_SENT:
+            if (mud->LOGGING) /* Loging */
+                fprintf(mud->LOG_FILE, message);
+            gtk_text_insert(mud->text, font_normal,
+                    &color_lightyellow, NULL, message, -1);
+            break;
+        case MESSAGE_ERR:
+            if (mud->LOGGING) /* Loging */
+                fprintf(mud->LOG_FILE, message);
+            gtk_text_insert(mud->text, font_normal, &color_red, NULL, message, -1);
+            break;
+        case MESSAGE_TICK:
+            gtk_text_insert(mud->text, font_normal,
+                    &color_lightcyan, NULL, message, -1);
+            break;
+        default:
+            if (mud->LOGGING) /* Loging */
+                fprintf(mud->LOG_FILE, message);
+            gtk_text_insert(mud->text, font_normal,
+                    &prefs.DefaultColor, NULL, message, -1);
+    }
 }
 
 

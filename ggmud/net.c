@@ -221,9 +221,8 @@ void open_connection (const char *name, const char *host, const char *port)
 
         sprintf(buffer, "%s %s", host, port);
         
-        mud->activesession = new_session(name, buffer, mud->activesession);
-
-        mud->activesession->socket = sockfd;
+        if ((mud->activesession = new_session(name, buffer, mud->activesession)))
+            mud->activesession->socket = sockfd;
     }
     
     mud->input_monitor = gdk_input_add (sockfd, GDK_INPUT_READ,
