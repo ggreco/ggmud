@@ -7,7 +7,8 @@ CXX = g++
 INCDIR = -Itt
 COMMONLIBS = -Ltt -ltt
 CFLAGS = $(INCDIR) `pkg-config gtk+-2.0 --cflags` $(GLOBAL_CFLAGS)
-LIBS = $(COMMONLIBS) `pkg-config gtk+-2.0 --libs`
+LIBS = $(COMMONLIBS) `pkg-config gtk+-2.0 --libs` 
+
 VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )
 
 export GLOBAL_CFLAGS

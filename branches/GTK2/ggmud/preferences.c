@@ -243,21 +243,29 @@ void load_prefs ()
                 
                 while(color_arr[i].name) {	    
                     if(!strcmp (color_arr[i].name, pref)) {
-                        sscanf(value, "(%u,%u,%u)",
-                                &(color_arr[i].color->red),
-                                &(color_arr[i].color->green),
-                                &(color_arr[i].color->blue));
-
-                        if(!gdk_color_alloc(gdk_colormap_get_system(), color_arr[i].color)) {
-                            g_error("Couldn't allocate background color - reverting to black\n");
-                            color_arr[i].color->pixel = color_black.pixel;
-                            color_arr[i].color->red = color_black.red;
-                            color_arr[i].color->green = color_black.green;
-                            color_arr[i].color->blue = color_black.blue;
-                        }
-
-                        update_color_tags(color_arr[i].color);
+                        int red, green, blue;
                         
+                        if (sscanf(value, "(%u,%u,%u)",
+                                &red,
+                                &green,
+                                &blue) == 3) {
+
+                            color_arr[i].color->red = red;
+                            color_arr[i].color->green = green;
+                            color_arr[i].color->blue = blue;
+                            
+                            if(!gdk_color_alloc(gdk_colormap_get_system(), 
+                                        color_arr[i].color)) {
+
+                                g_error("Couldn't allocate background color - reverting to black\n");
+                                color_arr[i].color->pixel = color_black.pixel;
+                                color_arr[i].color->red = color_black.red;
+                                color_arr[i].color->green = color_black.green;
+                                color_arr[i].color->blue = color_black.blue;
+                            }
+
+                            update_color_tags(color_arr[i].color);
+                        }
                         break;
                     }
                     i++;
