@@ -185,6 +185,7 @@ void  load_prefs ( void );
 void  window_prefs ( GtkWidget *widget, gpointer data );
 void color_prefs (GtkWidget *widget, GtkWidget *dummy);
 void load_tt_prefs(void);
+void load_zmud_prefs(void);
 void save_all_prefs(void);
 
 /* help.c */
