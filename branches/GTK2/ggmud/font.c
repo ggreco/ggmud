@@ -43,30 +43,40 @@ void set_style()
     }
 }
 
+#define DEFAULT_FONT "Monospace 12"
+
 void load_font () {
     FILE *fp;
     gchar line[255], pref[25], value[250];
 
-    font.FontName = strdup ("Monospace 12");
-#if 0
+    *value = 0;
+    
     if (fp = fileopen ("font", "r")) {
         while (fgets (line, 80, fp)) {
             sscanf (line, "%s %[^\n]", pref, value);
             if (!strcmp (pref, "FontName")) {
-                free(font.FontName);
-                font.FontName = strdup (value);
+                break;
             }
+            else
+                *value = 0;
         }
 
         fclose (fp);
     }
 
-    if ( ( font_normal = pango_font_description_from_string (font.FontName) ) == NULL ) {
-        g_error ("Can't load font... Using default.\n");
+    if ( !*value ||
+         !( font_normal = pango_font_description_from_string (value) )  ) {
+        if (!(font_normal = pango_font_description_from_string (DEFAULT_FONT) )) {
+            g_error ("Can't load font... Using default.\n");
+            return;
+        }
+        else
+            font.FontName = strdup(DEFAULT_FONT);
     }
     else
-        set_style();
-#endif
+        font.FontName = strdup (value);
+    
+    set_style();
 }
 
 void save_font () {
