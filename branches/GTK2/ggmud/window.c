@@ -1395,7 +1395,7 @@ GtkTextView *new_view(char *name, GtkWidget *parent, int ismain)
   GtkWidget *templabel, *paned, *sw;
   GtkTextView *t1, *t2;
   GtkTextBuffer *buf;
-  
+  int w, h;
   extern GtkTextTagTable *tag_table;
 
   paned = gtk_vpaned_new();
@@ -1421,6 +1421,9 @@ GtkTextView *new_view(char *name, GtkWidget *parent, int ismain)
   
   gtk_paned_add2(GTK_PANED(paned), create_tv(buf, &t2));
 
+  gtk_window_get_size(GTK_WINDOW(gtk_widget_get_toplevel(parent)), &w, &h);
+  gtk_paned_set_position(GTK_PANED(paned), h * 2 / 3);
+      
   if (ismain) 
     mud->review = sw;
   
