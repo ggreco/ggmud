@@ -1,10 +1,7 @@
 #include "ggmud.h"
 
-GtkWidget *menu_Tools_Variable;
-static GtkWidget *variable_window;
 static GtkWidget *textvariable;
 static GtkWidget *textvariablevalue;
-static int variable_selected_row = -1;
 
 #define VARIABLE_FILE "variable"
 
@@ -59,10 +56,10 @@ static void variable_selection_made (GtkWidget *clist, gint row, gint column,
 {
     gchar *text;
     
-    variable_selected_row    = row;
-
     if ( (GtkCList*) data )
     {
+        gtk_object_set_user_data(GTK_OBJECT(clist), (void *) row);
+        
         gtk_clist_get_text ((GtkCList*) data, row, 0, &text);
         gtk_entry_set_text (GTK_ENTRY (textvariable), text);
         gtk_clist_get_text ((GtkCList*) data, row, 1, &text);
@@ -127,16 +124,17 @@ static void variable_button_add (GtkWidget *button, GtkCList *data)
 
 static void variable_button_delete (GtkWidget *button, gpointer data) {
     gchar *word;
+    int selected_row = (int) gtk_object_get_user_data(GTK_OBJECT(data));
     
-    if ( variable_selected_row == -1 ) {
+    if ( selected_row == -1 ) {
         popup_window ("No selection made.");
     }
     else {
         char buffer[VAR_LEN + 20];
         
-        gtk_clist_get_text ((GtkCList*) data, variable_selected_row, 0, &word);
-        gtk_clist_remove ((GtkCList*) data, variable_selected_row);
-        variable_selected_row = -1;
+        gtk_clist_get_text ((GtkCList*) data, selected_row, 0, &word);
+        gtk_clist_remove ((GtkCList*) data, selected_row);
+        gtk_object_set_user_data(GTK_OBJECT(data), (void *) -1);
 
         sprintf(buffer, "#unvar %s", word);
 
@@ -148,6 +146,7 @@ static void variable_button_delete (GtkWidget *button, gpointer data) {
 void
 variables_window(GtkWidget *w, gpointer data)
 {
+    GtkWidget *variable_window;
     GtkWidget *vbox;
     GtkWidget *hbox;
     GtkWidget *hbox2;
@@ -202,6 +201,7 @@ variables_window(GtkWidget *w, gpointer data)
     gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (scrolled_window), clist);
 
     gtk_widget_show (clist);
+    gtk_object_set_user_data(GTK_OBJECT(clist), (void *) -1);
 
     hbox3 = gtk_table_new(2, 2, FALSE);
 

@@ -3,8 +3,6 @@
 
 extern struct listnode *common_highs;
 
-GtkWidget *menu_Tools_Highlight;
-
 #define HIGH_FILE "highlight"
 #define ALIAS_LEN 128
 
@@ -36,8 +34,7 @@ load_highlights()
     }
 }
 
-static int high_selected_row = -1;
-static GtkWidget *high_window, *bgwidget, *fgwidget, *textalias;
+static GtkWidget *bgwidget, *fgwidget, *textalias;
 
 
 typedef struct {
@@ -141,10 +138,10 @@ static void high_selection_made (GtkWidget *clist, gint row, gint column,
     gchar *text;
     int i;
     
-    high_selected_row    = row;
-
     if ( (GtkCList*) data )
     {
+        gtk_object_set_user_data(GTK_OBJECT(data), (void *) row);
+         
         gtk_clist_get_text ((GtkCList*) data, row, 0, &text);
         gtk_entry_set_text (GTK_ENTRY (textalias), text);
         
@@ -265,17 +262,19 @@ static void high_button_add (GtkWidget *button, GtkCList * data)
 
 static void high_button_delete (GtkWidget *button, GtkCList * data) {
     gchar *word;
-    
-    if ( high_selected_row == -1 ) {
+    int selected_row = (int) gtk_object_get_user_data(GTK_OBJECT(data));
+ 
+    if ( selected_row == -1 ) {
         popup_window ("No selection made.");
     }
     else {
         char buffer[ALIAS_LEN + 20];
         
-        gtk_clist_get_text (data, high_selected_row, 0, &word);
+        gtk_clist_get_text (data, selected_row, 0, &word);
         sprintf(buffer, "#unhigh {%s}", word);
         parse_input(buffer, mud->activesession);
-        high_selected_row = -1;
+        gtk_object_set_user_data(GTK_OBJECT(data), (void *) -1);
+
         insert_highlights(data);
     }
 
@@ -300,7 +299,7 @@ static void append_options(GtkWidget *w, color_options *options)
 
 void highlights_window (GtkWidget *widget, gpointer data)
 {
-    GtkWidget *vbox;
+    GtkWidget *vbox, *high_window;
     GtkWidget *hbox;
     GtkWidget *hbox2;
     GtkWidget *hbox3;
@@ -356,6 +355,8 @@ void highlights_window (GtkWidget *widget, gpointer data)
 
     gtk_widget_show (clist);
 
+    gtk_object_set_user_data(GTK_OBJECT(clist), (void *) -1);
+    
     hbox3 = gtk_table_new(3, 2, FALSE);
 
     gtk_box_pack_start (GTK_BOX (vbox), hbox3, FALSE, FALSE, 0);
