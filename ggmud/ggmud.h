@@ -41,12 +41,11 @@ typedef struct {
     GtkWidget *menu, *hostentry, *portentry, *vbox, *macrobuttons;
     GtkWidget *window;
     GtkTextView *text;
+    GtkWidget *review;
     GtkEntry *ent;
     GtkLabel *tick_counter;
     GtkNotebook *notebook;
     GtkTextTag *curr_color;
-    GdkFont *disp_font;
-    gchar *disp_font_name;
     struct ggmud_history *hist;
     gint lines;
     gint maxlines;
@@ -83,7 +82,7 @@ struct prefs_data {
 };
 
 #define text_insert(w, text) gtk_text_buffer_set_text(gtk_text_view_get_buffer(GTK_TEXT_VIEW(w)), text, -1)
-#define text_bg(w, color) gdk_window_set_background(gtk_text_view_get_window(GTK_TEXT_VIEW(w),GTK_TEXT_WINDOW_WIDGET), &color)
+#define text_bg(w, color) gtk_widget_modify_base((GtkWidget *)w, GTK_STATE_NORMAL, &color)
 
 struct alias_data {
     ALIAS_DATA *next;
@@ -184,7 +183,6 @@ extern void do_menu(GtkWidget *);
 extern void popup_window ( const gchar *message );
 
 extern GdkFont  *font_bold;
-extern GdkFont  *font_normal;
 
 /* prefs.c */
 void  load_prefs ( void );

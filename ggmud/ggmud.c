@@ -64,7 +64,6 @@ int main(int argc, char **argv)
     mud->hist->pos=0;
     mud->hist->cyclic=1;
     mud->hist->list=calloc(sizeof(gpointer), (mud->hist->max+1));
-    mud->disp_font_name="fixed";
     mud->lines=0;
     mud->maxlines = 300 * 70;	// This will be an option
 

@@ -95,12 +95,15 @@ int connected;
 static int connecting = 0;
 
 static void printline(const char *str, int isaprompt)
-{
-    textfield_add(mud->text, str, MESSAGE_ANSI);
-    
-    if (!isaprompt) 
-        textfield_add(mud->text, "\n", MESSAGE_NORMAL);
-    
+{    
+    if (!isaprompt) {
+        char buffer[2048];
+        strcpy(buffer, str);
+        strcat(buffer, "\n");
+        textfield_add(mud->text, buffer, MESSAGE_ANSI);
+    }
+    else
+        textfield_add(mud->text, str, MESSAGE_ANSI);
 }
 
 void tintin_puts2(const char *cptr, struct session *ses)
@@ -462,10 +465,11 @@ void send_to_connection (GtkWidget *widget, gpointer data)
     mud->activesession = parse_input(buffer, mud->activesession); // can change active session
     hist_add(entry_text);
 
-    
+#if 0 
     if(adj->value < (adj->upper - adj->page_size))
         gtk_adjustment_set_value(adj, (adj->upper - adj->page_size));
-    
+#endif
+
     //textfield_add ( "\n", MESSAGE_NONE);
     if ( prefs.KeepText && !hide_input)
         gtk_entry_select_region (mud->ent, 0,

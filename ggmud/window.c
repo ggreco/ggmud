@@ -77,7 +77,7 @@ GList *windows_list = NULL;
 extern char *get_arg_in_braces(char *s, char *arg, int flag);
 
 
-GtkTextView *new_view(char *name, GtkWidget *parent);
+GtkTextView *new_view(char *name, GtkWidget *parent, int ismain);
 
 void destroy_a_window(GtkWidget *w)
 {
@@ -112,7 +112,7 @@ GtkWidget *create_new_window(char *title, int width, int height)
 
     gtk_container_add(GTK_CONTAINER(win), vbox);
     
-    list = (GtkWidget *) new_view(NULL, vbox);
+    list = (GtkWidget *) new_view(NULL, vbox, FALSE);
     gtk_signal_connect (GTK_OBJECT (list), "destroy", GTK_SIGNAL_FUNC (destroy_a_window), NULL);
 
     gtk_widget_show(win);
@@ -1296,9 +1296,9 @@ spawn_gui()
   mud->notebook = (GtkNotebook *)gtk_notebook_new();
   gtk_widget_show(GTK_WIDGET(mud->notebook));
   gtk_box_pack_start(GTK_BOX(hbox1), GTK_WIDGET(mud->notebook), TRUE, TRUE, 0);
-  mud->text = new_view("not connected", mud->notebook);        
+  mud->text = new_view("not connected", mud->notebook, TRUE);        
 #else
-  mud->text = new_view("not connected", hbox1);
+  mud->text = new_view("not connected", hbox1,  TRUE);
 #endif
   
   hbox2 = gtk_hbox_new (FALSE, 0);
@@ -1372,62 +1372,43 @@ spawn_gui()
   macro_btnLabel_change();
 
 }
-
-static int scrolled_up;
-
 /* FOR THE WINDOW BUFFER FUNCTION */
 void clear_backbuffer()
 {
-    
     if (mud->maxlines > 0) {
         GtkTextIter start, end;
         GtkTextBuffer *b = gtk_text_view_get_buffer(mud->text);
-        int n = gtk_text_buffer_get_char_count(b);
+        int n = gtk_text_buffer_get_line_count(b);
         
         if( n < mud->maxlines)
             return;
 
         gtk_text_buffer_get_start_iter(b, &start);
-        gtk_text_buffer_get_iter_at_offset(b, &end, n - mud->maxlines);
+        gtk_text_buffer_get_iter_at_line_offset(b, &end, mud->maxlines / 20, 0);
         gtk_text_buffer_delete(b, &start, &end); 
     }
 }
 
 void textfield_freeze()
 {
-  GtkAdjustment *adj = mud->text->vadjustment;
-
-  if (adj->value < (adj->upper - adj->page_size)) {
-     scrolled_up = TRUE;
-  }
-  
-//  gtk_text_freeze(mud->text);
 }
 
 void textfield_unfreeze()
 {
-    GtkAdjustment *adj = mud->text->vadjustment;
-
     clear_backbuffer();
   
-//   gtk_text_thaw (mud->text);  
-  
-    if (scrolled_up) {
-        scrolled_up = FALSE;
-    }
-    else if(adj->value < (adj->upper - adj->page_size))
-        gtk_adjustment_set_value(adj, (adj->upper - adj->page_size));
-
-//    gtk_widget_grab_focus ((GtkWidget *)mud->ent); XXX serve?
+    gtk_text_view_scroll_mark_onscreen(mud->text, gtk_object_get_user_data(GTK_OBJECT(mud->text)));
 }
 
 void textfield_add(GtkTextView *txt, const char *message, int colortype)
 {
+    static GtkTextMark *mark = NULL;
     int numbytes;
     GtkTextIter iter;
     GtkTextBuffer *tbuf;
     extern GtkTextTag *fg_colors[2][8];
 
+    
     if (!*message)
         return;
     GtkTextTag *tag = prefs.DefaultColor;
@@ -1437,16 +1418,20 @@ void textfield_add(GtkTextView *txt, const char *message, int colortype)
             numbytes = strlen(message);
             
             disp_ansi(numbytes, message, txt);
+
+            if (txt != mud->text)
+                gtk_text_view_scroll_mark_onscreen(txt, gtk_object_get_user_data(GTK_OBJECT(txt)));
+            
             return;
         case MESSAGE_SENT:
             if (mud->LOGGING) /* Loging */
                 fprintf(mud->LOG_FILE, message);
-            tag = fg_colors[0][1]; // red
+            tag = fg_colors[1][3];// light yellow 
             break;
         case MESSAGE_ERR:
             if (mud->LOGGING) /* Loging */
                 fprintf(mud->LOG_FILE, message);
-            tag = fg_colors[1][3]; // light yellow
+            tag = fg_colors[0][1]; // red
             break;
         case MESSAGE_TICK:
             break;
@@ -1457,9 +1442,9 @@ void textfield_add(GtkTextView *txt, const char *message, int colortype)
     
     tbuf = gtk_text_view_get_buffer(txt);
     gtk_text_buffer_get_end_iter(tbuf, &iter);
-    gtk_text_buffer_insert_with_tags(tbuf, &iter, message, -1, tag, prefs.BackgroundColor, NULL);
+    gtk_text_buffer_insert_with_tags(tbuf, &iter, message, -1, tag, NULL);
 
-
+    gtk_text_view_scroll_mark_onscreen(txt, gtk_object_get_user_data(GTK_OBJECT(txt)));
 }
 
 
@@ -1509,18 +1494,54 @@ void popup_window (const gchar *message)
     gtk_widget_show (window);
 }
 
-
-GtkTextView *new_view(char *name, GtkWidget *parent)
+static 
+GtkWidget *create_tv(GtkTextBuffer *buffer, GtkTextView **view)
 {
-  GtkWidget *hbox4, *templabel, *vscrollbar;
-  GtkTextView *text;
+    extern PangoFontDescription *font_normal; 
+    GtkTextView *text;
+    GtkTextIter it;
+    GtkTextMark *mark;
+    
+    GtkWidget *sw = gtk_scrolled_window_new (NULL, NULL);
+
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
+            GTK_POLICY_NEVER,
+            GTK_POLICY_ALWAYS);
+    gtk_widget_show(sw);
+    text = (GtkTextView *)gtk_text_view_new_with_buffer (buffer);
+    gtk_container_add(GTK_CONTAINER(sw), (GtkWidget *)text);
+    gtk_widget_show((GtkWidget *)text);
+
+    gtk_widget_modify_base((GtkWidget *)text, GTK_STATE_NORMAL, &prefs.BackgroundGdkColor);
+    gtk_widget_modify_text ((GtkWidget *)text, GTK_STATE_NORMAL, &prefs.DefaultGdkColor); 
+
+    gtk_text_view_set_wrap_mode(text, GTK_WRAP_CHAR);
+    gtk_text_view_set_cursor_visible(text, FALSE);
+    gtk_text_view_set_left_margin(text, 3);
+
+    *view = text;
+
+    gtk_text_buffer_get_end_iter(buffer, &it);
+    mark = gtk_text_buffer_create_mark(buffer, NULL, &it, FALSE);
+    gtk_object_set_user_data(GTK_OBJECT(text), mark);
+    
+    gtk_widget_modify_font((GtkWidget *)text, font_normal);
+    return sw;
+}
+
+GtkTextView *new_view(char *name, GtkWidget *parent, int ismain)
+{
+  GtkWidget *templabel, *paned, *sw;
+  GtkTextView *t1, *t2;
+  GtkTextBuffer *buf;
+  
   extern GtkTextTagTable *tag_table;
 
-  hbox4 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox4);
-
+  paned = gtk_vpaned_new();
+  gtk_widget_show (paned);
+  
 #ifdef USE_NOTEBOOK
-      gtk_container_add(GTK_CONTAINER(parent), hbox4);
+      gtk_container_add(GTK_CONTAINER(parent), paned);
 
       templabel = gtk_label_new(name);
       gtk_widget_show(templabel);
@@ -1528,26 +1549,22 @@ GtkTextView *new_view(char *name, GtkWidget *parent)
       gtk_notebook_set_tab_label (mud->notebook, 
               gtk_notebook_get_nth_page(mud->notebook, 0), templabel);
 #else
-      gtk_box_pack_start(GTK_BOX(parent), GTK_WIDGET(hbox4), TRUE, TRUE, 0);
+      gtk_box_pack_start(GTK_BOX(parent), paned, TRUE, TRUE, 0);
 #endif
+     
+  buf = gtk_text_buffer_new(tag_table);
+
+  sw = create_tv(buf, &t1);
+  gtk_widget_hide(sw);
+  gtk_paned_add1(GTK_PANED(paned), sw);
+  
+  gtk_paned_add2(GTK_PANED(paned), create_tv(buf, &t2));
+  gtk_signal_connect(GTK_OBJECT(t1),"key_press_event",GTK_SIGNAL_FUNC(change_focus), mud);
+  gtk_signal_connect(GTK_OBJECT(t2),"key_press_event",GTK_SIGNAL_FUNC(change_focus), mud);
+
+  if (ismain)
+    mud->review = sw;
       
-  /* main text window */
-  text = (GtkTextView *)gtk_text_view_new_with_buffer (
-          gtk_text_buffer_new(tag_table));
-  gtk_signal_connect(GTK_OBJECT(text),"key_press_event",GTK_SIGNAL_FUNC(change_focus), mud);
-  gtk_widget_show (GTK_WIDGET(text));
-  gtk_box_pack_start (GTK_BOX (hbox4), GTK_WIDGET(text), TRUE, TRUE, 0);
-
-  gtk_widget_realize (GTK_WIDGET(text));
-
-  /* the scrollbar attached to the main text window */
-  vscrollbar = gtk_vscrollbar_new (text->vadjustment);
-  gtk_widget_show (vscrollbar);
-  gtk_box_pack_start (GTK_BOX (hbox4), vscrollbar, FALSE, TRUE, 0);
-  GTK_WIDGET_UNSET_FLAGS (vscrollbar, GTK_CAN_FOCUS);
-
-  text_bg(text, prefs.BackgroundGdkColor);
-
-  return text;
+  return (GtkTextView *)t2;
 }
 

@@ -33,38 +33,24 @@ GtkWidget   *font_window;
 GtkWidget   *font_button_save;
 GtkWidget   *entry_fontname;
 GtkWidget *menu_Option_font;
-GdkFont  *font_normal;
+PangoFontDescription *font_normal = NULL;
 GtkStyle *style;
 
-void set_style() {
+void set_style() 
+{
     if (!font_normal)
         return;
 
-    style = gtk_widget_get_default_style();
-
-    if (style) {
-//        style->font = font_normal; XXX todo
-//        gtk_widget_set_default_style(style);
-
-        if (mud->window) {
-           gtk_widget_set_style(mud->window, style);
-           gtk_widget_queue_draw(mud->window);
-        }
-    }	
+    if (mud->text) {
+        gtk_widget_modify_font(mud->text, font_normal);
+    }
 }
 
 void load_font () {
     FILE *fp;
     gchar line[255], pref[25], value[250];
 
-#ifdef WIN32
-    font.FontName = strdup("-*-Courier New-normal-r-normal-*-*-110-*-*-m-*-iso8859-1");
-
-    // font.FontName = strdup ("-adobe-courier-medium-r-normal-*-*-120-*-*-m-*-iso8859-1");
-#else
-    font.FontName = strdup ("-*-fixed-medium-r-normal-*-*-110-*-*-c-*-iso8859-1");
-    //	font.FontName = strdup ("fixed");
-#endif
+    font.FontName = strdup ("Monospace 12");
 
     if (fp = fileopen ("font", "r")) {
         while (fgets (line, 80, fp)) {
@@ -78,7 +64,7 @@ void load_font () {
         fclose (fp);
     }
 
-    if ( ( font_normal = gdk_font_load (font.FontName) ) == NULL ) {
+    if ( ( font_normal = pango_font_description_from_string (font.FontName) ) == NULL ) {
         g_error ("Can't load font... Using default.\n");
     }
     else
@@ -100,18 +86,24 @@ void font_font_selected (GtkWidget *button, GtkFontSelectionDialog *fs) {
     gchar *temp, buf[256];
 
     temp = gtk_font_selection_get_font_name (GTK_FONT_SELECTION (fs->fontsel));
+    fprintf(stderr, "font: %s", temp);
+
     if (temp) {
-        free (font.FontName);
-        font.FontName = strdup (temp);
-        font_normal = gdk_font_load (font.FontName);
-        set_style();
-        free (temp);
-        save_font();
-        gtk_widget_destroy (GTK_WIDGET (fs));
-    } else {
-        sprintf (buf, "The selected Font isn't valid, be sure to select a font that does exist.");
-        popup_window (buf);
-    }	    
+
+        if ((font_normal = pango_font_description_from_string (temp))) {
+            if (font.FontName)
+                free (font.FontName);
+            
+            font.FontName = strdup (temp);
+            set_style();
+            save_font();
+            gtk_widget_destroy (GTK_WIDGET (fs));
+            return;
+        }
+    }
+
+    sprintf (buf, "The selected Font isn't valid, be sure to select a font that does exist.");
+    popup_window (buf);
 }
 
 void window_font (GtkWidget *button, gpointer data) {

@@ -101,7 +101,7 @@ void window_macro (GtkWidget *widget, gpointer data)
   static GtkWidget *entry[12];
 
   /* macro window */
-  macro_window = gtk_window_new (GTK_WINDOW_POPUP);
+  macro_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_set_usize (macro_window, 400, 200);
   gtk_container_border_width (GTK_CONTAINER (macro_window), 3);
   gtk_window_set_title (GTK_WINDOW (macro_window), "Macros");
