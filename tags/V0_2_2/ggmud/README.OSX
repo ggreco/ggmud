@@ -1,0 +1,8 @@
+Actually the OSX version of GGMud uses the X11 version of GTKi and should be
+run from shell. 
+To be able to run it  you need to install the Apple or the Fink X11 server and the package GTK.
+
+NOTICE: If you are able to run GIMP or OpenOffice you already HAVE the needed libraries.
+
+To use the configuration file do something like:
+mv ggmud.cfg <your home>/.tintinrc
