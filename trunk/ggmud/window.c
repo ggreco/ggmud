@@ -44,6 +44,26 @@ GtkWidget *menu_File_DisConnect;
 
 GList *windows_list = NULL;
 
+/******************************/
+/* the #showme / #say command */
+/******************************/
+
+extern char *get_arg_in_braces(char *s, char *arg, int flag);
+
+void showme_command(char *arg, struct session *ses)
+{
+  char left[BUFFER_SIZE], result[BUFFER_SIZE], *d;
+
+  get_arg_in_braces(arg, left, 1);
+  prepare_actionalias(left, result, ses);
+  d = ParseAnsiColors(result);
+
+  strcat(d, "\n");
+  
+  textfield_add(mud->text, d, MESSAGE_ANSI);
+}
+
+
 typedef struct {
     char name[32];
     GtkWidget *listptr;    
@@ -134,7 +154,6 @@ void clear_text_widget(GtkText *w)
 
 void clr_command(char *arg, struct session *s)
 {
-    extern char *get_arg_in_braces(char *s, char *arg, int flag);
     char left[BUFFER_SIZE];
     window_entry *entry = NULL;
     
@@ -154,7 +173,6 @@ void clr_command(char *arg, struct session *s)
 
 void mess_command(char *arg, struct session *s)
 {
-    extern char *get_arg_in_braces(char *s, char *arg, int flag);
     char left[BUFFER_SIZE], right[BUFFER_SIZE];
 
     arg = get_arg_in_braces(arg, left, 0);

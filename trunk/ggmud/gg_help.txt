@@ -6,12 +6,8 @@ help available on the following topics:
 
 action          alias            all
 antisubstitute  bell             boss
-brokentelnet    call             char                    
-chat            chatall          clearprompt        
-chatname        chatpriv         chattransfer
-chat.conf       cinfo            cr
-echo            emote            emoteall
-end             filecancel       filestat
+brokentelnet    char             clearprompt   
+cr              echo             end
 fixedmath       forall           function        
 gag             getwalkdirection getvarvalue
 getlistlenght   getitemnr        help            
@@ -35,7 +31,7 @@ textin          tick             tickoff
 tickon          tickset          ticksize                
 timetry         tolower          togglesubs        
 toupper         tries            unaction                
-unalias         unantisubstitute unchat            
+unalias         unantisubstitute            
 unfunction      ungag            unhighlight        
 unpath          unpurist         unsplit                 
 unsubstitute    unvariable       variable                
@@ -45,7 +41,7 @@ walkoff         walkreset        walkset
 wildcard        wizlist          write                   
 writesession    zap              zombion            
 zombioff        helpversion      window
-verbosity
+verbosity       beep
 
 
 ~ALIAS
@@ -1346,5 +1342,9 @@ If winname is not specified the window cleared it's the main window.
 ~TRIGGER
 
 It's an alias of ACTION for ZMud compatibility, please use #help ACTION.
+
+~BEEP
+
+It's an alias of BELL for ZMud compatibility, please use #help BELL.
 
 ~*EOF* 
