@@ -37,11 +37,19 @@ GdkFont  *font_normal;
 GtkStyle *style;
 
 void set_style() {
+    if (!font_normal)
+        return;
+
     style = gtk_widget_get_default_style();
+
     if (style) {
-	style->font = font_normal;
-	gtk_widget_set_style(mud->window, style);
-	gtk_widget_queue_draw(mud->window);
+        style->font = font_normal;
+        gtk_widget_set_default_style(style);
+
+        if (mud->window) {
+           gtk_widget_set_style(mud->window, style);
+           gtk_widget_queue_draw(mud->window);
+        }
     }	
 }
 
@@ -49,14 +57,15 @@ void load_font () {
     FILE *fp;
     gchar line[255], pref[25], value[250];
 
-#ifndef WIN32
-    // font.FontName = strdup("-*-*-normal-r-normal--*-100-*-*-m-*-iso8859-1");
+#ifdef WIN32
+    font.FontName = strdup("-*-Courier New-normal-r-normal-*-*-110-*-*-m-*-iso8859-1");
 
-    font.FontName = strdup ("-adobe-courier-medium-r-normal-*-*-100-*-*-m-*-iso8859-1");
+    // font.FontName = strdup ("-adobe-courier-medium-r-normal-*-*-120-*-*-m-*-iso8859-1");
 #else
-	font.FontName = strdup ("fixed");
+    font.FontName = strdup ("-*-fixed-medium-r-normal-*-*-110-*-*-c-*-iso8859-1");
+    //	font.FontName = strdup ("fixed");
 #endif
-    
+
     if (fp = fileopen ("font", "r")) {
         while (fgets (line, 80, fp)) {
             sscanf (line, "%s %[^\n]", pref, value);
@@ -66,15 +75,14 @@ void load_font () {
             }
         }
 
-        if ( ( font_normal = gdk_font_load (font.FontName) ) == NULL ) {
-            g_error ("Can't load font... Using default.\n");
-            free ( font.FontName );
-            font.FontName = strdup ("fixed");
-            save_font ();
-        }
-        set_style();
         fclose (fp);
-    }	
+    }
+
+    if ( ( font_normal = gdk_font_load (font.FontName) ) == NULL ) {
+        g_error ("Can't load font... Using default.\n");
+    }
+    else
+        set_style();
 }
 
 void save_font () {

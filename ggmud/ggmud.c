@@ -72,11 +72,11 @@ int main(int argc, char **argv)
     /* load the stuff that needs to be loaded before the GUI comes up! */
     init_colors();
     load_prefs();
+    load_font();
 
     /* Spawn the Graphical User Interface */
     load_macro();
     spawn_gui();
-    load_font();
     load_wizard();
 
     hist_add(""); /* Needed to get rid of a blank line in history list */
