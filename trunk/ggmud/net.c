@@ -221,6 +221,12 @@ void open_connection (const char *name, const char *host, const char *port)
         if (errno == EINPROGRESS) {
             if (retries++ < 100) {
                 textfield_add(mud->text, ".", MESSAGE_ANSI);
+
+                while(gtk_events_pending())
+                    gtk_main_iteration();
+
+                gdk_flush();
+
                 sleep(1);
             }
             else {
