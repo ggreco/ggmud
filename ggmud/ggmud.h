@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
+#include "tintin.h"
 
 #define MESSAGE_ERR     0
 #define MESSAGE_NORMAL  1
@@ -101,6 +102,11 @@ extern GtkWidget *menu_File_DisConnect;
 extern GtkWidget *statusbar;
 extern gint statusbar_id;
 
+/* extprefs.c */
+extern void  gags_window    (GtkWidget *widget, gpointer data);
+extern void  highlights_window    (GtkWidget *widget, gpointer data);
+extern void  variables_window    (GtkWidget *widget, gpointer data);
+
 /* wiz.c */
 extern void  load_wizard        ( void );
 
@@ -157,6 +163,9 @@ GtkWidget *menu_Option_Colors;
 extern GtkWidget *menu_Tools_Alias;	
 extern GtkWidget *menu_Tools_Macro;
 extern GtkWidget *menu_Tools_Trigger;
+extern GtkWidget *menu_Tools_Variable;	
+extern GtkWidget *menu_Tools_Highlight;
+extern GtkWidget *menu_Tools_Gag;
 extern GtkWidget *menu_Tools_Logger;
 extern GtkWidget *menu_Tools_Logview;
 extern void do_menu(GtkWidget *);

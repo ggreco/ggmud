@@ -27,10 +27,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "tintin.h"
 #include "ggmud.h"
 #include "ansi.h"
-#include "preferences.h"	/* Needs to be after sclient.h */
 
 #ifdef WIN32
 #define PREFS_FILE "ggmud.prf"
@@ -38,18 +36,42 @@
 #define PREFS_FILE "Preference"
 #endif
 
+/* Used for the color selection UI
+ */
+typedef struct {
+    GdkColor *color;
+    gchar *name;
+} color_struct;
+
+extern GtkWidget *handlebox;
+extern GtkWidget *statusbar;
+
+/* Global variables */
+extern GtkWidget *btnLabel[12];
+extern GtkWidget *menu_Tools_Logger;
+extern GtkWidget *handlebox;
+
+
+/* Global ToolBar stuff */
+extern GtkWidget *btn_toolbar_logger;
+extern GtkWidget *btn_toolbar_disconnect;
+extern GtkWidget *btn_toolbar_connect;
+extern int use_tickcounter;
+
 /* Global variables */
 PREFS_DATA prefs;
-GtkWidget   *prefs_window;
-GtkWidget   *prefs_button_save;
-GtkWidget *checkbutton_Toolbar;
-GtkWidget *checkbutton_Macrobuttons;
-GtkWidget *checkbutton_Statusbar;
-GtkWidget *checkbutton_Tickcounter;
-GtkWidget *entry_TickSize;
-GtkWidget *entry_ReviewSize;
-int use_tickcounter = 0;
+static GtkWidget   *prefs_window;
+static GtkWidget   *prefs_button_save;
+static GtkWidget *checkbutton_Toolbar;
+static GtkWidget *checkbutton_Macrobuttons;
+static GtkWidget *checkbutton_Statusbar;
+static GtkWidget *checkbutton_Tickcounter;
+static GtkWidget *entry_TickSize;
+static GtkWidget *entry_ReviewSize;
 
+#ifndef min
+    #define min(x,y) ((x) > (y) ? (y) : (x))
+#endif
 
 color_struct color_arr[] = {
       {&color_white, "white"},
@@ -83,6 +105,8 @@ gdouble *gdk_color_to_gdouble (GdkColor *gdkcolor)
 
     return color;
 }
+
+extern int tick_size;
  
 void load_prefs () 
 {
@@ -120,7 +144,6 @@ void load_prefs ()
                 if(temp > 100 && temp < 100000)
                     mud->maxlines = temp;
             } else if (!strcmp(pref, "TickSize")) {
-                extern int tick_size;
                 int temp = atoi(value);
                 
                 if(temp > 10 && temp < 1000)
@@ -189,6 +212,16 @@ void save_prefs (GtkWidget *button, gpointer data)
     }
 }
 
+void change_tick_size (GtkWidget *widget, ggmud *mud)
+{
+    tick_size = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+}
+
+void change_review_size (GtkWidget *widget, ggmud *mud)
+{
+    mud->maxlines = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+}
+
 void check_text_toggle (GtkWidget *widget, GtkWidget *button)
 {
     if ( GTK_TOGGLE_BUTTON (button)->active )
@@ -200,11 +233,11 @@ void check_text_toggle (GtkWidget *widget, GtkWidget *button)
 void check_tickcounter (GtkWidget *widget, GtkWidget *button)
 {
     if ( GTK_TOGGLE_BUTTON (button)->active ) {
-        parse_input("#tickon", mud->activesession);
+        tickon_command( mud->activesession);
         use_tickcounter = 1;
     }
     else {
-        parse_input("#tickoff", mud->activesession);
+        tickoff_command( mud->activesession);
         use_tickcounter = 0;
     }
 
@@ -230,7 +263,7 @@ void check_wrap (GtkWidget *widget, GtkWidget *wrap_button)
 /* wordwrapper for the main textwindow */
 void text_toggle_word_wrap (GtkWidget *checkbutton_wrap, GtkWidget *text)
 {
-  gtk_text_set_word_wrap(GTK_TEXT(mud->text), GTK_TOGGLE_BUTTON(checkbutton_wrap)->active);
+  gtk_text_set_word_wrap(mud->text, GTK_TOGGLE_BUTTON(checkbutton_wrap)->active);
 }
 
 void check_beep (GtkWidget *widget, GtkWidget *check_button)
@@ -311,7 +344,7 @@ void color_ok (GtkWidget *widget, GtkWidget *color_sel)
 	color->color->pixel = new_color.pixel;
     }
     if(!strcmp("background color",color->name))
-	gdk_window_set_background(GTK_TEXT(mud->text)->text_area, &prefs.BackgroundColor);
+	gdk_window_set_background(mud->text->text_area, &prefs.BackgroundColor);
 
     gtk_widget_destroy(color_sel);
 }
@@ -370,7 +403,7 @@ void color_reset_to_default (GtkWidget *button, gpointer data)
     prefs.BackgroundColor	= color_black;
     prefs.DefaultColor	= color_white;
 
-    gdk_window_set_background(GTK_TEXT(mud->text)->text_area, &prefs.BackgroundColor);
+    gdk_window_set_background(mud->text->text_area, &prefs.BackgroundColor);
 
 }
 
@@ -424,8 +457,10 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy)
       
       style = gtk_style_copy(gtk_widget_get_style(color_button));
       
-      style->bg[0] = *color_arr[i].color;
-      
+      style->bg[GTK_STATE_NORMAL] = *color_arr[i].color;
+      style->bg[GTK_STATE_SELECTED] = *color_arr[i].color;
+      style->bg[GTK_STATE_PRELIGHT] = *color_arr[i].color;
+
       gtk_widget_set_style(color_button, style);
 
       gtk_style_unref(style);
@@ -495,7 +530,7 @@ void window_prefs (GtkWidget *widget, gpointer data)
 
   prefs_window = gtk_window_new (GTK_WINDOW_DIALOG);
   gtk_window_set_title (GTK_WINDOW (prefs_window), "Preferences");
-  gtk_window_set_policy (GTK_WINDOW (prefs_window), FALSE, FALSE, FALSE);
+  gtk_window_set_policy (GTK_WINDOW (prefs_window), TRUE, TRUE, TRUE);
   gtk_signal_connect (GTK_OBJECT (prefs_window), "destroy",
                              GTK_SIGNAL_FUNC(close_window), prefs_window );
 
@@ -664,7 +699,13 @@ void window_prefs (GtkWidget *widget, gpointer data)
   temp = gtk_label_new("Tick length:");
   gtk_widget_show(temp);
   gtk_box_pack_start (GTK_BOX (hbox), temp, TRUE, TRUE, 0);
-  entry_TickSize = gtk_entry_new();
+  temp = (GtkWidget *)gtk_adjustment_new (tick_size, 10, 1000, 1, 10, 10);
+  entry_TickSize = gtk_spin_button_new (GTK_ADJUSTMENT (temp), 1, 0);
+
+  gtk_signal_connect(GTK_OBJECT(entry_TickSize), "changed", 
+                        GTK_SIGNAL_FUNC(change_tick_size), mud);
+  
+//  entry_TickSize = gtk_entry_new();
   gtk_widget_show(entry_TickSize);
 
   if (mud->activesession && mud->activesession->tickstatus)
@@ -692,7 +733,11 @@ void window_prefs (GtkWidget *widget, gpointer data)
   temp = gtk_label_new("Review size:");
   gtk_widget_show(temp);
   gtk_box_pack_start (GTK_BOX (hbox), temp, TRUE, TRUE, 0);
-  entry_ReviewSize = gtk_entry_new();
+  temp = (GtkWidget *)gtk_adjustment_new (mud->maxlines, 2000, 1000000, 500, 10000, 10000);
+  entry_ReviewSize = gtk_spin_button_new (GTK_ADJUSTMENT (temp), 1, 0);
+
+  gtk_signal_connect(GTK_OBJECT(entry_ReviewSize), "changed", 
+                        GTK_SIGNAL_FUNC(change_review_size), mud);
   gtk_widget_show(entry_ReviewSize);
 
   gtk_tooltips_set_tip(tooltip, entry_ReviewSize,

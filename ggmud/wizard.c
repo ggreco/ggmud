@@ -22,32 +22,32 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "wizard.h"
+#include "ggmud.h"
 
 #define CONN_FILE "connections"
 
 /* Global Variables */
-gint         wizard_selected_row;
-GtkWidget   *wizard_entry_name;
-GtkWidget   *wizard_entry_host;
-GtkWidget   *wizard_entry_port;
-GtkWidget   *wizard_check_autologin;
-GtkWidget   *wizard_entry_player;
-GtkWidget   *wizard_entry_password;
-GtkWidget   *wizard_window;
-GtkWidget   *button_update;
-GtkWidget   *button_delete;
-GtkWidget   *button_connect;
+static gint         wizard_selected_row;
+static GtkWidget   *wizard_entry_name;
+static GtkWidget   *wizard_entry_host;
+static GtkWidget   *wizard_entry_port;
+static GtkWidget   *wizard_check_autologin;
+static GtkWidget   *wizard_entry_player;
+static GtkWidget   *wizard_entry_password;
+static GtkWidget   *wizard_window;
+static GtkWidget   *button_update;
+static GtkWidget   *button_delete;
+static GtkWidget   *button_connect;
 static GList       *wizard_connection_list2;
 
-void
+static void
 wiz_destructify()
 {
     gtk_widget_hide(wizard_window);
     return;
 }
 
-void free_wizard_data ( WIZARD_DATA *w )
+static void free_wizard_data ( WIZARD_DATA *w )
 {
     free (w->name);
     free (w->hostname);
@@ -98,7 +98,7 @@ void load_wizard ()
     }    
 }
 
-void save_wizard ()
+static void save_wizard ()
 {
     GList       *tmp;
     WIZARD_DATA *w;
@@ -121,7 +121,7 @@ void save_wizard ()
     }
 }
 
-WIZARD_DATA *wizard_get_wizard_data ( gchar *text )
+static WIZARD_DATA *wizard_get_wizard_data ( gchar *text )
 {
     GList       *tmp;
     WIZARD_DATA *w;
@@ -140,7 +140,7 @@ WIZARD_DATA *wizard_get_wizard_data ( gchar *text )
     return NULL;
 }
 
-void wizard_clist_append (WIZARD_DATA *w, GtkCList *clist)
+static void wizard_clist_append (WIZARD_DATA *w, GtkCList *clist)
 {
     if ( w )
     {
@@ -152,7 +152,7 @@ void wizard_clist_append (WIZARD_DATA *w, GtkCList *clist)
     }
 }
 
-void wizard_selection_made (GtkWidget *clist, gint row, gint column,
+static void wizard_selection_made (GtkWidget *clist, gint row, gint column,
                             GdkEventButton *event, gpointer data)
 {
     WIZARD_DATA *w;
@@ -197,7 +197,7 @@ void wizard_selection_made (GtkWidget *clist, gint row, gint column,
     gtk_widget_set_sensitive (button_connect, TRUE);
 }
 
-void wizard_unselection_made (GtkWidget *clist, gint row, gint column,
+static void wizard_unselection_made (GtkWidget *clist, gint row, gint column,
                               GdkEventButton *event, gpointer data)
 {
     wizard_selected_row = -1;
@@ -207,7 +207,7 @@ void wizard_unselection_made (GtkWidget *clist, gint row, gint column,
     gtk_widget_set_sensitive (button_connect, FALSE);
 }
 
-void wizard_button_connect (GtkWidget *button, gpointer data)
+static void wizard_button_connect (GtkWidget *button, gpointer data)
 {
     WIZARD_DATA *w;
     gchar *word;
@@ -254,7 +254,7 @@ void wizard_button_connect (GtkWidget *button, gpointer data)
     }
 }
 
-void wizard_button_delete (GtkWidget *button, gpointer data)
+static void wizard_button_delete (GtkWidget *button, gpointer data)
 {
     WIZARD_DATA *w;
     gchar *word;
@@ -282,7 +282,7 @@ void wizard_button_delete (GtkWidget *button, gpointer data)
     }
 }
 
-void wizard_button_modify (GtkWidget *button, gpointer data)
+static void wizard_button_modify (GtkWidget *button, gpointer data)
 {
     WIZARD_DATA *w;
     gchar *texta[1];
@@ -325,7 +325,7 @@ void wizard_button_modify (GtkWidget *button, gpointer data)
         w->autologin = FALSE;
 }
 
-void wizard_button_add (GtkWidget *button, gpointer data)
+static void wizard_button_add (GtkWidget *button, gpointer data)
 {
     WIZARD_DATA *w;
     gchar *texta[1];
@@ -369,7 +369,7 @@ void wizard_button_add (GtkWidget *button, gpointer data)
     gtk_widget_set_sensitive (button_connect, TRUE);
 }
 
-void wizard_check_callback (GtkWidget *widget, GtkWidget *check_button)
+static void wizard_check_callback (GtkWidget *widget, GtkWidget *check_button)
 {
     if ( GTK_TOGGLE_BUTTON (check_button)->active )
     {

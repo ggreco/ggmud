@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "font.h"
+#include "ggmud.h"
 
 /* Global variables */
 SYSTEM_DATA font;

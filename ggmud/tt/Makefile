@@ -30,9 +30,9 @@ CROSSCFLAGS = -mwindows -mno-cygwin -mms-bitfields $(GLOBAL_CFLAGS)
 
 # -fnative-struct corrispondente di -mms-bifields nel vecchio mingw32 -s
 
-all: $(PROJECTNAME).a
+all: depend $(PROJECTNAME).a
 
-win32: $(PROJECTNAME)w32.a
+win32: depend $(PROJECTNAME)w32.a
 
 $(OBJDIR)%.o: %.c
 	$(CC) $(CFLAGS) -o $@ -c $<
@@ -55,6 +55,14 @@ $(PROJECTNAME)w32.a: $(WINOBJS)
 	$(CROSSRANLIB) $@
 
 clean: 
-	rm -f $(WINOBJS) $(OBJS) $(PROJECTNAME)w32.a $(PROJECTNAME).a 
+	rm -f $(WINOBJS) $(OBJS) $(PROJECTNAME)w32.a $(PROJECTNAME).a depend
 
+depend:	$(C_SRCS) *.h
+	for i in $(C_SRCS); do \
+		$(CC) $(CFLAGS) -c -M $$i; \
+	done >  deptemp
+	sed -f ../mkdep.sed deptemp >depend
+	rm deptemp
+    
+-include depend
 

@@ -24,7 +24,7 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 
-#include "help.h"
+#include "ggmud.h"
 
 
 /* About txt */

@@ -20,12 +20,29 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "macro.h"
+#include "ggmud.h"
 
 #define MACRO_FILE "macro"
+extern gchar *keys[];
+extern void macro_btnLabel_change ();
+
+/* saves the macro's to file */
+void save_macro (gpointer data) 
+{
+    FILE *fp;
+    gint i = 0;
+
+    if (fp = fileopen (MACRO_FILE, "w")) {
+        while (keys[i]) {
+            fprintf (fp, "%s %s\n", keys[i], macro_list[i]);
+            i++;
+        }    
+        fclose (fp);
+    }
+}
 
 /* The callback function for the ok button */
-void button_ok_callback(GtkWidget *button, GtkWidget *entry[]) {
+static void button_ok_callback(GtkWidget *button, GtkWidget *entry[]) {
     gint i;
     
     for (i = 0; i <12; i++) {
@@ -38,29 +55,16 @@ void button_ok_callback(GtkWidget *button, GtkWidget *entry[]) {
     save_macro(NULL);
 }
 
-/* saves the macro's to file */
-void save_macro (gpointer data) {
-    FILE *fp;
-    gint i = 0;
-    
-    if (fp = fileopen (MACRO_FILE, "w")) {
-	while (keys[i]) {
-	    fprintf (fp, "%s %s\n", keys[i], macro_list[i]);
-	    i++;
-	}    
-        fclose (fp);
-    }
-}
-
 /* load's the macro's from file into the entry boxes */
-void load_macro () {
+void load_macro () 
+{
     FILE *fp;
     gchar line[255], macro[5], value[250];
     gint i;
-    
+
     if (!(macro_list = calloc(12, sizeof (gchar *)))) return;
     for (i = 0; i < 12; i++) if (!(macro_list[i] = calloc(1, sizeof(char)))) return;
-    
+
     if (fp = fileopen (MACRO_FILE, "r")) {
         /* load in the macro's into the entry[] boxes */
         while (fgets (line, sizeof(line) - 1, fp)) {

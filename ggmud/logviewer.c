@@ -25,9 +25,12 @@
 #include <unistd.h>
 #endif
 
-#include "logviewer.h"
+#include "ggmud.h"
 
-GtkWidget *text;
+static GtkWidget *text;
+
+#define BUF_SIZE 256
+
 
 typedef struct {
 
@@ -37,13 +40,251 @@ typedef struct {
 } typFileSelectionData;
 
 static   char        *sFilename = NULL; 
+static GtkWidget           *win_main;
+static GtkAccelGroup       *accel_group;
+static GtkTooltips         *tooltips = NULL;
 
-char *GetExistingFile ()
+static void menu_New ();
+static void menu_Find ();
+static void menu_Open ();
+static void menu_Save ();
+static void menu_SaveAs ();
+static void menu_Quit ();
+static void ShowMessage (char *szTitle, char *szMessage);
+
+static void 
+LoadFile (char *sFilename)
+{
+    char buffer[BUF_SIZE];
+    int nchars;
+    FILE *infile;
+    struct stat fileStatus;
+    long fileLen = 0;
+
+    gtk_text_freeze (GTK_TEXT (text));
+
+    gtk_editable_delete_text (GTK_EDITABLE (text), 0, -1);
+
+    stat (sFilename, &fileStatus);
+    fileLen = fileStatus.st_size;
+
+    infile = fopen (sFilename, "r");
+      
+    if (infile) {
+      
+        while ((nchars = fread (buffer, 1, BUF_SIZE, infile)) > 0) {
+
+            gtk_text_insert (GTK_TEXT (text), NULL, NULL, NULL, buffer, nchars);
+          
+            if (nchars < BUF_SIZE)
+                break;
+        }
+      
+        fclose (infile);
+    }
+  
+    gtk_text_thaw (GTK_TEXT (text));
+}
+
+
+GtkWidget *CreateMenuItem (GtkWidget *menu, 
+                           char *szName, 
+                           char *szAccel,
+                           char *szTip, 
+                           GtkSignalFunc func,
+                           gpointer data)
+{
+    GtkWidget *menuitem;
+
+    if (szName && strlen (szName)) {
+        menuitem = gtk_menu_item_new_with_label (szName);
+        gtk_signal_connect (GTK_OBJECT (menuitem), "activate",
+                    GTK_SIGNAL_FUNC(func), data);
+    } else {
+        menuitem = gtk_menu_item_new ();
+    }
+
+    gtk_menu_append (GTK_MENU (menu), menuitem);
+    gtk_widget_show (menuitem);
+
+    if (accel_group == NULL) {
+        accel_group = gtk_accel_group_new ();
+        gtk_accel_group_attach (accel_group, GTK_OBJECT (win_main));
+    }
+
+    if (szAccel && szAccel[0] == '^') {
+        gtk_widget_add_accelerator (menuitem, 
+                                    "activate", 
+                                    accel_group,
+                                    szAccel[1], 
+                                    GDK_CONTROL_MASK,
+                                    GTK_ACCEL_VISIBLE);
+    }
+
+    if (szTip && strlen (szTip)) {
+
+        if (tooltips == NULL) {
+
+            tooltips = gtk_tooltips_new ();
+        }
+        gtk_tooltips_set_tip (tooltips, menuitem, szTip, NULL);
+    }
+
+    return (menuitem);
+}
+
+GtkWidget *CreateMenuCheck (GtkWidget *menu, 
+                            char *szName, 
+                            GtkSignalFunc func, 
+                            gpointer data)
+{
+    GtkWidget *menuitem;
+
+    menuitem = gtk_check_menu_item_new_with_label (szName);
+
+    gtk_menu_append (GTK_MENU (menu), menuitem);
+    gtk_widget_show (menuitem);
+
+    gtk_signal_connect (GTK_OBJECT (menuitem), "toggled",
+                        GTK_SIGNAL_FUNC(func), data);
+
+    return (menuitem);
+}
+
+void CreateText (GtkWidget *window, GtkWidget *container)
+{
+    GtkWidget *table;
+    GtkWidget *hscrollbar;
+    GtkWidget *vscrollbar;
+
+    table = gtk_table_new (2, 2, FALSE);
+
+    gtk_container_add (GTK_CONTAINER (container), table);
+
+    gtk_table_set_row_spacing (GTK_TABLE (table), 0, 2);
+    gtk_table_set_col_spacing (GTK_TABLE (table), 0, 2);
+
+    gtk_widget_show (table);
+
+    text = gtk_text_new (NULL, NULL);
+    gtk_text_set_editable (GTK_TEXT (text), TRUE);
+
+    gtk_table_attach (GTK_TABLE (table), text, 0, 1, 0, 1,
+            GTK_EXPAND | GTK_SHRINK | GTK_FILL,
+            GTK_EXPAND | GTK_SHRINK | GTK_FILL, 0, 0);
+
+    gtk_widget_show (text);
+
+    hscrollbar = gtk_hscrollbar_new (GTK_TEXT (text)->hadj);
+    gtk_table_attach (GTK_TABLE (table), hscrollbar, 0, 1, 1, 2,
+            GTK_EXPAND | GTK_FILL | GTK_SHRINK, GTK_FILL, 0, 0);
+    gtk_widget_show (hscrollbar);
+
+    vscrollbar = gtk_vscrollbar_new (GTK_TEXT (text)->vadj);
+    gtk_table_attach (GTK_TABLE (table), vscrollbar, 1, 2, 0, 1,
+            GTK_FILL, GTK_EXPAND | GTK_SHRINK | GTK_FILL, 0, 0);
+    gtk_widget_show (vscrollbar);
+
+}
+
+GtkWidget *CreateSubMenu (GtkWidget *menubar, char *szName)
+{
+    GtkWidget *menuitem;
+    GtkWidget *menu;
+ 
+    menuitem = gtk_menu_item_new_with_label (szName);
+
+    gtk_widget_show (menuitem);
+    gtk_menu_append (GTK_MENU (menubar), menuitem);
+
+    menu = gtk_menu_new ();
+    gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem), menu);
+
+    return (menu);
+}
+
+GtkWidget *CreateBarSubMenu (GtkWidget *menu, char *szName)
+{
+    GtkWidget *menuitem;
+    GtkWidget *submenu;
+ 
+    menuitem = gtk_menu_item_new_with_label (szName);
+
+    gtk_menu_bar_append (GTK_MENU_BAR (menu), menuitem);
+    gtk_widget_show (menuitem);
+
+    submenu = gtk_menu_new ();
+    gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem), submenu);
+
+    return (submenu);
+}
+
+
+GtkWidget *CreateMenuRadio (GtkWidget *menu, 
+                            char *szName, 
+                            GSList **group,
+                            GtkSignalFunc func, 
+                            gpointer data)
+{
+    GtkWidget *menuitem;
+
+    menuitem = gtk_radio_menu_item_new_with_label (*group, szName);
+    *group = gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (menuitem));
+
+    gtk_menu_append (GTK_MENU (menu), menuitem);
+    gtk_widget_show (menuitem);
+
+    gtk_signal_connect (GTK_OBJECT (menuitem), "toggled",
+                        GTK_SIGNAL_FUNC(func), data);
+
+    return (menuitem);
+}
+
+
+static void CreateMenu (GtkWidget *window, GtkWidget *vbox_main)
+{
+    GtkWidget *menubar;
+    GtkWidget *menu;
+    GtkWidget *menuitem;
+
+    win_main = window;
+
+    accel_group = gtk_accel_group_new ();
+    gtk_accel_group_attach (accel_group, GTK_OBJECT (window));
+
+    menubar = gtk_menu_bar_new ();
+    gtk_box_pack_start (GTK_BOX (vbox_main), menubar, FALSE, TRUE, 0);
+    gtk_widget_show (menubar);
+
+    menu = CreateBarSubMenu (menubar, "File");
+
+    menuitem = CreateMenuItem (menu, "Open", "^O", 
+                     "Open an existing item", 
+                     GTK_SIGNAL_FUNC (menu_Open), "open");
+
+    menuitem = CreateMenuItem (menu, NULL, NULL, 
+                     NULL, NULL, NULL);
+
+    menuitem = CreateMenuItem (menu, "Quit", "", 
+                     "What's more descriptive than quit?", 
+                     GTK_SIGNAL_FUNC (menu_Quit), "quit");
+
+    menu = CreateBarSubMenu (menubar, "Search");
+
+    menuitem = CreateMenuItem (menu, "Find", "^F", 
+                     "Find item", 
+                     GTK_SIGNAL_FUNC (menu_Find), "paste");
+
+}
+
+static char *
+GetExistingFile ()
 {
     return (sFilename);
 }
     
-void FileOk (GtkWidget *w, gpointer data)
+static void 
+FileOk (GtkWidget *w, gpointer data)
 {
     char *sTempFile;
     typFileSelectionData *localdata;
@@ -155,171 +396,6 @@ void menu_Open (GtkWidget *widget, gpointer data)
     GetFilename ("Open", LoadFile);
 }
 
-GtkWidget           *win_main;
-GtkAccelGroup       *accel_group;
-
-
-void CreateMenu (GtkWidget *window, GtkWidget *vbox_main)
-{
-    GtkWidget *menubar;
-    GtkWidget *menu;
-    GtkWidget *menuitem;
-
-    win_main = window;
-
-    accel_group = gtk_accel_group_new ();
-    gtk_accel_group_attach (accel_group, GTK_OBJECT (window));
-
-    menubar = gtk_menu_bar_new ();
-    gtk_box_pack_start (GTK_BOX (vbox_main), menubar, FALSE, TRUE, 0);
-    gtk_widget_show (menubar);
-
-    menu = CreateBarSubMenu (menubar, "File");
-
-    menuitem = CreateMenuItem (menu, "Open", "^O", 
-                     "Open an existing item", 
-                     GTK_SIGNAL_FUNC (menu_Open), "open");
-
-    menuitem = CreateMenuItem (menu, NULL, NULL, 
-                     NULL, NULL, NULL);
-
-    menuitem = CreateMenuItem (menu, "Quit", "", 
-                     "What's more descriptive than quit?", 
-                     GTK_SIGNAL_FUNC (menu_Quit), "quit");
-
-    menu = CreateBarSubMenu (menubar, "Search");
-
-    menuitem = CreateMenuItem (menu, "Find", "^F", 
-                     "Find item", 
-                     GTK_SIGNAL_FUNC (menu_Find), "paste");
-
-}
-
-
-extern GtkWidget           *win_main;
-extern GtkAccelGroup *accel_group;
-GtkTooltips         *tooltips = NULL;
-
-
-GtkWidget *CreateMenuItem (GtkWidget *menu, 
-                           char *szName, 
-                           char *szAccel,
-                           char *szTip, 
-                           GtkSignalFunc func,
-                           gpointer data)
-{
-    GtkWidget *menuitem;
-
-    if (szName && strlen (szName)) {
-        menuitem = gtk_menu_item_new_with_label (szName);
-        gtk_signal_connect (GTK_OBJECT (menuitem), "activate",
-                    GTK_SIGNAL_FUNC(func), data);
-    } else {
-        menuitem = gtk_menu_item_new ();
-    }
-
-    gtk_menu_append (GTK_MENU (menu), menuitem);
-    gtk_widget_show (menuitem);
-
-    if (accel_group == NULL) {
-        accel_group = gtk_accel_group_new ();
-        gtk_accel_group_attach (accel_group, GTK_OBJECT (win_main));
-    }
-
-    if (szAccel && szAccel[0] == '^') {
-        gtk_widget_add_accelerator (menuitem, 
-                                    "activate", 
-                                    accel_group,
-                                    szAccel[1], 
-                                    GDK_CONTROL_MASK,
-                                    GTK_ACCEL_VISIBLE);
-    }
-
-    if (szTip && strlen (szTip)) {
-
-        if (tooltips == NULL) {
-
-            tooltips = gtk_tooltips_new ();
-        }
-        gtk_tooltips_set_tip (tooltips, menuitem, szTip, NULL);
-    }
-
-    return (menuitem);
-}
-
-GtkWidget *CreateMenuCheck (GtkWidget *menu, 
-                            char *szName, 
-                            GtkSignalFunc func, 
-                            gpointer data)
-{
-    GtkWidget *menuitem;
-
-    menuitem = gtk_check_menu_item_new_with_label (szName);
-
-    gtk_menu_append (GTK_MENU (menu), menuitem);
-    gtk_widget_show (menuitem);
-
-    gtk_signal_connect (GTK_OBJECT (menuitem), "toggled",
-                        GTK_SIGNAL_FUNC(func), data);
-
-    return (menuitem);
-}
-
-GtkWidget *CreateMenuRadio (GtkWidget *menu, 
-                            char *szName, 
-                            GSList **group,
-                            GtkSignalFunc func, 
-                            gpointer data)
-{
-    GtkWidget *menuitem;
-
-    menuitem = gtk_radio_menu_item_new_with_label (*group, szName);
-    *group = gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (menuitem));
-
-    gtk_menu_append (GTK_MENU (menu), menuitem);
-    gtk_widget_show (menuitem);
-
-    gtk_signal_connect (GTK_OBJECT (menuitem), "toggled",
-                        GTK_SIGNAL_FUNC(func), data);
-
-    return (menuitem);
-}
-
-GtkWidget *CreateSubMenu (GtkWidget *menubar, char *szName)
-{
-    GtkWidget *menuitem;
-    GtkWidget *menu;
- 
-    menuitem = gtk_menu_item_new_with_label (szName);
-
-    gtk_widget_show (menuitem);
-    gtk_menu_append (GTK_MENU (menubar), menuitem);
-
-    menu = gtk_menu_new ();
-    gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem), menu);
-
-    return (menu);
-}
-
-GtkWidget *CreateBarSubMenu (GtkWidget *menu, char *szName)
-{
-    GtkWidget *menuitem;
-    GtkWidget *submenu;
- 
-    menuitem = gtk_menu_item_new_with_label (szName);
-
-    gtk_menu_bar_append (GTK_MENU_BAR (menu), menuitem);
-    gtk_widget_show (menuitem);
-
-    submenu = gtk_menu_new ();
-    gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem), submenu);
-
-    return (submenu);
-}
-
-
-
-#define BUF_SIZE 256
 
 void ClearFile (GtkWidget *widget, gpointer data)
 {
@@ -334,75 +410,6 @@ void TextCopy (GtkWidget *widget, gpointer data)
 void TextPaste (GtkWidget *widget, gpointer data)
 {
     gtk_editable_paste_clipboard (GTK_EDITABLE (text));
-}
-
-void LoadFile (char *sFilename)
-{
-    char buffer[BUF_SIZE];
-    int nchars;
-    FILE *infile;
-    struct stat fileStatus;
-    long fileLen = 0;
-
-    gtk_text_freeze (GTK_TEXT (text));
-
-    gtk_editable_delete_text (GTK_EDITABLE (text), 0, -1);
-
-    stat (sFilename, &fileStatus);
-    fileLen = fileStatus.st_size;
-
-    infile = fopen (sFilename, "r");
-      
-    if (infile) {
-      
-        while ((nchars = fread (buffer, 1, BUF_SIZE, infile)) > 0) {
-
-            gtk_text_insert (GTK_TEXT (text), NULL, NULL, NULL, buffer, nchars);
-          
-            if (nchars < BUF_SIZE)
-                break;
-        }
-      
-        fclose (infile);
-    }
-  
-    gtk_text_thaw (GTK_TEXT (text));
-}
-
-void CreateText (GtkWidget *window, GtkWidget *container)
-{
-    GtkWidget *table;
-    GtkWidget *hscrollbar;
-    GtkWidget *vscrollbar;
-
-    table = gtk_table_new (2, 2, FALSE);
-
-    gtk_container_add (GTK_CONTAINER (container), table);
-
-    gtk_table_set_row_spacing (GTK_TABLE (table), 0, 2);
-    gtk_table_set_col_spacing (GTK_TABLE (table), 0, 2);
-
-    gtk_widget_show (table);
-
-    text = gtk_text_new (NULL, NULL);
-    gtk_text_set_editable (GTK_TEXT (text), TRUE);
-
-    gtk_table_attach (GTK_TABLE (table), text, 0, 1, 0, 1,
-            GTK_EXPAND | GTK_SHRINK | GTK_FILL,
-            GTK_EXPAND | GTK_SHRINK | GTK_FILL, 0, 0);
-
-    gtk_widget_show (text);
-
-    hscrollbar = gtk_hscrollbar_new (GTK_TEXT (text)->hadj);
-    gtk_table_attach (GTK_TABLE (table), hscrollbar, 0, 1, 1, 2,
-            GTK_EXPAND | GTK_FILL | GTK_SHRINK, GTK_FILL, 0, 0);
-    gtk_widget_show (hscrollbar);
-
-    vscrollbar = gtk_vscrollbar_new (GTK_TEXT (text)->vadj);
-    gtk_table_attach (GTK_TABLE (table), vscrollbar, 1, 2, 0, 1,
-            GTK_FILL, GTK_EXPAND | GTK_SHRINK | GTK_FILL, 0, 0);
-    gtk_widget_show (vscrollbar);
-
 }
 
 char *GetText ()

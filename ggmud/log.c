@@ -33,7 +33,11 @@
 #include <unistd.h>
 #endif
 
-#include "log.h"
+#include "ggmud.h"
+/* ToolBar Loggerbutton */
+extern GtkWidget *btn_toolbar_logger;
+
+extern GtkWidget *menu_Tools_Logger;
 
 static gboolean CLOSE_WINDOW = FALSE;
 static GtkWidget *file_dialog;
