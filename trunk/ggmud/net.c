@@ -84,6 +84,8 @@ struct session *new_session(char *, char *, struct session *);
 struct session *newactive_session();
 struct session *parse_input(char *, struct session *);
 
+int hide_input = FALSE;
+
 extern int prompt_on;
 
 /*
@@ -504,7 +506,7 @@ void write_line_mud(const char *line, struct session *ses)
   if(send(ses->socket, outtext, strlen(outtext), 0) == -1)
     syserr("write in write_to_mud");
 
-  if(prefs.EchoText) {
+  if(prefs.EchoText && !hide_input) {
       if(!broken_telnet) // remove the "\r"
           strcpy(outtext + strlen(outtext) - 2, "\n");
 

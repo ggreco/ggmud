@@ -197,9 +197,13 @@ int read_buffer_mud(char *buffer, struct session *ses)
   return(didget);
 }
 
+extern void input_line_visible(int );
+
+
 void translate_telnet_protocol(unsigned char *dst, unsigned char *src, 
 				 size_t srclen)
 {
+    static int input_hidden = 0;
     char buf[100];
     int skip_telnet = 0;
     unsigned char *cpdst;
@@ -209,54 +213,68 @@ void translate_telnet_protocol(unsigned char *dst, unsigned char *src,
     cpsrc = src ;
 
     while(srclen) {
-      if(*cpsrc == TELNET_IAC) {  /* if telnet command */
-	    sprintf(buf, "%X, %X, %X", cpsrc[1], cpsrc[2], cpsrc[3]);
-	      tintin_puts2(buf, NULL); 
-	switch(cpsrc[1]) {
-	  /* 2-byte commands ---- begin */
-	case TELNET_SE:    skip_telnet = 2 ; break ;
-	case TELNET_NOP:   skip_telnet = 2 ; break ;
-	case TELNET_DM:    skip_telnet = 2 ; break ;
-	case TELNET_BREAK: skip_telnet = 2 ; break ;
-	case TELNET_IP:    skip_telnet = 2 ; break ;
-	case TELNET_AO:    skip_telnet = 2 ; break ;
-	case TELNET_AYT:   skip_telnet = 2 ; break ;
-	case TELNET_EC:    skip_telnet = 2 ; break ;
-	case TELNET_EL:    skip_telnet = 2 ; break ;
-	case TELNET_GA:    *cpdst++ = '\n' ;
+        if(*cpsrc == TELNET_IAC) {  /* if telnet command */
+//            sprintf(buf, "%X, %X, %X", cpsrc[1], cpsrc[2], cpsrc[3]);
+//            tintin_puts2(buf, NULL);
+            
+            if(cpsrc[1] == 0xfb &&
+               cpsrc[2] == 1 &&
+               cpsrc[3] == 0 ) {
+            
+                input_hidden = 1;
+                
+                input_line_visible(FALSE);
+            }
+            else if(input_hidden) {
+                input_hidden = 0;
+                input_line_visible(TRUE);
+            }
+                
+            switch(cpsrc[1]) {
+                /* 2-byte commands ---- begin */
+                case TELNET_SE:    skip_telnet = 2 ; break ;
+                case TELNET_NOP:   skip_telnet = 2 ; break ;
+                case TELNET_DM:    skip_telnet = 2 ; break ;
+                case TELNET_BREAK: skip_telnet = 2 ; break ;
+                case TELNET_IP:    skip_telnet = 2 ; break ;
+                case TELNET_AO:    skip_telnet = 2 ; break ;
+                case TELNET_AYT:   skip_telnet = 2 ; break ;
+                case TELNET_EC:    skip_telnet = 2 ; break ;
+                case TELNET_EL:    skip_telnet = 2 ; break ;
+                case TELNET_GA:    *cpdst++ = '\n' ;
                                    skip_telnet = 2 ;
                                    break ;
-	case TELNET_SB:    skip_telnet = 2 ; break ;
-	  /* 2-byte commands ---- end */
-	  /* 3-byte commands ---- begin */
-	case TELNET_WILL:  skip_telnet = 3 ; 
-	  break ;
-	case TELNET_WONT:  skip_telnet = 3 ; 
-	  break ;
-	case TELNET_DO:    skip_telnet = 3 ; break ;
-	case TELNET_DONT:  skip_telnet = 3 ; break ;
-	  /* 3-byte commands ---- end */
+                case TELNET_SB:    skip_telnet = 2 ; break ;
+                                   /* 2-byte commands ---- end */
+                                   /* 3-byte commands ---- begin */
+                case TELNET_WILL:  skip_telnet = 3 ; 
+                                   break ;
+                case TELNET_WONT:  skip_telnet = 3 ; 
+                                   break ;
+                case TELNET_DO:    skip_telnet = 3 ; break ;
+                case TELNET_DONT:  skip_telnet = 3 ; break ;
+                                   /* 3-byte commands ---- end */
 
-	  /* data commands   ---- begin */
-	case TELNET_IAC:   *cpdst++ = 0xFF ;
+                                   /* data commands   ---- begin */
+                case TELNET_IAC:   *cpdst++ = 0xFF ;
                                    skip_telnet = 2 ;
                                    break ;
-				   /* data commands   ---- end */
-				   /* unknown telnet commands gonna be 
-				      just skipped. */
+                                   /* data commands   ---- end */
+                                   /* unknown telnet commands gonna be 
+                                      just skipped. */
 
-	default:           skip_telnet = 1 ; break ;
-	} /* switch */
-	srclen -= skip_telnet ;
-	cpsrc  += skip_telnet ;
-      } else {                   /* if not telnet command */
-	/* skip (char)0 in socket input */
-	if(*cpsrc==0)
-	  cpsrc++;
-	else
-	*cpdst++ = *cpsrc++ ;
-	srclen -- ;
-      } /* if */
+                default:           skip_telnet = 1 ; break ;
+            } /* switch */
+            srclen -= skip_telnet ;
+            cpsrc  += skip_telnet ;
+        } else {                   /* if not telnet command */
+            /* skip (char)0 in socket input */
+            if(*cpsrc==0)
+                cpsrc++;
+            else
+                *cpdst++ = *cpsrc++ ;
+            srclen -- ;
+        } /* if */
     } /* while */
     *cpdst = '\0' ;
 
