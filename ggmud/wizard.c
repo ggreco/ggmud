@@ -223,10 +223,9 @@ static void wizard_button_connect (GtkWidget *button, gpointer data)
        wich would crash the client??? */
     if ( connected )
     {
-        g_snprintf (buf, 256, "You are already connected.\n"
+        popup_window ( "You are already connected.\n"
 		              "Either disconnect or start \n"
-		              "       an new client.        ");
-        popup_window (buf);     
+		              "       an new client.        ");   
         return;
     }
 

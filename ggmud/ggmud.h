@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <time.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
@@ -181,7 +182,7 @@ extern GtkWidget *menu_Option_Preference;
 GtkWidget *menu_Option_Colors;
 extern void do_menu(GtkWidget *);
 
-extern void popup_window ( const gchar *message );
+extern void popup_window ( const gchar *message, ... );
 
 extern GdkFont  *font_bold;
 
