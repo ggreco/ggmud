@@ -120,7 +120,7 @@ static void trigger_selection_made (GtkWidget *clist, gint row, gint column,
     return;
 }
 
-static void add_trigger(char *a, char *b, int pri)
+static void add_trigger(const char *a, const char *b, int pri)
 {
     char buffer[1024];
 
@@ -131,7 +131,8 @@ static void add_trigger(char *a, char *b, int pri)
 
 static void trigger_button_add (GtkWidget *button, GtkCList *data)
 {
-    gchar *text[3], buffer[20];
+    const gchar *text[3];
+    gchar buffer[20];
     gint   i;
 
     text[0]   = gtk_entry_get_text (GTK_ENTRY (textalias  ));

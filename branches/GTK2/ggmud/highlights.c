@@ -161,7 +161,7 @@ static void high_selection_made (GtkWidget *clist, gint row, gint column,
 
 
 static void
-add_highlight(char *string, color_options *bg, color_options *fg)
+add_highlight(const char *string, color_options *bg, color_options *fg)
 {
     char buffer[200];
 
@@ -235,7 +235,7 @@ static void  insert_highlights  (GtkCList *clist)
 
 static void high_button_add (GtkWidget *button, GtkCList * data)
 {
-    gchar *text;
+    const gchar *text;
     gint   i, j;
 
     text   = gtk_entry_get_text (GTK_ENTRY (textalias  ));

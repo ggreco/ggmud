@@ -60,7 +60,7 @@ static void save_aliases (GtkWidget *button, gpointer data)
     }    
 }
 
-static void  add_alias (char *alias, char *replacement)
+static void add_alias(const char *alias, const char *replacement)
 {
     char buffer[1024];
     
@@ -119,7 +119,7 @@ static void alias_selection_made (GtkWidget *clist, gint row, gint column,
 
 static void alias_button_add (GtkWidget *button, gpointer data)
 {
-    gchar *text[2];
+    const gchar *text[2];
     gint   i;
 
     text[0]   = gtk_entry_get_text (GTK_ENTRY (textalias  ));

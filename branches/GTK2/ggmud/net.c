@@ -131,7 +131,7 @@ void tintin_puts(const char *cptr, struct session *ses)
     tintin_puts2(cptr, ses);
 }
 
-void make_connection (char *name, char *host, char *port)
+void make_connection (const char *name, const char *host, const char *port)
 {
     char buf[2048];
 
@@ -451,7 +451,8 @@ void read_from_connection (gpointer data, gint source, GdkInputCondition conditi
 void send_to_connection (GtkWidget *widget, gpointer data)
 {
     char buffer[2048];
-    gchar *entry_text;
+    const gchar *entry_text;
+    GtkAdjustment *adj = mud->text->vadjustment;
 
     entry_text = gtk_entry_get_text (mud->ent);
 
@@ -462,8 +463,8 @@ void send_to_connection (GtkWidget *widget, gpointer data)
     hist_add(entry_text);
 
     
-    if(mud->text->vadj->value < (mud->text->vadj->upper - mud->text->vadj->page_size))
-        gtk_adjustment_set_value(mud->text->vadj, (mud->text->vadj->upper - mud->text->vadj->page_size));
+    if(adj->value < (adj->upper - adj->page_size))
+        gtk_adjustment_set_value(adj, (adj->upper - adj->page_size));
     
     //textfield_add ( "\n", MESSAGE_NONE);
     if ( prefs.KeepText && !hide_input)

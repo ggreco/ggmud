@@ -43,8 +43,8 @@ void set_style() {
     style = gtk_widget_get_default_style();
 
     if (style) {
-        style->font = font_normal;
-        gtk_widget_set_default_style(style);
+//        style->font = font_normal; XXX todo
+//        gtk_widget_set_default_style(style);
 
         if (mud->window) {
            gtk_widget_set_style(mud->window, style);

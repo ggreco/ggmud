@@ -77,7 +77,7 @@ GList *windows_list = NULL;
 extern char *get_arg_in_braces(char *s, char *arg, int flag);
 
 
-GtkText *new_view(char *name, GtkWidget *parent);
+GtkTextView *new_view(char *name, GtkWidget *parent);
 
 void destroy_a_window(GtkWidget *w)
 {
@@ -125,7 +125,7 @@ void
 input_line_visible(int state)
 {
     if (state == hide_input) {
-       char *temp = gtk_entry_get_text(mud->ent);
+       const char *temp = gtk_entry_get_text(mud->ent);
        int pos = mud->hist->pos;
        
        pos--;
@@ -255,11 +255,9 @@ window_entry *in_window_list(char *tag)
     return NULL;
 }
 
-void clear_text_widget(GtkText *w)
+void clear_text_widget(GtkTextView *w)
 {
-    int l = gtk_text_get_length(w);
-
-    gtk_editable_delete_text(GTK_EDITABLE(w), 0, l);
+    gtk_text_buffer_set_text(gtk_text_view_get_buffer(w), "", -1); 
 }
 
 void clr_command(char *arg, struct session *s)
@@ -290,7 +288,7 @@ void clr_command(char *arg, struct session *s)
             gtk_window_activate_focus(GTK_WINDOW(mud->window));
         }
         else
-            clear_text_widget(GTK_TEXT(entry->listptr));
+            clear_text_widget(GTK_TEXT_VIEW(entry->listptr));
     }
 }
 
@@ -298,14 +296,19 @@ void clr_command(char *arg, struct session *s)
 void
 review_ok(GtkWidget *w, GtkFileSelection *fs)
 {
-    int len = gtk_text_get_length(mud->text);
-    char *buffer = gtk_editable_get_chars(GTK_EDITABLE(mud->text), 0, len);
-    FILE *f;
+    GtkTextIter start, end;
+    GtkTextBuffer *b = gtk_text_view_get_buffer(mud->text);
+    FILE *f;    
+    char *buffer;
+    
+    gtk_text_buffer_get_bounds(b, &start, &end);
+
+    buffer = gtk_text_buffer_get_text(b, &start, &end, FALSE);
+    
     
     if( f = fopen(gtk_file_selection_get_filename(fs), "w") ) {
         if (buffer) {
-            fwrite(buffer, 1, len, f);
-            g_free(buffer);
+            fputs(buffer, f);
         }
         else
             popup_window("Unable to lock review buffer!");
@@ -320,6 +323,9 @@ review_ok(GtkWidget *w, GtkFileSelection *fs)
 
         popup_window(temp);
     }
+
+    if (buffer)
+            g_free(buffer);
 
     gtk_widget_destroy(GTK_WIDGET(fs));
 }
@@ -390,7 +396,7 @@ void window_command(char *arg, struct session *s)
         substitute_vars(left, right, s);
         result = ParseAnsiColors(right);
         strcat(result, "\n");
-        textfield_add((GtkText *)entry->listptr, result , MESSAGE_ANSI);
+        textfield_add((GtkTextView *)entry->listptr, result , MESSAGE_ANSI);
     }
 }
 
@@ -550,8 +556,8 @@ void quit (GtkWidget *widget, gpointer data)
 
 void do_con()
 {
-    char *port;
-    char *host;
+    const char *port;
+    const char *host;
     gchar buf[256];
 
     host = gtk_entry_get_text(GTK_ENTRY(mud->hostentry));
@@ -1046,10 +1052,9 @@ spawn_gui()
   /* toolbar will be horizontal, with both icons and text, and
    * with 5pxl spaces between items and finally, 
    * we'll also put it into our handlebox */
-  toolbar = gtk_toolbar_new ( GTK_ORIENTATION_HORIZONTAL,
-                              GTK_TOOLBAR_ICONS );
+  toolbar = gtk_toolbar_new ( );
   gtk_container_set_border_width ( GTK_CONTAINER ( toolbar ) , 5 );
-  gtk_toolbar_set_space_size ( GTK_TOOLBAR ( toolbar ), 5 );
+  //gtk_toolbar_set_space_size ( GTK_TOOLBAR ( toolbar ), 5 );
   gtk_container_add ( GTK_CONTAINER ( handlebox ) , toolbar );
 
   /* our first item is <Connection Wizard> button */
@@ -1375,37 +1380,37 @@ void clear_backbuffer()
 {
     
     if (mud->maxlines > 0) {
-        int n;
-
-        n= gtk_text_get_length (mud->text);
+        GtkTextIter start, end;
+        GtkTextBuffer *b = gtk_text_view_get_buffer(mud->text);
+        int n = gtk_text_buffer_get_char_count(b);
         
         if( n < mud->maxlines)
             return;
 
-        gtk_text_set_point (mud->text, n - mud->maxlines);
-        gtk_text_backward_delete (mud->text, n - mud->maxlines);
-        gtk_text_set_point (mud->text, mud->maxlines);
+        gtk_text_buffer_get_start_iter(b, &start);
+        gtk_text_buffer_get_iter_at_offset(b, &end, n - mud->maxlines);
+        gtk_text_buffer_delete(b, &start, &end); 
     }
 }
 
 void textfield_freeze()
 {
-  GtkAdjustment *adj = mud->text->vadj;
+  GtkAdjustment *adj = mud->text->vadjustment;
 
   if (adj->value < (adj->upper - adj->page_size)) {
      scrolled_up = TRUE;
   }
   
-  gtk_text_freeze(mud->text);
+//  gtk_text_freeze(mud->text);
 }
 
 void textfield_unfreeze()
 {
-    GtkAdjustment *adj = mud->text->vadj;
+    GtkAdjustment *adj = mud->text->vadjustment;
 
     clear_backbuffer();
   
-    gtk_text_thaw (mud->text);  
+//   gtk_text_thaw (mud->text);  
   
     if (scrolled_up) {
         scrolled_up = FALSE;
@@ -1416,49 +1421,54 @@ void textfield_unfreeze()
 //    gtk_widget_grab_focus ((GtkWidget *)mud->ent); XXX serve?
 }
 
-void textfield_add(GtkText *txt, const char *message, int colortype)
+void textfield_add(GtkTextView *txt, const char *message, int colortype)
 {
     int numbytes;
+    GtkTextIter iter;
+    GtkTextBuffer *tbuf;
+    extern GtkTextTag *fg_colors[2][8];
 
     if (!*message)
         return;
-
+    GtkTextTag *tag = prefs.DefaultColor;
+    
     switch (colortype) {
         case MESSAGE_ANSI:
             numbytes = strlen(message);
             
             disp_ansi(numbytes, message, txt);
-            break;
+            return;
         case MESSAGE_SENT:
             if (mud->LOGGING) /* Loging */
                 fprintf(mud->LOG_FILE, message);
-            gtk_text_insert(txt, font_normal,
-                    &color_lightyellow, NULL, message, -1);
+            tag = fg_colors[0][1]; // red
             break;
         case MESSAGE_ERR:
             if (mud->LOGGING) /* Loging */
                 fprintf(mud->LOG_FILE, message);
-            gtk_text_insert(txt, font_normal, &color_red, NULL, message, -1);
+            tag = fg_colors[1][3]; // light yellow
             break;
         case MESSAGE_TICK:
-            gtk_text_insert(txt, font_normal,
-                    &color_lightcyan, NULL, message, -1);
             break;
         default:
             if (mud->LOGGING) /* Loging */
                 fprintf(mud->LOG_FILE, message);
-            gtk_text_insert(txt, font_normal,
-                    &prefs.DefaultColor, NULL, message, -1);
     }
+    
+    tbuf = gtk_text_view_get_buffer(txt);
+    gtk_text_buffer_get_end_iter(tbuf, &iter);
+    gtk_text_buffer_insert_with_tags(tbuf, &iter, message, -1, tag, prefs.BackgroundColor, NULL);
+
+
 }
 
 
 	/* n is the number of lines to NOT delete, if it's 0, delete 'em all */
-void clear(int n, GtkText *target)
+void clear(int n, GtkTextView *target)
 {
-    gtk_text_freeze (target);
-    gtk_text_backward_delete ((target), gtk_text_get_length (target));
-    gtk_text_thaw (target);
+    GtkTextBuffer *b = (GtkTextBuffer *)gtk_text_view_get_buffer(target);
+
+    gtk_text_buffer_set_text(b, "", -1);
 }	
 
 
@@ -1500,11 +1510,12 @@ void popup_window (const gchar *message)
 }
 
 
-GtkText *new_view(char *name, GtkWidget *parent)
+GtkTextView *new_view(char *name, GtkWidget *parent)
 {
   GtkWidget *hbox4, *templabel, *vscrollbar;
-  GtkText *text;
-  
+  GtkTextView *text;
+  extern GtkTextTagTable *tag_table;
+
   hbox4 = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox4);
 
@@ -1521,7 +1532,8 @@ GtkText *new_view(char *name, GtkWidget *parent)
 #endif
       
   /* main text window */
-  text = (GtkText *)gtk_text_new (NULL, NULL);
+  text = (GtkTextView *)gtk_text_view_new_with_buffer (
+          gtk_text_buffer_new(tag_table));
   gtk_signal_connect(GTK_OBJECT(text),"key_press_event",GTK_SIGNAL_FUNC(change_focus), mud);
   gtk_widget_show (GTK_WIDGET(text));
   gtk_box_pack_start (GTK_BOX (hbox4), GTK_WIDGET(text), TRUE, TRUE, 0);
@@ -1529,13 +1541,12 @@ GtkText *new_view(char *name, GtkWidget *parent)
   gtk_widget_realize (GTK_WIDGET(text));
 
   /* the scrollbar attached to the main text window */
-  vscrollbar = gtk_vscrollbar_new (text->vadj);
+  vscrollbar = gtk_vscrollbar_new (text->vadjustment);
   gtk_widget_show (vscrollbar);
   gtk_box_pack_start (GTK_BOX (hbox4), vscrollbar, FALSE, TRUE, 0);
   GTK_WIDGET_UNSET_FLAGS (vscrollbar, GTK_CAN_FOCUS);
 
-  gdk_window_set_background(text->text_area,
-			      &(prefs.BackgroundColor));
+  text_bg(text, prefs.BackgroundGdkColor);
 
   return text;
 }
