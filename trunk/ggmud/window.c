@@ -106,6 +106,69 @@ GtkWidget *create_new_window(char *title)
     return list;
 }
 
+window_entry *create_new_entry(char *title)
+{
+    window_entry *entry;
+    
+    if(!(entry = malloc(sizeof(window_entry))))
+        return NULL;
+
+    strncpy(entry->name, title, 31);
+
+    if((entry->listptr = create_new_window(title)))
+        windows_list = g_list_append(windows_list, entry);
+    else {
+        free(entry);
+        return NULL;
+    }
+
+    return entry;
+}
+
+void clear_text_widget(GtkText *w)
+{
+    int l = gtk_text_get_length(w);
+
+    gtk_editable_delete_text(GTK_EDITABLE(w), 0, l);
+}
+
+void clr_command(char *arg, struct session *s)
+{
+    extern char *get_arg_in_braces(char *s, char *arg, int flag);
+    char left[BUFFER_SIZE];
+    window_entry *entry = NULL;
+    
+    arg = get_arg_in_braces(arg, left, 0);
+
+    if(!*left) {
+        clear_text_widget(mud->text);
+    }
+    else {
+        if(!(entry = in_window_list(left))) {
+            create_new_entry(left); // creo la nuova finestra nel caso non ci sia
+        }
+        else
+            clear_text_widget(GTK_TEXT(entry->listptr));
+    }
+}
+
+void mess_command(char *arg, struct session *s)
+{
+    extern char *get_arg_in_braces(char *s, char *arg, int flag);
+    char left[BUFFER_SIZE], right[BUFFER_SIZE];
+
+    arg = get_arg_in_braces(arg, left, 0);
+    arg = get_arg_in_braces(arg, right, 1);
+
+    if(!*left || !*right)
+        return;
+   
+    substitute_myvars(right, left, s);
+    substitute_vars(left, right, s);
+
+    popup_window(right);
+}
+
 void window_command(char *arg, struct session *s)
 {
     extern char *get_arg_in_braces(char *s, char *arg, int flag);
@@ -119,17 +182,7 @@ void window_command(char *arg, struct session *s)
         return;
 
     if(!(entry = in_window_list(left))) {
-        if(!(entry = malloc(sizeof(window_entry))))
-            return;
-
-        strncpy(entry->name, left, 31);
-
-        if((entry->listptr = create_new_window(left)))
-            windows_list = g_list_append(windows_list, entry);
-        else {
-            free(entry);
-            return;
-        }
+        entry = create_new_entry(left);
     }
 
     if(right && *right && entry) {

@@ -44,7 +44,8 @@ walkback        walkinfo         walkon
 walkoff         walkreset        walkset            
 wildcard        wizlist          write                   
 writesession    zap              zombion            
-zombioff        helpversion
+zombioff        helpversion      window
+verbosity
 
 
 ~ALIAS
@@ -81,7 +82,7 @@ it will put the word valgar into %1
 list all aliases
 #alias he*
 list all aliases that start with the letters 'he'
- 
+
 ~ACTION
 
 format:     #action [{string}] [{command(s)}] [{priority}]
@@ -383,7 +384,13 @@ the amount still needed.
 
 ~MESSAGE
 
-format:        #message {type}
+format:        #message {type} {contents}
+
+Shows a popup window with "contents".
+
+~VERBOSITY
+
+format:        #verbosity {type}
 
 This will toggle off and on the messages dealing with a certain type of
 command.  The possible message types are alias, action, antisub, sub
@@ -392,7 +399,7 @@ variable, and highlight.  This is very helpful if you are using
 the Variable Set messages.
 
 example:
-#message {variable}
+#verbosity {variable}
 toggles whether messages dealing with variables will be shown.
 
 ~NOP
@@ -1320,5 +1327,24 @@ will be disconnected.
 
 ~HELPVERSION
     Help file was last modified on 7/21/00 by Davin Chan.
+
+~WINDOW
+
+format:        #window name {string}
+
+Sends to window named "name" the string "string". If the window doesn't
+exists it's created.
+
+~CLR
+
+format:        #clr winname
+
+Clears the buffer of the window named "winname", if the window doesn't
+exists it's created. 
+If winname is not specified the window cleared it's the main window.
+
+~TRIGGER
+
+It's an alias of ACTION for ZMud compatibility, please use #help ACTION.
 
 ~*EOF* 
