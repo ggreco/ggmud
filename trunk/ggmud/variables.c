@@ -164,7 +164,7 @@ variables_window(GtkWidget *w, gpointer data)
     gchar     *titles[2] = { "Variable", "Initial value" };
 
     tooltip = gtk_tooltips_new ();
-    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
+//    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
 
 
     variable_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);

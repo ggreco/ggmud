@@ -133,7 +133,7 @@ create_complete_window(GtkWidget *w, gpointer data)
     gchar     *titles[1] = { "Word list" };
 
     tooltip = gtk_tooltips_new ();
-    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
+//    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
 
 
     complete_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
