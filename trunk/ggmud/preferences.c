@@ -105,6 +105,13 @@ static void tt_file_ok(GtkWidget *w, GtkFileSelection *fs)
     gtk_widget_destroy(GTK_WIDGET(fs));
 }
 
+void load_zmud_prefs(void)
+{
+    popup_window("Warning, at the moment trigger params (%d), (%w)...\nand other custom zmud settings are not imported!");
+
+    load_tt_prefs();
+}
+
 void load_tt_prefs(void)
 {
     /* Create a new file selection widget */

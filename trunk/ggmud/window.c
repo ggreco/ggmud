@@ -795,7 +795,7 @@ spawn_gui()
   gtk_widget_show (separator2);
   gtk_container_add (GTK_CONTAINER (menu_Options_menu), separator2);
   gtk_signal_connect (GTK_OBJECT (separator2), "activate",
-                      GTK_SIGNAL_FUNC (load_tt_prefs),
+                      GTK_SIGNAL_FUNC (load_zmud_prefs),
                       NULL);
   separator2 = gtk_menu_item_new();
   gtk_widget_show (separator2);
