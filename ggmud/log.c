@@ -233,7 +233,7 @@ void file_ok_sel (GtkWidget *w, GtkFileSelection *fs)
     struct stat file_stat;
 
     /* Get the filename from file dialog */
-    mud->log_filename = g_strdup(gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs)));
+    mud->log_filename = strdup(gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs)));
 #ifndef WIN32
     /* Check to see if mud->log_filename exists or not */
     if (stat (mud->log_filename, &file_stat) == 0) {

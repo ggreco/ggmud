@@ -154,16 +154,16 @@ void init_colors ()
     /* Hmm, why is this here??? CHECK IT OUT */
     if ( !font.FontName ) {
 #ifdef WIN32
-		font.FontName = g_strdup("-*-*-normal-r-normal--*-100-*-*-m-*-iso8859-1");
+		font.FontName = strdup("-*-*-normal-r-normal--*-100-*-*-m-*-iso8859-1");
 #else
-        font.FontName = g_strdup ("fixed");
+        font.FontName = strdup ("fixed");
 #endif
 	}
     if ( ( font_normal = gdk_font_load (font.FontName) ) == NULL )
     {
         g_error ("Can't load font... Using default.\n");
-        g_free ( font.FontName );
-        font.FontName = g_strdup ("fixed");
+        free ( font.FontName );
+        font.FontName = strdup ("fixed");
         save_font ();
     }
 }

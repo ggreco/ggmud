@@ -72,31 +72,12 @@
 #endif
 
 #include "net.h"
-extern struct session *activesession;
 
 struct session *new_session(char *, char *, struct session *);
 struct session *newactive_session();
 struct session *parse_input(char *, struct session *);
 
 extern int prompt_on;
-
-gchar* strdelim(gchar *str, const gchar *delim, gchar new_delim)
-
-/* The same as g_strdelimit(), but doesn't modify the original string */
-
-{
-    register gchar	*c;
-    gchar		*newstr;
-
-    g_return_val_if_fail (str != NULL, NULL);
-    if (!delim) delim = G_STR_DELIMITERS;
-    newstr = g_new(char, strlen(str) + 1);
-    strcpy(newstr, str);
-    for (c = newstr; *c; c++) {
-    	if (strchr (delim, *c)) *c = new_delim;
-    }
-    return newstr;
-}
 
 static void printline(const char *str, int isaprompt)
 {
@@ -111,7 +92,7 @@ void tintin_puts2(const char *cptr, struct session *ses)
 {
   extern int puts_echoing;
 
-  if((ses != activesession && ses) || !puts_echoing)
+  if((ses != mud->activesession && ses) || !puts_echoing)
     return;
 
   textfield_freeze();
@@ -161,8 +142,8 @@ void make_connection (char *name, char *host, char *port)
 
 void disconnect ( void )
 {
-    cleanup_session(activesession);
-    gdk_input_remove (input_monitor);
+    cleanup_session(mud->activesession);
+    gdk_input_remove (mud->input_monitor);
     textfield_add ( "\n*** Connection closed.\n", MESSAGE_NORMAL);
     connected = FALSE;
     gtk_widget_set_sensitive (menu_File_Connect, TRUE);
@@ -177,6 +158,7 @@ void open_connection (const char *name, const char *host, const char *port)
     struct hostent *he;
     struct sockaddr_in their_addr;
     int sockfd;
+
 #ifdef WIN32
     static int winsock_initted = 0;
 
@@ -191,6 +173,15 @@ void open_connection (const char *name, const char *host, const char *port)
     
 #endif
 
+    if(connected) {
+#ifdef USE_NOTEBOOK
+        new_view(name);
+#else
+        popup_window("You have to close the previous connection!");
+        return;
+#endif
+    }
+    
     /* strerror(3) */
     if ( ( he = gethostbyname (host) ) == NULL )
     {
@@ -222,14 +213,14 @@ void open_connection (const char *name, const char *host, const char *port)
 
         sprintf(buffer, "%s %s", host, port);
         
-        activesession = new_session(name, buffer, activesession);
+        mud->activesession = new_session(name, buffer, mud->activesession);
 
-        activesession->socket = sockfd;
+        mud->activesession->socket = sockfd;
     }
     
-    input_monitor = gdk_input_add (sockfd, GDK_INPUT_READ,
+    mud->input_monitor = gdk_input_add (sockfd, GDK_INPUT_READ,
     				   read_from_connection,
-    				   activesession );
+    				   mud->activesession );
     connected = TRUE;
     gtk_widget_set_sensitive (menu_File_Connect, FALSE);
     gtk_widget_set_sensitive (btn_toolbar_connect, FALSE);
@@ -268,11 +259,11 @@ static void readmud(struct session *s)
     /* sprintf(mybuf, "rv: %d", rv);
        tintin_puts(mybuf, NULL); */ 
     if(!rv) {
-//           cleanup_session(s); da riconsiderare quando avremo piu' sessioni
-
+        extern struct session *activesession;
         disconnect();
         
         newactive_session();
+        mud->activesession = activesession;
         return;
     }
     else if(rv < 0)
@@ -281,7 +272,7 @@ static void readmud(struct session *s)
     buf[++rv] = '\0';
 
     /* changed by DasI */
-    if( s->snoopstatus && (s != activesession))
+    if( s->snoopstatus && (s != mud->activesession))
         sprintf(header, "%s%% ", s->name);
     else
         header[0] = '\0';
@@ -319,7 +310,7 @@ static void readmud(struct session *s)
         do_one_line(linebuf, s);		/* changes linebuf */
 
         /* added by DasI */
-        if( (s == activesession) || s->snoopstatus )
+        if( (s == mud->activesession) || s->snoopstatus )
         {
             if(strcmp(linebuf, ".")) {
                 strcat(header, linebuf);
@@ -349,21 +340,20 @@ void send_to_connection (GtkWidget *widget, gpointer data)
     char buffer[2048];
     gchar *entry_text;
 
-    entry_text = gtk_entry_get_text (GTK_ENTRY (mud->ent));
-//    gtk_entry_select_region (GTK_ENTRY (mud->ent), 0,  GTK_ENTRY (mud->ent)->text_length); ???
+    entry_text = gtk_entry_get_text (mud->ent);
 
 
     strcpy(buffer, entry_text);
     
-    activesession = parse_input(buffer, activesession); // can change active session
+    mud->activesession = parse_input(buffer, mud->activesession); // can change active session
     hist_add(entry_text);
 
     //textfield_add ( "\n", MESSAGE_NONE);
     if ( prefs.KeepText )
-        gtk_entry_select_region (GTK_ENTRY (mud->ent), 0,
-                GTK_ENTRY (mud->ent)->text_length);
+        gtk_entry_select_region (mud->ent, 0,
+                mud->ent->text_length);
     else
-        gtk_entry_set_text (GTK_ENTRY (mud->ent), "");
+        gtk_entry_set_text (mud->ent, "");
 
 }
 
@@ -371,8 +361,8 @@ void send_to_connection (GtkWidget *widget, gpointer data)
 */
 void connection_send (gchar *message)
 {
-    if(activesession)
-        send (activesession->socket, message, strlen (message), 0);
+    if(mud->activesession)
+        send (mud->activesession->socket, message, strlen (message), 0);
 }
 
 /************************************************************/
@@ -410,15 +400,8 @@ void write_line_mud(const char *line, struct session *ses)
 /* send the macro and triggered ext to mud! */
 void alt_send_to_connection (gchar *text)
 {
-    gchar *temp;
-    if (strlen(text)) {
-        temp = g_malloc0(strlen(text) + 2);
-        strcpy(temp, strdelim(text,";",'\n'));
-        strcat(temp,"\n");
-        if (connected && activesession) 
-            send (activesession->socket, temp, strlen(temp), 0);
-        if (prefs.EchoText) textfield_add (temp, MESSAGE_SENT);
-    }
+    if (strlen(text) && mud->activesession) 
+        mud->activesession = parse_input(text, mud->activesession);
 }
 
 

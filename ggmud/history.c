@@ -17,7 +17,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 #include <gdk/gdkkeysyms.h>
-
+#include <string.h>
+#include <stdlib.h>
 #include "history.h"
 #include "tintin.h"
 
@@ -35,10 +36,10 @@ void hist_add (char *x)
         
     /* free up 'lost' bit */
     if(mud->hist->list[mud->hist->pos])
-        g_free(mud->hist->list[mud->hist->pos]);
+        free(mud->hist->list[mud->hist->pos]);
 
     /* add our line to the history */
-    mud->hist->list[mud->hist->pos] = g_strdup (x);
+    mud->hist->list[mud->hist->pos] = strdup (x);
 
     /* update the rest of history */
     mud->hist->cur = mud->hist->pos;
@@ -47,7 +48,7 @@ void hist_add (char *x)
 
     mud->hist->pos=(mud->hist->pos+1)%mud->hist->size;
 
-//    g_free(mud->hist->tmp); ????
+//    free(mud->hist->tmp); ????
     mud->hist->cur=mud->hist->pos;
 }
 
@@ -57,9 +58,9 @@ void hist_prev ()
         if((mud->hist->pos+1)%mud->hist->size==mud->hist->cur)  return;
 
     if (mud->hist->list[mud->hist->cur])
-        g_free(mud->hist->list[mud->hist->cur]);
+        free(mud->hist->list[mud->hist->cur]);
     
-    mud->hist->list[mud->hist->cur] = g_strdup (gtk_entry_get_text(mud->ent));
+    mud->hist->list[mud->hist->cur] = strdup (gtk_entry_get_text(mud->ent));
 
     if (mud->hist->size>0) {
         mud->hist->cur--;
@@ -76,9 +77,9 @@ void hist_next ()
             return;
 
     if (mud->hist->list[mud->hist->cur])
-        g_free(mud->hist->list[mud->hist->cur]);
+        free(mud->hist->list[mud->hist->cur]);
 
-    mud->hist->list[mud->hist->cur] = g_strdup (gtk_entry_get_text(mud->ent));
+    mud->hist->list[mud->hist->cur] = strdup (gtk_entry_get_text(mud->ent));
 
     if (mud->hist->size)
         mud->hist->cur = (mud->hist->cur+1)%mud->hist->size;
@@ -92,7 +93,7 @@ void hist_clear ()
 
     for (x = 0; x < mud->hist->max; x++)
         if(mud->hist->list[x]) {
-            g_free (mud->hist->list[x]);
+            free (mud->hist->list[x]);
             mud->hist->list[x] = NULL;
         }
     mud->hist->cur = mud->hist->pos = 0;
@@ -163,14 +164,13 @@ gint hist_evt (GtkWidget* w, GdkEventKey* event, gpointer data)
     }
 
     if(keypress) {
-        extern struct session *activesession;
         extern struct session *parse_input(char *, struct session *); // fake prototype
         
         char temp[20];
 
         temp[0] = keypress;
         temp[1] = 0;
-        parse_input(temp, activesession);
+        parse_input(temp, mud->activesession);
     }
     
     gtk_signal_emit_stop_by_name(GTK_OBJECT(w), "key_press_event");

@@ -20,6 +20,8 @@
 #include "config.h"
 #include "pixmaps.h"	// ToolBar Icons
 
+void new_view(char *, GtkWidget *);
+
 void toggle_parsing(GtkToggleButton *togglebutton,
                                             gpointer user_data)
 {
@@ -214,9 +216,7 @@ void cbox()
 
 
 void macro_send (GtkWidget *widget, gint button) {
-    extern struct session *activesession;
-
-    parse_input(macro_list[button], activesession);
+    parse_input(macro_list[button], mud->activesession);
 }
 
 /*
@@ -261,7 +261,7 @@ GtkWidget *spawn_gui()
   GtkWidget *menu_Help_About;
   GtkWidget *menu_Help_Manual;
   GtkWidget *vbox2;
-  GtkWidget *hbox1, *hbox4, *templabel;
+  GtkWidget *hbox1;
   GtkWidget *frame;
   GtkWidget *table;
   GtkWidget *macro_label;
@@ -772,36 +772,15 @@ GtkWidget *spawn_gui()
   gtk_widget_show (fill_block2);
   gtk_box_pack_start (GTK_BOX (vbox3), fill_block2, FALSE, TRUE, 0);
 
+#ifdef USE_NOTEBOOK
   mud->notebook = (GtkNotebook *)gtk_notebook_new();
   gtk_widget_show(GTK_WIDGET(mud->notebook));
-  
-  hbox4 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox4);
-
-  gtk_container_add(GTK_CONTAINER(mud->notebook), hbox4);
-
   gtk_box_pack_start(GTK_BOX(hbox1), GTK_WIDGET(mud->notebook), TRUE, TRUE, 0);
-          
-  templabel = gtk_label_new("Session 1");
-  gtk_widget_show(templabel);
-
-  gtk_notebook_set_tab_label (mud->notebook, 
-          gtk_notebook_get_nth_page(mud->notebook, 0), templabel);
-  /* main text window */
-  mud->text = (GtkText *)gtk_text_new (NULL, NULL);
-  gtk_object_set_data (GTK_OBJECT (window), "mud->text", mud->text);
-  gtk_signal_connect(GTK_OBJECT(mud->text),"key_press_event",GTK_SIGNAL_FUNC(change_focus), mud);
-  gtk_widget_show (GTK_WIDGET(mud->text));
-  gtk_box_pack_start (GTK_BOX (hbox4), GTK_WIDGET(mud->text), TRUE, TRUE, 0);
-
-  gtk_widget_realize (GTK_WIDGET(mud->text));
-
-  /* the scrollbar attached to the main text window */
-  vscrollbar = gtk_vscrollbar_new (GTK_TEXT(mud->text)->vadj);
-  gtk_widget_show (vscrollbar);
-  gtk_box_pack_start (GTK_BOX (hbox4), vscrollbar, FALSE, TRUE, 0);
-  GTK_WIDGET_UNSET_FLAGS (vscrollbar, GTK_CAN_FOCUS);
-
+  new_view("not connected", mud->notebook);        
+#else
+  new_view("not connected", hbox1);
+#endif
+  
   hbox2 = gtk_hbox_new (FALSE, 0);
   gtk_object_set_data (GTK_OBJECT (window), "hbox2", hbox2);
   gtk_widget_show (hbox2);
@@ -1010,3 +989,42 @@ void popup_window (const gchar *message)
     gtk_widget_show (box);
     gtk_widget_show (window);
 }
+
+
+void new_view(char *name, GtkWidget *parent)
+{
+  GtkWidget *hbox4, *templabel, *vscrollbar;
+
+  hbox4 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox4);
+
+#ifdef USE_NOTEBOOK
+      gtk_container_add(GTK_CONTAINER(parent), hbox4);
+
+      templabel = gtk_label_new(name);
+      gtk_widget_show(templabel);
+      
+      gtk_notebook_set_tab_label (mud->notebook, 
+              gtk_notebook_get_nth_page(mud->notebook, 0), templabel);
+#else
+      gtk_box_pack_start(GTK_BOX(parent), GTK_WIDGET(hbox4), TRUE, TRUE, 0);
+#endif
+      
+  /* main text window */
+  mud->text = (GtkText *)gtk_text_new (NULL, NULL);
+  gtk_signal_connect(GTK_OBJECT(mud->text),"key_press_event",GTK_SIGNAL_FUNC(change_focus), mud);
+  gtk_widget_show (GTK_WIDGET(mud->text));
+  gtk_box_pack_start (GTK_BOX (hbox4), GTK_WIDGET(mud->text), TRUE, TRUE, 0);
+
+  gtk_widget_realize (GTK_WIDGET(mud->text));
+
+  /* the scrollbar attached to the main text window */
+  vscrollbar = gtk_vscrollbar_new (mud->text->vadj);
+  gtk_widget_show (vscrollbar);
+  gtk_box_pack_start (GTK_BOX (hbox4), vscrollbar, FALSE, TRUE, 0);
+  GTK_WIDGET_UNSET_FLAGS (vscrollbar, GTK_CAN_FOCUS);
+
+  gdk_window_set_background(mud->text->text_area,
+			      &(prefs.BackgroundColor));
+}
+

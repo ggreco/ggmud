@@ -20,10 +20,14 @@
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "wizard.h"
 
-void wiz_destructify()
+#define CONN_FILE "connections"
+
+void
+wiz_destructify()
 {
     gtk_widget_hide(wizard_window);
     return;
@@ -31,46 +35,46 @@ void wiz_destructify()
 
 void free_wizard_data ( WIZARD_DATA *w )
 {
-    g_free (w->name);
-    g_free (w->hostname);
-    g_free (w->port);
-    g_free (w->playername);
-    g_free (w->password);
-    g_free (w);
+    free (w->name);
+    free (w->hostname);
+    free (w->port);
+    if(w->playername)
+        free (w->playername);
+    if(w->password)
+        free (w->password);
+    
+    free (w);
 }
 
 void load_wizard ()
 {
     WIZARD_DATA *w = NULL;
     FILE *fp;
-    gchar line[1024], value[1004];
-    gchar *name;
+    gchar line[1024], value[1004], name[256];
 
-    if (fp = fileopen ("connections", "r")) {
-    	while (fgets (line, 1024, fp)) {
-            name = (gchar *) g_malloc0 (20 * sizeof (gchar));
+    if (fp = fileopen (CONN_FILE, "r")) {
+        while (fgets (line, sizeof(line) - 1, fp)) {
             sscanf (line, "%s %[^\n]", name, value);
             if (!strcmp (name, "Connection")) {
                 if (w) {
                     if (!wizard_connection_list2) wizard_connection_list2 = g_list_alloc ();
                     wizard_connection_list2 = g_list_append (wizard_connection_list2, w);
                 }
-                w = (WIZARD_DATA *) g_malloc0 (sizeof (WIZARD_DATA));
-                w->name = g_strdup (value);
-                w->playername = g_strdup ("");
-                w->password = g_strdup ("");
+                w = (WIZARD_DATA *) calloc(sizeof (WIZARD_DATA), 1);
+                w->name = strdup (value);
             }
-            if (!strcmp (name, "Hostname")) w->hostname = g_strdup (value);
-            if (!strcmp (name, "Port")) w->port = g_strdup (value);
-            if (!strcmp (name, "Player")) w->playername = g_strdup (value);
-            if (!strcmp (name, "Password")) w->password = g_strdup (value);
-            if (!strcmp (name, "AutoLogin")) w->autologin = TRUE;
-            g_free (name);
+            if(w) {
+                if (!strcmp (name, "Hostname")) w->hostname = strdup (value);
+                if (!strcmp (name, "Port")) w->port = strdup (value);
+                if (!strcmp (name, "Player")) w->playername = strdup (value);
+                if (!strcmp (name, "Password")) w->password = strdup (value);
+                if (!strcmp (name, "AutoLogin")) w->autologin = TRUE;
+            }
         }
         if (w) {
             if (w->name) {
-	        if (!wizard_connection_list2) wizard_connection_list2 = g_list_alloc ();
-	        wizard_connection_list2 = g_list_append (wizard_connection_list2, w);
+                if (!wizard_connection_list2) wizard_connection_list2 = g_list_alloc ();
+                wizard_connection_list2 = g_list_append (wizard_connection_list2, w);
             } 
             else if (w) free_wizard_data (w);
             wizard_connection_list2 = wizard_connection_list2->next;
@@ -86,19 +90,18 @@ void save_wizard ()
     WIZARD_DATA *w;
     FILE *fp;
 
-    if (fp = fileopen("connections", "w")) {
+    if (fp = fileopen(CONN_FILE, "w")) {
     	for (tmp = wizard_connection_list2; tmp; tmp = tmp->next) {
             if (tmp->data) {
                 w = (WIZARD_DATA *) tmp->data;
             	fprintf (fp, "Connection %s\n", w->name);
-            	if (strlen (w->hostname)) fprintf (fp, "Hostname %s\n", w->hostname);
-            	if (strlen (w->port)) fprintf (fp, "Port %s\n", w->port);
-            	if (strlen (w->playername)) fprintf (fp, "Player %s\n", w->playername);
-            	if (strlen (w->password)) fprintf (fp, "Password %s\n", w->password);
+            	if (w->hostname && strlen (w->hostname)) fprintf (fp, "Hostname %s\n", w->hostname);
+            	if (w->port && strlen (w->port)) fprintf (fp, "Port %s\n", w->port);
+            	if (w->playername && strlen (w->playername)) fprintf (fp, "Player %s\n", w->playername);
+            	if (w->password && strlen (w->password)) fprintf (fp, "Password %s\n", w->password);
             	if (w->autologin) fprintf (fp, "AutoLogin YES\n");
             	fprintf (fp, "\n");
             }
-            w = NULL;
         }
     	fclose (fp);
     }
@@ -156,6 +159,7 @@ void wizard_selection_made (GtkWidget *clist, gint row, gint column,
             gtk_entry_set_text (GTK_ENTRY (wizard_entry_host), w->hostname);
         if ( w->port)
             gtk_entry_set_text (GTK_ENTRY (wizard_entry_port), w->port);
+        
         gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (wizard_check_autologin), w->autologin);
 
         if ( w->autologin )
@@ -205,7 +209,7 @@ void wizard_button_connect (GtkWidget *button, gpointer data)
        wich would crash the client??? */
     if ( connected )
     {
-        g_snprintf (buf, 256, "You are allready connected.\n"
+        g_snprintf (buf, 256, "You are already connected.\n"
 		              "Either disconnect or start \n"
 		              "       an new client.        ");
         popup_window (buf);     
@@ -229,7 +233,8 @@ void wizard_button_connect (GtkWidget *button, gpointer data)
             connection_send (w->password);
             connection_send ("\n");
         }
-	wiz_destructify();
+    	wiz_destructify();
+        
         sprintf (buf, "Connected to %s - GGMud %s", w->name, VERSION);
         gtk_window_set_title (GTK_WINDOW (mud->window), buf);
     }
@@ -284,10 +289,21 @@ void wizard_button_modify (GtkWidget *button, gpointer data)
         return;
     }
 
-    g_free (w->hostname);   w->hostname   = g_strdup (gtk_entry_get_text (GTK_ENTRY (wizard_entry_host)));
-    g_free (w->port);       w->port       = g_strdup (gtk_entry_get_text (GTK_ENTRY (wizard_entry_port)));
-    g_free (w->playername); w->playername = g_strdup (gtk_entry_get_text (GTK_ENTRY (wizard_entry_player)));
-    g_free (w->password);   w->password   = g_strdup (gtk_entry_get_text (GTK_ENTRY (wizard_entry_password)));
+    if(w->hostname)
+        free (w->hostname);  
+    w->hostname = strdup (gtk_entry_get_text (GTK_ENTRY (wizard_entry_host)));
+    
+    if(w->port)
+        free (w->port); 
+    w->port = strdup (gtk_entry_get_text (GTK_ENTRY (wizard_entry_port)));
+    
+    if(w->playername)
+        free(w->playername); 
+    w->playername = strdup (gtk_entry_get_text (GTK_ENTRY (wizard_entry_player)));
+    
+    if(w->password)
+        free (w->password);
+    w->password = strdup (gtk_entry_get_text (GTK_ENTRY (wizard_entry_password)));
 
     if ( GTK_TOGGLE_BUTTON (wizard_check_autologin)->active )
         w->autologin = TRUE;
@@ -319,13 +335,14 @@ void wizard_button_add (GtkWidget *button, gpointer data)
     if ( !wizard_connection_list2 || !wizard_connection_list2->data )
         gtk_clist_select_row ((GtkCList *) data, 0, 0);
 
-    w = (WIZARD_DATA *) g_malloc0 ( sizeof (WIZARD_DATA) );
+    w = (WIZARD_DATA *) calloc( sizeof (WIZARD_DATA), 1);
 
-    w->name       = g_strdup (gtk_entry_get_text (GTK_ENTRY (wizard_entry_name)));
-    w->hostname   = g_strdup (gtk_entry_get_text (GTK_ENTRY (wizard_entry_host)));
-    w->port       = g_strdup (gtk_entry_get_text (GTK_ENTRY (wizard_entry_port)));
-    w->playername = g_strdup (gtk_entry_get_text (GTK_ENTRY (wizard_entry_player)));
-    w->password   = g_strdup (gtk_entry_get_text (GTK_ENTRY (wizard_entry_password)));
+    w->name       = strdup (gtk_entry_get_text (GTK_ENTRY (wizard_entry_name)));
+    w->hostname   = strdup (gtk_entry_get_text (GTK_ENTRY (wizard_entry_host)));
+    w->port       = strdup (gtk_entry_get_text (GTK_ENTRY (wizard_entry_port)));
+    w->playername = strdup (gtk_entry_get_text (GTK_ENTRY (wizard_entry_player)));
+    w->password   = strdup (gtk_entry_get_text (GTK_ENTRY (wizard_entry_password)));
+    
     if ( GTK_TOGGLE_BUTTON (wizard_check_autologin)->active )
         w->autologin = TRUE;
     else
@@ -372,7 +389,7 @@ void do_wiz (GtkWidget *widget, gpointer data)
     gchar *titles[1] = { "Connections" };
     
     tooltip = gtk_tooltips_new ();
-    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
+//    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
 
 
     wizard_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
