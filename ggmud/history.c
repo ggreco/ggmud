@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include "ggmud.h"
 
-void hist_add (char *x)
+void hist_add (const char *x)
 {
     extern int hide_input;
 
@@ -225,12 +225,12 @@ gint hist_evt (GtkWidget* w, GdkEventKey* event, gpointer data)
             break;
         }
         case GDK_Page_Up: {
-            GtkAdjustment *adj = mud->text->vadj;
+            GtkAdjustment *adj = mud->text->vadjustment;
             gtk_adjustment_set_value(adj,adj->value-adj->page_size);
             break;
         }
         case GDK_Page_Down: {
-            GtkAdjustment *adj = mud->text->vadj;
+            GtkAdjustment *adj = mud->text->vadjustment;
             if (adj->value < adj->upper - adj->page_size)
                 gtk_adjustment_set_value(adj,adj->value+adj->page_size);
             break;

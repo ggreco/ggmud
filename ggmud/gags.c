@@ -27,7 +27,7 @@ save_gags (GtkWidget *button, gpointer data) {
 }
 
 static void 
-add_gag(char *line)
+add_gag(const char *line)
 {
     char buffer[GAG_LEN + 20];
 
@@ -68,7 +68,7 @@ insert_gags  (GtkCList *clist)
 static void
 gag_button_add (GtkWidget *button, GtkCList * data)
 {
-    gchar *text;
+    const gchar *text;
     GtkWidget *textgag = (GtkWidget *)
                 gtk_object_get_data(GTK_OBJECT(data), "entry");
 

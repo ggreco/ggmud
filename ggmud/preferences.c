@@ -91,14 +91,14 @@ color_struct color_arr[] = {
       {&color_lightmagenta, "light magenta", NULL},
       {&color_black, "black", NULL},
       {&color_lightblack, "light black", NULL},
-      {&prefs.BackgroundColor, "background color", NULL},
-      {&prefs.DefaultColor, "default color", NULL},      
+      {&prefs.BackgroundGdkColor, "background color", NULL},
+      {&prefs.DefaultGdkColor, "default color", NULL},      
       {NULL,NULL}
 };
 
 static void tt_file_ok(GtkWidget *w, GtkFileSelection *fs)
 {
-    char *name = gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs));
+    const char *name = gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs));
 
     if(*name)
         read_command(name, NULL);
@@ -198,9 +198,9 @@ void load_prefs ()
     FILE *fp;
     gchar line[255], pref[100], value[230];
 
-    prefs.BackgroundColor = color_black;
-    prefs.BackgroundColor.pixel = 0;
-    prefs.DefaultColor = color_white;
+//    prefs.BackgroundColor = color_black;
+//    prefs.BackgroundColor.pixel = 0;
+//    prefs.DefaultColor = color_white;
 
     if (fp = fileopen(PREFS_FILE, "r")) {
         prefs.KeepText = prefs.EchoText  = prefs.WordWrap = prefs.DoBeep = TRUE;
@@ -432,7 +432,7 @@ void color_ok (GtkWidget *widget, GtkWidget *color_sel)
     }
 
     if(!strcmp("background color",color->name))
-        gdk_window_set_background(mud->text->text_area, &prefs.BackgroundColor);
+        text_bg(mud->text, prefs.BackgroundGdkColor);
 
     update_widget_color(color);
 
@@ -485,10 +485,10 @@ void color_reset_to_default (GtkWidget *button, gpointer data)
     color_lightcyan	= default_color_lightcyan;
     color_black		= default_color_black;
     color_lightblack	= default_color_lightblack;
-    prefs.BackgroundColor	= color_black;
-    prefs.DefaultColor	= color_white;
+    prefs.BackgroundGdkColor	= color_black;
+    prefs.DefaultGdkColor	= color_white;
 
-    gdk_window_set_background(mud->text->text_area, &prefs.BackgroundColor);
+    text_bg(mud->text, prefs.BackgroundGdkColor);
 
     while (color_arr[i].color) {
         update_widget_color(&color_arr[i]);
@@ -616,7 +616,7 @@ void window_prefs (GtkWidget *widget, gpointer data)
   GtkWidget *temp;
   GtkTooltips *tooltip;
 
-  prefs_window = gtk_window_new (GTK_WINDOW_DIALOG);
+  prefs_window = gtk_window_new (GTK_WINDOW_POPUP);
   gtk_window_set_title (GTK_WINDOW (prefs_window), "Preferences");
   gtk_window_set_policy (GTK_WINDOW (prefs_window), TRUE, TRUE, TRUE);
   gtk_signal_connect (GTK_OBJECT (prefs_window), "destroy",

@@ -61,7 +61,7 @@ LoadFile (char *sFilename)
     struct stat fileStatus;
     long fileLen = 0;
 
-    gtk_text_freeze (GTK_TEXT (text));
+//    gtk_text_freeze (GTK_TEXT (text));
 
     gtk_editable_delete_text (GTK_EDITABLE (text), 0, -1);
 
@@ -72,9 +72,11 @@ LoadFile (char *sFilename)
       
     if (infile) {
       
-        while ((nchars = fread (buffer, 1, BUF_SIZE, infile)) > 0) {
+        while ((nchars = fread (buffer, 1, BUF_SIZE - 1, infile)) > 0) {
 
-            gtk_text_insert (GTK_TEXT (text), NULL, NULL, NULL, buffer, nchars);
+            buffer[nchars] = 0;
+            
+            text_insert (text, buffer);
           
             if (nchars < BUF_SIZE)
                 break;
@@ -83,7 +85,7 @@ LoadFile (char *sFilename)
         fclose (infile);
     }
   
-    gtk_text_thaw (GTK_TEXT (text));
+//    gtk_text_thaw (GTK_TEXT (text));
 }
 
 
@@ -109,7 +111,7 @@ GtkWidget *CreateMenuItem (GtkWidget *menu,
 
     if (accel_group == NULL) {
         accel_group = gtk_accel_group_new ();
-        gtk_accel_group_attach (accel_group, GTK_OBJECT (win_main));
+        // gtk_accel_group_attach (accel_group, GTK_OBJECT (win_main));
     }
 
     if (szAccel && szAccel[0] == '^') {
@@ -166,8 +168,8 @@ void CreateText (GtkWidget *window, GtkWidget *container)
 
     gtk_widget_show (table);
 
-    text = gtk_text_new (NULL, NULL);
-    gtk_text_set_editable (GTK_TEXT (text), TRUE);
+    text = gtk_text_view_new ();
+    gtk_text_view_set_editable (GTK_TEXT_VIEW (text), TRUE);
 
     gtk_table_attach (GTK_TABLE (table), text, 0, 1, 0, 1,
             GTK_EXPAND | GTK_SHRINK | GTK_FILL,
@@ -175,12 +177,12 @@ void CreateText (GtkWidget *window, GtkWidget *container)
 
     gtk_widget_show (text);
 
-    hscrollbar = gtk_hscrollbar_new (GTK_TEXT (text)->hadj);
+    hscrollbar = gtk_hscrollbar_new (GTK_TEXT_VIEW (text)->hadjustment);
     gtk_table_attach (GTK_TABLE (table), hscrollbar, 0, 1, 1, 2,
             GTK_EXPAND | GTK_FILL | GTK_SHRINK, GTK_FILL, 0, 0);
     gtk_widget_show (hscrollbar);
 
-    vscrollbar = gtk_vscrollbar_new (GTK_TEXT (text)->vadj);
+    vscrollbar = gtk_vscrollbar_new (GTK_TEXT_VIEW (text)->vadjustment);
     gtk_table_attach (GTK_TABLE (table), vscrollbar, 1, 2, 0, 1,
             GTK_FILL, GTK_EXPAND | GTK_SHRINK | GTK_FILL, 0, 0);
     gtk_widget_show (vscrollbar);
@@ -250,7 +252,7 @@ static void CreateMenu (GtkWidget *window, GtkWidget *vbox_main)
     win_main = window;
 
     accel_group = gtk_accel_group_new ();
-    gtk_accel_group_attach (accel_group, GTK_OBJECT (window));
+//    gtk_accel_group_attach (accel_group, GTK_OBJECT (window));
 
     menubar = gtk_menu_bar_new ();
     gtk_box_pack_start (GTK_BOX (vbox_main), menubar, FALSE, TRUE, 0);
@@ -286,7 +288,7 @@ GetExistingFile ()
 static void 
 FileOk (GtkWidget *w, gpointer data)
 {
-    char *sTempFile;
+    const char *sTempFile;
     typFileSelectionData *localdata;
     GtkWidget *filew;
  
@@ -350,7 +352,7 @@ void log_viewer()
 {
     GtkWidget *main_vbox;
     
-    window = gtk_window_new(GTK_WINDOW_DIALOG);
+    window = gtk_window_new(GTK_WINDOW_POPUP);
 
     gtk_window_set_title (GTK_WINDOW (window), "GGMud Log Viewer");
     gtk_container_border_width (GTK_CONTAINER (window), 0);
@@ -414,13 +416,15 @@ void TextPaste (GtkWidget *widget, gpointer data)
 
 char *GetText ()
 {
-    char *buffer;
+    // TODO
+    char *buffer = NULL;
+#if 0
 
     buffer = gtk_editable_get_chars (
                  GTK_EDITABLE (text), 
                  (gint) 0,
                  (gint) gtk_text_get_length (GTK_TEXT (text)));
- 
+#endif
     return (buffer);
 }
 
@@ -446,6 +450,8 @@ void CloseFindDialog (GtkWidget *widget, gpointer data)
 
 void FindFunction (GtkWidget *widget, gpointer data)
 {
+    // TODO
+#if 0
     int nIndex;
     GtkWidget *text = GetTextWidget ();
     char *szHaystack;   
@@ -475,6 +481,7 @@ void FindFunction (GtkWidget *widget, gpointer data)
     }
 
     free (szHaystack);
+#endif
 }
 
 int LookForString (char *szHaystack, char *szNeedle, int nStart)

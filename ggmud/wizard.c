@@ -121,7 +121,7 @@ static void save_wizard ()
     }
 }
 
-static WIZARD_DATA *wizard_get_wizard_data ( gchar *text )
+static WIZARD_DATA *wizard_get_wizard_data (const gchar *text )
 {
     GList       *tmp;
     WIZARD_DATA *w;
@@ -285,7 +285,7 @@ static void wizard_button_delete (GtkWidget *button, gpointer data)
 static void wizard_button_modify (GtkWidget *button, gpointer data)
 {
     WIZARD_DATA *w;
-    gchar *texta[1];
+    const gchar *texta[1];
 
     texta[0] = gtk_entry_get_text (GTK_ENTRY (wizard_entry_name));
 
@@ -328,7 +328,7 @@ static void wizard_button_modify (GtkWidget *button, gpointer data)
 static void wizard_button_add (GtkWidget *button, gpointer data)
 {
     WIZARD_DATA *w;
-    gchar *texta[1];
+    const gchar *texta[1];
 
     texta[0] = gtk_entry_get_text (GTK_ENTRY (wizard_entry_name));
 
@@ -344,7 +344,7 @@ static void wizard_button_add (GtkWidget *button, gpointer data)
         return;
     }
 
-    gtk_clist_append ((GtkCList *) data, texta);
+    gtk_clist_append ((GtkCList *) data, (void *)texta);
 
     if ( !wizard_connection_list2 || !wizard_connection_list2->data )
         gtk_clist_select_row ((GtkCList *) data, 0, 0);

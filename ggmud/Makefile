@@ -6,13 +6,13 @@ CC = gcc
 CXX = g++
 INCDIR = -Itt
 COMMONLIBS = -Ltt -ltt
-CFLAGS = $(INCDIR) `gtk-config --cflags` $(GLOBAL_CFLAGS)
-LIBS = $(COMMONLIBS) `gtk-config --libs`
+CFLAGS = $(INCDIR) `pkg-config gtk+-2.0 --cflags` $(GLOBAL_CFLAGS)
+LIBS = $(COMMONLIBS) `pkg-config gtk+-2.0 --libs`
 VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )
 
 export GLOBAL_CFLAGS
 
-PROJECTNAME = ggmud
+PROJECTNAME = ggmud2
 
 C_SRCS = alias.c ansi.c font.c fileopen.c help.c history.c log.c logviewer.c \
          macro.c net.c preferences.c ggmud.c triggers.c window.c wizard.c \

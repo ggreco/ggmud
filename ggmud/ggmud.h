@@ -40,11 +40,11 @@ typedef struct {
 typedef struct {
     GtkWidget *menu, *hostentry, *portentry, *vbox, *macrobuttons;
     GtkWidget *window;
-    GtkText *text;
+    GtkTextView *text;
     GtkEntry *ent;
     GtkLabel *tick_counter;
     GtkNotebook *notebook;
-    GdkColor curr_color;
+    GtkTextTag *curr_color;
     GdkFont *disp_font;
     gchar *disp_font_name;
     struct ggmud_history *hist;
@@ -76,9 +76,14 @@ struct prefs_data {
     gint       Toolbar;
     gint       Macrobuttons;
     gint       Statusbar;
-    GdkColor   BackgroundColor; /* Red, Green, Blue */
-    GdkColor   DefaultColor; /* Red, Green, Blue */
+    GtkTextTag *BackgroundColor; /* Red, Green, Blue */
+    GtkTextTag *DefaultColor; /* Red, Green, Blue */
+    GdkColor BackgroundGdkColor; /* Red, Green, Blue */
+    GdkColor DefaultGdkColor; /* Red, Green, Blue */
 };
+
+#define text_insert(w, text) gtk_text_buffer_set_text(gtk_text_view_get_buffer(GTK_TEXT_VIEW(w)), text, -1)
+#define text_bg(w, color) gdk_window_set_background(gtk_text_view_get_window(GTK_TEXT_VIEW(w),GTK_TEXT_WINDOW_WIDGET), &color)
 
 struct alias_data {
     ALIAS_DATA *next;
@@ -135,7 +140,7 @@ struct ggmud_history{
 	int cyclic;	/* controls cyclic vs linear history */
 };
 
-extern void hist_add(char *);
+extern void hist_add(const char *);
 extern gint hist_evt(GtkWidget*,GdkEventKey*,gpointer);
 gint change_focus (GtkWidget* w, GdkEventKey* event, gpointer data);
 extern void hist_clear();
@@ -147,10 +152,10 @@ extern void  window_macro    (GtkWidget *widget, gpointer data);
 
 /* win.c */
 extern void spawn_gui( void );
-extern void textfield_add(GtkText *, const char *, int);
+extern void textfield_add(GtkTextView *, const char *, int);
 extern void textfield_freeze();
 extern void textfield_unfreeze();
-extern void clear(int,GtkText *);
+extern void clear(int,GtkTextView *);
 extern void cbox(void);
 
 /* font.c */
@@ -164,7 +169,7 @@ extern FILE *fileopen (gchar *filename, gchar *mode);
 /* net.c */
 extern int connected;
 extern void disconnect ( void );
-extern void make_connection ( char *name, char *host, char *port );
+extern void make_connection ( const char *name, const char *host, const char *port );
 extern void open_connection (  const char *name, const char *host, const char *port );
 extern void send_to_connection ( GtkWidget *, gpointer data );
 extern void read_from_connection (gpointer, gint , GdkInputCondition );
@@ -212,7 +217,7 @@ extern void  close_window ( GtkWidget *widget, gpointer data );
 extern void init_colors();
 
 /* ansi.c */
-extern void disp_ansi(int, const char *, GtkText *);
+extern void disp_ansi(int, const char *, GtkTextView *);
 
 /* BOLD = bright color. LOW = darkish color */
 extern GdkColor color_lightwhite;	/* BOLD white  */
