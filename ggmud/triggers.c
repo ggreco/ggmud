@@ -27,6 +27,8 @@
 
 #define TRIGGER_FILE "triggers"
 
+static GtkWidget *trig_window = NULL;
+static GtkWidget *class_window = NULL;
 static GtkWidget *textalias;
 static GtkWidget *textreplace;
 static GtkWidget *textpri;
@@ -191,7 +193,6 @@ static void trigger_selection_made (GtkWidget *clist, gint row, gint column,
 
 void triggerclass_window(GtkWidget *widget, gpointer data )
 {
-    GtkWidget *window;
     GtkWidget *vbox;
     GtkWidget *clist;
     GtkWidget *label;
@@ -203,16 +204,22 @@ void triggerclass_window(GtkWidget *widget, gpointer data )
 //    tooltip = gtk_tooltips_new ();
 //    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
 
-
-    window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title (GTK_WINDOW (window), "Trigger Classes");
-    gtk_signal_connect (GTK_OBJECT (window), "destroy",
-                               GTK_SIGNAL_FUNC(close_window), window );
+    if (class_window) {
+        gtk_window_present(GTK_WINDOW(class_window));
+        return;
+    }
     
-    gtk_widget_set_usize (window, 400, 350);			       
+    class_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title (GTK_WINDOW (class_window), "Trigger Classes");
+    gtk_signal_connect (GTK_OBJECT (class_window), "destroy",
+                               GTK_SIGNAL_FUNC(close_window), class_window );
+    gtk_signal_connect (GTK_OBJECT (class_window), "destroy",
+                               GTK_SIGNAL_FUNC(kill_window), &class_window );
+    
+    gtk_widget_set_usize (class_window, 400, 350);			       
     vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
-    gtk_container_add (GTK_CONTAINER (window), vbox);
+    gtk_container_add (GTK_CONTAINER (class_window), vbox);
     gtk_widget_show (vbox);
 
     /* create a new scrolled window. */
@@ -250,7 +257,7 @@ void triggerclass_window(GtkWidget *widget, gpointer data )
             GTK_SIGNAL_FUNC(close_window));
 
     insert_trigger_classes  (GTK_CLIST(clist)  );
-    gtk_widget_show (window );
+    gtk_widget_show (class_window );
 }
 
 static void add_trigger(const char *a, const char *b, const char *class)
@@ -324,18 +331,23 @@ void triggers_window(GtkWidget *widget, gpointer data)
     GtkWidget *label;
 //    GtkTooltips *tooltip;
     GtkWidget *scrolled_window;
-    GtkWidget *trig_window;
 
     gchar     *titles[4] = { "Trigger string", "Commands", "Class", "State" };
 
 //    tooltip = gtk_tooltips_new ();
 //    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
 
+    if (trig_window) {
+        gtk_window_present(GTK_WINDOW(trig_window));
+        return;
+    }
 
     trig_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title (GTK_WINDOW (trig_window), "Triggers (actions)");
     gtk_signal_connect (GTK_OBJECT (trig_window), "destroy",
                                GTK_SIGNAL_FUNC(close_window), trig_window );
+    gtk_signal_connect (GTK_OBJECT (trig_window), "destroy",
+                               GTK_SIGNAL_FUNC(kill_window), &trig_window );
     gtk_widget_set_usize (trig_window, 640, 450);			       
     vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);

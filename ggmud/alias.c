@@ -33,7 +33,7 @@
 /* Global variables for alias */
 static GtkWidget *textalias;
 static GtkWidget *textreplace;
-GtkWidget *alias_window;
+static GtkWidget *alias_window = NULL;
 static gint      alias_selected_row    = -1;
 
 static void save_aliases (GtkWidget *button, gpointer data)
@@ -189,12 +189,17 @@ void window_alias (GtkWidget *widget, gpointer data)
     GtkWidget *button_save;
     GtkWidget *label;
     GtkWidget *separator;
-    GtkTooltips *tooltip;
+//    GtkTooltips *tooltip;
     GtkWidget *scrolled_window;
 
     gchar     *titles[2] = { "Alias", "Replacement" };
 
-    tooltip = gtk_tooltips_new ();
+    if (alias_window) {
+        gtk_window_present(GTK_WINDOW(alias_window));
+        return;
+    }
+
+//    tooltip = gtk_tooltips_new ();
 //    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
 
 
@@ -202,6 +207,8 @@ void window_alias (GtkWidget *widget, gpointer data)
     gtk_window_set_title (GTK_WINDOW (alias_window), "Aliases");
     gtk_signal_connect (GTK_OBJECT (alias_window), "destroy",
                                GTK_SIGNAL_FUNC(close_window), alias_window );
+    gtk_signal_connect (GTK_OBJECT (alias_window), "destroy",
+                               GTK_SIGNAL_FUNC(kill_window), &alias_window );
     gtk_widget_set_usize (alias_window, 450, 320);			       
     vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);

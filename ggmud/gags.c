@@ -3,6 +3,8 @@
 #define GAG_FILE "gag"
 #define GAG_LEN 128
 
+static GtkWidget *gag_window = NULL;
+
 static void
 save_gags (GtkWidget *button, gpointer data) {
     FILE *fp;
@@ -134,16 +136,20 @@ static void gag_selection_made (GtkWidget *clist, gint row, gint column,
 void
 gags_window(GtkWidget *w, gpointer data)
 {
-    GtkWidget *gag_window, *textgag;
-    GtkWidget *vbox;
+    GtkWidget *vbox, *textgag;
     GtkWidget *hbox3;
     GtkWidget *clist;
-    GtkTooltips *tooltip;
+//    GtkTooltips *tooltip;
     GtkWidget *scrolled_window;
 
     gchar     *titles[1] = { "Text to gag" };
 
-    tooltip = gtk_tooltips_new ();
+    if (gag_window) {
+        gtk_window_present(GTK_WINDOW(gag_window));
+        return;
+    }
+
+//    tooltip = gtk_tooltips_new ();
 //    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
 
 
@@ -151,6 +157,8 @@ gags_window(GtkWidget *w, gpointer data)
     gtk_window_set_title (GTK_WINDOW (gag_window), "Gags");
     gtk_signal_connect (GTK_OBJECT (gag_window), "destroy",
                                GTK_SIGNAL_FUNC(close_window), gag_window );
+    gtk_signal_connect (GTK_OBJECT (gag_window), "destroy",
+                               GTK_SIGNAL_FUNC(kill_window), &gag_window );
     gtk_widget_set_usize (gag_window, 450, 320);			       
     vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);

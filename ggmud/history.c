@@ -126,15 +126,13 @@ gint change_focus(GtkWidget *w, GdkEventKey *event, gpointer data)
       }
       return 0;
   } else {
+      GtkWidget *win = gtk_widget_get_toplevel((GtkWidget *)mud->ent);
       if (event->keyval == GDK_Tab) {
           toggle_review();
       }
      
-      if (gtk_widget_get_toplevel((GtkWidget *)mud->ent) !=
-          gtk_widget_get_toplevel(w)) {
-          // TODO
-          return 1;
-      }
+      if (win != gtk_widget_get_toplevel(w)) 
+          gtk_window_present(GTK_WINDOW(win));
       
       gtk_widget_grab_default (GTK_WIDGET(mud->ent));
       gtk_widget_grab_focus (GTK_WIDGET(mud->ent));

@@ -25,6 +25,7 @@
 #define MACRO_FILE "macro"
 extern gchar *keys[];
 extern void macro_btnLabel_change ();
+static GtkWidget *macro_window = NULL;
 
 /* saves the macro's to file */
 void save_macro (gpointer data) 
@@ -89,7 +90,6 @@ void load_macro ()
 void window_macro (GtkWidget *widget, gpointer data)
 {
   gint i;
-  GtkWidget *macro_window;
   GtkWidget *vbox1;
   GtkWidget *frame1;
   GtkWidget *hbox1;
@@ -102,11 +102,19 @@ void window_macro (GtkWidget *widget, gpointer data)
   GtkWidget *button;
   static GtkWidget *entry[12];
   
+  if (macro_window) {
+      gtk_window_present(GTK_WINDOW(macro_window));
+      return;
+  }
   /* macro window */
   macro_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_container_border_width (GTK_CONTAINER (macro_window), 3);
   gtk_window_set_title (GTK_WINDOW (macro_window), "Macros");
   gtk_window_set_policy (GTK_WINDOW (macro_window), FALSE, FALSE, FALSE);
+  gtk_signal_connect (GTK_OBJECT (macro_window), "destroy",
+                               GTK_SIGNAL_FUNC(close_window), macro_window );
+  gtk_signal_connect (GTK_OBJECT (macro_window), "destroy",
+                               GTK_SIGNAL_FUNC(kill_window), &macro_window );
 
   vbox1 = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (vbox1);

@@ -1,6 +1,7 @@
 #include "ggmud.h"
 
 #define COMPLETE_LEN 40
+static GtkWidget *complete_window = NULL;
 
 static void
 save_complete (GtkWidget *button, gpointer data) {
@@ -45,7 +46,10 @@ insert_words  (GtkCList *clist)
 
     gtk_clist_clear(clist);
     gtk_clist_freeze(clist);
- 
+
+    if (!list)
+        return;
+
     do {
         text[0] = list->word;
         gtk_clist_prepend (GTK_CLIST (clist), text);
@@ -123,23 +127,28 @@ static void complete_selection_made (GtkWidget *clist, gint row, gint column,
 void
 create_complete_window(GtkWidget *w, gpointer data)
 {
-    GtkWidget *complete_window;
     GtkWidget *vbox;
     GtkWidget *hbox3;
     GtkWidget *clist, *text;
-    GtkTooltips *tooltip;
+//    GtkTooltips *tooltip;
     GtkWidget *scrolled_window;
 
     gchar     *titles[1] = { "Word list" };
 
-    tooltip = gtk_tooltips_new ();
+//    tooltip = gtk_tooltips_new ();
 //    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
 
+    if (complete_window) {
+        gtk_window_present(GTK_WINDOW(complete_window));
+        return;
+    }
 
     complete_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title (GTK_WINDOW (complete_window), "TAB complete settings");
     gtk_signal_connect (GTK_OBJECT (complete_window), "destroy",
                                GTK_SIGNAL_FUNC(close_window), complete_window );
+    gtk_signal_connect (GTK_OBJECT (complete_window), "destroy",
+                               GTK_SIGNAL_FUNC(kill_window), &complete_window );
     gtk_widget_set_usize (complete_window, 450, 320);			       
     vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
