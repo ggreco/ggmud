@@ -180,35 +180,12 @@ void insertnode_list(struct listnode *listhead,
   newnode->left = strdup(ltext);
   newnode->right = strdup(rtext);
   newnode->pr = strdup(prtext);
+  newnode->enabled = 1;
 
   nptr = listhead;
   switch(mode) {
+// removed priority system, now priority is used as trigger class
   case PRIORITY:
-    while((nptrlast = nptr) && (nptr = nptr->next))
-      if(strcmp(prtext, nptr->pr) < 0) {
-	newnode->next = nptr;
-	nptrlast->next = newnode;
-	return;
-      }
-      else if(!strcmp(prtext, nptr->pr)) {
-	while(nptrlast && nptr && !strcmp(prtext, nptr->pr)) {
-	  if(strcmp(ltext, nptr->left) <= 0) {
-	    newnode->next = nptr;
-	    nptrlast->next = newnode;
-	    return;
-	  }
-	  nptrlast = nptr;
-	  nptr = nptr->next;
-	}
-	nptrlast->next = newnode;
-	newnode->next = nptr;
-	return;
-      }
-
-    nptrlast->next = newnode;
-    newnode->next = NULL;
-    return;
-
   case ALPHA:
     while((nptrlast = nptr) && (nptr = nptr->next))
       if(strcmp(ltext, nptr->left) <= 0) {
@@ -278,14 +255,6 @@ struct listnode *searchnode_list_begin(struct listnode *listhead,
 
   switch(mode) {
   case PRIORITY:
-    while((listhead = listhead->next)) {
-      if(!(i = strncmp(listhead->left, cptr, strlen(cptr))) &&
-	 (listhead->left[strlen(cptr)] == ' ' ||
-	  !listhead->left[strlen(cptr)]))
-	return(listhead);
-    }
-    break;
-
   case ALPHA:
     while((listhead = listhead->next)) {
       if(!(i = strncmp(listhead->left, cptr, strlen(cptr))) &&

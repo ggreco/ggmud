@@ -221,6 +221,7 @@ int timeofday;
 struct listnode {
   struct listnode *next;
   char *left, *right, *pr;
+  int enabled;
 };
 
 struct completenode {
