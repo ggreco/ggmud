@@ -209,7 +209,6 @@ void window_alias (GtkWidget *widget, gpointer data)
     vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
     gtk_container_add (GTK_CONTAINER (alias_window), vbox);
-    gtk_widget_show (vbox);
 
     /* create a new scrolled window. */
     scrolled_window = gtk_scrolled_window_new (NULL, NULL);
@@ -217,7 +216,6 @@ void window_alias (GtkWidget *widget, gpointer data)
     gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_window),
                                     GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
     gtk_box_pack_start (GTK_BOX (vbox), scrolled_window, TRUE, TRUE, 0);
-    gtk_widget_show (scrolled_window);
 
     clist = gtk_clist_new_with_titles (2, titles);
     gtk_signal_connect_object (GTK_OBJECT (clist), "select_row",
@@ -234,23 +232,18 @@ void window_alias (GtkWidget *widget, gpointer data)
 
     gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (scrolled_window), clist);
 
-    gtk_widget_show (clist);
-
     hbox3 = gtk_table_new(3, 2, FALSE);
 
     gtk_box_pack_start (GTK_BOX (vbox), hbox3, FALSE, FALSE, 0);
-    gtk_widget_show (hbox3);
 
     
     label = gtk_label_new ("Alias");
-    gtk_table_attach(GTK_TABLE(hbox3), label, 0, 1, 0, 1,
+    gtk_table_attach(GTK_TABLE(hbox3), label, 1, 2, 0, 1,
                         /*GTK_FILL*/ 0L, /*GTK_FILL*/ 0L, 2, 2);
-    gtk_widget_show (label);
     
     label = gtk_label_new ("Replacement");
-    gtk_table_attach(GTK_TABLE(hbox3), label, 1, 2, 0, 1,
+    gtk_table_attach(GTK_TABLE(hbox3), label, 2, 3, 0, 1,
                         GTK_FILL | GTK_EXPAND, /*GTK_FILL*/ 0L, 2, 2);
-    gtk_widget_show (label);
 
     but = gtk_button_new();
     label = gtk_image_new_from_stock(GTK_STOCK_FIND, GTK_ICON_SIZE_SMALL_TOOLBAR);
@@ -263,13 +256,10 @@ void window_alias (GtkWidget *widget, gpointer data)
     textalias   = gtk_entry_new ();
     gtk_table_attach(GTK_TABLE(hbox3), textalias, 1, 2, 1, 2,
                          0L, /*GTK_FILL*/ 0L, 2, 2);
-    gtk_widget_show (textalias  );
-
 
     textreplace = gtk_entry_new ();
     gtk_table_attach(GTK_TABLE(hbox3), textreplace, 2, 3, 1, 2,
                         GTK_FILL | GTK_EXPAND, /*GTK_FILL*/ 0L, 2, 2);
-    gtk_widget_show (textreplace);
     
     AddButtonBar(vbox, (gpointer)clist,
             GTK_SIGNAL_FUNC(alias_button_add),
@@ -277,6 +267,5 @@ void window_alias (GtkWidget *widget, gpointer data)
             GTK_SIGNAL_FUNC(save_aliases));
 
     insert_aliases  (GTK_CLIST(clist)        );
-    gtk_widget_show (alias_window );
-
+    gtk_widget_show_all (alias_window );
 }
