@@ -443,6 +443,32 @@ MakeButton(char *name, char **image, GtkSignalFunc func, gpointer data, GtkAccel
     return button;
 }
 
+void AddSimpleBar(GtkWidget *vbox, gpointer *data,
+        GtkSignalFunc save_func,
+        GtkSignalFunc close_func
+        ) {
+  GtkAccelGroup *accel_group = gtk_accel_group_new ();
+  GtkWidget *hbuttonbox = gtk_hbutton_box_new (), *button;
+  gtk_widget_show (hbuttonbox);
+  
+  gtk_box_pack_start (GTK_BOX (vbox), hbuttonbox, FALSE, TRUE, 5);
+  button = MakeButton("_Save", save_xpm, save_func, 
+          data, accel_group);
+  
+  gtk_container_add (GTK_CONTAINER (hbuttonbox), button);
+
+  button   = MakeButton("_Close", cross_xpm,
+            close_func, 
+            gtk_widget_get_toplevel(vbox),
+            accel_group);
+
+  gtk_container_add (GTK_CONTAINER (hbuttonbox), button);
+
+  gtk_window_add_accel_group(
+            GTK_WINDOW(gtk_widget_get_toplevel(vbox)), 
+            accel_group);
+}
+
 void AddButtonBar(GtkWidget *vbox, gpointer *data,
         GtkSignalFunc add_func,
         GtkSignalFunc del_func,
