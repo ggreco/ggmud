@@ -373,19 +373,6 @@ void togglesubs_command(struct session *ses)
     tintin_puts("#SUBSTITUTES ARE NO LONGER IGNORED.", ses);
 }
 
-/***********************/
-/* the #showme command */
-/***********************/
-
-void showme_command(const char *arg, struct session *ses)
-{
-  char left[BUFFER_SIZE], result[BUFFER_SIZE];
-
-  get_arg_in_braces(arg, left, 1);
-  prepare_actionalias(left, result, ses);
-  tintin_puts(result, ses);
-}
-
 /*********************/
 /* the #loop command */
 /*********************/

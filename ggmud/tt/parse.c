@@ -413,7 +413,7 @@ struct session *parse_tintin_command(const char *command, char *arg,
   else if(is_abbrev(command, "session"))
     ses = session_command(arg, ses);
 
-  else if(is_abbrev(command, "showme"))
+  else if(is_abbrev(command, "showme") || is_abbrev(command, "say"))
     showme_command(arg,ses);
 
   else if (is_abbrev(command, "show_pretick"))
