@@ -35,6 +35,7 @@ static gint      trigger_selected_row    = -1;
 
 #define ALIAS_LEN 128
 #define REPL_LEN 512
+#define CLASS_LEN 16
 
 /*
  * Save triggers to file
@@ -46,20 +47,20 @@ void save_triggers (GtkWidget *w, GtkCList *data)
     if (fp = fileopen (TRIGGER_FILE, "w")) {
         int done = FALSE;
         gint  row = 0;
-        gchar *alias, *replace, *priority;
+        gchar *alias, *replace, *class;
         
         while ( !done && data) {
             if ( !gtk_clist_get_text (data, row, 0, &alias)
                     || !gtk_clist_get_text (data, row, 1, &replace) 
-                    || !gtk_clist_get_text (data, row, 2, &priority))
+                    || !gtk_clist_get_text (data, row, 2, &class))
                 break;
 
             if (!alias[0]) {
                 done = TRUE;
                 break;
             }
-            fprintf (fp, "#action {%s} {%s} {%s}\n", alias, replace, priority);
-            row++;       // TODO
+            fprintf (fp, "#action {%s} {%s} {%s}\n", alias, replace, class);
+            row++;      
         }
         fclose (fp);
     }	
@@ -114,17 +115,17 @@ static void trigger_selection_made (GtkWidget *clist, gint row, gint column,
         gtk_clist_get_text ((GtkCList*) data, row, 1, &text);
         gtk_entry_set_text (GTK_ENTRY (textreplace), text);
         gtk_clist_get_text ((GtkCList*) data, row, 2, &text);
-        gtk_spin_button_set_value (GTK_SPIN_BUTTON (textpri), atoi(text));
+        gtk_entry_set_text (GTK_ENTRY (textpri), atoi(text));
     }
     
     return;
 }
 
-static void add_trigger(const char *a, const char *b, int pri)
+static void add_trigger(const char *a, const char *b, const char *class)
 {
     char buffer[1024];
 
-    sprintf(buffer, "#action {%s} {%s} {%d}", a, b, pri);
+    sprintf(buffer, "#action {%s} {%s} {%s}", a, b, class);
 
     parse_input(buffer, NULL);
 }
@@ -132,12 +133,10 @@ static void add_trigger(const char *a, const char *b, int pri)
 static void trigger_button_add (GtkWidget *button, GtkCList *data)
 {
     const gchar *text[3];
-    gchar buffer[20];
-    gint   i;
 
     text[0]   = gtk_entry_get_text (GTK_ENTRY (textalias  ));
     text[1]   = gtk_entry_get_text (GTK_ENTRY (textreplace));
-    text[2]   = buffer;
+    text[2]   = gtk_entry_get_text (GTK_ENTRY (textpri));
     
     if ( text[0][0] == '\0' || text[1][0] == '\0' ) {
         popup_window ("Please complete the trigger first.");
@@ -153,10 +152,13 @@ static void trigger_button_add (GtkWidget *button, GtkCList *data)
         popup_window ("Command string too big.");
         return;
     }
-    
-    i = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(textpri));
 
-    add_trigger (text[0], text[1], i);
+    if ( strlen (text[2]) > CLASS_LEN)  {
+        popup_window ("Class string too big.");
+        return;
+    }
+
+    add_trigger (text[0], text[1], text[2]);
 
     insert_triggers(data);
 }
@@ -197,7 +199,7 @@ void triggers_window(GtkWidget *widget, gpointer data)
     GtkTooltips *tooltip;
     GtkWidget *scrolled_window;
 
-    gchar     *titles[3] = { "Trigger string", "Commands", "Priority" };
+    gchar     *titles[3] = { "Trigger string", "Commands", "Class" };
 
     tooltip = gtk_tooltips_new ();
 //    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
@@ -255,7 +257,7 @@ void triggers_window(GtkWidget *widget, gpointer data)
                         GTK_FILL | GTK_EXPAND, /*GTK_FILL*/ 0L, 2, 2);
     gtk_widget_show (label);
 
-    label = gtk_label_new ("Pri");
+    label = gtk_label_new ("Class");
     gtk_table_attach(GTK_TABLE(hbox3), label, 2, 3, 0, 1,
                         0L, /*GTK_FILL*/ 0L, 2, 2);
     gtk_widget_show (label);
@@ -271,8 +273,7 @@ void triggers_window(GtkWidget *widget, gpointer data)
                         GTK_FILL | GTK_EXPAND, /*GTK_FILL*/ 0L, 2, 2);
     gtk_widget_show (textreplace);
     
-    temp = (GtkWidget *)gtk_adjustment_new (5, 0, 100, 1, 10, 10);
-    textpri = gtk_spin_button_new (GTK_ADJUSTMENT (temp), 1, 0);
+    textpri = gtk_entry_new();
     gtk_table_attach(GTK_TABLE(hbox3), textpri, 2, 3, 1, 2,
                         0L, /*GTK_FILL*/ 0L, 2, 2);
     gtk_widget_show (textpri);
