@@ -15,7 +15,7 @@
 */
 
 #include <glib.h>
-
+#include <string.h>
 #include "ggmud.h"
 #include "config.h"
 #include "pixmaps.h"	// ToolBar Icons
@@ -41,7 +41,25 @@ GtkWidget *btn_toolbar_disconnect;
 GtkWidget *btn_toolbar_connect;
 GtkWidget *menu_File_Connect;
 GtkWidget *menu_File_DisConnect;
+GtkWidget *menu_File_Reconnect;
 
+void reconnect(void)
+{
+    if(!connected || !mud->activesession)
+        popup_window("Must be connected first!");
+    else {
+        char *name, *host, *port;
+        
+        name = strdup(mud->activesession->name);
+        host = strdup(mud->activesession->host);
+        port = strdup(mud->activesession->port);
+        disconnect();
+
+        make_connection(name, host, port);
+
+        free(name); free(host); free(port);
+    }
+}
 
 
 typedef struct {
@@ -117,7 +135,6 @@ window_entry *create_new_entry(char *title, int width, int height)
         free(entry);
         return NULL;
     }
-    gtk_widget_grab_focus (GTK_WIDGET(mud->ent));
 
     return entry;
 }
@@ -146,7 +163,7 @@ void load_win_pos()
         }
         fclose(f);
     }
-    gtk_window_activate_focus(GTK_WINDOW(mud->window));
+    gdk_window_raise(gtk_widget_get_toplevel(mud->window)->window);
 }
 
 void write_win_pos(char *name, FILE *dest, GtkWidget *widget)
@@ -704,6 +721,15 @@ spawn_gui()
                       NULL);
   gtk_widget_add_accelerator (menu_File_DisConnect, "activate", accel_group,
                               GDK_D, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
+
+  menu_File_Reconnect = gtk_menu_item_new_with_label ("Reconnect");
+  gtk_widget_show (menu_File_Reconnect);
+  gtk_container_add (GTK_CONTAINER (menu_File_menu), menu_File_Reconnect);
+  gtk_signal_connect (GTK_OBJECT (menu_File_Reconnect), "activate",
+                      GTK_SIGNAL_FUNC (reconnect),
+                      NULL);
+  gtk_widget_add_accelerator (menu_File_Reconnect, "activate", accel_group,
+                              GDK_R, GDK_MOD1_MASK, GTK_ACCEL_VISIBLE);
 
   separator2 = gtk_menu_item_new ();
   gtk_widget_show (separator2);
