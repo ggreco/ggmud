@@ -391,39 +391,10 @@ void highlights_window (GtkWidget *widget, gpointer data)
                             0L, /*GTK_FILL*/ 0L, 2, 2);
     gtk_widget_show (fgwidget);
     
-    separator = gtk_hseparator_new ();
-    gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, TRUE, 5);
-    gtk_widget_show (separator);
-
-    hbox = gtk_hbox_new (FALSE, 0);
-    gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 10);
-    gtk_widget_show (hbox);
-
-    button_add    = gtk_button_new_with_label ("  add   ");
-    button_quit   = gtk_button_new_with_label (" close  ");
-    button_delete = gtk_button_new_with_label (" delete ");
-    button_save   = gtk_button_new_with_label ("  save  ");
-    gtk_signal_connect (GTK_OBJECT (button_add), "clicked",
-                               GTK_SIGNAL_FUNC (high_button_add),
-                               (gpointer) clist);
-    gtk_signal_connect (GTK_OBJECT (button_delete), "clicked",
-                               GTK_SIGNAL_FUNC (high_button_delete),
-                               (gpointer) clist);
-    gtk_signal_connect (GTK_OBJECT (button_save), "clicked",
-                               GTK_SIGNAL_FUNC (save_highlights),
-                               (gpointer) clist);
-    gtk_signal_connect (GTK_OBJECT (button_quit), "clicked",
-                               GTK_SIGNAL_FUNC (close_window), high_window);
-
-    gtk_box_pack_start (GTK_BOX (hbox), button_add,    TRUE, TRUE, 15);
-    gtk_box_pack_start (GTK_BOX (hbox), button_delete, TRUE, TRUE, 15);
-    gtk_box_pack_start (GTK_BOX (hbox), button_save,   TRUE, TRUE, 15);
-    gtk_box_pack_start (GTK_BOX (hbox), button_quit,   TRUE, TRUE, 15);
-
-    gtk_widget_show (button_add   );
-    gtk_widget_show (button_quit  );
-    gtk_widget_show (button_delete);
-    gtk_widget_show (button_save  );
+    AddButtonBar(vbox, (gpointer)clist,
+            GTK_SIGNAL_FUNC(high_button_add),
+            GTK_SIGNAL_FUNC(high_button_delete),
+            GTK_SIGNAL_FUNC(save_highlights));
 
     insert_highlights  (GTK_CLIST(clist)        );
     gtk_widget_show (high_window );

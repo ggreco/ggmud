@@ -97,6 +97,7 @@ void kill_all(struct session *ses, int mode)
   switch(mode) {
   case CLEAN:
     if(ses) {
+#if 0
       kill_list(ses->aliases);
       ses->aliases = init_list();
       kill_list(ses->actions);
@@ -116,6 +117,7 @@ void kill_all(struct session *ses, int mode)
       ses->path = init_list();
       kill_list(ses->pathdirs);
       ses->pathdirs = init_list();
+#endif
       tintin_puts("Lists cleared.", ses);
       prompt(NULL);
     }
@@ -127,6 +129,7 @@ void kill_all(struct session *ses, int mode)
 
   case END:
     if(ses) {
+#if 0
       kill_list(ses->aliases);
       kill_list(ses->actions);
       kill_list(ses->myvars);
@@ -136,6 +139,7 @@ void kill_all(struct session *ses, int mode)
       kill_list(ses->antisubs);
       kill_list(ses->path);
       kill_list(ses->pathdirs);
+#endif
     }
     break;
   }
