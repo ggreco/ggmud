@@ -101,6 +101,8 @@ static void tt_file_ok(GtkWidget *w, GtkFileSelection *fs)
 
     if(*name)
         read_command(name, NULL);
+
+    gtk_widget_destroy(GTK_WIDGET(fs));
 }
 
 void load_tt_prefs(void)

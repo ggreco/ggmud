@@ -21,7 +21,7 @@ save_gags (GtkWidget *button, gpointer data) {
                 done = TRUE;
                 break;
             }
-            fprintf (fp, "%s\n", gag);
+            fprintf (fp, "#gag {%s}\n", gag);
             row++;
         }
         fclose (fp);
@@ -33,32 +33,21 @@ add_gag(char *line)
 {
     char buffer[GAG_LEN + 20];
 
-    sprintf(buffer, "#gag {%s} .", line);
+    sprintf(buffer, "#gag {%s}", line);
     
     parse_input(buffer, mud->activesession);
 }
 
-void 
-load_gags ()
+void
+load_gags()
 {
     FILE *fp;
-    gchar line[255];
-        
-    if (fp = fileopen (GAG_FILE, "r")) {
-    	while (fgets (line, sizeof(line) - 1, fp)) {
-            char *c = line;
-            
-            while(*c >= ' ')
-                c++;
-            
-            *c = 0;
-                
-            add_gag(line);
-        }
-        fclose (fp);
-    }    
-}
 
+    if((fp = fileopen(GAG_FILE, "r"))) {
+        parse_config(fp, NULL);
+        fclose(fp);
+    }
+}
 static GtkWidget *gag_window;
 static GtkWidget *textgag;
 static int gag_selected_row = -1;

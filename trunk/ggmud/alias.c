@@ -35,7 +35,6 @@ static GtkWidget *textalias;
 static GtkWidget *textreplace;
 GtkWidget *alias_window;
 static gint      alias_selected_row    = -1;
-static gint      alias_selected_column = -1;
 
 static void save_aliases (GtkWidget *button, gpointer data)
 {
@@ -54,7 +53,7 @@ static void save_aliases (GtkWidget *button, gpointer data)
                 done = TRUE;
                 break;
             }
-            fprintf (fp, "%s %s\n", alias, replace);
+            fprintf (fp, "#alias {%s} {%s}\n", alias, replace);
             row++;
         }
         fclose (fp);
@@ -71,18 +70,14 @@ static void  add_alias (char *alias, char *replacement)
 }
 
 
-void load_aliases () {
+void load_aliases () 
+{
     FILE *fp;
-    gchar line[REPL_LEN+ALIAS_LEN+5];
-    gchar alias[ALIAS_LEN], replace[REPL_LEN];
-    
-    if (fp = fileopen (ALIAS_FILE, "r")) {
-    	while (fgets (line, sizeof(line) - 1, fp)) {
-            sscanf (line, "%s %[^\n]", alias, replace);
-            add_alias (alias, replace);
-        }
-        fclose (fp);
-    }    
+
+    if((fp = fileopen(ALIAS_FILE, "r"))) {
+        parse_config(fp, NULL);
+        fclose(fp);
+    }
 }
 
 #include "include/llist.h"
@@ -106,7 +101,6 @@ static void alias_selection_made (GtkWidget *clist, gint row, gint column,
     gchar *text;
     
     alias_selected_row    = row;
-    alias_selected_column = column;
 
     if ( (GtkCList*) data )
     {

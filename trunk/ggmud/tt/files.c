@@ -144,22 +144,49 @@ void log_command(const char *arg, struct session *ses)
 /* read and execute a command file */
 /***********************************/
 
+void parse_config(FILE *myfile, struct session *ses)
+{
+    static int flag = TRUE;
+    char buffer[BUFFER_SIZE], *cptr;
+    int old_echoing = puts_echoing;
+    
+    if(!verbose)
+        puts_echoing = FALSE;
+
+    while(fgets(buffer, sizeof(buffer), myfile)) {
+        if(flag) {
+            puts_echoing = TRUE;
+            char_command(buffer, ses);
+            if(!verbose)
+                puts_echoing = FALSE;
+            flag = FALSE;
+        }
+
+        for(cptr = buffer; *cptr && *cptr != '\n'; cptr++)
+            ;
+        *cptr = '\0';
+
+        if (buffer[0] != '\0')
+            ses = parse_input(buffer, ses); 
+    }
+
+    if(!verbose)
+        puts_echoing = old_echoing;
+}
+
 struct session *read_command(const char *filename, struct session *ses)
 {
   FILE *myfile;
-  char buffer[BUFFER_SIZE], *cptr;
-  char message[80];
-  int flag = TRUE;
+  char message[256];
 
-  get_arg_in_braces(filename, buffer, 1);
-  if(!(myfile = fopen(buffer, "r"))) {
+  get_arg_in_braces(filename, message, 1);
+
+  if(!(myfile = fopen(message, "r"))) {
     tintin_puts("#ERROR - COULDN'T OPEN THAT FILE.", ses);
     prompt(NULL);
     return(ses);
   }
 
-  if(!verbose)
-    puts_echoing = FALSE;
   alnum = 0;
   acnum = 0;
   subnum = 0;
@@ -168,38 +195,39 @@ struct session *read_command(const char *filename, struct session *ses)
   antisubnum = 0;
   funcnum = 0;
 
-  while(fgets(buffer, sizeof(buffer), myfile)) {
-    if(flag) {
-      puts_echoing = TRUE;
-      char_command(buffer, ses);
-      if(!verbose)
-	puts_echoing = FALSE;
-      flag = FALSE;
-    }
-
-    for(cptr = buffer; *cptr && *cptr != '\n'; cptr++)
-      ;
-    *cptr = '\0';
-
-    if (buffer[0] != '\0')
-      ses = parse_input(buffer, ses); 
-  }
+  parse_config(myfile, ses);
+  
   if(!verbose) {
     puts_echoing = TRUE;
-    sprintf(message,"#OK. %d ALIASES LOADED.", alnum);
-    tintin_puts2(message, ses);
-    sprintf(message,"#OK. %d ACTIONS LOADED.", acnum);
-    tintin_puts2(message, ses);
-    sprintf(message,"#OK. %d ANTISUBS LOADED.", antisubnum);
-    tintin_puts2(message, ses);
-    sprintf(message,"#OK. %d SUBSTITUTES LOADED.", subnum);
-    tintin_puts2(message, ses);
-    sprintf(message,"#OK. %d VARIABLES LOADED.", varnum);
-    tintin_puts2(message, ses);
-    sprintf(message,"#OK. %d HIGHLIGHTS LOADED.", hinum);
-    tintin_puts2(message, ses);
-    sprintf(message,"#OK. %d FUNCTIONS LOADED.", funcnum);
-    tintin_puts2(message, ses);
+
+    if(alnum) {
+        sprintf(message,"#OK. %d ALIASES LOADED.", alnum);
+        tintin_puts2(message, ses);
+    }
+    if(acnum) {
+        sprintf(message,"#OK. %d ACTIONS LOADED.", acnum);
+        tintin_puts2(message, ses);
+    }
+    if(antisubnum) {
+        sprintf(message,"#OK. %d ANTISUBS LOADED.", antisubnum);
+        tintin_puts2(message, ses);
+    }
+    if(subnum) {
+        sprintf(message,"#OK. %d SUBSTITUTES LOADED.", subnum);
+        tintin_puts2(message, ses);
+    }
+    if(varnum) {
+        sprintf(message,"#OK. %d VARIABLES LOADED.", varnum);
+        tintin_puts2(message, ses);
+    }
+    if(hinum) {
+        sprintf(message,"#OK. %d HIGHLIGHTS LOADED.", hinum);
+        tintin_puts2(message, ses);
+    }
+    if(funcnum) {
+        sprintf(message,"#OK. %d FUNCTIONS LOADED.", funcnum);
+        tintin_puts2(message, ses);
+    }
   }
   fclose(myfile);
   prompt(NULL);

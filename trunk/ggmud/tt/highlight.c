@@ -218,103 +218,215 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
   const char *tmp1, *tmp2;
   char tmp3[BUFFER_SIZE];
   int code;
-
-  sprintf(result, "%s", DEFAULT_BEGIN_COLOR);
+  int just_highlighted = 0;
+  
+  strcpy(result, DEFAULT_BEGIN_COLOR);
   tmp1 = htype;
   tmp2 = tmp1;
   while(*tmp2) {
-    tmp2++;
-    while(*tmp2 && *tmp2 != ',')
       tmp2++;
-    while(isspace(*tmp1))
-      tmp1++;
-    memcpy(tmp3, tmp1, tmp2-tmp1);
-    tmp3[tmp2-tmp1] = '\0';
-    code = -1;
-    if(isdigit(*tmp3)) {
-      sscanf(tmp3, "%d", &code);
-      code--;
-    }
-    if(is_abbrev(tmp3, "black") || code == 0)
-      strcat(result, ";30");
-    else if(is_abbrev(tmp3, "red") || code == 1)
-      strcat(result, ";31");
-    else if(is_abbrev(tmp3, "green") || code == 2)
-      strcat(result, ";32");
-    else if(is_abbrev(tmp3, "brown") || code == 3)
-      strcat(result, ";33");
-    else if(is_abbrev(tmp3, "blue") || code == 4)
-      strcat(result, ";34");
-    else if(is_abbrev(tmp3, "magenta") || code == 5)
-      strcat(result, ";35");
-    else if(is_abbrev(tmp3, "cyan") || code == 6)
-      strcat(result, ";36");
-    else if(is_abbrev(tmp3, "grey") || code == 7)
-      strcat(result, ";37");
-    else if(is_abbrev(tmp3, "charcoal") || code == 8)
-      strcat(result, ";30;1");
-    else if(is_abbrev(tmp3, "light red") || code == 9)
-      strcat(result, ";31;1");
-    else if(is_abbrev(tmp3, "light green") || code == 10)
-      strcat(result, ";32;1");
-    else if(is_abbrev(tmp3, "yellow") || code == 11)
-      strcat(result, ";33;1");
-    else if(is_abbrev(tmp3, "light blue") || code == 12)
-      strcat(result, ";34;1");
-    else if(is_abbrev(tmp3, "light magenta") || code == 13)
-      strcat(result, ";35;1");
-    else if(is_abbrev(tmp3, "light cyan")|| code == 14)
-      strcat(result, ";36;1");
-    else if(is_abbrev(tmp3, "white") || code == 15)
-      strcat(result, ";37;1");
-    else if(is_abbrev(tmp3, "b black") || code == 16)
-      strcat(result, ";40");
-    else if(is_abbrev(tmp3, "b red") || code == 17)
-      strcat(result, ";41");
-    else if(is_abbrev(tmp3, "b green") || code == 18)
-      strcat(result, ";42");
-    else if(is_abbrev(tmp3, "b brown") || code == 19)
-      strcat(result, ";43");
-    else if(is_abbrev(tmp3, "b blue") || code == 20)
-      strcat(result, ";44");
-    else if(is_abbrev(tmp3, "b magenta") || code == 21)
-      strcat(result, ";45");
-    else if(is_abbrev(tmp3, "b cyan") || code == 22)
-      strcat(result, ";46");
-    else if(is_abbrev(tmp3, "b grey") || code == 23)
-      strcat(result, ";47");
-    else if(is_abbrev(tmp3, "b charcoal") || code == 24)
-      strcat(result, ";40;1");
-    else if(is_abbrev(tmp3, "b light red") || code == 25)
-      strcat(result, ";41;1");
-    else if(is_abbrev(tmp3, "b light green") || code == 26)
-      strcat(result, ";42;1");
-    else if(is_abbrev(tmp3, "b yellow") || code == 27)
-      strcat(result, ";43;1");
-    else if(is_abbrev(tmp3, "b light blue") || code == 28)
-      strcat(result, ";44;1");
-    else if(is_abbrev(tmp3, "b light magenta") || code == 29)
-      strcat(result, ";45;1");
-    else if(is_abbrev(tmp3, "b light cyan") || code == 30)
-      strcat(result, ";46;1");
-    else if(is_abbrev(tmp3, "b white") || code == 31)
-      strcat(result, ";47;1");
-    else if(is_abbrev(tmp3, "bold"))
-      strcat(result, ";1");
-    else if(is_abbrev(tmp3, "faint"))
-      strcat(result, ";2");
-    else if(is_abbrev(tmp3, "blink"))
-      strcat(result, ";5");
-    else if(is_abbrev(tmp3, "italic"))
-      strcat(result, ";3");
-    else if(is_abbrev(tmp3, "reverse"))
-      strcat(result, ";7");
-    tmp1 = tmp2+1;
+      while(*tmp2 && *tmp2 != ',')
+          tmp2++;
+      while(isspace(*tmp1))
+          tmp1++;
+      memcpy(tmp3, tmp1, tmp2-tmp1);
+      tmp3[tmp2-tmp1] = '\0';
+      code = -1;
+      if(isdigit(*tmp3)) {
+          sscanf(tmp3, "%d", &code);
+          code--;
+      }
+      if(is_abbrev(tmp3, "black") || code == 0) {
+          if(just_highlighted)
+              strcat(result, "30;");
+          else
+              strcat(result, "0;30;");
+
+          just_highlighted = 0;
+      }
+      else if(is_abbrev(tmp3, "red") || code == 1) {
+          if(just_highlighted)
+              strcat(result, "31;");
+          else
+              strcat(result, "0;31;");
+
+          just_highlighted = 0;
+      }
+      else if(is_abbrev(tmp3, "green") || code == 2) {
+          if(just_highlighted)
+              strcat(result, "32;");
+          else
+              strcat(result, "0;32;");
+
+          just_highlighted = 0;
+      }
+      else if(is_abbrev(tmp3, "brown") || code == 3) {
+          if(just_highlighted)
+              strcat(result, "33;");
+          else
+              strcat(result, "0;33;");
+
+          just_highlighted = 0;
+      }
+      else if(is_abbrev(tmp3, "blue") || code == 4) {
+          if(just_highlighted)
+              strcat(result, "34;");
+          else
+              strcat(result, "0;34;");
+
+          just_highlighted = 0;
+      }
+      else if(is_abbrev(tmp3, "magenta") || code == 5) {
+          if(just_highlighted)
+              strcat(result, "35;");
+          else
+              strcat(result, "0;35;");
+
+          just_highlighted = 0;
+      }
+      else if(is_abbrev(tmp3, "cyan") || code == 6) {
+          if(just_highlighted)
+              strcat(result, "36;");
+          else
+              strcat(result, "0;36;");
+
+          just_highlighted = 0;
+      }
+      else if(is_abbrev(tmp3, "grey") || code == 7) {
+          if(just_highlighted)
+              strcat(result, "37;");
+          else
+              strcat(result, "0;37;");
+
+          just_highlighted = 0;
+      }
+      else if(is_abbrev(tmp3, "charcoal") || code == 8)
+          strcat(result, "1;30;");
+      else if(is_abbrev(tmp3, "light red") || code == 9)
+          strcat(result, "1;31;");
+      else if(is_abbrev(tmp3, "light green") || code == 10)
+          strcat(result, "1;32;");
+      else if(is_abbrev(tmp3, "yellow") || code == 11)
+          strcat(result, "1;33;");
+      else if(is_abbrev(tmp3, "light blue") || code == 12)
+          strcat(result, "1;34;");
+      else if(is_abbrev(tmp3, "light magenta") || code == 13)
+          strcat(result, "1;35;");
+      else if(is_abbrev(tmp3, "light cyan")|| code == 14)
+          strcat(result, "1;36;");
+      else if(is_abbrev(tmp3, "white") || code == 15)
+          strcat(result, "1;37;");
+      else if(is_abbrev(tmp3, "b black") || code == 16) {
+          if(just_highlighted)
+              strcat(result, "40;");
+          else
+              strcat(result, "0;40;");
+
+          just_highlighted = 0;
+      }
+      else if(is_abbrev(tmp3, "b red") || code == 17) {
+          if(just_highlighted)
+              strcat(result, "41;");
+          else
+              strcat(result, "0;41;");
+
+          just_highlighted = 0;
+      }
+      else if(is_abbrev(tmp3, "b green") || code == 18) {
+          if(just_highlighted)
+              strcat(result, "42;");
+          else
+              strcat(result, "0;42;");
+
+          just_highlighted = 0;
+      }
+      else if(is_abbrev(tmp3, "b brown") || code == 19) {
+          if(just_highlighted)
+              strcat(result, "43;");
+          else
+              strcat(result, "0;43;");
+
+          just_highlighted = 0;
+      }
+      else if(is_abbrev(tmp3, "b blue") || code == 20) {
+          if(just_highlighted)
+              strcat(result, "44;");
+          else
+              strcat(result, "0;44;");
+
+          just_highlighted = 0;
+      }
+      else if(is_abbrev(tmp3, "b magenta") || code == 21) {
+          if(just_highlighted)
+              strcat(result, "45;");
+          else
+              strcat(result, "0;45;");
+
+          just_highlighted = 0;
+      }
+      else if(is_abbrev(tmp3, "b cyan") || code == 22) {
+          if(just_highlighted)
+              strcat(result, "46;");
+          else
+              strcat(result, "0;46;");
+
+          just_highlighted = 0;
+      }
+      else if(is_abbrev(tmp3, "b grey") || code == 23) {
+          if(just_highlighted)
+              strcat(result, "47;");
+          else
+              strcat(result, "0;47;");
+
+          just_highlighted = 0;
+      }
+      else if(is_abbrev(tmp3, "b charcoal") || code == 24)
+          strcat(result, "1;40;");
+      else if(is_abbrev(tmp3, "b light red") || code == 25)
+          strcat(result, "1;41;");
+      else if(is_abbrev(tmp3, "b light green") || code == 26)
+          strcat(result, "1;42;");
+      else if(is_abbrev(tmp3, "b yellow") || code == 27)
+          strcat(result, "1;43;");
+      else if(is_abbrev(tmp3, "b light blue") || code == 28)
+          strcat(result, "1;44;");
+      else if(is_abbrev(tmp3, "b light magenta") || code == 29)
+          strcat(result, "1;45;");
+      else if(is_abbrev(tmp3, "b light cyan") || code == 30)
+          strcat(result, "1;46;");
+      else if(is_abbrev(tmp3, "b white") || code == 31)
+          strcat(result, "1;47;");
+      else if(is_abbrev(tmp3, "bold")) {
+          strcat(result, "1;");
+      }
+      else if(is_abbrev(tmp3, "faint")) {
+          strcat(result, "2;");
+          just_highlighted = 1;
+      }
+      else if(is_abbrev(tmp3, "blink")) {
+          strcat(result, "5;");
+          just_highlighted = 1;
+      }
+      else if(is_abbrev(tmp3, "italic")) {
+          strcat(result, "3;");
+          just_highlighted = 1;
+      }
+      else if(is_abbrev(tmp3, "reverse")) {
+          strcat(result, "7;");
+          just_highlighted = 1;
+      }
+      
+      tmp1 = tmp2+1;
   }
-  strcat(result, "m");
+  
+  if(result[strlen(result) - 1] == ';') {
+        result[strlen(result) - 1] = 'm';
+  }
+  else
+      strcat(result, "m");
+  
   strcat(result, line);
   strcat(result, DEFAULT_END_COLOR);
-
   {
       FILE *f;
 
@@ -323,4 +435,5 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
           fclose(f);
       }
   }
+
 }

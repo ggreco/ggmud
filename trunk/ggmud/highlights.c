@@ -40,20 +40,14 @@ add_highlight(int type, char *string)
     // TODO
 }
 
-void 
-load_highlights()    
+void
+load_highlights() 
 {
     FILE *fp;
-    gchar line[255];
-    gchar string[250];
-    int type;
-        
-    if (fp = fileopen (HIGH_FILE, "r")) {
-    	while (fgets (line, sizeof(line) - 1, fp)) {
-            sscanf (line, "%d %[^\n]", type, string);
-            add_highlight (type, string);
-        }
-        fclose (fp);
-    }    
+
+    if ((fp = fileopen(HIGH_FILE, "r"))) {
+        parse_config(fp, NULL);   
+        fclose(fp);
+    }
 }
 

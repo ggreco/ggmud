@@ -28,7 +28,7 @@ save_variables (GtkWidget *button, gpointer data) {
                 done = TRUE;
                 break;
             }
-            fprintf (fp, "%s %s\n", alias, replace);
+            fprintf (fp, "#var {%s} {%s}\n", alias, replace);
             row++;
         }
         fclose (fp);
@@ -69,7 +69,7 @@ static void  add_variable (char *alias, char *replacement)
 {
     char buffer[1024];
     
-    sprintf(buffer, "#var %s %s", alias, replacement);
+    sprintf(buffer, "#var {%s} {%s}", alias, replacement);
 
     parse_input(buffer, mud->activesession);
 }
@@ -77,16 +77,11 @@ static void  add_variable (char *alias, char *replacement)
 void load_variables ()
 {
     FILE *fp;
-    gchar line[VAR_LEN+VALUE_LEN+5];
-    gchar alias[VAR_LEN], replace[VALUE_LEN];
-    
-    if (fp = fileopen (VARIABLE_FILE, "r")) {
-    	while (fgets (line, sizeof(line) - 1, fp)) {
-            sscanf (line, "%s %[^\n]", alias, replace);
-            add_variable (alias, replace);
-        }
-        fclose (fp);
-    }    
+
+    if((fp = fileopen(VARIABLE_FILE, "r"))) {
+        parse_config(fp, NULL);
+        fclose(fp);
+    }
 }
 
 
