@@ -250,7 +250,7 @@ void check_all_actions(const char *line, struct session *ses)
         tintin_puts2(strng, ses);
       }
       parse_input(buffer, ses);
-      return;
+//      return; this prevent the use of multiple actions on a single line
     }
   }
 }
