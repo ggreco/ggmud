@@ -208,7 +208,7 @@ void do_one_high(char *line, struct session *ses)
       *place = '\0';
       tptr = line2;
       sprintf(result, "%s%s%s", line, temp2, tptr);
-      sprintf(line, "%s" , result);
+      strcpy(line, result);
     }
   }
 }
@@ -425,6 +425,6 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
   else
       strcat(result, "m");
   
-  strcat(result, line);
+  strip_ansi(line, result + strlen(result)); // move the sequence stripped from ANSI colors to the result buffer
   strcat(result, DEFAULT_END_COLOR);
 }
