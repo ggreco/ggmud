@@ -52,33 +52,49 @@ static GtkWidget *gag_window;
 static GtkWidget *textgag;
 static int gag_selected_row = -1;
 
-static void gag_button_add (GtkWidget *button, gpointer data)
+
+static void
+insert_gags  (GtkCList *clist)
 {
+    extern struct listnode *common_subs;
     gchar *text[1];
-    gint   i;
+    struct listnode *list = mud->activesession ? mud->activesession->subs : common_subs;
 
-    text[0]   = gtk_entry_get_text (GTK_ENTRY (textgag  ));
+    gtk_clist_clear(clist);
+    
+    while ( list = list->next ) {
+        text[0] = list->left;
+        gtk_clist_prepend (GTK_CLIST (clist), text);
+    }
+}
 
-    if ( text[0][0] == '\0' )    {
+static void
+gag_button_add (GtkWidget *button, GtkCList * data)
+{
+    gchar *text;
+
+    text   = gtk_entry_get_text (GTK_ENTRY (textgag  ));
+
+    if ( text[0] == '\0' )    {
         popup_window ("Please insert some text first.");
         return;
     }
 
-    if ( strlen (text[0]) < 8)  {
+    if ( strlen (text) < 4)  {
         popup_window ("It's unsafe to gag a such short text.");
         return;
     }
     
-    if ( strlen (text[0]) > GAG_LEN)    {
+    if ( strlen (text) > GAG_LEN)    {
         popup_window ("Gag value too big.");
         return;
     }
 
-    gtk_clist_append ((GtkCList *) data, text);
-    add_gag (text[0]);
+    add_gag (text);
+    insert_gags(data);
 }
 
-static void gag_button_delete (GtkWidget *button, gpointer data) {
+static void gag_button_delete (GtkWidget *button, GtkCList * data) {
     gchar *word;
     
     if (gag_selected_row == -1 ) {
@@ -87,29 +103,16 @@ static void gag_button_delete (GtkWidget *button, gpointer data) {
     else {
         char buffer[GAG_LEN + 20];
         
-        gtk_clist_get_text ((GtkCList*) data, gag_selected_row, 0, &word);
-        gtk_clist_remove ((GtkCList*) data, gag_selected_row);
+        gtk_clist_get_text (data, gag_selected_row, 0, &word);
         gag_selected_row = -1;
 
         sprintf(buffer, "#ungag {%s}", word);
 
         parse_input(buffer, mud->activesession);
+
+        insert_gags(data);
     }
 
-}
-
-static void
-insert_gags  (GtkWidget *clist)
-{
-    extern struct listnode *common_subs;
-    gchar *text[1];
-    struct listnode *list = mud->activesession ? mud->activesession->subs : common_subs;
-
-    while ( list = list->next ) {
-        text[0] = list->left;
-//        text[1] = list->right;
-        gtk_clist_prepend (GTK_CLIST (clist), text);
-    }
 }
 
 static void gag_selection_made (GtkWidget *clist, gint row, gint column,
@@ -119,8 +122,7 @@ static void gag_selection_made (GtkWidget *clist, gint row, gint column,
     
     gag_selected_row    = row;
 
-    if ( (GtkCList*) data )
-    {
+    if ( (GtkCList*) data ) {
         gtk_clist_get_text ((GtkCList*) data, row, 0, &text);
         gtk_entry_set_text (GTK_ENTRY (textgag), text);
     }
@@ -134,10 +136,6 @@ gags_window(GtkWidget *w, gpointer data)
     GtkWidget *hbox2;
     GtkWidget *hbox3;
     GtkWidget *clist;
-    GtkWidget *button_add;
-    GtkWidget *button_quit;
-    GtkWidget *button_delete;
-    GtkWidget *button_save;
     GtkWidget *label;
     GtkWidget *separator;
     GtkTooltips *tooltip;
@@ -193,42 +191,13 @@ gags_window(GtkWidget *w, gpointer data)
     gtk_widget_show (textgag  );
     gtk_container_add(GTK_CONTAINER(hbox3), textgag);
 
+
+    AddButtonBar(vbox, (gpointer)clist,
+            GTK_SIGNAL_FUNC(gag_button_add),
+            GTK_SIGNAL_FUNC(gag_button_delete),
+            GTK_SIGNAL_FUNC(save_gags));
     
-    separator = gtk_hseparator_new ();
-    gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, TRUE, 5);
-    gtk_widget_show (separator);
-
-    hbox = gtk_hbox_new (FALSE, 0);
-    gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 10);
-    gtk_widget_show (hbox);
-
-    button_add    = gtk_button_new_with_label ("  add   ");
-    button_quit   = gtk_button_new_with_label (" close  ");
-    button_delete = gtk_button_new_with_label (" delete ");
-    button_save   = gtk_button_new_with_label ("  save  ");
-    gtk_signal_connect (GTK_OBJECT (button_add), "clicked",
-                               GTK_SIGNAL_FUNC (gag_button_add),
-                               (gpointer) clist);
-    gtk_signal_connect (GTK_OBJECT (button_delete), "clicked",
-                               GTK_SIGNAL_FUNC (gag_button_delete),
-                               (gpointer) clist);
-    gtk_signal_connect (GTK_OBJECT (button_save), "clicked",
-                               GTK_SIGNAL_FUNC (save_gags),
-                               (gpointer) clist);
-    gtk_signal_connect (GTK_OBJECT (button_quit), "clicked",
-                               GTK_SIGNAL_FUNC (close_window), gag_window);
-
-    gtk_box_pack_start (GTK_BOX (hbox), button_add,    TRUE, TRUE, 15);
-    gtk_box_pack_start (GTK_BOX (hbox), button_delete, TRUE, TRUE, 15);
-    gtk_box_pack_start (GTK_BOX (hbox), button_save,   TRUE, TRUE, 15);
-    gtk_box_pack_start (GTK_BOX (hbox), button_quit,   TRUE, TRUE, 15);
-
-    gtk_widget_show (button_add   );
-    gtk_widget_show (button_quit  );
-    gtk_widget_show (button_delete);
-    gtk_widget_show (button_save  );
-
-    insert_gags  (clist        );
+    insert_gags  (GTK_CLIST(clist)        );
     gtk_widget_show (gag_window );
 }
 

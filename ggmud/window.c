@@ -43,6 +43,55 @@ GtkWidget *menu_File_DisConnect;
 
 void new_view(char *, GtkWidget *);
 
+void AddButtonBar(GtkWidget *vbox, gpointer *data,
+        GtkSignalFunc add_func,
+        GtkSignalFunc del_func,
+        GtkSignalFunc save_func
+        )
+{
+    GtkWidget *hbox;
+    GtkWidget * separator;
+    GtkWidget *button_add;
+    GtkWidget *button_quit;
+    GtkWidget *button_delete;
+    GtkWidget *button_save;
+    
+    separator = gtk_hseparator_new ();
+    gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, TRUE, 5);
+    gtk_widget_show (separator);
+
+    hbox = gtk_hbox_new (FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 10);
+    gtk_widget_show (hbox);
+
+    button_add    = gtk_button_new_with_label ("  add   ");
+    button_quit   = gtk_button_new_with_label (" close  ");
+    button_delete = gtk_button_new_with_label (" delete ");
+    button_save   = gtk_button_new_with_label ("  save  ");
+    gtk_signal_connect (GTK_OBJECT (button_add), "clicked",
+                               add_func,
+                               data );
+    gtk_signal_connect (GTK_OBJECT (button_delete), "clicked",
+                               del_func,
+                               data );
+    gtk_signal_connect (GTK_OBJECT (button_save), "clicked",
+                               save_func,
+                               data );
+    gtk_signal_connect (GTK_OBJECT (button_quit), "clicked",
+                               GTK_SIGNAL_FUNC (close_window), 
+                               gtk_widget_get_toplevel(vbox));
+
+    gtk_box_pack_start (GTK_BOX (hbox), button_add,    TRUE, TRUE, 15);
+    gtk_box_pack_start (GTK_BOX (hbox), button_delete, TRUE, TRUE, 15);
+    gtk_box_pack_start (GTK_BOX (hbox), button_save,   TRUE, TRUE, 15);
+    gtk_box_pack_start (GTK_BOX (hbox), button_quit,   TRUE, TRUE, 15);
+
+    gtk_widget_show (button_add   );
+    gtk_widget_show (button_quit  );
+    gtk_widget_show (button_delete);
+    gtk_widget_show (button_save  );
+}
+
 void toggle_parsing(GtkToggleButton *togglebutton,
                                             gpointer user_data)
 {
@@ -443,7 +492,7 @@ spawn_gui()
   menu_Tools_menu = gtk_menu_new ();
   gtk_menu_item_set_submenu (GTK_MENU_ITEM (menu_Tools), menu_Tools_menu);
 
-  menu_Tools_Macro = gtk_menu_item_new_with_label ("Macro's");
+  menu_Tools_Macro = gtk_menu_item_new_with_label ("Macros");
   gtk_widget_show (menu_Tools_Macro);
   gtk_container_add (GTK_CONTAINER (menu_Tools_menu), menu_Tools_Macro);
   gtk_signal_connect (GTK_OBJECT (menu_Tools_Macro), "activate",

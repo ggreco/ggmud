@@ -82,16 +82,18 @@ void load_aliases ()
 
 #include "include/llist.h"
 
-static void  insert_aliases  (GtkWidget *clist)
+static void  insert_aliases  (GtkCList *clist)
 {
     extern struct listnode *common_aliases;
     gchar *text[2];
     struct listnode *list = mud->activesession ? mud->activesession->aliases : common_aliases;
 
+    gtk_clist_clear(clist);
+            
     while ( list = list->next ) {
         text[0] = list->left;
         text[1] = list->right;
-        gtk_clist_prepend (GTK_CLIST (clist), text);
+        gtk_clist_prepend (clist, text);
     }
 }
 
@@ -148,8 +150,8 @@ static void alias_button_add (GtkWidget *button, gpointer data)
         return;
     }
 
-    gtk_clist_append ((GtkCList *) data, text);
     add_alias (text[0], text[1]);
+    insert_aliases(GTK_CLIST(data));
 }
 
 static void alias_button_delete (GtkWidget *button, gpointer data) {
@@ -163,10 +165,11 @@ static void alias_button_delete (GtkWidget *button, gpointer data) {
         
         gtk_clist_get_text ((GtkCList*) data, alias_selected_row, 0, &word);
         sprintf(buffer, "#unalias %s", word);
-        gtk_clist_remove ((GtkCList*) data, alias_selected_row);
         alias_selected_row = -1;
 
         parse_input(buffer, mud->activesession);
+
+        insert_aliases(GTK_CLIST(data));
     }
 
 }
@@ -289,7 +292,7 @@ void window_alias (GtkWidget *widget, gpointer data)
     gtk_widget_show (button_delete);
     gtk_widget_show (button_save  );
 
-    insert_aliases  (clist        );
+    insert_aliases  (GTK_CLIST(clist)        );
     gtk_widget_show (alias_window );
 
 }
