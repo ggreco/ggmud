@@ -81,6 +81,8 @@ This program is protected under the GNU GPL (See COPYING)
 /* parse input, check for TINTIN commands and aliases and send to session */
 /**************************************************************************/
 
+extern void wait_command(struct session *ses, char *arg, char *line);
+
 struct session *parse_input(char *input, struct session *ses)
 {
   char command[BUFFER_SIZE], arg[BUFFER_SIZE], result[BUFFER_SIZE];
@@ -130,8 +132,15 @@ struct session *parse_input(char *input, struct session *ses)
     substitute_myvars(arg, result, ses);
     strcpy(arg, result);
     
-    if(*command == tintin_char) 
+    if(*command == tintin_char) {
+      // we need an exception to handle the wait command...
+
+      if (is_abbrev(command + 1, "wait")) {
+          wait_command(ses, arg, input2);
+          break;
+      }
       ses = parse_tintin_command(command+1, arg, ses);
+    }
     else if((ln = searchnode_list_begin((ses ? ses->aliases : common_aliases),
 					command, ALPHA))) {
       int i;

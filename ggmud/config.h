@@ -25,5 +25,5 @@
 #define PACKAGE "ggmud"
 
 /* Version number of package */
-#define VERSION "0.2.3cvs"
+#define VERSION "0.2.4cvs"
 
