@@ -173,6 +173,7 @@ void open_connection (const char *name, const char *host, const char *port)
 
 #define ioctl ioctlsocket
 #define EINPROGRESS WSAEINPROGRESS
+#define EISCONN WSAEISCONN
 
     static int winsock_initted = 0;
 
@@ -220,14 +221,28 @@ void open_connection (const char *name, const char *host, const char *port)
                  sizeof (struct sockaddr)) == -1 ) {
         if (errno == EINPROGRESS) {
             if (retries++ < 100) {
-                textfield_add(mud->text, ".", MESSAGE_ANSI);
+                fd_set wr;
+                struct timeval to = {1L, 0};
+                
+                FD_SET(sockfd, &wr);
+                
+                select(sockfd+1, NULL, &wr, NULL, &to);
 
-                while(gtk_events_pending())
-                    gtk_main_iteration();
+                if(!FD_ISSET(sockfd, &wr)) {
+                    textfield_add(mud->text, ".", MESSAGE_ANSI);
 
-                gdk_flush();
+                    while(gtk_events_pending())
+                        gtk_main_iteration();
 
-                sleep(1);
+                    gdk_flush();
+
+                    sleep(1);
+                }
+                else
+                    break;
+            }
+            else if(errno == EISCONN) {
+                break;
             }
             else {
                 textfield_add(mud->text, "\nCONNECTION TIMEOUT\n.", MESSAGE_ERR);
