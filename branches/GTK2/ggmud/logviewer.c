@@ -352,7 +352,7 @@ void log_viewer()
 {
     GtkWidget *main_vbox;
     
-    window = gtk_window_new(GTK_WINDOW_POPUP);
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
     gtk_window_set_title (GTK_WINDOW (window), "GGMud Log Viewer");
     gtk_container_border_width (GTK_CONTAINER (window), 0);

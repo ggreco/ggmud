@@ -72,7 +72,7 @@ void do_about (GtkWidget *widget, gpointer data)
   GtkWidget *hbuttonbox;
   GtkWidget *ok_button;
 
-  about_window = gtk_window_new (GTK_WINDOW_POPUP);
+  about_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_set_usize (about_window, 400, 375);
   gtk_window_set_title (GTK_WINDOW (about_window), "About GGMud");
   gtk_window_set_policy (GTK_WINDOW (about_window), FALSE, FALSE, FALSE);
@@ -164,7 +164,7 @@ void do_manual(GtkWidget *widget, gpointer data)
   prefs.DefaultColor = gtk_text_tag_new(NULL);
   g_object_set(prefs.DefaultColor, "foreground-gdk", color_black);
  
-  man_window = gtk_window_new (GTK_WINDOW_POPUP);
+  man_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_set_usize (man_window, 550, 550);
   gtk_window_set_title (GTK_WINDOW (man_window), "GGMud "VERSION" Manual");
   gtk_window_set_policy (GTK_WINDOW (man_window), FALSE, FALSE, FALSE);

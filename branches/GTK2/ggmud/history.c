@@ -123,6 +123,13 @@ gint change_focus(GtkWidget *w, GdkEventKey *event, gpointer data)
       }
       return 0;
   } else {
+      if (event->keyval == GDK_Tab) {
+          if (GTK_WIDGET_VISIBLE(mud->review))
+              gtk_widget_hide(mud->review);
+          else
+              gtk_widget_show(mud->review);
+      }
+      
       gtk_widget_grab_focus (GTK_WIDGET(mud->ent));
       gtk_widget_grab_default (GTK_WIDGET(mud->ent));
 

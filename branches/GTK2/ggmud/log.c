@@ -70,7 +70,7 @@ void my_popup_window(const char *title, const char *message)
     GtkWidget *separator;
     GtkWidget *btnBox, *btnOk;
 
-    window = gtk_window_new(GTK_WINDOW_POPUP);
+    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW (window), title);
     gtk_signal_connect (GTK_OBJECT (window), "delete_event",
                         GTK_SIGNAL_FUNC (destroy), NULL);
@@ -168,7 +168,7 @@ void append_dialog (const gchar *filename)
                    "or cancel the operation.");
     sprintf (dialog_text, "%s%s", file_text, text);
 
-    window = gtk_window_new (GTK_WINDOW_POPUP);
+    window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title (GTK_WINDOW (window), "File already exists");
     gtk_signal_connect (GTK_OBJECT (window), "delete_event",
                         GTK_SIGNAL_FUNC (destroy), NULL);
