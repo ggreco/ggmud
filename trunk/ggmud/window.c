@@ -43,6 +43,35 @@ GtkWidget *menu_File_DisConnect;
 
 void new_view(char *, GtkWidget *);
 
+GtkWidget *
+MakeButton(char *name, GtkSignalFunc func, gpointer data, GtkAccelGroup *accel_group)
+{
+    GtkWidget *hbox, *label, *button;
+    guint key;
+ 
+    button = gtk_button_new();
+    hbox = gtk_hbox_new(FALSE, 0);
+    gtk_widget_show(hbox);
+    gtk_container_add(GTK_CONTAINER(button), hbox);
+
+    label = gtk_label_new("");
+    key = gtk_label_parse_uline(GTK_LABEL(label), name);
+    gtk_widget_show(label);
+    gtk_box_pack_start (GTK_BOX (hbox), label, TRUE, FALSE, 0);
+    
+    gtk_signal_connect (GTK_OBJECT (button), "clicked",
+                               func,
+                               data );
+    
+    gtk_widget_add_accelerator (button, "clicked", accel_group,
+                              key, GDK_MOD1_MASK,
+                              0);
+
+    gtk_widget_show(button);
+
+    return button;
+}
+
 void AddButtonBar(GtkWidget *vbox, gpointer *data,
         GtkSignalFunc add_func,
         GtkSignalFunc del_func,
@@ -55,6 +84,7 @@ void AddButtonBar(GtkWidget *vbox, gpointer *data,
     GtkWidget *button_quit;
     GtkWidget *button_delete;
     GtkWidget *button_save;
+    GtkAccelGroup *accel_group = gtk_accel_group_new ();
     
     separator = gtk_hseparator_new ();
     gtk_box_pack_start (GTK_BOX (vbox), separator, FALSE, TRUE, 5);
@@ -64,32 +94,23 @@ void AddButtonBar(GtkWidget *vbox, gpointer *data,
     gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 10);
     gtk_widget_show (hbox);
 
-    button_add    = gtk_button_new_with_label ("  add   ");
-    button_quit   = gtk_button_new_with_label (" close  ");
-    button_delete = gtk_button_new_with_label (" delete ");
-    button_save   = gtk_button_new_with_label ("  save  ");
-    gtk_signal_connect (GTK_OBJECT (button_add), "clicked",
-                               add_func,
-                               data );
-    gtk_signal_connect (GTK_OBJECT (button_delete), "clicked",
-                               del_func,
-                               data );
-    gtk_signal_connect (GTK_OBJECT (button_save), "clicked",
-                               save_func,
-                               data );
-    gtk_signal_connect (GTK_OBJECT (button_quit), "clicked",
-                               GTK_SIGNAL_FUNC (close_window), 
-                               gtk_widget_get_toplevel(vbox));
+    
+    button_add    = MakeButton("_Add", add_func, data, accel_group);    
+    button_delete = MakeButton("_Delete", del_func, data, accel_group);
+    button_save   = MakeButton("_Save", save_func, data, accel_group);
+    button_quit   = MakeButton("_Close", 
+            GTK_SIGNAL_FUNC(close_window), 
+            gtk_widget_get_toplevel(vbox),
+            accel_group);
 
     gtk_box_pack_start (GTK_BOX (hbox), button_add,    TRUE, TRUE, 15);
     gtk_box_pack_start (GTK_BOX (hbox), button_delete, TRUE, TRUE, 15);
     gtk_box_pack_start (GTK_BOX (hbox), button_save,   TRUE, TRUE, 15);
     gtk_box_pack_start (GTK_BOX (hbox), button_quit,   TRUE, TRUE, 15);
 
-    gtk_widget_show (button_add   );
-    gtk_widget_show (button_quit  );
-    gtk_widget_show (button_delete);
-    gtk_widget_show (button_save  );
+    gtk_window_add_accel_group(
+            GTK_WINDOW(gtk_widget_get_toplevel(vbox)), 
+            accel_group);
 }
 
 void toggle_parsing(GtkToggleButton *togglebutton,
