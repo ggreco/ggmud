@@ -115,8 +115,15 @@ int checktick(void)
 
 int main(int argc, char **argv)
 {
+    char *display;
     extern int checktick(void);
 
+#ifndef WIN32
+    if(!(display = getenv("DISPLAY")) || !*display) {
+        putenv("DISPLAY=:0.0");
+    }
+#endif
+    
     gtk_set_locale ();
     gtk_init (&argc, &argv);
     gdk_init (&argc, &argv);

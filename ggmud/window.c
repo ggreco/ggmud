@@ -661,7 +661,7 @@ spawn_gui()
 
   /* create the main window */
   mud->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-//  gtk_widget_set_usize (mud->window, 695, 480);
+  gtk_widget_set_usize (mud->window, 640, 480);
   gtk_container_border_width (GTK_CONTAINER (mud->window), 3);
   gtk_window_set_title (GTK_WINDOW (mud->window), "GGMud "VERSION"");
 //  gtk_window_set_policy (GTK_WINDOW (mud->window), FALSE, TRUE, FALSE);

@@ -102,13 +102,32 @@ static void hist_clear ()
 
 gint change_focus(GtkWidget *w, GdkEventKey *event, gpointer data)
 {
-  gtk_widget_grab_focus (GTK_WIDGET(mud->ent));
-  gtk_widget_grab_default (GTK_WIDGET(mud->ent));
+/*  char buffer[100];
+  
+  sprintf(buffer, "Ricevuto state: %ld keyval: %ld\n", event->state, event->keyval);
+      textfield_add(mud->text, buffer, MESSAGE_NORMAL);
+ */
 
-  gtk_signal_emit_by_name(GTK_OBJECT(mud->ent), "key_press_event", event, data);
-          
-  gtk_signal_emit_stop_by_name(GTK_OBJECT(w), "key_press_event");
-  return 1;
+  if ( (event->state & GDK_CONTROL_MASK) == GDK_CONTROL_MASK ||
+         event->keyval == GDK_Control_L ||
+         event->keyval == GDK_Control_R ) {
+
+      if(event->keyval == GDK_c ||
+         event->keyval == GDK_C ) {
+//        textfield_add(mud->text, "Grabbato ctrl+c\n", MESSAGE_NORMAL);
+        gtk_editable_copy_clipboard(GTK_EDITABLE(mud->text));
+      }
+      return 0;
+  } else {
+      gtk_widget_grab_focus (GTK_WIDGET(mud->ent));
+      gtk_widget_grab_default (GTK_WIDGET(mud->ent));
+
+      gtk_signal_emit_by_name(GTK_OBJECT(mud->ent), "key_press_event", event, data);
+
+      gtk_signal_emit_stop_by_name(GTK_OBJECT(w), "key_press_event");
+      return 1;
+  }
+
 }
 
 
