@@ -10,7 +10,7 @@ brokentelnet    char             clearprompt
 cr              echo             end
 fixedmath       forall           function        
 gag             getwalkdirection getvarvalue
-getlistlenght   getitemnr        help            
+getlistlenght   getitemnr        gettimer 
 highlight       history          if            
 ifstrequal      ifexist          ifmatch            
 ignore          info             killall            
@@ -24,12 +24,12 @@ result          retab            return
 revstring       removestring     savepath        
 sendfile        setprompt        session                 
 showme          sleep            snoop            
-speedwalk       split            substitute        
+speedwalk       split            stoptimer
 suspend         system           tabadd            
 tabdelete       tablist          tabsave            
-textin          tick             tickoff                 
+textin          tick             tickoff 
 tickon          tickset          ticksize                
-timetry         tolower          togglesubs        
+timer           timetry          tolower
 toupper         tries            unaction                
 unalias         unantisubstitute            
 unfunction      ungag            unhighlight        
@@ -41,7 +41,8 @@ walkoff         walkreset        walkset
 wildcard        wizlist          write                   
 writesession    zap              zombion            
 zombioff        helpversion      window
-verbosity       beep
+verbosity       beep             help            
+togglesubs      substitute        
 
 
 ~ALIAS
@@ -1346,5 +1347,42 @@ It's an alias of ACTION for ZMud compatibility, please use #help ACTION.
 ~BEEP
 
 It's an alias of BELL for ZMud compatibility, please use #help BELL.
+
+~TIMER
+
+format: #timer secs [name]
+
+Start a timer of SECS seconds named NAME. It shows a triggerable message
+ten seconds and in the moment the timer ends. If NAME is not specified it
+will be created an unnamed and unstoppable timer.
+
+Example:
+#action {white aura aroud your body flickers} {#timer 150 SANCTIMER}
+
+See also: STOPTIMER, GETTIMER
+
+~STOPTIMER
+
+format: #stoptimer name
+
+Stops the first matching timer named NAME and remove its datas from the
+client.
+
+Example:
+#action {white aura aroud your body fades} {#stoptimer SANCTIMER}
+
+See also: TIMER, GETTIMER
+
+~GETTIMER
+
+format: #gettimer variable name
+
+Puts in $variable the number of seconds till the end of the timer named
+NAME. 
+
+Example:
+#alias {mysanc} {#gettimer secs SANCTIMER;gt I have $secs seconds of sanc!}
+
+See also: TIMER, STOPTIMER
 
 ~*EOF* 
