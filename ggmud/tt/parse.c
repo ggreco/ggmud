@@ -445,7 +445,8 @@ struct session *parse_tintin_command(const char *command, char *arg,
 
   else if(is_abbrev(command, "textin"))
     read_file(arg, ses);  
-  
+  else if(is_abbrev(command, "timer"))
+    do_timer(arg, ses);
   else if(is_abbrev(command, "timetry"))
     time_between_tries(arg, ses);
 

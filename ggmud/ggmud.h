@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include "tintin.h"
@@ -29,6 +30,12 @@
 #define MESSAGE_NONE    3
 #define MESSAGE_SENT	4
 #define MESSAGE_TICK    5
+
+typedef struct {
+    time_t finish;
+    time_t last;
+    char *string;
+} timerdata;
 
 typedef struct {
     GtkWidget *menu, *hostentry, *portentry, *vbox, *macrobuttons;
@@ -49,6 +56,7 @@ typedef struct {
     gchar *log_filename;	/* The name of the Log File. */
     struct session *activesession;
     int input_monitor;
+    GList *timers;
 } ggmud;
 
 typedef struct alias_data  ALIAS_DATA;
