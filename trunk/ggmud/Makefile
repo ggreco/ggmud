@@ -1,6 +1,6 @@
 CROSSDIR = /usr/local/cross-gcc33/i386-mingw32msvc/
 CROSSCC = $(CROSSDIR)/bin/gcc
-GLOBAL_CFLAGS = -g
+GLOBAL_CFLAGS = -O2
 OBJDIR = obj/
 CC = gcc
 CXX = g++
@@ -64,6 +64,17 @@ $(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a
 clean: 
 	cd tt && make clean && cd ..
 	rm -f $(WINOBJS) $(OBJS) $(PROJECTNAME) $(PROJECTNAME).exe depend 
+
+dist: dist-osx dist-linux dist-win32
+    
+dist-osx: ggmud
+	tar czf ggmud-osx.tgz ggmud gg_help.txt README README.OSX
+
+dist-linux: ggmud.exe ggmud
+	tar czf ggmud-linux.tgz ggmud gg_help.txt README
+
+dist-win32: ggmud.exe ggmud
+	zip -9 ggmud-win32.zip ggmud.exe gg_help.txt README README.W32
 
 depend:	$(C_SRCS) *.h
 	for i in $(C_SRCS); do \
