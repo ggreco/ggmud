@@ -768,7 +768,7 @@ void window_prefs (GtkWidget *widget, gpointer data)
 //  entry_TickSize = gtk_entry_new();
   gtk_widget_show(entry_TickSize);
 
-  if (mud->activesession && mud->activesession->tickstatus)
+  if (use_tickcounter)
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbutton_Tickcounter), TRUE);
   else 
       gtk_widget_set_sensitive(entry_TickSize, FALSE);
