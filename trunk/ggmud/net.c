@@ -88,10 +88,10 @@ int connected;
 
 static void printline(const char *str, int isaprompt)
 {
-    textfield_add(str, MESSAGE_ANSI);
+    textfield_add(mud->text, str, MESSAGE_ANSI);
     
     if (!isaprompt) 
-        textfield_add("\n", MESSAGE_NORMAL);
+        textfield_add(mud->text, "\n", MESSAGE_NORMAL);
     
 }
 
@@ -103,8 +103,8 @@ void tintin_puts2(const char *cptr, struct session *ses)
     return;
 
   textfield_freeze();
-  textfield_add(cptr, MESSAGE_NORMAL);
-  textfield_add("\n", MESSAGE_NORMAL);
+  textfield_add(mud->text, cptr, MESSAGE_NORMAL);
+  textfield_add(mud->text, "\n", MESSAGE_NORMAL);
   textfield_unfreeze();
 }
 
@@ -130,19 +130,19 @@ void make_connection (char *name, char *host, char *port)
     if ( !(strcmp (host, "\0")) )
     {
         sprintf (buf, "\n*** Can't connect - you didn't specify a host\n");
-        textfield_add ( buf, MESSAGE_ERR);
+        textfield_add (mud->text, buf, MESSAGE_ERR);
         return;
     }
 
     if ( !(strcmp(port, "\0")) )
     {
         sprintf (buf, "\n*** No port specified - assuming port 23\n");
-        textfield_add ( buf, MESSAGE_NORMAL);
+        textfield_add (mud->text,  buf, MESSAGE_NORMAL);
         port = "23\0";
     }
 
     sprintf (buf, "\n*** Connecting to %s, port %s\n", host, port);
-    textfield_add ( buf, MESSAGE_NORMAL);
+    textfield_add (mud->text,  buf, MESSAGE_NORMAL);
 
     open_connection (name, host, port);
 }
@@ -151,7 +151,7 @@ void disconnect ( void )
 {
     gdk_input_remove (mud->input_monitor);
     gtk_main_iteration(); // to ensure the input is removed
-    textfield_add ( "\n*** Connection closed.\n", MESSAGE_NORMAL);
+    textfield_add (mud->text,  "\n*** Connection closed.\n", MESSAGE_NORMAL);
     connected = FALSE;
     gtk_widget_set_sensitive (menu_File_Connect, TRUE);
     gtk_widget_set_sensitive (btn_toolbar_connect, TRUE);
@@ -199,7 +199,7 @@ void open_connection (const char *name, const char *host, const char *port)
 
     if ( ( sockfd = socket (AF_INET, SOCK_STREAM, 0)) == -1 )
     {
-        textfield_add (strerror(errno), MESSAGE_ERR);
+        textfield_add (mud->text, strerror(errno), MESSAGE_ERR);
         return;
     }
 
@@ -211,11 +211,11 @@ void open_connection (const char *name, const char *host, const char *port)
     if (connect (sockfd, (struct sockaddr *)&their_addr,
                  sizeof (struct sockaddr)) == -1 )
     {
-        textfield_add (strerror(errno), MESSAGE_ERR);
+        textfield_add (mud->text, strerror(errno), MESSAGE_ERR);
         return;
     }
 
-    textfield_add ("\n*** Connection established.\n", MESSAGE_NORMAL);
+    textfield_add (mud->text, "\n*** Connection established.\n", MESSAGE_NORMAL);
 
     {
         char buffer[200];
@@ -405,7 +405,7 @@ void write_line_mud(const char *line, struct session *ses)
       if(!broken_telnet) // remove the "\r"
           strcpy(outtext + strlen(outtext) - 2, "\n");
 
-      textfield_add(outtext, MESSAGE_SENT);
+      textfield_add(mud->text, outtext, MESSAGE_SENT);
   }
 }
 

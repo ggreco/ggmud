@@ -42,7 +42,105 @@ GtkWidget *btn_toolbar_connect;
 GtkWidget *menu_File_Connect;
 GtkWidget *menu_File_DisConnect;
 
-void new_view(char *, GtkWidget *);
+GList *windows_list = NULL;
+
+typedef struct {
+    char name[32];
+    GtkWidget *listptr;    
+} window_entry;
+
+window_entry *in_window_list(char *tag)
+{
+    GList *l = windows_list;
+
+    while(l) {
+        if(!strcmp(((window_entry *)l->data)->name, tag))
+            return (window_entry *)l->data;
+        
+        l = l->next;
+    }
+
+    return NULL;
+}
+
+void destroy_a_window(GtkWidget *w)
+{
+    GList *l = windows_list;
+    
+    while(l) {
+        if(((window_entry *)l->data)->listptr == w) {
+            free(l->data);
+            windows_list = g_list_remove(windows_list, l->data);
+            
+            return;
+        }
+        
+        l = l->next;
+    }
+}
+
+GtkText *new_view(char *name, GtkWidget *parent);
+
+GtkWidget *create_new_window(char *title)
+{
+    GtkWidget *win, *vbox;
+    GtkWidget *list;
+
+    win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_widget_set_usize(win, 400, 300);
+    gtk_window_set_title(GTK_WINDOW(win), title);
+    gtk_container_border_width(GTK_CONTAINER(win), 4);
+
+    gtk_widget_realize(win);
+
+    vbox = gtk_vbox_new (FALSE, 0);
+    gtk_widget_show(vbox);
+
+    gtk_container_add(GTK_CONTAINER(win), vbox);
+    
+    list = (GtkWidget *) new_view(NULL, vbox);
+    gtk_signal_connect (GTK_OBJECT (list), "destroy", GTK_SIGNAL_FUNC (destroy_a_window), NULL);
+
+    gtk_widget_show(win);
+
+    return list;
+}
+
+void window_command(char *arg, struct session *s)
+{
+    extern char *get_arg_in_braces(char *s, char *arg, int flag);
+    char left[BUFFER_SIZE], right[BUFFER_SIZE];
+    window_entry *entry;
+
+    arg = get_arg_in_braces(arg, left, 0);
+    arg = get_arg_in_braces(arg, right, 1);
+
+    if(!*left || strlen(left) > 31)
+        return;
+
+    if(!(entry = in_window_list(left))) {
+        if(!(entry = malloc(sizeof(window_entry))))
+            return;
+
+        strncpy(entry->name, left, 31);
+
+        if((entry->listptr = create_new_window(left)))
+            windows_list = g_list_append(windows_list, entry);
+        else {
+            free(entry);
+            return;
+        }
+    }
+
+    if(right && *right && entry) {
+        char *result;
+        substitute_myvars(right, left, s);
+        substitute_vars(left, right, s);
+        result = ParseAnsiColors(right);
+        strcat(result, "\n");
+        textfield_add((GtkText *)entry->listptr, result , MESSAGE_ANSI);
+    }
+}
 
 GtkWidget *
 MakeButton(char *name, char **image, GtkSignalFunc func, gpointer data, GtkAccelGroup *accel_group)
@@ -138,11 +236,11 @@ void toggle_parsing(GtkToggleButton *togglebutton,
     GtkWidget *iconw;
 
     if(gtk_toggle_button_get_active(togglebutton)) {
-        textfield_add("# PARSING ENABLED\n", MESSAGE_SENT);
+        textfield_add(mud->text, "# PARSING ENABLED\n", MESSAGE_SENT);
         verbatim = 0;
     }
     else {
-        textfield_add("# PARSING DISABLED\n", MESSAGE_SENT);
+        textfield_add(mud->text, "# PARSING DISABLED\n", MESSAGE_SENT);
         verbatim = 1;
         image = SC_parsingoff;
     }
@@ -167,11 +265,11 @@ void toggle_triggers(GtkToggleButton *togglebutton,
     GtkWidget *iconw;
 
     if(gtk_toggle_button_get_active(togglebutton)) {
-        textfield_add("# TRIGGERS ENABLED\n", MESSAGE_SENT);
+        textfield_add(mud->text, "# TRIGGERS ENABLED\n", MESSAGE_SENT);
         use_triggers = 1;
     }
     else {
-        textfield_add("# TRIGGERS DISABLED\n", MESSAGE_SENT);
+        textfield_add(mud->text, "# TRIGGERS DISABLED\n", MESSAGE_SENT);
         use_triggers = 0;
         image = SC_triggersoff;
     }
@@ -902,9 +1000,9 @@ spawn_gui()
   mud->notebook = (GtkNotebook *)gtk_notebook_new();
   gtk_widget_show(GTK_WIDGET(mud->notebook));
   gtk_box_pack_start(GTK_BOX(hbox1), GTK_WIDGET(mud->notebook), TRUE, TRUE, 0);
-  new_view("not connected", mud->notebook);        
+  mud->text = new_view("not connected", mud->notebook);        
 #else
-  new_view("not connected", hbox1);
+  mud->text = new_view("not connected", hbox1);
 #endif
   
   hbox2 = gtk_hbox_new (FALSE, 0);
@@ -1027,7 +1125,7 @@ void textfield_unfreeze()
     gtk_widget_grab_focus ((GtkWidget *)mud->ent);
 }
 
-void textfield_add(const char *message, int colortype)
+void textfield_add(GtkText *txt, const char *message, int colortype)
 {
     int numbytes;
 
@@ -1038,27 +1136,27 @@ void textfield_add(const char *message, int colortype)
         case MESSAGE_ANSI:
             numbytes = strlen(message);
             
-            disp_ansi(numbytes, message, mud->text);
+            disp_ansi(numbytes, message, txt);
             break;
         case MESSAGE_SENT:
             if (mud->LOGGING) /* Loging */
                 fprintf(mud->LOG_FILE, message);
-            gtk_text_insert(mud->text, font_normal,
+            gtk_text_insert(txt, font_normal,
                     &color_lightyellow, NULL, message, -1);
             break;
         case MESSAGE_ERR:
             if (mud->LOGGING) /* Loging */
                 fprintf(mud->LOG_FILE, message);
-            gtk_text_insert(mud->text, font_normal, &color_red, NULL, message, -1);
+            gtk_text_insert(txt, font_normal, &color_red, NULL, message, -1);
             break;
         case MESSAGE_TICK:
-            gtk_text_insert(mud->text, font_normal,
+            gtk_text_insert(txt, font_normal,
                     &color_lightcyan, NULL, message, -1);
             break;
         default:
             if (mud->LOGGING) /* Loging */
                 fprintf(mud->LOG_FILE, message);
-            gtk_text_insert(mud->text, font_normal,
+            gtk_text_insert(txt, font_normal,
                     &prefs.DefaultColor, NULL, message, -1);
     }
 }
@@ -1111,10 +1209,11 @@ void popup_window (const gchar *message)
 }
 
 
-void new_view(char *name, GtkWidget *parent)
+GtkText *new_view(char *name, GtkWidget *parent)
 {
   GtkWidget *hbox4, *templabel, *vscrollbar;
-
+  GtkText *text;
+  
   hbox4 = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox4);
 
@@ -1131,20 +1230,22 @@ void new_view(char *name, GtkWidget *parent)
 #endif
       
   /* main text window */
-  mud->text = (GtkText *)gtk_text_new (NULL, NULL);
-  gtk_signal_connect(GTK_OBJECT(mud->text),"key_press_event",GTK_SIGNAL_FUNC(change_focus), mud);
-  gtk_widget_show (GTK_WIDGET(mud->text));
-  gtk_box_pack_start (GTK_BOX (hbox4), GTK_WIDGET(mud->text), TRUE, TRUE, 0);
+  text = (GtkText *)gtk_text_new (NULL, NULL);
+  gtk_signal_connect(GTK_OBJECT(text),"key_press_event",GTK_SIGNAL_FUNC(change_focus), mud);
+  gtk_widget_show (GTK_WIDGET(text));
+  gtk_box_pack_start (GTK_BOX (hbox4), GTK_WIDGET(text), TRUE, TRUE, 0);
 
-  gtk_widget_realize (GTK_WIDGET(mud->text));
+  gtk_widget_realize (GTK_WIDGET(text));
 
   /* the scrollbar attached to the main text window */
-  vscrollbar = gtk_vscrollbar_new (mud->text->vadj);
+  vscrollbar = gtk_vscrollbar_new (text->vadj);
   gtk_widget_show (vscrollbar);
   gtk_box_pack_start (GTK_BOX (hbox4), vscrollbar, FALSE, TRUE, 0);
   GTK_WIDGET_UNSET_FLAGS (vscrollbar, GTK_CAN_FOCUS);
 
-  gdk_window_set_background(mud->text->text_area,
+  gdk_window_set_background(text->text_area,
 			      &(prefs.BackgroundColor));
+
+  return text;
 }
 
