@@ -325,14 +325,9 @@ review_ok(GtkWidget *w, GtkFileSelection *fs)
         
         fclose(f);
     }
-    else {
-        char temp[100];
-
-        sprintf(temp, "Unable to open %s for reading.", 
+    else
+        popup_window( "Unable to open %s for reading.", 
                 gtk_file_selection_get_filename(fs));
-
-        popup_window(temp);
-    }
 
     if (buffer)
             g_free(buffer);
@@ -1303,41 +1298,48 @@ void clear(int n, GtkTextView *target)
 }	
 
 
-void popup_window (const gchar *message)
+void popup_window (const gchar *message, ...)
 {
+    va_list va;
     GtkWidget *window;
     GtkWidget *label;
     GtkWidget *button;
     GtkWidget *box;
-    GtkWidget *separator;
+    GtkWidget *separator, *image, *hbox;
 
     gchar       buf[3072];
 
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title (GTK_WINDOW (window), "Popup Message");
 
-    box = gtk_vbox_new (FALSE, 5);
+    box = gtk_vbox_new (FALSE, 3);
+    hbox = gtk_hbox_new (FALSE, 2);
     gtk_container_set_border_width (GTK_CONTAINER (box), 5);
     gtk_container_add (GTK_CONTAINER (window), box);
 
-    g_snprintf ( buf, 3072, " %s ", message);
-    label = gtk_label_new (buf);
-    gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 5);
-    gtk_widget_show (label);
+    va_start(va, message);
+    *buf = ' ';
+    vsprintf(buf + 1, message, va);
+    strcat(buf, " ");
+    va_end(va);
 
+    label = gtk_label_new (buf);
+    image = gtk_image_new_from_stock(GTK_STOCK_DIALOG_WARNING, 
+            GTK_ICON_SIZE_DIALOG);
+    
+    gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 5);
+    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 5);
+    gtk_box_pack_start (GTK_BOX (box), hbox, FALSE, FALSE, 5);
+ 
     separator = gtk_hseparator_new ();
     gtk_box_pack_start (GTK_BOX (box), separator, TRUE, TRUE, 0);
-    gtk_widget_show (separator);
-    
-    button = gtk_button_new_with_label (" OK ");
+ 
+    button = gtk_button_new_from_stock (GTK_STOCK_OK);
     gtk_signal_connect (GTK_OBJECT (button), "clicked",
-                        GTK_SIGNAL_FUNC (close_window),
-                        window);
+            GTK_SIGNAL_FUNC (close_window),
+            window);
     gtk_box_pack_start (GTK_BOX (box), button, TRUE, TRUE, 5);
-    gtk_widget_show (button);
-    
-    gtk_widget_show (box);
-    gtk_widget_show (window);
+    gtk_widget_show_all (window);
 }
 
 static 

@@ -108,8 +108,7 @@ void font_font_selected (GtkWidget *button, GtkFontSelectionDialog *fs) {
         }
     }
 
-    sprintf (buf, "The selected Font isn't valid, be sure to select a font that does exist.");
-    popup_window (buf);
+    popup_window ( "The selected Font isn't valid, be sure to select a font that does exist.");
 }
 
 void window_font (GtkWidget *button, gpointer data) {

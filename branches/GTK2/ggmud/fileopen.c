@@ -38,22 +38,17 @@ int check_sclient_dir (gchar *dirname) {
     /* can we stat ~/.sclient? */
     	if (!S_ISDIR(file_stat.st_mode)) {
     	/* if it's not a directory */
-            g_snprintf (buf, 256, "%s already exists and is not a directory!", dirname);
-            popup_window (buf);                                                      
-            return_val = -1;
+            popup_window ("%s already exists and is not a directory!", dirname);
         }
     } else {
     /* it must not exist */
-        g_snprintf (buf, 256, "%s does not exist, Creating it as a directory.", dirname);
-        popup_window (buf);
+        popup_window ( "%s does not exist, Creating it as a directory.", dirname);
         if (!mkdir(dirname, 0777)) {
         /* this isn't dangerous, umask modifies it */
-            g_snprintf (buf, 256, "%s created.", dirname);
-            popup_window (buf);                           
+            popup_window ("%s created.", dirname);
             do_manual();
         } else {
-            g_snprintf (buf, 256, "%s NOT created: %s", dirname, strerror (errno));
-            popup_window (buf);
+            popup_window ( "%s NOT created: %s", dirname, strerror (errno));
             return_val = errno;
         }
     }

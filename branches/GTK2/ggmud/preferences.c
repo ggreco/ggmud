@@ -122,7 +122,7 @@ void update_widget_color(color_struct *col)
 
 void load_zmud_prefs(void)
 {
-    popup_window("Warning, at the moment trigger params (%d), (%w)...\nand other custom zmud settings are not imported!");
+    popup_window("Warning, at the moment trigger params (%%d), (%%w)...\nand other custom zmud settings are not imported!");
 
     load_tt_prefs();
 }

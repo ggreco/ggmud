@@ -286,7 +286,7 @@ void open_connection (const char *name, const char *host, const char *port)
                  sizeof (struct sockaddr)) == -1 ) {
 
         if (errno == EINPROGRESS) {
-            GtkWidget *window, *label, *box, *separator, *button;
+            GtkWidget *label, *box, *hbox, *separator, *button, *image;
             char buffer[200];
             struct tempdata *datas = malloc(sizeof(struct tempdata));
 
@@ -303,28 +303,29 @@ void open_connection (const char *name, const char *host, const char *port)
             datas->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
             gtk_window_set_title (GTK_WINDOW (datas->window), "GGMud message");
 
-            box = gtk_vbox_new (FALSE, 5);
+            box = gtk_vbox_new (FALSE, 3);
+            hbox = gtk_hbox_new (FALSE, 2);
             gtk_container_set_border_width (GTK_CONTAINER (box), 5);
             gtk_container_add (GTK_CONTAINER (datas->window), box);
 
             sprintf(buffer, " Connection to %s:%s in progress... ", host, port);
             label = gtk_label_new (buffer);
-            gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 5);
-            gtk_widget_show (label);
+            image = gtk_image_new_from_stock(GTK_STOCK_DIALOG_INFO, 
+                                             GTK_ICON_SIZE_DIALOG);
+            gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 5);
+            gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 5);
+            gtk_box_pack_start (GTK_BOX (box), hbox, FALSE, FALSE, 5);
 
             separator = gtk_hseparator_new ();
             gtk_box_pack_start (GTK_BOX (box), separator, TRUE, TRUE, 0);
-            gtk_widget_show (separator);
 
-            button = gtk_button_new_with_label (" Cancel ");
+            button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
             gtk_signal_connect (GTK_OBJECT (button), "clicked",
                     GTK_SIGNAL_FUNC (stop_connecting),
                     datas);
             gtk_box_pack_start (GTK_BOX (box), button, TRUE, TRUE, 5);
-            gtk_widget_show (button);
 
-            gtk_widget_show (box);
-            gtk_widget_show (datas->window);
+            gtk_widget_show_all (datas->window);
 
             return;
         }
