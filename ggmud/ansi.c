@@ -428,9 +428,10 @@ void disp_ansi(int size, const char *in, GtkTextView *target)
     static char ansibuffer[12];
     GtkTextBuffer *tbuff = gtk_text_view_get_buffer(target);
     GtkTextIter iter;
+    int n=0,x=0;
+
     gtk_text_buffer_get_end_iter(tbuff, &iter);
  
-    int n=0,x=0;
     
     if(!started_code) {
         fg_col=prefs.DefaultColor;
