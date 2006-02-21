@@ -52,6 +52,10 @@ gint        snoop_keys              (GtkWidget *grab_widget,
        return FALSE;
 }
 
+#ifdef linux
+#include "prefix.h"
+#endif
+
 int main(int argc, char **argv)
 {
     char *display;
@@ -67,6 +71,28 @@ int main(int argc, char **argv)
     gtk_set_locale ();
     gtk_init (&argc, &argv);
     gdk_init (&argc, &argv);
+  
+// this code set the ggmud path in a way you can find the help file
+#ifdef linux
+    {
+        FILE *f;
+        
+        if ((f = fopen( DEFAULT_HELP_FILE, "r"))) {
+            fclose(f);
+        }
+        else {
+            char *path = strdup(SELFPATH), *c;
+
+            if ((c = strrchr(path, '/'))) {
+                *c = 0;
+
+                chdir(path);
+
+            }
+            free(path);
+        }
+    }
+#endif
     
     mud = calloc(sizeof(ggmud), 1);
 
