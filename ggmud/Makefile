@@ -9,6 +9,11 @@ COMMONLIBS = -Ltt -ltt
 CFLAGS = $(INCDIR) `gtk-config --cflags` $(GLOBAL_CFLAGS)
 LIBS = $(COMMONLIBS) `gtk-config --libs`
 VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )
+OS:=	$(uname)
+MAKE=	make
+
+if ${OS} == FreeBSD || ${OS} == NetBSD || ${OS} == OpenBSD
+	MAKE	=	gmake
 
 export GLOBAL_CFLAGS
 
@@ -51,10 +56,10 @@ $(OBJDIR)icon.w: icon.rc icon.ico
 	$(CROSSDIR)/../bin/i386-mingw32msvc-windres $< $@
 
 tt/libtt.a: tt/*.c
-	cd tt && make && cd ..
+	cd tt && $(MAKE) && cd ..
     
 tt/libttw32.a: tt/*.c
-	cd tt && make win32 && cd ..
+	cd tt && $(MAKE) win32 && cd ..
 
 $(PROJECTNAME): $(OBJS) tt/libtt.a
 	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) $(LIBS)
@@ -63,7 +68,7 @@ $(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a
 	$(CROSSCC) $(CROSSCFLAGS) $(WINOBJS) -o $(PROJECTNAME).exe $(CROSSLIBS)
 
 clean: 
-	cd tt && make clean && cd ..
+	cd tt && $(MAKE) clean && cd ..
 	rm -f $(WINOBJS) $(OBJS) $(PROJECTNAME) $(PROJECTNAME).exe depend 
 
 dist: dist-osx dist-linux dist-win32
