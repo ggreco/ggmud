@@ -172,6 +172,7 @@ void do_timer(char *arg, struct session *ses)
         sprintf(buffer, "#NEW TIMER %s (%d seconds)\n", d->string, length);
         tintin_puts(buffer, ses);        
     }
+
 }
 
 int checktick(void)
@@ -184,6 +185,7 @@ int checktick(void)
 
     now = time(0);
 
+    swap_blinks();
     
     while (l) {
         timerdata *d = (timerdata *) l->data;

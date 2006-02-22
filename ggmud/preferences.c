@@ -44,14 +44,11 @@ typedef struct {
     GtkWidget *widget;
 } color_struct;
 
-extern GtkWidget *handlebox;
-extern GtkWidget *statusbar;
-
 /* Global variables */
 extern GtkWidget *btnLabel[12];
 extern GtkWidget *menu_Tools_Logger;
 extern GtkWidget *handlebox;
-
+extern GtkWidget *statusbar;
 
 /* Global ToolBar stuff */
 extern GtkWidget *btn_toolbar_logger;
@@ -61,14 +58,6 @@ extern int use_tickcounter;
 
 /* Global variables */
 PREFS_DATA prefs;
-static GtkWidget   *prefs_window;
-static GtkWidget   *prefs_button_save;
-static GtkWidget *checkbutton_Toolbar;
-static GtkWidget *checkbutton_Macrobuttons;
-static GtkWidget *checkbutton_Statusbar;
-static GtkWidget *checkbutton_Tickcounter;
-static GtkWidget *entry_TickSize;
-static GtkWidget *entry_ReviewSize;
 
 #ifndef min
     #define min(x,y) ((x) > (y) ? (y) : (x))
@@ -91,14 +80,14 @@ color_struct color_arr[] = {
       {&color_lightmagenta, "light magenta", NULL},
       {&color_black, "black", NULL},
       {&color_lightblack, "light black", NULL},
-      {&prefs.BackgroundColor, "background color", NULL},
-      {&prefs.DefaultColor, "default color", NULL},      
+      {&prefs.BackgroundGdkColor, "background color", NULL},
+      {&prefs.DefaultGdkColor, "default color", NULL},      
       {NULL,NULL}
 };
 
 static void tt_file_ok(GtkWidget *w, GtkFileSelection *fs)
 {
-    char *name = gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs));
+    const char *name = gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs));
 
     if(*name)
         read_command(name, NULL);
@@ -109,23 +98,20 @@ static void tt_file_ok(GtkWidget *w, GtkFileSelection *fs)
 void update_widget_color(color_struct *col)
 {
     if(col->widget) {
-        GtkStyle *style = gtk_style_copy(gtk_widget_get_style(col->widget));
-
-        if(style) {
-            style->bg[GTK_STATE_NORMAL] = *(col->color);
-            style->bg[GTK_STATE_SELECTED] = *(col->color);
-            style->bg[GTK_STATE_PRELIGHT] = *(col->color);
-
-            gtk_widget_set_style(col->widget, style);
-
-            gtk_style_unref(style);
-        }
+#ifdef HAS_GTK24
+        gtk_color_button_set_color(GTK_COLOR_BUTTON(col->widget), col->color);
+#else
+        gtk_widget_modify_bg(col->widget, GTK_STATE_NORMAL, col->color);
+        gtk_widget_modify_bg(col->widget, GTK_STATE_SELECTED, col->color);
+        gtk_widget_modify_bg(col->widget, GTK_STATE_PRELIGHT, col->color);
+#endif
+        update_color_tags(col->color);
     }
 }
 
 void load_zmud_prefs(void)
 {
-    popup_window("Warning, at the moment trigger params (%d), (%w)...\nand other custom zmud settings are not imported!");
+    popup_window("Warning, at the moment trigger params (%%d), (%%w)...\nand other custom zmud settings are not imported!");
 
     load_tt_prefs();
 }
@@ -198,18 +184,22 @@ void load_prefs ()
     FILE *fp;
     gchar line[255], pref[100], value[230];
 
-    prefs.BackgroundColor = color_black;
-    prefs.BackgroundColor.pixel = 0;
-    prefs.DefaultColor = color_white;
+//    prefs.BackgroundColor = color_black;
+//    prefs.BackgroundColor.pixel = 0;
+//    prefs.DefaultColor = color_white;
 
     if (fp = fileopen(PREFS_FILE, "r")) {
-        prefs.KeepText = prefs.EchoText  = prefs.WordWrap = prefs.DoBeep = TRUE;
+        prefs.SaveVars = prefs.Blinking = prefs.KeepText = prefs.EchoText  = prefs.WordWrap = prefs.DoBeep = TRUE;
 
         while (fgets (line, sizeof(line) - 1, fp)) {
             sscanf (line, "%[^=]=%[^\n]", pref, value);
             if (!strcmp(value, "Off")) {
                 if (!strcmp (pref, "KeepText")) {
                     prefs.KeepText = FALSE;
+                } else if (!strcmp (pref, "SaveVars")) {
+                    prefs.SaveVars = FALSE;
+                } else if (!strcmp (pref, "Blinking")) {
+                    prefs.Blinking = FALSE;
                 } else if (!strcmp (pref, "EchoText")) {
                     prefs.EchoText = FALSE;
                 } else if (!strcmp (pref, "Wordwrap")) {
@@ -244,16 +234,28 @@ void load_prefs ()
                 
                 while(color_arr[i].name) {	    
                     if(!strcmp (color_arr[i].name, pref)) {
-                        sscanf(value, "(%u,%u,%u)",
-                                &(color_arr[i].color->red),
-                                &(color_arr[i].color->green),
-                                &(color_arr[i].color->blue));
-                        if(!gdk_color_alloc(gdk_colormap_get_system(), color_arr[i].color)) {
-                            g_error("Couldn't allocate background color - reverting to black\n");
-                            color_arr[i].color->pixel = color_black.pixel;
-                            color_arr[i].color->red = color_black.red;
-                            color_arr[i].color->green = color_black.green;
-                            color_arr[i].color->blue = color_black.blue;
+                        int red, green, blue;
+                        
+                        if (sscanf(value, "(%u,%u,%u)",
+                                &red,
+                                &green,
+                                &blue) == 3) {
+
+                            color_arr[i].color->red = red;
+                            color_arr[i].color->green = green;
+                            color_arr[i].color->blue = blue;
+                            
+                            if(!gdk_color_alloc(gdk_colormap_get_system(), 
+                                        color_arr[i].color)) {
+
+                                g_error("Couldn't allocate background color - reverting to black\n");
+                                color_arr[i].color->pixel = color_black.pixel;
+                                color_arr[i].color->red = color_black.red;
+                                color_arr[i].color->green = color_black.green;
+                                color_arr[i].color->blue = color_black.blue;
+                            }
+
+                            update_color_tags(color_arr[i].color);
                         }
                         break;
                     }
@@ -278,6 +280,8 @@ void save_prefs (GtkWidget *button, gpointer data)
         CFGW("KeepText", prefs.KeepText);
     	CFGW("EchoText", prefs.EchoText);
         CFGW("Wordwrap", prefs.WordWrap);
+        CFGW("Blinking", prefs.Blinking);
+        CFGW("SaveVars", prefs.SaveVars);
     	CFGW("Beep", prefs.DoBeep);
         CFGW("Toolbar", prefs.Toolbar);
         CFGW("Macrobuttons", prefs.Macrobuttons);
@@ -307,17 +311,9 @@ void change_review_size (GtkWidget *widget, ggmud *mud)
     mud->maxlines = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
 }
 
-void check_text_toggle (GtkWidget *widget, GtkWidget *button)
+void check_tickcounter (GtkWidget *widget, GtkWidget *entry_TickSize)
 {
-    if ( GTK_TOGGLE_BUTTON (button)->active )
-        prefs.KeepText = TRUE;
-    else
-        prefs.KeepText = FALSE;
-}
-
-void check_tickcounter (GtkWidget *widget, GtkWidget *button)
-{
-    if ( GTK_TOGGLE_BUTTON (button)->active ) {
+    if ( GTK_TOGGLE_BUTTON (widget)->active ) {
         tickon_command( mud->activesession);
         use_tickcounter = 1;
     }
@@ -326,145 +322,82 @@ void check_tickcounter (GtkWidget *widget, GtkWidget *button)
         use_tickcounter = 0;
     }
 
-    gtk_widget_set_sensitive(entry_TickSize, GTK_TOGGLE_BUTTON (button)->active);
+    gtk_widget_set_sensitive(entry_TickSize, GTK_TOGGLE_BUTTON (widget)->active);
 }
 
-void check_callback (GtkWidget *widget, GtkWidget *check_button)
+static void check_toggle (GtkWidget *widget, gint *var)
 {
-    if ( GTK_TOGGLE_BUTTON (check_button)->active )
-        prefs.EchoText = TRUE;
+    if ( GTK_TOGGLE_BUTTON (widget)->active )
+        *var = TRUE;
     else
-        prefs.EchoText = FALSE;
-}
-
-void check_wrap (GtkWidget *widget, GtkWidget *wrap_button)
-{
-    if ( GTK_TOGGLE_BUTTON (wrap_button)->active )
-        prefs.WordWrap = TRUE;
-    else
-        prefs.WordWrap = FALSE;
+        *var = FALSE;
 }
 
 /* wordwrapper for the main textwindow */
 void text_toggle_word_wrap (GtkWidget *checkbutton_wrap, GtkWidget *text)
 {
-  gtk_text_set_word_wrap(mud->text, GTK_TOGGLE_BUTTON(checkbutton_wrap)->active);
+  gtk_text_view_set_wrap_mode(mud->text, GTK_TOGGLE_BUTTON(checkbutton_wrap)->active ? 
+          GTK_WRAP_CHAR : GTK_WRAP_NONE);
 }
 
-void check_beep (GtkWidget *widget, GtkWidget *check_button)
+void toggle_visibility(GtkWidget *widget, GtkWidget *dest)
 {
-    if ( GTK_TOGGLE_BUTTON (check_button)->active )
-        prefs.DoBeep = TRUE;
-    else
-        prefs.DoBeep = FALSE;
-}
-
-/*
- * check to see if we should show or hide the toolbar
- */
-void check_Toolbar (GtkWidget *widget, GtkWidget *check_button_toolbar)
-{
-    if ( GTK_TOGGLE_BUTTON (check_button_toolbar)->active )
-        prefs.Toolbar = TRUE;
-    else
-        prefs.Toolbar = FALSE;
-
-  if ( GTK_TOGGLE_BUTTON (check_button_toolbar)->active )
-      gtk_widget_show(handlebox);
+  if ( GTK_TOGGLE_BUTTON (widget)->active )
+      gtk_widget_show(dest);
   else
-      gtk_widget_hide (handlebox);
-
+      gtk_widget_hide (dest);
 }
 
-/* 
- * check to see if we should show or hide the Macro buttons
- */
-void check_Macrobuttons (GtkWidget *widget, GtkWidget *check_button_macro)
+#ifdef HAS_GTK24
+void color_ok (GtkColorButton *widget, color_struct *col)
 {
-    if ( GTK_TOGGLE_BUTTON (check_button_macro)->active )
-        prefs.Macrobuttons = TRUE;
-    else
-        prefs.Macrobuttons = FALSE;
+    gtk_color_button_get_color(widget, col->color);
 
-  if ( GTK_TOGGLE_BUTTON (check_button_macro)->active )
-      gtk_widget_show(mud->macrobuttons);
-  else
-      gtk_widget_hide (mud->macrobuttons);
+    if(!strcmp("background color",col->name))
+        text_bg(mud->text, prefs.BackgroundGdkColor);
+
+    update_widget_color(col);
 }
-
-/* 
- * check to see if we should show or hide the Statusbar
- */
-void check_Statusbar (GtkWidget *widget, GtkWidget *check_button_statusbar)
-{
-    if ( GTK_TOGGLE_BUTTON (check_button_statusbar)->active )
-        prefs.Statusbar = TRUE;
-    else
-        prefs.Statusbar = FALSE;
-
-  if ( GTK_TOGGLE_BUTTON (check_button_statusbar)->active )
-      gtk_widget_show(statusbar);
-  else
-      gtk_widget_hide (statusbar);
-}
-
+#else
 void color_ok (GtkWidget *widget, GtkWidget *color_sel)
 {
-    gdouble fcolor[3];
-    color_struct *color;
-    GdkColor new_color;
-
-    gtk_color_selection_get_color(GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG(color_sel)->colorsel), fcolor);
-    /* FIXME: Need to make the change take effect at once */
-    color = (color_struct *)gtk_object_get_data (GTK_OBJECT(color_sel), "color");
+    color_struct *col = (color_struct *)
+        gtk_object_get_data(GTK_OBJECT(color_sel), "color");
     
-    new_color.red = 65535 * fcolor[0];
-    new_color.green = 65535 * fcolor[1];
-    new_color.blue = 65535 * fcolor[2];
-    
-    if(!gdk_color_alloc(cmap,&new_color)) {
-        g_error("Couldn't allocate color - keeping old color\n");
-    } else {
-        color->color->red = new_color.red;
-        color->color->blue = new_color.blue;
-        color->color->green = new_color.green;
-        color->color->pixel = new_color.pixel;
-    }
+    gtk_color_selection_get_current_color (
+            GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG(color_sel)->colorsel),
+				   col->color);
 
-    if(!strcmp("background color",color->name))
-        gdk_window_set_background(mud->text->text_area, &prefs.BackgroundColor);
+    if(!strcmp("background color",col->name))
+        text_bg(mud->text, prefs.BackgroundGdkColor);
 
-    update_widget_color(color);
+    update_widget_color(col);
 
-    gtk_widget_destroy(color_sel);
-}
-
-void color_cancel (GtkWidget *widget, GtkWidget *color_sel)
-{
     gtk_widget_destroy(color_sel);
 }
 
 void color_callback (GtkWidget *widget, color_struct *color)
 {
     GtkWidget *color_sel;
-    gdouble *fcolor;
     char str[255];
 
     sprintf(str, "Set color for %s", color->name);
     color_sel = gtk_color_selection_dialog_new (str);
-    fcolor = gdk_color_to_gdouble(color->color);
-    gtk_color_selection_set_color (GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG(color_sel)->colorsel),
-				   fcolor);
+    gtk_color_selection_set_current_color (
+            GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG(color_sel)->colorsel),
+				   color->color);
     gtk_object_set_data (GTK_OBJECT (color_sel), "color", color);
     gtk_signal_connect( GTK_OBJECT(GTK_COLOR_SELECTION_DIALOG(color_sel)->ok_button),
 			"clicked", GTK_SIGNAL_FUNC(color_ok),
 			color_sel);
     gtk_signal_connect( GTK_OBJECT(GTK_COLOR_SELECTION_DIALOG(color_sel)->cancel_button),
-			"clicked", GTK_SIGNAL_FUNC(color_cancel),
+			"clicked", GTK_SIGNAL_FUNC(close_window),
 			color_sel);
     gtk_widget_show(color_sel);
 }
 
+#endif
+    
 void color_reset_to_default (GtkWidget *button, gpointer data)
 {
     int i = 0;
@@ -485,10 +418,10 @@ void color_reset_to_default (GtkWidget *button, gpointer data)
     color_lightcyan	= default_color_lightcyan;
     color_black		= default_color_black;
     color_lightblack	= default_color_lightblack;
-    prefs.BackgroundColor	= color_black;
-    prefs.DefaultColor	= color_white;
+    prefs.BackgroundGdkColor	= color_black;
+    prefs.DefaultGdkColor	= color_white;
 
-    gdk_window_set_background(mud->text->text_area, &prefs.BackgroundColor);
+    text_bg(mud->text, prefs.BackgroundGdkColor);
 
     while (color_arr[i].color) {
         update_widget_color(&color_arr[i]);
@@ -533,12 +466,18 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy)
   /* Make buttons for all the colors */
   while(color_arr[i].color) {     
       color_row = gtk_hbox_new(TRUE, 0);
-      color_arr[i].widget =  gtk_button_new();
-
       sprintf(tmp, "Color for %s", color_arr[i].name);
-      color_label = gtk_label_new(tmp);
+#ifdef HAS_GTK24
+      color_arr[i].widget =  gtk_color_button_new_with_color(color_arr[i].color);
+      gtk_color_button_set_title(GTK_COLOR_BUTTON(color_arr[i].widget), tmp);
+      gtk_signal_connect (GTK_OBJECT (color_arr[i].widget), "color-set",
+			  GTK_SIGNAL_FUNC (color_ok), (gpointer) &color_arr[i]);
+#else
+      color_arr[i].widget =  gtk_button_new();
       gtk_signal_connect (GTK_OBJECT (color_arr[i].widget), "clicked",
 			  GTK_SIGNAL_FUNC (color_callback), (gpointer) &color_arr[i]);
+#endif
+      color_label = gtk_label_new(tmp);
       tooltip = gtk_tooltips_new ();
 //      gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
       sprintf(tmp, "You can use this button to change the %s color", color_arr[i].name);
@@ -549,9 +488,9 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy)
       gtk_box_pack_start (GTK_BOX (color_row), color_arr[i].widget, TRUE, TRUE, 3);
       gtk_box_pack_start (GTK_BOX (color_row), color_label, TRUE, TRUE, 1);
       gtk_box_pack_start (GTK_BOX(color_box), color_row, TRUE, TRUE, 1);
-
+#ifndef HAS_GTK24
       update_widget_color(&color_arr[i]);
-      
+#endif
       i++;
   }
 
@@ -607,6 +546,7 @@ void window_prefs (GtkWidget *widget, gpointer data)
   GtkWidget *frame_text;
   GtkWidget *frame_vbox_text;
   GtkWidget *checkbutton_wrap;
+  GtkWidget *checkbutton_blinking;
   GtkWidget *checkbutton_beep;
   GtkWidget *frame_misc, *frame_new;
   GtkWidget *frame_vbox_misc;
@@ -615,8 +555,15 @@ void window_prefs (GtkWidget *widget, gpointer data)
   GtkWidget *close_button;
   GtkWidget *temp;
   GtkTooltips *tooltip;
-
-  prefs_window = gtk_window_new (GTK_WINDOW_DIALOG);
+  GtkWidget *checkbutton_Toolbar;
+  GtkWidget *checkbutton_Macrobuttons;
+  GtkWidget *checkbutton_Statusbar;
+  GtkWidget *checkbutton_savevars;
+  GtkWidget *checkbutton_Tickcounter;
+  GtkWidget *entry_TickSize;
+  GtkWidget *entry_ReviewSize;
+  
+  prefs_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title (GTK_WINDOW (prefs_window), "Preferences");
   gtk_window_set_policy (GTK_WINDOW (prefs_window), TRUE, TRUE, TRUE);
   gtk_signal_connect (GTK_OBJECT (prefs_window), "destroy",
@@ -645,8 +592,8 @@ void window_prefs (GtkWidget *widget, gpointer data)
 
   checkbutton_keep = gtk_check_button_new_with_label ("Keep Text Entered");
   gtk_signal_connect (GTK_OBJECT (checkbutton_keep), "toggled",
-                      GTK_SIGNAL_FUNC (check_text_toggle),
-                      checkbutton_keep);
+                      GTK_SIGNAL_FUNC (check_toggle),
+                      &prefs.KeepText);
   tooltip = gtk_tooltips_new ();
 //  gtk_tooltips_set_colors (tooltip1, &color_lightyellow, &color_black);
   gtk_tooltips_set_tip (tooltip, checkbutton_keep,
@@ -659,7 +606,7 @@ void window_prefs (GtkWidget *widget, gpointer data)
 
   checkbutton_echo = gtk_check_button_new_with_label ("Echo Text");
   gtk_signal_connect (GTK_OBJECT (checkbutton_echo), "toggled",
-                      GTK_SIGNAL_FUNC (check_callback), checkbutton_echo);
+                      GTK_SIGNAL_FUNC (check_toggle), &prefs.EchoText);
   
   gtk_tooltips_set_tip (tooltip, checkbutton_echo,
                         "With this toggled on, all the text you type and "
@@ -685,7 +632,7 @@ void window_prefs (GtkWidget *widget, gpointer data)
 
   checkbutton_wrap = gtk_check_button_new_with_label ("Word Wrap");
   gtk_signal_connect (GTK_OBJECT (checkbutton_wrap), "toggled",
-                      GTK_SIGNAL_FUNC (check_wrap), checkbutton_wrap);
+                      GTK_SIGNAL_FUNC (check_toggle), &prefs.WordWrap);
   gtk_signal_connect (GTK_OBJECT(checkbutton_wrap), "toggled",
 		      GTK_SIGNAL_FUNC(text_toggle_word_wrap), mud->text);
 
@@ -696,10 +643,21 @@ void window_prefs (GtkWidget *widget, gpointer data)
   gtk_box_pack_start (GTK_BOX (frame_vbox_text), checkbutton_wrap, TRUE, TRUE, 0);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_wrap), prefs.WordWrap);
 
+  checkbutton_blinking = gtk_check_button_new_with_label ("Text blinking");
+  gtk_signal_connect (GTK_OBJECT (checkbutton_blinking), "toggled",
+                      GTK_SIGNAL_FUNC (check_toggle), &prefs.Blinking);
+
+  gtk_tooltips_set_tip (tooltip, checkbutton_blinking,
+                        "Enable/disable text blinking.",
+                        NULL);
+  gtk_widget_show (checkbutton_blinking);
+  gtk_box_pack_start (GTK_BOX (frame_vbox_text), checkbutton_blinking, TRUE, TRUE, 0);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_blinking), prefs.Blinking);
+
   checkbutton_beep = gtk_check_button_new_with_label ("Emit Beeps");
   gtk_signal_connect (GTK_OBJECT (checkbutton_beep), "toggled",
-                      GTK_SIGNAL_FUNC (check_beep),
-                      checkbutton_beep);
+                      GTK_SIGNAL_FUNC (check_toggle),
+                      &prefs.DoBeep);
 
   gtk_tooltips_set_tip (tooltip, checkbutton_beep,
                         "If enabled SClient will emit the beep (system bell) sound.",
@@ -721,7 +679,10 @@ void window_prefs (GtkWidget *widget, gpointer data)
 
   checkbutton_Toolbar = gtk_check_button_new_with_label ("Show/Hide Toolbar");
   gtk_signal_connect (GTK_OBJECT (checkbutton_Toolbar),"toggled",
-                       GTK_SIGNAL_FUNC (check_Toolbar),checkbutton_Toolbar);
+                       GTK_SIGNAL_FUNC (check_toggle), &prefs.Toolbar);
+  gtk_signal_connect (GTK_OBJECT (checkbutton_Toolbar),"toggled",
+                       GTK_SIGNAL_FUNC (toggle_visibility), handlebox);
+
   gtk_tooltips_set_tip (tooltip, checkbutton_Toolbar,
                         "Toggle this on to hide the Toolbar.",
                         NULL);
@@ -732,7 +693,9 @@ void window_prefs (GtkWidget *widget, gpointer data)
 
   checkbutton_Macrobuttons = gtk_check_button_new_with_label ("Show/Hide Macro buttons");
   gtk_signal_connect (GTK_OBJECT (checkbutton_Macrobuttons),"toggled",
-                       GTK_SIGNAL_FUNC (check_Macrobuttons),checkbutton_Macrobuttons);
+                       GTK_SIGNAL_FUNC (check_toggle), &prefs.Macrobuttons);
+  gtk_signal_connect (GTK_OBJECT (checkbutton_Macrobuttons),"toggled",
+                       GTK_SIGNAL_FUNC (toggle_visibility), mud->macrobuttons);
 
   gtk_tooltips_set_tip (tooltip, checkbutton_Macrobuttons,
                         "Toggle this on to hide the Macro buttons.",
@@ -742,8 +705,11 @@ void window_prefs (GtkWidget *widget, gpointer data)
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_Macrobuttons), prefs.Macrobuttons);
 
   checkbutton_Statusbar = gtk_check_button_new_with_label ("Show/Hide Statusbar");
+  
   gtk_signal_connect (GTK_OBJECT (checkbutton_Statusbar),"toggled",
-                       GTK_SIGNAL_FUNC (check_Statusbar),checkbutton_Statusbar);
+                       GTK_SIGNAL_FUNC (check_toggle), &prefs.Statusbar);
+  gtk_signal_connect (GTK_OBJECT (checkbutton_Statusbar),"toggled",
+                       GTK_SIGNAL_FUNC (toggle_visibility), statusbar );
 
   gtk_tooltips_set_tip (tooltip, checkbutton_Statusbar,
                         "Toggle this on to hide the Statusbar.",
@@ -770,8 +736,6 @@ void window_prefs (GtkWidget *widget, gpointer data)
   
 // tickcounter
   checkbutton_Tickcounter = gtk_check_button_new_with_label ("Use TickCounter");
-  gtk_signal_connect (GTK_OBJECT (checkbutton_Tickcounter),"toggled",
-                       GTK_SIGNAL_FUNC (check_tickcounter),checkbutton_Tickcounter);
 
   gtk_tooltips_set_tip (tooltip, checkbutton_Tickcounter,
                         "Toggle this to enable/disable the builtin tickcounter.",
@@ -793,7 +757,9 @@ void window_prefs (GtkWidget *widget, gpointer data)
   gtk_signal_connect(GTK_OBJECT(entry_TickSize), "changed", 
                         GTK_SIGNAL_FUNC(change_tick_size), mud);
   
-//  entry_TickSize = gtk_entry_new();
+  gtk_signal_connect (GTK_OBJECT (checkbutton_Tickcounter),"toggled",
+                       GTK_SIGNAL_FUNC (check_tickcounter), entry_TickSize);
+  
   gtk_widget_show(entry_TickSize);
 
   if (use_tickcounter)
@@ -818,10 +784,21 @@ void window_prefs (GtkWidget *widget, gpointer data)
   gtk_widget_show(hbox);
   gtk_box_pack_start (GTK_BOX (vbox3), hbox, TRUE, TRUE, 0);
  
-  temp = gtk_label_new("Review size:");
+  temp = gtk_label_new("Review lines:");
   gtk_widget_show(temp);
   gtk_box_pack_start (GTK_BOX (hbox), temp, TRUE, TRUE, 0);
-  temp = (GtkWidget *)gtk_adjustment_new (mud->maxlines, 2000, 1000000, 500, 10000, 10000);
+  checkbutton_savevars = gtk_check_button_new_with_label ("Save variables");
+  gtk_signal_connect (GTK_OBJECT (checkbutton_savevars), "toggled",
+                      GTK_SIGNAL_FUNC (check_toggle), &prefs.SaveVars);
+
+  gtk_tooltips_set_tip (tooltip, checkbutton_savevars,
+                        "Save variable values on program exit.",
+                        NULL);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_savevars), prefs.SaveVars);
+  gtk_widget_show (checkbutton_savevars);
+  gtk_box_pack_start (GTK_BOX (vbox3), checkbutton_savevars, TRUE, TRUE, 0);
+  
+  temp = (GtkWidget *)gtk_adjustment_new (mud->maxlines, 1000, 1000000, 100, 10000, 10000);
   entry_ReviewSize = gtk_spin_button_new (GTK_ADJUSTMENT (temp), 1, 0);
 
   gtk_signal_connect(GTK_OBJECT(entry_ReviewSize), "changed", 
@@ -829,33 +806,14 @@ void window_prefs (GtkWidget *widget, gpointer data)
   gtk_widget_show(entry_ReviewSize);
 
   gtk_tooltips_set_tip(tooltip, entry_ReviewSize,
-          "The size in bytes of the review buffer, use about 50 x number of lines you need.",
+          "The size in lines of the review buffer.",
           NULL);
   gtk_box_pack_start (GTK_BOX (hbox), entry_ReviewSize, TRUE, TRUE, 0);
   
 // button box
-  prefs_hbuttonbox = gtk_hbutton_box_new ();
-  gtk_widget_show (prefs_hbuttonbox);
-  gtk_box_pack_start (GTK_BOX (vbox), prefs_hbuttonbox, TRUE, TRUE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (prefs_hbuttonbox), 7);
-  gtk_button_box_set_spacing (GTK_BUTTON_BOX (prefs_hbuttonbox), 10);
-  gtk_button_box_set_child_ipadding (GTK_BUTTON_BOX (prefs_hbuttonbox), 5, 0);
-
-  save_button = gtk_button_new_with_label ("Save");
-  gtk_signal_connect_object (GTK_OBJECT (save_button), "clicked",
-                             GTK_SIGNAL_FUNC (save_prefs),
-                             NULL);
-  gtk_widget_show (save_button);
-  gtk_container_add (GTK_CONTAINER (prefs_hbuttonbox), save_button);
-  gtk_container_border_width (GTK_CONTAINER (save_button), 3);
-
-  close_button = gtk_button_new_with_label ("Close");
-  gtk_signal_connect (GTK_OBJECT (close_button), "clicked",
-                             GTK_SIGNAL_FUNC (close_window), prefs_window);
-  gtk_widget_show (close_button);
-  gtk_container_add (GTK_CONTAINER (prefs_hbuttonbox), close_button);
-  gtk_container_border_width (GTK_CONTAINER (close_button), 3);
-
+  AddSimpleBar(vbox, NULL, 
+          GTK_SIGNAL_FUNC(save_prefs), GTK_SIGNAL_FUNC(close_window));
+  
   gtk_widget_show (prefs_window);
 }
 

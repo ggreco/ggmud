@@ -6,6 +6,8 @@ extern struct listnode *common_highs;
 #define HIGH_FILE "highlight"
 #define ALIAS_LEN 128
 
+static GtkWidget *high_window = NULL;
+
 static void
 save_highlights (GtkWidget *button, gpointer data) {
     FILE *fp;
@@ -161,7 +163,7 @@ static void high_selection_made (GtkWidget *clist, gint row, gint column,
 
 
 static void
-add_highlight(char *string, color_options *bg, color_options *fg)
+add_highlight(const char *string, color_options *bg, color_options *fg)
 {
     char buffer[200];
 
@@ -235,7 +237,7 @@ static void  insert_highlights  (GtkCList *clist)
 
 static void high_button_add (GtkWidget *button, GtkCList * data)
 {
-    gchar *text;
+    const gchar *text;
     gint   i, j;
 
     text   = gtk_entry_get_text (GTK_ENTRY (textalias  ));
@@ -299,7 +301,7 @@ static void append_options(GtkWidget *w, color_options *options)
 
 void highlights_window (GtkWidget *widget, gpointer data)
 {
-    GtkWidget *vbox, *high_window;
+    GtkWidget *vbox;
     GtkWidget *hbox;
     GtkWidget *hbox2;
     GtkWidget *hbox3;
@@ -310,19 +312,25 @@ void highlights_window (GtkWidget *widget, gpointer data)
     GtkWidget *button_save;
     GtkWidget *label;
     GtkWidget *separator;
-    GtkTooltips *tooltip;
+//    GtkTooltips *tooltip;
     GtkWidget *scrolled_window;
 
     gchar     *titles[3] = { "Highlight", "Background/Effect", "Foreground" };
 
-    tooltip = gtk_tooltips_new ();
+//    tooltip = gtk_tooltips_new ();
 //    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
+    if (high_window) {
+        gtk_window_present(GTK_WINDOW(high_window));
+        return;
+    }
 
 
     high_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title (GTK_WINDOW (high_window), "Highlights");
     gtk_signal_connect (GTK_OBJECT (high_window), "destroy",
                                GTK_SIGNAL_FUNC(close_window), high_window );
+    gtk_signal_connect (GTK_OBJECT (high_window), "destroy",
+                               GTK_SIGNAL_FUNC(kill_window), &high_window );
     gtk_widget_set_usize (high_window, 550, 320);			       
     vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);

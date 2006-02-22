@@ -63,8 +63,8 @@ GdkColor default_color_cyan;		/* LOW cyan */
 GdkColor default_color_lightblack;	/* BOLD grey (highlighted black) */
 GdkColor default_color_black;		/* LOW black */
 
-GdkColor fg_col;		/* Foreground color */
-GdkColor bg_col;		/* background color */
+GtkTextTag *fg_col;		/* Foreground color */
+GtkTextTag *bg_col;		/* background color */
 
 /* from bezerk */
 gushort convert_color (unsigned c)
@@ -84,7 +84,7 @@ void extract_color (GdkColor *color, unsigned red, unsigned green, unsigned blue
     color->blue  = convert_color (blue);
 }
 
-GdkColor *colors[2][8] =
+GdkColor *orig_colors[2][8] =
 {
     {
         &color_black,
@@ -108,10 +108,16 @@ GdkColor *colors[2][8] =
     }
 };
 
+GtkTextTag *fg_colors[2][8];
+GtkTextTag *bg_colors[2][8];
+GtkTextTag *blink_colors[2][8];
+GtkTextTagTable *tag_table = NULL;
+
 /* from bezerk */
 void init_colors ()
 {
-    
+    int i,j;
+
     cmap = gdk_colormap_get_system ();
     
     extract_color(&color_lightwhite, 254, 254, 254);
@@ -196,8 +202,81 @@ void init_colors ()
     default_color_black 		= color_black;		//default_color_white 	= color_white;
     default_color_lightblack 	= color_lightblack;	//default_color_white 	= color_white;
 
-    prefs.DefaultColor = color_white;
-    prefs.BackgroundColor = color_black;
+
+    if (!tag_table) {
+        tag_table = (GtkTextTagTable *)gtk_text_tag_table_new();
+        
+        for (i = 0; i < 8; i++) {
+            for (j = 0; j < 2; j++) {
+                fg_colors[j][i] = gtk_text_tag_new(NULL);
+                g_object_set(fg_colors[j][i], "foreground-gdk", orig_colors[j][i], NULL);
+                blink_colors[j][i] = gtk_text_tag_new(NULL);
+                g_object_set(blink_colors[j][i], "foreground-gdk", orig_colors[j][i], NULL);
+                bg_colors[j][i] = gtk_text_tag_new(NULL);            
+                g_object_set(bg_colors[j][i], "background-gdk", orig_colors[j][i], NULL);
+
+                gtk_text_tag_table_add(tag_table, fg_colors[j][i]);
+                gtk_text_tag_table_add(tag_table, bg_colors[j][i]);
+                gtk_text_tag_table_add(tag_table, blink_colors[j][i]);
+            }
+        }
+        fg_col = prefs.DefaultColor = gtk_text_tag_new(NULL);
+        g_object_set(prefs.DefaultColor, "foreground-gdk", &color_white, NULL);
+        bg_col = prefs.BackgroundColor = gtk_text_tag_new(NULL);
+        g_object_set(prefs.BackgroundColor, "background-gdk", &color_black, NULL);
+
+        gtk_text_tag_table_add(tag_table, bg_col);
+        gtk_text_tag_table_add(tag_table, fg_col);
+    }
+}
+
+void swap_blinks(void)
+{
+    static int blink = 0;
+    int i,j;
+   
+    if (!tag_table)
+        return;
+    
+    if (blink == 0) {
+        if (!prefs.Blinking)
+            return;
+
+        for (i = 0; i < 8; i++) {
+            for (j = 0; j < 2; j++) {
+                g_object_set(blink_colors[j][i], "foreground-gdk", &prefs.BackgroundGdkColor, NULL);
+            }
+        }
+    }
+    else {
+        for (i = 0; i < 8; i++) {
+            for (j = 0; j < 2; j++) {
+                g_object_set(blink_colors[j][i], "foreground-gdk", orig_colors[j][i], NULL);
+            }
+        }        
+    }
+    
+    blink ^= 1;
+}
+
+void update_color_tags(GdkColor *color)
+{
+    int i, j;
+    
+    if (color == &prefs.BackgroundGdkColor) {
+        g_object_set(prefs.BackgroundColor, "background-gdk", color, NULL);        
+    }
+    else if (color == &prefs.DefaultGdkColor) {
+        g_object_set(prefs.DefaultColor, "foreground-gdk", color, NULL);
+    }
+    else for (i = 0; i < 8; i++) {
+        for (j = 0; j < 2; j++) {
+            if (orig_colors[j][i] == color) {
+                g_object_set(fg_colors[j][i], "foreground-gdk", color, NULL);
+                g_object_set(bg_colors[j][i], "background-gdk", color, NULL);
+            }
+        }
+    }
 }
 
 static int
@@ -227,6 +306,7 @@ void test_getcol(const char *tmp, int bleh)
 #ifdef debug
     printf("code(%d): %.9s\n", bleh, tmp);
 #endif
+    
     switch(bleh){
 
         case 2: if( tmp[0]== '[' && tmp[1] == 'm') {
@@ -240,17 +320,17 @@ void test_getcol(const char *tmp, int bleh)
                     return;
                 }
                 if(!strncmp(tmp,"[1m",3)) {
-                    fg_col = color_lightwhite;
+                    fg_col = fg_colors[1][7]; // light white
                     return;
                 }
                 break;
         case 4:
                 if(tmp[1] == '3') {
-                    fg_col = *colors[0][get_second(tmp[2])];
+                    fg_col = fg_colors[0][get_second(tmp[2])];
                     return;
                 }
                 else if(tmp[1] == '4') {
-                    bg_col = *colors[0][get_second(tmp[2])];
+                    bg_col = bg_colors[0][get_second(tmp[2])];
                     return;
                 }
                 
@@ -260,15 +340,15 @@ void test_getcol(const char *tmp, int bleh)
 parse6chars:        
                 if(tmp[1] == '0' || tmp[1] == '1') {
                     if(tmp[3] == '3') {
-                        fg_col = *colors[get_first(tmp[1])][get_second(tmp[4])];
+                        fg_col = fg_colors[get_first(tmp[1])][get_second(tmp[4])];
                     }
                     else if(tmp[3] == '4')
-                        bg_col = *colors[get_first(tmp[1])][get_second(tmp[4])];
+                        bg_col = bg_colors[get_first(tmp[1])][get_second(tmp[4])];
                     return;
                 }
                 else if(tmp[1] == '7') {
-                    fg_col = color_black;
-                    bg_col = *colors[1][get_second(tmp[4])];
+                    fg_col = fg_colors[0][0]; // black
+                    bg_col = bg_colors[1][get_second(tmp[4])];
                     return;
                 }
                 
@@ -282,7 +362,7 @@ parse6chars:
                 break;
         case 8:
                 if(tmp[5] == '3') {
-                    fg_col = *colors[get_first(tmp[3])][get_second(tmp[6])];
+                    fg_col = fg_colors[get_first(tmp[3])][get_second(tmp[6])];
 
                     return;
                 }
@@ -291,54 +371,67 @@ parse6chars:
 // with 11 chars ansi codes
         case 11:
                 if (tmp[3] == '4') {
-                    if(tmp[1] == '1' && tmp[4] == '0') // lasciamo lo sfondo nero
-                        bg_col = color_black;
+                    if( (tmp[1] == '1' || tmp[1] == '5') && 
+                            tmp[4] == '0') // lasciamo lo sfondo nero
+                        bg_col = bg_colors[0][0]; // black;
                     else {
-                        bg_col = *colors[get_first(tmp[1])][get_second(tmp[4])];
+                        bg_col = bg_colors[get_first(tmp[1])][get_second(tmp[4])];
                     }
                 }
                 if (tmp[8] == '3') {
-                    fg_col = *colors[get_first(tmp[6])][get_second(tmp[9])];
+                    if (tmp[1] == '5')
+                        fg_col = blink_colors[get_first(tmp[6])][get_second(tmp[9])];
+                    else
+                        fg_col = fg_colors[get_first(tmp[6])][get_second(tmp[9])];
                 }
                 return;
         case 9:
                 if (tmp[3] == '4') {
                     if(tmp[4] != '0') {
-                        bg_col = *colors[1][get_second(tmp[4])];
+                        bg_col = bg_colors[1][get_second(tmp[4])];
                     }
                     else
-                        bg_col = color_black; // lasciamo lo sfondo nero
+                        bg_col = bg_colors[0][0]; // lasciamo lo sfondo nero
                 }
                 if (tmp[6] == '3') {
                     int a = get_first(tmp[1]);
                     int b = get_second(tmp[7]);
                     
-                    fg_col = *colors[a][b];
+                    fg_col = fg_colors[a][b];
                 }
                 return;
 
         default:
-                fg_col = prefs.DefaultColor;
-                return;
+                break;
     }
+
     fg_col = prefs.DefaultColor;
-    return;
 }
 
-#ifdef WIN32
-#define OLDSTYLE_ANSI
-#endif
-
-void disp_ansi(int size, const char *in, GtkText *target)
+static void
+flush_text_buffer(char *buf, int *pos, GtkTextIter *iter, GtkTextBuffer *tbuff)
 {
-#ifndef OLDSTYLE_ANSI
+    if(*pos) {
+        if (mud->LOGGING) /* Logging */
+            fwrite(buf, *pos, 1, mud->LOG_FILE);
+
+        gtk_text_buffer_insert_with_tags(tbuff, iter, buf, *pos,  fg_col, bg_col, NULL);
+        *pos = 0;
+    }
+}
+
+void disp_ansi(int size, const char *in, GtkTextView *target)
+{
     char buffer[256];
     int bufferpos = 0;
-#endif
     static int started_code = 0;
     static char ansibuffer[12];
-    
+    GtkTextBuffer *tbuff = gtk_text_view_get_buffer(target);
+    GtkTextIter iter;
     int n=0,x=0;
+
+    gtk_text_buffer_get_end_iter(tbuff, &iter);
+ 
     
     if(!started_code) {
         fg_col=prefs.DefaultColor;
@@ -368,8 +461,7 @@ void disp_ansi(int size, const char *in, GtkText *target)
         if(in[n] == '\r') {
             n++;
 
-            if (n == size)
-                break;
+            continue;
         }
         
         /* mask the password at login */
@@ -391,37 +483,16 @@ void disp_ansi(int size, const char *in, GtkText *target)
 
         /* plain text no color nothing */
         if(in[n] != 27) {
-#ifndef OLDSTYLE_ANSI
             if(bufferpos < sizeof(buffer)) {
                 buffer[bufferpos++] = in[n];
             }
-            else {
-                if (mud->LOGGING) /* Loging */
-                    fwrite(buffer, bufferpos, 1, mud->LOG_FILE);
-                
-                gtk_text_insert(target, font_normal, &fg_col, &bg_col, buffer, bufferpos);
-                bufferpos = 0;
-            }
-#else
-            if (mud->LOGGING) /* Loging */
-                fputc(in[n], mud->LOG_FILE);
-
-            gtk_text_insert(target, font_normal, &fg_col, &bg_col, &in[n], 1);
-            gtk_text_insert (target, NULL, NULL, NULL," ", 1 );
-            gtk_text_backward_delete (target, 1);
-#endif
+            else 
+                flush_text_buffer(buffer, &bufferpos, &iter, tbuff);
         }
         /* color and special signs -> stripp it! */
         else {
-#ifndef OLDSTYLE_ANSI
-            if(bufferpos) {
-                if (mud->LOGGING) /* Loging */
-                    fwrite(buffer, bufferpos, 1, mud->LOG_FILE);
-
-                gtk_text_insert(target, font_normal, &fg_col, &bg_col, buffer, bufferpos);
-                bufferpos = 0;
-            }
-#endif
+            flush_text_buffer(buffer, &bufferpos, &iter, tbuff);
+            
             while(in[x+n] != 'm') {
                 x++;
 
@@ -445,15 +516,7 @@ void disp_ansi(int size, const char *in, GtkText *target)
     }	
     started_code = 0;
     
-#ifndef OLDSTYLE_ANSI
-    if(bufferpos) {
-        if (mud->LOGGING) /* Loging */
-           fwrite(buffer, bufferpos, 1, mud->LOG_FILE);
-                
-        gtk_text_insert(target, font_normal, &fg_col, &bg_col, buffer, bufferpos);
-        bufferpos = 0;
-    }    
-#endif
+    flush_text_buffer(buffer, &bufferpos, &iter, tbuff);
 }
 
 #define MOD_NORMAL	"0"

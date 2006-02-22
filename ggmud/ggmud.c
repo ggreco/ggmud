@@ -39,11 +39,28 @@ gchar **macro_list;
 gchar *keys[] = {"F1", "F2", "F3", "F4", "F5",
 	         "F6", "F7", "F8", "F9", "F10", "F11", "F12", NULL};
 
+gint        snoop_keys              (GtkWidget *grab_widget,
+                                             GdkEventKey *event,
+                                             ggmud *mud)
+{
+   if (event->type == GDK_KEY_PRESS &&
+       event->keyval >= GDK_F1 && event->keyval <= GDK_F12) {
+       macro_send(NULL , event->keyval - GDK_F1);
+       return TRUE;
+   }
+   else
+       return FALSE;
+}
+
+#ifdef linux
+#include "prefix.h"
+#endif
 
 int main(int argc, char **argv)
 {
     char *display;
     extern int checktick(void);
+    extern void save_vars(void);
 
 #ifndef WIN32
     if(!(display = getenv("DISPLAY")) || !*display) {
@@ -54,6 +71,28 @@ int main(int argc, char **argv)
     gtk_set_locale ();
     gtk_init (&argc, &argv);
     gdk_init (&argc, &argv);
+  
+// this code set the ggmud path in a way you can find the help file
+#ifdef linux
+    {
+        FILE *f;
+        
+        if ((f = fopen( DEFAULT_HELP_FILE, "r"))) {
+            fclose(f);
+        }
+        else {
+            char *path = strdup(SELFPATH), *c;
+
+            if ((c = strrchr(path, '/'))) {
+                *c = 0;
+
+                chdir(path);
+
+            }
+            free(path);
+        }
+    }
+#endif
     
     mud = calloc(sizeof(ggmud), 1);
 
@@ -64,7 +103,6 @@ int main(int argc, char **argv)
     mud->hist->pos=0;
     mud->hist->cyclic=1;
     mud->hist->list=calloc(sizeof(gpointer), (mud->hist->max+1));
-    mud->disp_font_name="fixed";
     mud->lines=0;
     mud->maxlines = 300 * 70;	// This will be an option
 
@@ -79,6 +117,8 @@ int main(int argc, char **argv)
     spawn_gui();
     load_wizard();
 
+    atexit(save_vars);
+    
     hist_add(""); /* Needed to get rid of a blank line in history list */
 
     mud->curr_color=prefs.DefaultColor;
@@ -87,6 +127,7 @@ int main(int argc, char **argv)
     gtk_widget_show(mud->window);
 
     load_win_pos();
+
 
     g_timeout_add(500, (GSourceFunc)checktick, NULL);
 
@@ -100,6 +141,8 @@ int main(int argc, char **argv)
     load_triggers();
     load_tabs();
 
+    gtk_window_present(GTK_WINDOW(mud->window));
+    gtk_key_snooper_install(snoop_keys, mud);
     gtk_main();
 	
     return 0;

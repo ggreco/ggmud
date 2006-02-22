@@ -221,7 +221,16 @@ int timeofday;
 struct listnode {
   struct listnode *next;
   char *left, *right, *pr;
+  int enabled;
 };
+
+typedef struct _trigclass
+{
+    const char *name;
+    int how_many;
+    struct _trigclass *next;
+    char enabled;    
+} trigger_class;
 
 struct completenode {
   struct completenode *next;

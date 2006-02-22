@@ -1,13 +1,15 @@
 CROSSDIR = /usr/local/cross-gcc33/i386-mingw32msvc/
 CROSSCC = $(CROSSDIR)/bin/gcc
-GLOBAL_CFLAGS = -g
+GLOBAL_CFLAGS = -O2
 OBJDIR = obj/
 CC = gcc
 CXX = g++
 INCDIR = -Itt
 COMMONLIBS = -Ltt -ltt
-CFLAGS = $(INCDIR) `gtk-config --cflags` $(GLOBAL_CFLAGS)
-LIBS = $(COMMONLIBS) `gtk-config --libs`
+CFLAGS = $(INCDIR) `pkg-config gtk+-2.0 --cflags` $(GLOBAL_CFLAGS) -DENABLE_BINRELOC -DBR_PTHREADS=0
+
+LIBS = $(COMMONLIBS) `pkg-config gtk+-2.0 --libs` 
+
 VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )
 OS:=	$(uname)
 MAKE=	make
@@ -21,7 +23,7 @@ PROJECTNAME = ggmud
 
 C_SRCS = alias.c ansi.c font.c fileopen.c help.c history.c log.c logviewer.c \
          macro.c net.c preferences.c ggmud.c triggers.c window.c wizard.c \
-         variables.c highlights.c gags.c timers.c complete.c
+         variables.c highlights.c gags.c timers.c complete.c prefix.c
 
 DEP_SRCS = $(CXX_SRCS) $(C_SRCS)
 
@@ -29,12 +31,17 @@ OBJS = $(patsubst %.c, $(OBJDIR)%.o, $(C_SRCS))
 
 WINOBJS = $(OBJDIR)icon.w $(patsubst %.c, $(OBJDIR)%.w, $(C_SRCS))
 
-CROSSCFLAGS = $(INCDIR) -I$(CROSSDIR)/include/glib-2.0 -mwindows \
-			-I$(CROSSDIR)/include/gtk -mno-cygwin -mms-bitfields $(GLOBAL_CFLAGS)
+CROSSCFLAGS = $(INCDIR) -I$(CROSSDIR)/include/glib-2.0  \
+            -I$(CROSSDIR)/lib/glib-2.0/include/ \
+			-I$(CROSSDIR)/include/gtk-2.0 -I$(CROSSDIR)/include/atk-1.0 \
+            -I$(CROSSDIR)/include/pango-1.0 -I$(CROSSDIR)/lib/gtk-2.0/include \
+            -mwindows -mno-cygwin -mms-bitfields $(GLOBAL_CFLAGS)
 
 # -fnative-struct corrispondente di -mms-bifields nel vecchio mingw32 -s
 
-CROSSLIBS = -s -L../lib_w32 -Ltt -lttw32 -lgtk.dll -lgdk.dll -lgmodule-2.0.dll -lglib-2.0.dll -lws2_32
+CROSSLIBS = -s -Ltt -lttw32 -lgtk-win32-2.0.dll -lgdk-win32-2.0.dll \
+            -latk-1.0.dll -lgdk_pixbuf-2.0.dll -lpango-1.0.dll -lpangowin32-1.0.dll \
+            -lgmodule-2.0.dll -lgobject-2.0.dll -lglib-2.0.dll -lws2_32
 
 all: depend $(PROJECTNAME) 
 
@@ -56,10 +63,10 @@ $(OBJDIR)icon.w: icon.rc icon.ico
 	$(CROSSDIR)/../bin/i386-mingw32msvc-windres $< $@
 
 tt/libtt.a: tt/*.c
-	cd tt && $(MAKE) && cd ..
+	$(MAKE) -C tt 
     
 tt/libttw32.a: tt/*.c
-	cd tt && $(MAKE) win32 && cd ..
+	$(MAKE) -C tt win32
 
 $(PROJECTNAME): $(OBJS) tt/libtt.a
 	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) $(LIBS)
