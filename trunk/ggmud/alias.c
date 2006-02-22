@@ -33,7 +33,7 @@
 /* Global variables for alias */
 static GtkWidget *textalias;
 static GtkWidget *textreplace;
-GtkWidget *alias_window;
+static GtkWidget *alias_window = NULL;
 static gint      alias_selected_row    = -1;
 
 static void save_aliases (GtkWidget *button, gpointer data)
@@ -60,7 +60,7 @@ static void save_aliases (GtkWidget *button, gpointer data)
     }    
 }
 
-static void  add_alias (char *alias, char *replacement)
+static void add_alias(const char *alias, const char *replacement)
 {
     char buffer[1024];
     
@@ -119,7 +119,7 @@ static void alias_selection_made (GtkWidget *clist, gint row, gint column,
 
 static void alias_button_add (GtkWidget *button, gpointer data)
 {
-    gchar *text[2];
+    const gchar *text[2];
     gint   i;
 
     text[0]   = gtk_entry_get_text (GTK_ENTRY (textalias  ));
@@ -178,23 +178,24 @@ static void alias_button_delete (GtkWidget *button, gpointer data) {
 
 void window_alias (GtkWidget *widget, gpointer data)
 {
-    GtkWidget *vbox;
+    GtkWidget *vbox, *but;
     GtkWidget *hbox;
     GtkWidget *hbox2;
     GtkWidget *hbox3;
     GtkWidget *clist;
-    GtkWidget *button_add;
-    GtkWidget *button_quit;
-    GtkWidget *button_delete;
-    GtkWidget *button_save;
     GtkWidget *label;
     GtkWidget *separator;
-    GtkTooltips *tooltip;
+//    GtkTooltips *tooltip;
     GtkWidget *scrolled_window;
 
     gchar     *titles[2] = { "Alias", "Replacement" };
 
-    tooltip = gtk_tooltips_new ();
+    if (alias_window) {
+        gtk_window_present(GTK_WINDOW(alias_window));
+        return;
+    }
+
+//    tooltip = gtk_tooltips_new ();
 //    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
 
 
@@ -202,11 +203,12 @@ void window_alias (GtkWidget *widget, gpointer data)
     gtk_window_set_title (GTK_WINDOW (alias_window), "Aliases");
     gtk_signal_connect (GTK_OBJECT (alias_window), "destroy",
                                GTK_SIGNAL_FUNC(close_window), alias_window );
+    gtk_signal_connect (GTK_OBJECT (alias_window), "destroy",
+                               GTK_SIGNAL_FUNC(kill_window), &alias_window );
     gtk_widget_set_usize (alias_window, 450, 320);			       
     vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
     gtk_container_add (GTK_CONTAINER (alias_window), vbox);
-    gtk_widget_show (vbox);
 
     /* create a new scrolled window. */
     scrolled_window = gtk_scrolled_window_new (NULL, NULL);
@@ -214,7 +216,6 @@ void window_alias (GtkWidget *widget, gpointer data)
     gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_window),
                                     GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
     gtk_box_pack_start (GTK_BOX (vbox), scrolled_window, TRUE, TRUE, 0);
-    gtk_widget_show (scrolled_window);
 
     clist = gtk_clist_new_with_titles (2, titles);
     gtk_signal_connect_object (GTK_OBJECT (clist), "select_row",
@@ -231,34 +232,34 @@ void window_alias (GtkWidget *widget, gpointer data)
 
     gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (scrolled_window), clist);
 
-    gtk_widget_show (clist);
-
-    hbox3 = gtk_table_new(2, 2, FALSE);
+    hbox3 = gtk_table_new(3, 2, FALSE);
 
     gtk_box_pack_start (GTK_BOX (vbox), hbox3, FALSE, FALSE, 0);
-    gtk_widget_show (hbox3);
 
     
     label = gtk_label_new ("Alias");
-    gtk_table_attach(GTK_TABLE(hbox3), label, 0, 1, 0, 1,
+    gtk_table_attach(GTK_TABLE(hbox3), label, 1, 2, 0, 1,
                         /*GTK_FILL*/ 0L, /*GTK_FILL*/ 0L, 2, 2);
-    gtk_widget_show (label);
     
     label = gtk_label_new ("Replacement");
-    gtk_table_attach(GTK_TABLE(hbox3), label, 1, 2, 0, 1,
+    gtk_table_attach(GTK_TABLE(hbox3), label, 2, 3, 0, 1,
                         GTK_FILL | GTK_EXPAND, /*GTK_FILL*/ 0L, 2, 2);
-    gtk_widget_show (label);
 
-    textalias   = gtk_entry_new ();
-    gtk_table_attach(GTK_TABLE(hbox3), textalias, 0, 1, 1, 2,
+    but = gtk_button_new();
+    label = gtk_image_new_from_stock(GTK_STOCK_FIND, GTK_ICON_SIZE_SMALL_TOOLBAR);
+    gtk_container_add(GTK_CONTAINER(but), label);
+    gtk_table_attach(GTK_TABLE(hbox3), but, 0, 1, 1, 2,
                          0L, /*GTK_FILL*/ 0L, 2, 2);
-    gtk_widget_show (textalias  );
-
+    gtk_signal_connect (GTK_OBJECT (but), "clicked",
+                       GTK_SIGNAL_FUNC (find_in_list), clist);
+    
+    textalias   = gtk_entry_new ();
+    gtk_table_attach(GTK_TABLE(hbox3), textalias, 1, 2, 1, 2,
+                         0L, /*GTK_FILL*/ 0L, 2, 2);
 
     textreplace = gtk_entry_new ();
-    gtk_table_attach(GTK_TABLE(hbox3), textreplace, 1, 2, 1, 2,
+    gtk_table_attach(GTK_TABLE(hbox3), textreplace, 2, 3, 1, 2,
                         GTK_FILL | GTK_EXPAND, /*GTK_FILL*/ 0L, 2, 2);
-    gtk_widget_show (textreplace);
     
     AddButtonBar(vbox, (gpointer)clist,
             GTK_SIGNAL_FUNC(alias_button_add),
@@ -266,6 +267,5 @@ void window_alias (GtkWidget *widget, gpointer data)
             GTK_SIGNAL_FUNC(save_aliases));
 
     insert_aliases  (GTK_CLIST(clist)        );
-    gtk_widget_show (alias_window );
-
+    gtk_widget_show_all (alias_window );
 }

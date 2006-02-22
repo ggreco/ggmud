@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include "ggmud.h"
 
-void hist_add (char *x)
+void hist_add (const char *x)
 {
     extern int hide_input;
 
@@ -119,12 +119,23 @@ gint change_focus(GtkWidget *w, GdkEventKey *event, gpointer data)
       if(event->keyval == GDK_c ||
          event->keyval == GDK_C ) {
 //        textfield_add(mud->text, "Grabbato ctrl+c\n", MESSAGE_NORMAL);
-        gtk_editable_copy_clipboard(GTK_EDITABLE(w)); // it was mud->text
+//        gtk_editable_copy_clipboard(GTK_EDITABLE(w)); // it was mud->text
+      
+        gtk_text_buffer_copy_clipboard(gtk_text_view_get_buffer(GTK_TEXT_VIEW(w)),
+                gtk_clipboard_get(gdk_atom_intern("CLIPBOARD", TRUE)));
       }
       return 0;
   } else {
-      gtk_widget_grab_focus (GTK_WIDGET(mud->ent));
+      GtkWidget *win = gtk_widget_get_toplevel((GtkWidget *)mud->ent);
+      if (event->keyval == GDK_Tab) {
+          toggle_review();
+      }
+     
+      if (win != gtk_widget_get_toplevel(w)) 
+          gtk_window_present(GTK_WINDOW(win));
+      
       gtk_widget_grab_default (GTK_WIDGET(mud->ent));
+      gtk_widget_grab_focus (GTK_WIDGET(mud->ent));
 
       gtk_signal_emit_by_name(GTK_OBJECT(mud->ent), "key_press_event", event, data);
 
@@ -225,12 +236,12 @@ gint hist_evt (GtkWidget* w, GdkEventKey* event, gpointer data)
             break;
         }
         case GDK_Page_Up: {
-            GtkAdjustment *adj = mud->text->vadj;
+            GtkAdjustment *adj = mud->text->vadjustment;
             gtk_adjustment_set_value(adj,adj->value-adj->page_size);
             break;
         }
         case GDK_Page_Down: {
-            GtkAdjustment *adj = mud->text->vadj;
+            GtkAdjustment *adj = mud->text->vadjustment;
             if (adj->value < adj->upper - adj->page_size)
                 gtk_adjustment_set_value(adj,adj->value+adj->page_size);
             break;

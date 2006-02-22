@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <time.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
@@ -40,13 +41,12 @@ typedef struct {
 typedef struct {
     GtkWidget *menu, *hostentry, *portentry, *vbox, *macrobuttons;
     GtkWidget *window;
-    GtkText *text;
+    GtkTextView *text;
+    GtkWidget *review;
     GtkEntry *ent;
     GtkLabel *tick_counter;
     GtkNotebook *notebook;
-    GdkColor curr_color;
-    GdkFont *disp_font;
-    gchar *disp_font_name;
+    GtkTextTag *curr_color;
     struct ggmud_history *hist;
     gint lines;
     gint maxlines;
@@ -72,13 +72,20 @@ struct prefs_data {
     gint       KeepText;
     gint       EchoText;
     gint       WordWrap;
+    gint       Blinking;
     gint       DoBeep;
     gint       Toolbar;
     gint       Macrobuttons;
     gint       Statusbar;
-    GdkColor   BackgroundColor; /* Red, Green, Blue */
-    GdkColor   DefaultColor; /* Red, Green, Blue */
+    GtkTextTag *BackgroundColor; /* Red, Green, Blue */
+    GtkTextTag *DefaultColor; /* Red, Green, Blue */
+    GdkColor BackgroundGdkColor; /* Red, Green, Blue */
+    GdkColor DefaultGdkColor; /* Red, Green, Blue */
+    gint       SaveVars;
 };
+
+#define text_insert(w, text) gtk_text_buffer_set_text(gtk_text_view_get_buffer(GTK_TEXT_VIEW(w)), text, -1)
+#define text_bg(w, color) gtk_widget_modify_base((GtkWidget *)w, GTK_STATE_NORMAL, &color)
 
 struct alias_data {
     ALIAS_DATA *next;
@@ -135,7 +142,7 @@ struct ggmud_history{
 	int cyclic;	/* controls cyclic vs linear history */
 };
 
-extern void hist_add(char *);
+extern void hist_add(const char *);
 extern gint hist_evt(GtkWidget*,GdkEventKey*,gpointer);
 gint change_focus (GtkWidget* w, GdkEventKey* event, gpointer data);
 extern void hist_clear();
@@ -147,10 +154,10 @@ extern void  window_macro    (GtkWidget *widget, gpointer data);
 
 /* win.c */
 extern void spawn_gui( void );
-extern void textfield_add(GtkText *, const char *, int);
+extern void textfield_add(GtkTextView *, const char *, int);
 extern void textfield_freeze();
 extern void textfield_unfreeze();
-extern void clear(int,GtkText *);
+extern void clear(int,GtkTextView *);
 extern void cbox(void);
 
 /* font.c */
@@ -164,7 +171,7 @@ extern FILE *fileopen (gchar *filename, gchar *mode);
 /* net.c */
 extern int connected;
 extern void disconnect ( void );
-extern void make_connection ( char *name, char *host, char *port );
+extern void make_connection ( const char *name, const char *host, const char *port );
 extern void open_connection (  const char *name, const char *host, const char *port );
 extern void send_to_connection ( GtkWidget *, gpointer data );
 extern void read_from_connection (gpointer, gint , GdkInputCondition );
@@ -176,10 +183,9 @@ extern GtkWidget *menu_Option_Preference;
 GtkWidget *menu_Option_Colors;
 extern void do_menu(GtkWidget *);
 
-extern void popup_window ( const gchar *message );
+extern void popup_window ( const gchar *message, ... );
 
 extern GdkFont  *font_bold;
-extern GdkFont  *font_normal;
 
 /* prefs.c */
 void  load_prefs ( void );
@@ -188,7 +194,7 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy);
 void load_tt_prefs(void);
 void load_zmud_prefs(void);
 void save_all_prefs(void);
-
+void triggerclass_window(GtkWidget *widget, gpointer data );
 /* help.c */
 extern void do_about();
 extern void do_manual();
@@ -208,11 +214,14 @@ extern void TextCopy (GtkWidget *widget, gpointer data);
 
 
 /* win.c */
+extern void find_in_list(GtkWidget *widget, GtkCList *clist);
 extern void  close_window ( GtkWidget *widget, gpointer data );
+extern void  kill_window ( GtkWidget *widget, gpointer data );
 extern void init_colors();
 
 /* ansi.c */
-extern void disp_ansi(int, const char *, GtkText *);
+extern void disp_ansi(int, const char *, GtkTextView *);
+extern void update_color_tags(GdkColor *);
 
 /* BOLD = bright color. LOW = darkish color */
 extern GdkColor color_lightwhite;	/* BOLD white  */
@@ -247,6 +256,10 @@ extern void AddButtonBar(GtkWidget *vbox, gpointer *data,
         GtkSignalFunc add_func,
         GtkSignalFunc del_func,
         GtkSignalFunc save_func
+        );
+
+extern void AddSimpleBar(GtkWidget *vbox, gpointer *data,
+        GtkSignalFunc save_func, GtkSignalFunc close_func
         );
 
 extern char *ParseAnsiColors(char *);

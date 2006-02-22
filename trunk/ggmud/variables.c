@@ -7,6 +7,7 @@ static GtkWidget *textvariablevalue;
 
 #define VAR_LEN 56
 #define VALUE_LEN 200
+static GtkWidget *variable_window = NULL;
 
 static void
 save_variables (GtkWidget *button, gpointer data) {
@@ -30,6 +31,25 @@ save_variables (GtkWidget *button, gpointer data) {
         }
         fclose (fp);
     }    
+}
+
+void save_vars()
+{
+    extern struct listnode *common_myvars;
+    struct listnode *list = (mud && mud->activesession) ? mud->activesession->myvars : common_myvars;
+    FILE *fp;
+
+    if (!prefs.SaveVars)
+        return;
+
+    if (list) {
+        if (fp = fileopen (VARIABLE_FILE, "w")) {
+            while ( list = list->next ) {
+                fprintf (fp, "#var {%s} {%s}\n", list->left, list->right);
+            }
+            fclose(fp);
+        }
+    }
 }
 
 static void
@@ -67,7 +87,7 @@ static void variable_selection_made (GtkWidget *clist, gint row, gint column,
     }
 }
 
-static void  add_variable (char *alias, char *replacement)
+static void  add_variable (const char *alias, const char *replacement)
 {
     char buffer[1024];
     
@@ -89,7 +109,7 @@ void load_variables ()
 
 static void variable_button_add (GtkWidget *button, GtkCList *data)
 {
-    gchar *text[2];
+    const gchar *text[2];
     gint   i;
 
     text[0]   = gtk_entry_get_text (GTK_ENTRY (textvariable  ));
@@ -146,7 +166,6 @@ static void variable_button_delete (GtkWidget *button, gpointer data) {
 void
 variables_window(GtkWidget *w, gpointer data)
 {
-    GtkWidget *variable_window;
     GtkWidget *vbox;
     GtkWidget *hbox;
     GtkWidget *hbox2;
@@ -158,19 +177,25 @@ variables_window(GtkWidget *w, gpointer data)
     GtkWidget *button_save;
     GtkWidget *label;
     GtkWidget *separator;
-    GtkTooltips *tooltip;
+//    GtkTooltips *tooltip;
     GtkWidget *scrolled_window;
 
     gchar     *titles[2] = { "Variable", "Initial value" };
 
-    tooltip = gtk_tooltips_new ();
+//    tooltip = gtk_tooltips_new ();
 //    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
 
+    if (variable_window) {
+        gtk_window_present(GTK_WINDOW(variable_window));
+        return;
+    }
 
     variable_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title (GTK_WINDOW (variable_window), "Variables");
     gtk_signal_connect (GTK_OBJECT (variable_window), "destroy",
                                GTK_SIGNAL_FUNC(close_window), variable_window );
+    gtk_signal_connect (GTK_OBJECT (variable_window), "destroy",
+                               GTK_SIGNAL_FUNC(kill_window), &variable_window );
     gtk_widget_set_usize (variable_window, 450, 320);			       
     vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);

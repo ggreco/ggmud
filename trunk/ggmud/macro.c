@@ -25,6 +25,7 @@
 #define MACRO_FILE "macro"
 extern gchar *keys[];
 extern void macro_btnLabel_change ();
+static GtkWidget *macro_window = NULL;
 
 /* saves the macro's to file */
 void save_macro (gpointer data) 
@@ -53,6 +54,8 @@ static void button_ok_callback(GtkWidget *button, GtkWidget *entry[]) {
     }	
     macro_btnLabel_change();
     save_macro(NULL);
+
+    gtk_widget_destroy(gtk_widget_get_toplevel(button));
 }
 
 /* load's the macro's from file into the entry boxes */
@@ -87,7 +90,6 @@ void load_macro ()
 void window_macro (GtkWidget *widget, gpointer data)
 {
   gint i;
-  GtkWidget *macro_window;
   GtkWidget *vbox1;
   GtkWidget *frame1;
   GtkWidget *hbox1;
@@ -99,13 +101,20 @@ void window_macro (GtkWidget *widget, gpointer data)
   GtkWidget *hbuttonbox;
   GtkWidget *button;
   static GtkWidget *entry[12];
-
+  
+  if (macro_window) {
+      gtk_window_present(GTK_WINDOW(macro_window));
+      return;
+  }
   /* macro window */
-  macro_window = gtk_window_new (GTK_WINDOW_DIALOG);
-  gtk_widget_set_usize (macro_window, 400, 200);
+  macro_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_container_border_width (GTK_CONTAINER (macro_window), 3);
   gtk_window_set_title (GTK_WINDOW (macro_window), "Macros");
   gtk_window_set_policy (GTK_WINDOW (macro_window), FALSE, FALSE, FALSE);
+  gtk_signal_connect (GTK_OBJECT (macro_window), "destroy",
+                               GTK_SIGNAL_FUNC(close_window), macro_window );
+  gtk_signal_connect (GTK_OBJECT (macro_window), "destroy",
+                               GTK_SIGNAL_FUNC(kill_window), &macro_window );
 
   vbox1 = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (vbox1);
@@ -136,7 +145,7 @@ void window_macro (GtkWidget *widget, gpointer data)
     gtk_entry_set_text (GTK_ENTRY(entry[i]), macro_list[i]);
     gtk_widget_show (entry[i]);
     gtk_box_pack_start (GTK_BOX (vbox3), entry[i], TRUE, TRUE, 0);
-    gtk_widget_set_usize (entry[i], 140, -1);
+//    gtk_widget_set_usize (entry[i], 140, -1);
   }
   /* create vbox's for the right half of the window */
   vbox4 = gtk_vbox_new (FALSE, 0);
@@ -154,34 +163,12 @@ void window_macro (GtkWidget *widget, gpointer data)
     gtk_entry_set_text (GTK_ENTRY(entry[i]), macro_list[i]);
     gtk_widget_show (entry[i]);
     gtk_box_pack_start (GTK_BOX (vbox5), entry[i], TRUE, TRUE, 0);
-    gtk_widget_set_usize (entry[i], 140, -1);
+//    gtk_widget_set_usize (entry[i], 140, -1);
   }
   
   /* create hbox for ok/cancel buttons */
-  hbuttonbox = gtk_hbutton_box_new ();
-  gtk_widget_show (hbuttonbox);
-  gtk_box_pack_start (GTK_BOX (vbox1), hbuttonbox, FALSE, TRUE, 5);
-  gtk_widget_set_usize (hbuttonbox, -1, 25);
-  gtk_button_box_set_layout (GTK_BUTTON_BOX (hbuttonbox), GTK_BUTTONBOX_SPREAD);
 
-  button = gtk_button_new_with_label ("Ok");
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-                     GTK_SIGNAL_FUNC (button_ok_callback),
-                     entry);
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-                      GTK_SIGNAL_FUNC (close_window), macro_window);
-  gtk_widget_show (button);
-  gtk_container_add (GTK_CONTAINER (hbuttonbox), button);
-  gtk_widget_set_usize (button, -1, 20);
-  gtk_container_border_width (GTK_CONTAINER (button), 3);
-
-  button = gtk_button_new_with_label ("Cancel");
-  gtk_signal_connect (GTK_OBJECT (button), "clicked",
-                      GTK_SIGNAL_FUNC (close_window), macro_window);
-  gtk_widget_show (button);
-  gtk_container_add (GTK_CONTAINER (hbuttonbox), button);
-  gtk_widget_set_usize (button, -1, 20);
-  gtk_container_border_width (GTK_CONTAINER (button), 3);
-
+  AddSimpleBar(vbox1, (void *)entry, GTK_SIGNAL_FUNC(button_ok_callback),
+          GTK_SIGNAL_FUNC(close_window));
   gtk_widget_show (macro_window);
 }

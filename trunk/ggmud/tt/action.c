@@ -31,11 +31,8 @@ This program is protected under the GNU GPL (See COPYING)
 #include "config.h"
 #include "tintin.h"
 
-#if defined(HAVE_STRING_H)
 #include <string.h>
-#elif defined(HAVE_STRINGS_H)
-#include <strings.h>
-#endif
+#include <stdlib.h>
 
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
@@ -54,24 +51,110 @@ int use_triggers = 1;
 static int var_len[10];
 static const char *var_ptr[10];
 
+trigger_class *trigger_classes = NULL;
+
+
 /***********************/
 /* the #action command */
 /***********************/
 
 /*  Priority code added by Robert Ellsworth 2/2/94 */
+/* Priority code removed by Gabriele Greco and substituted
+   with more useful trigger class code.
+ */
+
+
+static trigger_class * add_class(const char *name)
+{
+    trigger_class *class = malloc(sizeof(trigger_class));
+
+    if (class) {
+        class->name = strdup(name);
+        class->how_many = 0;
+        class->next = trigger_classes;
+        class->enabled = 1;
+    
+        trigger_classes = class;
+    }
+
+    return class;
+}
+
+static trigger_class * get_class(const char *name)
+{
+    trigger_class *t = trigger_classes;
+    
+    while (t) {
+        if (!strcmp(t->name, name))
+            return t;
+
+        t = t->next;
+    }
+    
+    return NULL;
+}
+
+static int enable_class(trigger_class *cl, int enable, struct session *ses)
+{
+     struct listnode *myactions = (ses ? ses->actions : common_actions);
+
+     cl->enabled = enable;
+
+     while ((myactions = myactions->next)) {
+         if (!myactions->pr)
+             continue;
+
+         if (!strcmp(myactions -> pr, cl->name))
+             myactions-> enabled = enable;
+     }
+}
+
 
 void action_command(const char *arg, struct session *ses)
 {
   char left[BUFFER_SIZE], right[BUFFER_SIZE], result[BUFFER_SIZE];
   char pr[BUFFER_SIZE];
   struct listnode *myactions, *ln;
+  trigger_class *cl;
+ 
+  while (*arg == ' ')
+      arg++;
+  
+  if (*arg == '+' || *arg == '-') {
+      trigger_class *t;
+      char *c = left, d = *arg++;
+      
+      while (*arg > ' ')
+        *c++ = *arg++;    
+      
+      *c = 0;
 
+      if (!(t = get_class(left))) {
+          sprintf(result, "#Undefined trigger class [%s]\n", left);
+          tintin_puts2(result, ses);
+      }
+      else {
+          enable_class(t, (d == '+'), ses);
+          sprintf(result, "#%s trigger class [%s]\n", 
+                  d == '+' ? "Enabled" : "Disabled", left);
+      }
+      return;
+  }
+  
   myactions = (ses ? ses->actions : common_actions);
   arg = get_arg_in_braces(arg, left, 0);
   arg = get_arg_in_braces(arg, right, 1);
-  arg = get_arg_in_braces(arg, pr, 1);
+  arg = get_arg_in_braces(arg, pr, 1); // pr now is used as trigger class
+
   if(!*pr)
-    sprintf(pr, "%s", "5"); 
+    strcpy(pr, "undefined"); 
+
+// if a class is not available I add it and enable it.
+  if (!(cl = get_class(pr)))
+      cl = add_class(pr);
+
+  cl->how_many++;
+  
   if(!*left) {
     tintin_puts2("#Defined actions:", ses);
     show_list_action(myactions);
@@ -241,6 +324,9 @@ void check_all_actions(const char *line, struct session *ses)
 
   ln = (ses ? ses->actions : common_actions);
   while((ln = ln->next)) {
+    if (!ln->enabled)
+        continue;
+
     if(check_one_action(linebuf, ln->left, ses)) {
       char buffer[BUFFER_SIZE], strng[BUFFER_SIZE];
 
