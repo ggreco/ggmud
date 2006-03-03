@@ -42,14 +42,14 @@ int skip_ansi(const char *str)
   if(!str || !*str)
     return(skip);
 
-  switch(*str++) {
+  switch(*str++) { // cr and lf was commented, why?
   case '\a': /* BEL */
   case '\b': /* BS */
   case '\t': /* HT */
-/*case '\n':    NL */
+  case '\n': /*   NL */
   case '\v': /* VT */
   case '\f': /* NP */
-/*case '\r':    CR */
+  case '\r': /*   CR */
   case 14:   /* SO */
   case 15:   /* SI */
     return(++skip);

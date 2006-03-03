@@ -278,8 +278,15 @@ struct session {
   int  walk_mode ;  /* set slow-walk properties here. */
 
   FILE *lowlogfile;   /* added for low-level logging - ycjhi */
-
+#ifdef TELNET_SUPPORT
+  char *telnet_buf;
+  int telnet_buflen;
+#endif
 };
+
+#ifdef TELNET_SUPPORT
+#define INPUT_CHUNK 512
+#endif
 
 /* DSC: for the chat module */
 #define SHORT_STRING 128

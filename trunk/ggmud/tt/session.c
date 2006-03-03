@@ -277,6 +277,10 @@ struct session *new_session(const char *name, const char *address,
   newsession->path_length = 0;
   newsession->more_coming = 0;
   newsession->old_more_coming = 0;
+#ifdef TELNET_SUPPORT
+  newsession->telnet_buf = malloc(INPUT_CHUNK);
+  newsession->telnet_buflen = 0;
+#endif
   sessionlist = newsession;
   activesession = newsession;  
   sessionsstarted++;

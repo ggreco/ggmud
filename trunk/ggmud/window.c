@@ -248,7 +248,7 @@ void showme_command(char *arg, struct session *ses)
 
   strcat(d, "\n");
   
-  textfield_add(mud->text, d, MESSAGE_ANSI);
+  textfield_add(mud->text, d, MESSAGE_LOCAL);
 }
 
 window_entry *in_window_list(char *tag)
@@ -401,7 +401,7 @@ void window_command(char *arg, struct session *s)
         substitute_vars(left, right, s);
         result = ParseAnsiColors(right);
         strcat(result, "\n");
-        textfield_add((GtkTextView *)entry->listptr, result , MESSAGE_ANSI);
+        textfield_add((GtkTextView *)entry->listptr, result , MESSAGE_LOCAL);
     }
 }
 
@@ -638,7 +638,11 @@ void cbox()
     gtk_button_box_set_layout (GTK_BUTTON_BOX (hbuttonbox), GTK_BUTTONBOX_SPREAD);
     gtk_button_box_set_child_size (GTK_BUTTON_BOX (hbuttonbox), 72, 25);
 
-    button_connect = gtk_button_new_with_label ("Connect");
+    if (gtk_minor_version > 5)
+        button_connect = gtk_button_new_from_stock ("gtk-connect");
+    else
+        button_connect = gtk_button_new_with_label ("Connect");
+    
     gtk_signal_connect (GTK_OBJECT (button_connect), "clicked",
                         GTK_SIGNAL_FUNC (do_con), mud);
     gtk_signal_connect (GTK_OBJECT (button_connect), "clicked",
@@ -647,7 +651,7 @@ void cbox()
     gtk_container_add (GTK_CONTAINER (hbuttonbox), button_connect);
     gtk_container_border_width (GTK_CONTAINER (button_connect), 3);
 
-    button_cancel = gtk_button_new_with_label ("Cancel");
+    button_cancel = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
     gtk_signal_connect (GTK_OBJECT(button_cancel), "clicked", 
                         GTK_SIGNAL_FUNC (close_window), con_window);
     gtk_widget_show (button_cancel);
@@ -1258,6 +1262,16 @@ void textfield_add(GtkTextView *txt, const char *message, int colortype)
         return;
     
     switch (colortype) {
+        case MESSAGE_LOCAL:
+            numbytes = strlen(message);
+            
+            local_disp_ansi(numbytes, message, txt);
+            
+            if (txt != mud->text) {
+                if ((mark = gtk_object_get_user_data(GTK_OBJECT(txt))))
+                   gtk_text_view_scroll_mark_onscreen(txt, mark);
+            }
+            return;
         case MESSAGE_ANSI:
             numbytes = strlen(message);
             

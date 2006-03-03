@@ -420,57 +420,148 @@ flush_text_buffer(char *buf, int *pos, GtkTextIter *iter, GtkTextBuffer *tbuff)
     }
 }
 
+void dump_buffer(const char *b, int len)
+{
+    while (len--) {
+        fprintf(stderr, "%d (%c) ", *b, *b);
+        b++;
+    }
+    fputc('\n', stderr);
+}
+
+void local_disp_ansi(int size, const char *in, GtkTextView *target)
+{
+    char buffer[256];
+    int bufferpos = 0;
+    char ansibuffer[32];
+    GtkTextBuffer *tbuff = gtk_text_view_get_buffer(target);
+    GtkTextIter iter;
+    int n = 0;
+
+    gtk_text_buffer_get_end_iter(tbuff, &iter);
+
+    fg_col=prefs.DefaultColor;
+    bg_col=prefs.BackgroundColor;
+
+    while(n < size) {
+        /* plain text no color nothing */
+        if(in[n] != 27) {
+            buffer[bufferpos++] = in[n];
+
+            if(bufferpos == sizeof(buffer)) // flush_text_buffer resets internally bufferpos
+                flush_text_buffer(buffer, &bufferpos, &iter, tbuff);    
+        }
+        /* color and special signs -> stripp it! */
+        else {
+            int started_code = 0;
+            flush_text_buffer(buffer, &bufferpos, &iter, tbuff);
+           
+            while(in[n] != 'm' && n < size) {
+                n++;
+                
+                if (in[n] != 0)
+                    ansibuffer[started_code++] = in[n];
+            }
+
+            test_getcol(ansibuffer, started_code);
+        }
+        n++;
+    }	
+    
+    flush_text_buffer(buffer, &bufferpos, &iter, tbuff);
+}
+
 void disp_ansi(int size, const char *in, GtkTextView *target)
 {
     char buffer[256];
     int bufferpos = 0;
     static int started_code = 0;
-    static char ansibuffer[12];
+    static char ansibuffer[32];
     GtkTextBuffer *tbuff = gtk_text_view_get_buffer(target);
     GtkTextIter iter;
-    int n=0,x=0;
+    int n = 0;
+
 
     gtk_text_buffer_get_end_iter(tbuff, &iter);
- 
-    
+
     if(!started_code) {
         fg_col=prefs.DefaultColor;
         bg_col=prefs.BackgroundColor;
     }
     else {
         int i = 0;
-        
+
         while(in[i] != 'm' && i < size) {
+            if (in[i] == 27)
+                started_code = 0;
+            else if (in[i] != 0)
+                ansibuffer[started_code++] = in[i];
+
             i++;
         }
 
-        if( (i + started_code) < 12) {
-            memcpy(ansibuffer + started_code, in, i);
-            
-            test_getcol(ansibuffer, i + started_code);
-
-            in += i;
-            size -= i;
+        if (i == size ) {
+#ifdef SUPERDEBUG
+            fprintf(stderr, "Received packet of %d bytes without a full ansi code\n", size);
+            dump_buffer(in, size);
+            fprintf(stderr, "Actual ansibuffer: ");
+            dump_buffer(ansibuffer, started_code);
+#endif
+            return;
         }
+        else
+            ansibuffer[started_code++] = in[i++]; // I've to skip the m in the end of the code too
+
+        in += i;
+        size -= i;
+            
+        if ( started_code < 12) {
+            test_getcol(ansibuffer, started_code);
+        }
+
         started_code = 0;
     }
-    
+
     while(n < size) {
 
         /* stripp out goofy signs like linefeeds.... */
-        if(in[n] == '\r') {
+        if (in[n] == '\r' || in[n] == 0) {
             n++;
 
             continue;
         }
-        
+
         /* mask the password at login */
-        if(in[n] == -1 && in[n+2] == 1) {
-            if(in[n+1] == -5)
-                mud->ent->visible = 0;
-            if(in[n+1] == -4)
-                mud->ent->visible = 1;
-            n+=3;
+        if (in[n] == -1) {
+            fprintf(stderr, "Telnet code passed, next 8 bytes: ");
+            dump_buffer(in + n, 8);
+            n++;
+            continue;
+#if 0
+            if (in[n+2] == 1) {
+                if(in[n+1] == -5)
+                    mud->ent->visible = 0;
+                if(in[n+1] == -4)
+                    mud->ent->visible = 1;
+                n+=3;
+            }
+            else if (mud->activesession) {
+                int b=do_telnet_protocol(in + n, size - n, mud->activesession);
+                
+                fprintf(stderr, "Telnet protocol returned: %d, buffer: ", b);
+                dump_buffer(in + n, 5);
+
+                switch(b)
+                {
+                    case -1:
+                        // this is the situation when the telnet code does not end in the packet. 
+                        return;
+                    default:
+                        n += b;
+                        continue;
+                }
+            }
+#endif
         }
 
         /* we have intercepted the beep character */
@@ -483,39 +574,32 @@ void disp_ansi(int size, const char *in, GtkTextView *target)
 
         /* plain text no color nothing */
         if(in[n] != 27) {
-            if(bufferpos < sizeof(buffer)) {
-                buffer[bufferpos++] = in[n];
-            }
-            else 
-                flush_text_buffer(buffer, &bufferpos, &iter, tbuff);
+            buffer[bufferpos++] = in[n];
+
+            if(bufferpos == sizeof(buffer)) // flush_text_buffer resets internally bufferpos
+                flush_text_buffer(buffer, &bufferpos, &iter, tbuff);    
         }
         /* color and special signs -> stripp it! */
         else {
             flush_text_buffer(buffer, &bufferpos, &iter, tbuff);
-            
-            while(in[x+n] != 'm') {
-                x++;
 
-                if((x + n) >= size) {
-                    if(x <= 11) {
-                        started_code = x - 1;
-                        memcpy(ansibuffer, &in[n + 1], x - 1);
-                    }
-                    else
-                        started_code = 0;
-                    return;
-                }
+            while(in[n] != 'm' && n < size) {
+                n++;
+                
+                if (in[n] != 0)
+                    ansibuffer[started_code++] = in[n];
             }
-            if(x <= 11)
-                test_getcol(&in[n+1], x);
-            n += x;
 
-            x = 0;
+            if (n == size && ansibuffer[started_code - 1] != 'm')
+                return;
+
+            test_getcol(ansibuffer, started_code);
+
+            started_code = 0;
         }
         n++;
     }	
-    started_code = 0;
-    
+
     flush_text_buffer(buffer, &bufferpos, &iter, tbuff);
 }
 
