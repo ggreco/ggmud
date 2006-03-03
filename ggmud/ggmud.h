@@ -31,6 +31,7 @@
 #define MESSAGE_NONE    3
 #define MESSAGE_SENT	4
 #define MESSAGE_TICK    5
+#define MESSAGE_LOCAL   6
 
 typedef struct {
     time_t finish;
@@ -221,6 +222,7 @@ extern void init_colors();
 
 /* ansi.c */
 extern void disp_ansi(int, const char *, GtkTextView *);
+extern void local_disp_ansi(int, const char *, GtkTextView *);
 extern void update_color_tags(GdkColor *);
 
 /* BOLD = bright color. LOW = darkish color */

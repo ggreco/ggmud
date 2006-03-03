@@ -516,21 +516,21 @@ void do_wiz (GtkWidget *widget, gpointer data)
     gtk_container_add (GTK_CONTAINER (vbox_base), hbox2);
     gtk_widget_show (hbox2);
 
-    button_add     = gtk_button_new_with_label ("  add   ");
+    button_add     = gtk_button_new_from_stock (GTK_STOCK_ADD);
     gtk_signal_connect (GTK_OBJECT (button_add), "clicked",
                                GTK_SIGNAL_FUNC (wizard_button_add),
                                (gpointer) clist);
     gtk_box_pack_start (GTK_BOX (hbox2), button_add,    TRUE, TRUE, 15);
     gtk_widget_show (button_add);
 
-    button_update  = gtk_button_new_with_label ("  apply ");
+    button_update  = gtk_button_new_from_stock (GTK_STOCK_APPLY);
     gtk_signal_connect (GTK_OBJECT (button_update), "clicked",
                                GTK_SIGNAL_FUNC (wizard_button_modify),
                                (gpointer) clist);
     gtk_box_pack_start (GTK_BOX (hbox2), button_update, TRUE, TRUE, 15);
     gtk_widget_show (button_update);
 
-    button_delete  = gtk_button_new_with_label (" delete ");
+    button_delete  = gtk_button_new_from_stock (GTK_STOCK_DELETE);
     gtk_signal_connect (GTK_OBJECT (button_delete), "clicked",
                                GTK_SIGNAL_FUNC (wizard_button_delete),
                                (gpointer) clist);
@@ -545,19 +545,23 @@ void do_wiz (GtkWidget *widget, gpointer data)
     gtk_container_add (GTK_CONTAINER (vbox_base), hbox3);
     gtk_widget_show (hbox3);
 
-    button_connect = gtk_button_new_with_label (" connect ");
+    if (gtk_minor_version > 5)
+        button_connect = gtk_button_new_from_stock ("gtk-connect");
+    else
+        button_connect = gtk_button_new_with_label ("Connect");
+        
     gtk_signal_connect (GTK_OBJECT (button_connect), "clicked",
                                GTK_SIGNAL_FUNC (wizard_button_connect),(gpointer) clist);
     gtk_box_pack_start (GTK_BOX (hbox3), button_connect, TRUE, TRUE, 15);
     gtk_widget_show (button_connect);
 
-    button_save    = gtk_button_new_with_label ("  save   ");
+    button_save    = gtk_button_new_from_stock (GTK_STOCK_SAVE);
     gtk_signal_connect (GTK_OBJECT (button_save), "clicked",
                                GTK_SIGNAL_FUNC (save_wizard), NULL);
     gtk_box_pack_start (GTK_BOX (hbox3), button_save,    TRUE, TRUE, 15);
     gtk_widget_show (button_save);
 
-    button_close   = gtk_button_new_with_label ("  close  ");
+    button_close   = gtk_button_new_from_stock (GTK_STOCK_CLOSE);
     gtk_signal_connect (GTK_OBJECT (button_close), "clicked",
                                GTK_SIGNAL_FUNC (close_window),wizard_window);
     gtk_box_pack_start (GTK_BOX (hbox3), button_close,   TRUE, TRUE, 15);

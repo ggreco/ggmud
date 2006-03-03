@@ -171,6 +171,7 @@ int connect_mud(const char *host, const char *port, struct session *ses)
 /* read at most BUFFER_SIZE chars from mud - parse protocol stuff  */
 /*******************************************************************/
 
+#ifndef TELNET_SUPPORT 
 int read_buffer_mud(char *buffer, struct session *ses)
 {
   int i, didget;
@@ -181,11 +182,11 @@ int read_buffer_mud(char *buffer, struct session *ses)
   ses->more_coming = (didget == 512 ? 1 : 0);
 
   if(didget < 0) 
-    return(0); /*syserr("read from socket");  we do this here instead - dunno quite
+    return(-1); /*syserr("read from socket");  we do this here instead - dunno quite
                 why, but i got some mysterious connection read by peer on some hps */
   
   else if(!didget)
-    return(0);
+    return(-666);
   else {
     cpsource = tmpbuf;
     cpdest = buffer;
@@ -279,3 +280,97 @@ void translate_telnet_protocol(unsigned char *dst, unsigned char *src,
     *cpdst = '\0' ;
 
 }
+
+#else
+
+int read_buffer_mud(char *buffer, struct session *ses)
+{
+    int i, didget, b;
+    char *cpsource, *cpdest;
+#define tmpbuf ses->telnet_buf
+#define len ses->telnet_buflen
+
+#if 0
+    if (!ses->issocket)
+    {
+        didget=read(ses->socket, buffer, INPUT_CHUNK);
+        if (didget<=0)
+            return -1;
+        ses->more_coming=(didget==INPUT_CHUNK);
+        buffer[didget]=0;
+        return didget;
+    }
+#endif
+    didget = recv(ses->socket, tmpbuf+len, INPUT_CHUNK-len, 0);
+
+    if (didget < 0)
+        return -1;
+
+    else if (didget == 0)
+        return -666;
+
+    *(tmpbuf+len+didget)=0;
+#if 0
+    tintin_printf(ses,"~8~text:[%s]~-1~",tmpbuf);
+#endif
+    ses->old_more_coming = ses->more_coming;
+ 
+    if ((didget+=len) == INPUT_CHUNK)
+        ses->more_coming = 1;
+    else
+        ses->more_coming = 0;
+    len=0;
+//    ses->ga=0;
+
+    tmpbuf[didget]=0;
+    cpsource = tmpbuf;
+    cpdest = buffer;
+    i = didget;
+    while (i > 0)
+    {
+        switch(*(unsigned char *)cpsource)
+        {
+        case 0:
+            i--;
+            didget--;
+            cpsource++;
+            break;
+        case 255:
+            b=do_telnet_protocol(cpsource, i, ses);
+            switch(b)
+            {
+            case -1:
+                len=i;
+                memmove(tmpbuf, cpsource, i);
+                *cpdest=0;
+                return didget-len;
+            case -2:
+            	i-=2;
+            	didget-=2;
+            	cpsource+=2;
+//            	if (!i)
+//            		ses->ga=1;
+            	break;
+            case -3:
+                i -= 2;
+                didget-=1;
+                *cpdest++=255;
+                cpsource+=2;
+                break;
+            default:
+                i -= b;
+                didget-=b;
+                cpsource += b;
+            }
+            break;
+        default:
+            *cpdest++ = *cpsource++;
+            i--;
+        }
+    }
+    *cpdest = '\0';
+    return didget;
+}
+#endif
+
+

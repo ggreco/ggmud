@@ -250,7 +250,7 @@ void open_connection (const char *name, const char *host, const char *port)
     if(connecting) {
         textfield_add(mud->text,
                 "\n...Connection already in progress...\n",
-                MESSAGE_ANSI);
+                MESSAGE_NORMAL);
         return;
     }
     
@@ -373,9 +373,18 @@ static void readmud(struct session *s)
 
     buf = thebuffer + BUFFER_SIZE;
     rv = read_buffer_mud(buf, s);
+
+    if (!rv)
+        return;
+
     /* sprintf(mybuf, "rv: %d", rv);
        tintin_puts(mybuf, NULL); */ 
-    if(!rv) {
+#ifdef TELNET_SUPPORT
+    if(rv == -666) 
+#else
+    if (!rv)
+#endif
+    {
         extern struct session *activesession;
         disconnect();
         
