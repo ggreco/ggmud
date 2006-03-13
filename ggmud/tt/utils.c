@@ -101,9 +101,9 @@ void syserr(const char *msg)
   syserrmsg = strerror(errno);
 
   if(syserrmsg)
-    fprintf(stderr, "ERROR: %s (%d: %s)", msg, errno, syserrmsg);
+    fprintf(stderr, "\nERROR: %s (%d: %s)\n\n", msg, errno, syserrmsg);
   else
-    fprintf(stderr, "ERROR: %s (%d)", msg, errno);
+    fprintf(stderr, "\nERROR: %s (%d)\n\n", msg, errno);
 
   exit(0);
 }

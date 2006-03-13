@@ -484,11 +484,7 @@ void disp_ansi(int size, const char *in, GtkTextView *target)
 
     gtk_text_buffer_get_end_iter(tbuff, &iter);
 
-    if(!started_code) {
-        fg_col=prefs.DefaultColor;
-        bg_col=prefs.BackgroundColor;
-    }
-    else {
+    if (started_code) {
         int i = 0;
 
         while(in[i] != 'm' && i < size) {
@@ -531,13 +527,12 @@ void disp_ansi(int size, const char *in, GtkTextView *target)
             continue;
         }
 
-        /* mask the password at login */
-        if (in[n] == -1) {
-            fprintf(stderr, "Telnet code passed, next 8 bytes: ");
-            dump_buffer(in + n, 8);
+        if (in[n] < 0) {
             n++;
             continue;
 #if 0
+        /* mask the password at login */
+
             if (in[n+2] == 1) {
                 if(in[n+1] == -5)
                     mud->ent->visible = 0;
@@ -570,6 +565,7 @@ void disp_ansi(int size, const char *in, GtkTextView *target)
             if (prefs.DoBeep)
                 gdk_beep();
             n++;
+            continue;
         }
 
         /* plain text no color nothing */
