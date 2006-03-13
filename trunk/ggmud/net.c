@@ -380,21 +380,34 @@ static void readmud(struct session *s)
     /* sprintf(mybuf, "rv: %d", rv);
        tintin_puts(mybuf, NULL); */ 
 #ifdef TELNET_SUPPORT
-    if(rv == -666) 
+    if(rv <0) 
 #else
     if (!rv)
 #endif
     {
         extern struct session *activesession;
+
+#ifdef TELNET_SUPPORT
+        if (rv != -666) {
+            char *e = strerror(errno);
+
+            if (!e) 
+                e = "<UNKNOWN>";
+
+            popup_window("Connection aborted\nError: %s (%d)", e, errno);
+        }
+#endif
         disconnect();
         
         newactive_session();
         mud->activesession = activesession;
         return;
     }
-    else if(rv < 0)
-        syserr("readmud: read");
-
+#ifndef TELNET_SUPPORT
+    else if(rv < 0) {
+        syserr("readmud: read"); // this call ends the program
+    }
+#endif
     buf[++rv] = '\0';
 
     /* changed by DasI */
@@ -518,8 +531,22 @@ void write_line_mud(const char *line, struct session *ses)
   else
     strcat(outtext, "\r\n");
     
-  if(send(ses->socket, outtext, strlen(outtext), 0) == -1)
-    syserr("write in write_to_mud");
+  if(send(ses->socket, outtext, strlen(outtext), 0) == -1) {
+      extern struct session *activesession;
+      
+      char *e = strerror(errno);
+
+      if (!e)
+          e = "<UNKNOWN";
+
+      popup_window("Connection aborted\nError: %s (%d)", e, errno);
+      disconnect();
+
+      newactive_session();
+      mud->activesession = activesession;
+
+      return;
+  }
 
   if(prefs.EchoText && !hide_input) {
       if(!broken_telnet) // remove the "\r"
