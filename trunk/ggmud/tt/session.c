@@ -349,8 +349,7 @@ void cleanup_nonzombi_session(struct session *ses)
 /*  if(write(ses->socket, "ctld\n", 5) < 5)
     syserr("write in cleanup"); */    /* can't do this, cozof the peer stuff in net.c */
   if (ses->socket)
-    if(sockclose(ses->socket) == -1)
-      syserr("close in cleanup");
+    sockclose(ses->socket);
 
   if(ses->logfile)
     fclose(ses->logfile);
@@ -375,8 +374,7 @@ void cleanup_zombi_session(struct session *ses)
 
   /* close socket */
   if(ses->socket)
-  if(sockclose(ses->socket) == -1)
-    syserr("close in cleanup");
+    sockclose(ses->socket);
 
   /* initialize socket descriptor for the next use. */
   ses->socket = 0 ;

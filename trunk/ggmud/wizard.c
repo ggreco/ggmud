@@ -545,7 +545,7 @@ void do_wiz (GtkWidget *widget, gpointer data)
     gtk_container_add (GTK_CONTAINER (vbox_base), hbox3);
     gtk_widget_show (hbox3);
 
-    if (gtk_minor_version > 5)
+    if (gtk_minor_version > 7)
         button_connect = gtk_button_new_from_stock ("gtk-connect");
     else
         button_connect = gtk_button_new_with_label ("Connect");

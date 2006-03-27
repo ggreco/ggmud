@@ -302,60 +302,48 @@ void clr_command(char *arg, struct session *s)
     }
 }
 
-
-void
-review_ok(GtkWidget *w, GtkFileSelection *fs)
-{
-    GtkTextIter start, end;
-    GtkTextBuffer *b = gtk_text_view_get_buffer(mud->text);
-    FILE *f;    
-    char *buffer;
-    
-    gtk_text_buffer_get_bounds(b, &start, &end);
-
-    buffer = gtk_text_buffer_get_text(b, &start, &end, FALSE);
-    
-    
-    if( f = fopen(gtk_file_selection_get_filename(fs), "w") ) {
-        if (buffer) {
-            fputs(buffer, f);
-        }
-        else
-            popup_window("Unable to lock review buffer!");
-        
-        fclose(f);
-    }
-    else
-        popup_window( "Unable to open %s for reading.", 
-                gtk_file_selection_get_filename(fs));
-
-    if (buffer)
-            g_free(buffer);
-
-    gtk_widget_destroy(GTK_WIDGET(fs));
-}
-
 void
 save_review(void)
 {
-    GtkWidget *filew = gtk_file_selection_new ("Save Log file as");
-
-    gtk_signal_connect (GTK_OBJECT (filew), "destroy",
-            (GtkSignalFunc) gtk_widget_destroy, filew);
-
-    /* Connect the ok_button to file_ok_sel function */
-    gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (filew)->ok_button),
-            "clicked", (GtkSignalFunc) review_ok, filew );
-
-    /* Connect the cancel_button to destroy the widget */
-    gtk_signal_connect_object (GTK_OBJECT (GTK_FILE_SELECTION (filew)->cancel_button),
-            "clicked", (GtkSignalFunc) gtk_widget_destroy,
-            GTK_OBJECT (filew));
-
-    /* Hide the file managment buttons */
-    gtk_file_selection_hide_fileop_buttons(GTK_FILE_SELECTION (filew));
-
+    GtkWidget *filew = gtk_file_chooser_dialog_new ("Save Review buffer as...",
+                                             GTK_WINDOW(mud->window), 
+                                             GTK_FILE_CHOOSER_ACTION_SAVE,
+                                             GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                             GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+                                             NULL);
+    
     gtk_widget_show(filew);
+
+    if (gtk_dialog_run(GTK_DIALOG(filew)) == GTK_RESPONSE_ACCEPT) {
+        GtkTextIter start, end;
+        GtkTextBuffer *b = gtk_text_view_get_buffer(mud->text);
+        FILE *f;    
+        char *buffer;
+
+        gtk_text_buffer_get_bounds(b, &start, &end);
+
+        buffer = gtk_text_buffer_get_text(b, &start, &end, FALSE);
+
+
+        if( f = fopen(gtk_file_chooser_get_filename(
+                        GTK_FILE_CHOOSER(filew)), "w") ) {
+            if (buffer) {
+                fputs(buffer, f);
+            }
+            else
+                popup_window("Unable to lock review buffer!");
+
+            fclose(f);
+        }
+        else
+            popup_window( "Unable to open %s for reading.", 
+                    gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(filew)));
+
+        if (buffer)
+            g_free(buffer);
+    }
+
+    gtk_widget_destroy(filew);
 }
 
 void mess_command(char *arg, struct session *s)
@@ -638,7 +626,7 @@ void cbox()
     gtk_button_box_set_layout (GTK_BUTTON_BOX (hbuttonbox), GTK_BUTTONBOX_SPREAD);
     gtk_button_box_set_child_size (GTK_BUTTON_BOX (hbuttonbox), 72, 25);
 
-    if (gtk_minor_version > 5)
+    if (gtk_minor_version > 7)
         button_connect = gtk_button_new_from_stock ("gtk-connect");
     else
         button_connect = gtk_button_new_with_label ("Connect");
@@ -827,8 +815,22 @@ spawn_gui()
   
   add_menu_item(menu, accel_group, "Connection Wizard", GTK_SIGNAL_FUNC(do_wiz),  GDK_W, GDK_MOD1_MASK);
   add_separator(menu);
-  menu_File_Connect = add_menu_item(menu, accel_group, "Connect", GTK_SIGNAL_FUNC(cbox),  GDK_C, GDK_MOD1_MASK);
-  menu_File_DisConnect = add_menu_item(menu, accel_group, "Disconnect", GTK_SIGNAL_FUNC(disconnect),  GDK_D, GDK_MOD1_MASK);
+
+
+  if (gtk_minor_version > 7)
+      menu_File_Connect = add_stock_item(menu, accel_group, "gtk-connect", 
+              GTK_SIGNAL_FUNC(cbox));
+  else
+      menu_File_Connect = add_menu_item(menu, accel_group, "Connect", 
+              GTK_SIGNAL_FUNC(cbox),  GDK_C, GDK_MOD1_MASK);
+  
+  if (gtk_minor_version > 7)
+      menu_File_Connect = add_stock_item(menu, accel_group, "gtk-disconnect", 
+              GTK_SIGNAL_FUNC(disconnect));
+  else
+      menu_File_DisConnect = add_menu_item(menu, accel_group, "Disconnect", 
+              GTK_SIGNAL_FUNC(disconnect),  GDK_D, GDK_MOD1_MASK);
+
   gtk_widget_set_sensitive (menu_File_DisConnect, FALSE);
   menu_File_Reconnect = add_menu_item(menu, accel_group, "Reconnect", GTK_SIGNAL_FUNC(reconnect),  GDK_R, GDK_MOD1_MASK);
   add_separator(menu);
@@ -846,11 +848,11 @@ spawn_gui()
   add_stock_item(menu, accel_group, GTK_STOCK_PREFERENCES, GTK_SIGNAL_FUNC(window_prefs));
 
   add_separator(menu);
-  add_menu_item(menu, NULL, "Load TT++ command file...", GTK_SIGNAL_FUNC(load_tt_prefs), 0, 0);
+  add_menu_item(menu, NULL, "Load TT++/GGMUD file...", GTK_SIGNAL_FUNC(load_tt_prefs), 0, 0);
   add_menu_item(menu, NULL, "Import ZMud configuration...", GTK_SIGNAL_FUNC(load_zmud_prefs), 0, 0);
   add_separator(menu);
   add_menu_item(menu, NULL, "Save window positions", GTK_SIGNAL_FUNC(save_win_pos), 0, 0);
-  add_menu_item(menu, NULL, "Save settings", GTK_SIGNAL_FUNC(save_all_prefs), 0, 0);
+  add_menu_item(menu, NULL, "Export settings", GTK_SIGNAL_FUNC(save_all_prefs), 0, 0);
   add_separator(menu);
   add_menu_item(menu, NULL, "Save review buffer...", GTK_SIGNAL_FUNC(save_review), 0, 0);
 

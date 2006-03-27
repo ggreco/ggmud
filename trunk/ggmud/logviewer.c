@@ -40,7 +40,6 @@ typedef struct {
 } typFileSelectionData;
 
 static   char        *sFilename = NULL; 
-static GtkWidget           *win_main;
 static GtkAccelGroup       *accel_group;
 static GtkTooltips         *tooltips = NULL;
 
@@ -109,10 +108,8 @@ GtkWidget *CreateMenuItem (GtkWidget *menu,
     gtk_menu_append (GTK_MENU (menu), menuitem);
     gtk_widget_show (menuitem);
 
-    if (accel_group == NULL) {
+    if (accel_group == NULL) 
         accel_group = gtk_accel_group_new ();
-        // gtk_accel_group_attach (accel_group, GTK_OBJECT (win_main));
-    }
 
     if (szAccel && szAccel[0] == '^') {
         gtk_widget_add_accelerator (menuitem, 
@@ -249,8 +246,6 @@ static void CreateMenu (GtkWidget *window, GtkWidget *vbox_main)
     GtkWidget *menu;
     GtkWidget *menuitem;
 
-    win_main = window;
-
     accel_group = gtk_accel_group_new ();
 //    gtk_accel_group_attach (accel_group, GTK_OBJECT (window));
 
@@ -269,7 +264,7 @@ static void CreateMenu (GtkWidget *window, GtkWidget *vbox_main)
 
     menuitem = CreateMenuItem (menu, "Quit", "", 
                      "What's more descriptive than quit?", 
-                     GTK_SIGNAL_FUNC (menu_Quit), "quit");
+                     GTK_SIGNAL_FUNC (menu_Quit), window);
 
     menu = CreateBarSubMenu (menubar, "Search");
 
@@ -279,80 +274,39 @@ static void CreateMenu (GtkWidget *window, GtkWidget *vbox_main)
 
 }
 
-static char *
-GetExistingFile ()
+void GetFilename (char *sTitle, void (*do_callback) (char *))
 {
-    return (sFilename);
-}
-    
-static void 
-FileOk (GtkWidget *w, gpointer data)
-{
-    const char *sTempFile;
-    typFileSelectionData *localdata;
-    GtkWidget *filew;
- 
-    localdata = (typFileSelectionData *) data;
-    filew = localdata->filesel;
+    GtkWidget *filew = gtk_file_chooser_dialog_new (sTitle, GTK_WINDOW(mud->window), 
+                                  GTK_FILE_CHOOSER_ACTION_OPEN,
+                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                  GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+                                  NULL);
 
-    sTempFile = gtk_file_selection_get_filename (GTK_FILE_SELECTION (filew));
-
-    if (sFilename) free (sFilename);
-    sFilename = strdup (sTempFile); 
-    (*(localdata->func)) (sFilename);
-    gtk_widget_destroy (filew);
-}
-
-static void destroy (GtkWidget *widget, gpointer *data)
-{
-    gtk_grab_remove (widget);
-
-    free (data);
-}
-
-void GetFilename (char *sTitle, void (*callback) (char *))
-{
-    GtkWidget *filew = NULL;
-    typFileSelectionData *data;
-
-    filew = gtk_file_selection_new (sTitle);
-
-    data = malloc (sizeof (typFileSelectionData));
-    data->func = callback;
-    data->filesel = filew;
-
-    gtk_signal_connect (GTK_OBJECT (filew), "destroy",
-            (GtkSignalFunc) destroy, data);
-
-    gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (filew)->ok_button),
-            "clicked", (GtkSignalFunc) FileOk, data);
-    
-    gtk_signal_connect_object (
-             GTK_OBJECT (GTK_FILE_SELECTION (filew)->cancel_button),
-             "clicked", (GtkSignalFunc) gtk_widget_destroy, 
-             (gpointer) filew);
-    
-    if (sFilename) {
-
-        gtk_file_selection_set_filename (GTK_FILE_SELECTION (filew), 
+    if (sFilename) 
+        gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (filew), 
                                          sFilename);
-    }
-   
+    
     gtk_widget_show (filew);
-    gtk_grab_add (filew);
+
+    if (gtk_dialog_run(GTK_DIALOG(filew)) == GTK_RESPONSE_ACCEPT) {
+        if (sFilename) free (sFilename);
+
+        sFilename = strdup(
+                gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (filew)));
+        
+        do_callback(sFilename);
+    }
+
+    gtk_widget_destroy(filew);
 }
 
 gint ClosingAppWindow (GtkWidget *widget, gpointer data);
-char *GetExistingFile ();
-
-
-    GtkWidget *window;
 
 void log_viewer()
 {
     GtkWidget *main_vbox;
     
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
     gtk_window_set_title (GTK_WINDOW (window), "GGMud Log Viewer");
     gtk_container_border_width (GTK_CONTAINER (window), 0);
@@ -387,7 +341,7 @@ gint ClosingAppWindow (GtkWidget *widget, gpointer data)
     return (FALSE);
 }
 
-void menu_Quit (GtkWidget *widget, gpointer data)
+void menu_Quit (GtkWidget *widget, GtkWidget *window)
 {
    gtk_widget_destroy (window);
 }

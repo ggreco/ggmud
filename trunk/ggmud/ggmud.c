@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <signal.h>
 
 ggmud *mud;
 
@@ -63,6 +64,8 @@ int main(int argc, char **argv)
     extern void save_vars(void);
 
 #ifndef WIN32
+    signal(SIGPIPE, SIG_IGN);
+        
     if(!(display = getenv("DISPLAY")) || !*display) {
         putenv("DISPLAY=:0.0");
     }
@@ -92,6 +95,11 @@ int main(int argc, char **argv)
             free(path);
         }
     }
+
+#elif defined(WIN32)
+    extern void winsock_init();
+
+    winsock_init();
 #endif
     
     mud = calloc(sizeof(ggmud), 1);
@@ -148,7 +156,7 @@ int main(int argc, char **argv)
     return 0;
 }			
 
-#ifdef WIN32
+#if 0
 
 int _stdcall
 WinMain (int hInstance, int hPrevInstance, char *lpszCmdLine, int nCmdShow)
