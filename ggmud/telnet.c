@@ -7,13 +7,19 @@
 //extern void tintin_printf(struct session *ses, char *format, ...);
 //extern void tintin_eprintf(struct session *ses, char *format, ...);
 
-#define tintin_printf(a, b, args...) printf(b, ## args )
-#define tintin_eprintf(a, b, args...) fprintf(stderr, b, ## args )
+// #define TELNET_DEBUG
+
+#define tintin_printf(a, b, args...) if (debugfile) fprintf(debugfile, b, ## args )
+#define tintin_eprintf(a, b, args...) if (debugfile) fprintf(debugfile, b, ## args )
 
 extern int LINES,COLS,isstatus;
 extern struct session *sessionlist;
 extern void pty_resize(int fd,int sx,int sy);
 extern void syserr(char *msg, ...);
+
+#ifdef TELNET_DEBUG
+static FILE *debugfile = NULL;
+#endif
 
 #define EOR 239     /* End of Record */
 #define SE  240     /* subnegotiation end */
@@ -181,6 +187,11 @@ int do_telnet_protocol(unsigned char *data,int nb,struct session *ses)
     unsigned char answer[3];
     unsigned char nego[128],*np;
 
+#ifdef TELNET_DEBUG
+    if (!debugfile)
+        debugfile = fopen("debug.txt", "w");
+#endif
+    
 #define NEXTCH  cp++;               \
                 if (cp-data>=nb)    \
                     return -1;
@@ -207,9 +218,9 @@ int do_telnet_protocol(unsigned char *data,int nb,struct session *ses)
         case ECHO:
             switch(wt)
             {
-            case DO:    answer[1]=WONT; break;
-            case WILL:  answer[1]=DO;  mud->ent->visible=0; input_line_visible(FALSE); break;
-            case WONT:  answer[1]=DONT; if (!mud->ent->visible) { mud->ent->visible=1; input_line_visible(TRUE); } break;
+            case DO:    answer[1]=WONT; fprintf(stderr, "echo DO\n"); break;
+            case WILL:  answer[1]=DO;  fprintf(stderr, "echo WILL\n"); mud->ent->visible=0; input_line_visible(FALSE); break;
+            case WONT:  answer[1]=DONT; fprintf(stderr, "echo WONT\n"); if (!mud->ent->visible) { mud->ent->visible=1; input_line_visible(TRUE); } break;
             case DONT:  answer[1]=WONT; fprintf(stderr, "echo DONT\n"); break;
             };
             break;
@@ -336,7 +347,9 @@ sbloop:
     }
     return (cp-data);
 nego_too_long:
+#ifdef TELNET_DEBUG
     tintin_eprintf(ses, "#error: unterminated TELNET subnegotiation received.");
+#endif
     return 2; /* we leave everything but IAC SB */
 }
 

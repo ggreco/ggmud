@@ -160,8 +160,16 @@ void make_connection (const char *name, const char *host, const char *port)
 
 void disconnect ( void )
 {
-    gdk_input_remove (mud->input_monitor);
-    gtk_main_iteration(); // to ensure the input is removed
+    extern struct session *activesession;
+
+    if (mud->input_monitor >= 0) {
+        gdk_input_remove (mud->input_monitor);
+        mud->input_monitor = -1;
+    }
+   
+    while(gtk_events_pending())
+        gtk_main_iteration(); // to ensure the input is removed
+
     textfield_add (mud->text,  "\n*** Connection closed.\n", MESSAGE_NORMAL);
     connected = FALSE;
     gtk_widget_set_sensitive (menu_File_Connect, TRUE);
@@ -170,7 +178,9 @@ void disconnect ( void )
     gtk_widget_set_sensitive (btn_toolbar_disconnect, FALSE);
     gtk_window_set_title (GTK_WINDOW (mud->window), "GGMud "VERSION"");
     cleanup_session(mud->activesession);
-    mud->activesession = NULL;
+    
+    newactive_session();
+    mud->activesession = activesession;
 }
 
 struct tempdata
@@ -180,6 +190,19 @@ struct tempdata
     int sock;
     GtkWidget *window;
 };
+
+#ifdef WIN32
+void
+winsock_init()
+{
+    WSADATA datas;
+
+    if(WSAStartup(2,&datas)){
+        MessageBox(NULL, "Unable to init Winsock 2+", NULL, MB_OK);
+        exit(0);
+    }
+}
+#endif
 
 void
 connection_part_two(int sockfd, struct tempdata *mystr)
@@ -231,21 +254,6 @@ void open_connection (const char *name, const char *host, const char *port)
     struct hostent *he;
     struct sockaddr_in their_addr;
     int sockfd, onoff = 1, retries = 0;
-
-#ifdef WIN32
-    static int winsock_initted = 0;
-
-    if (!winsock_initted) {
-        WSADATA datas;
-
-        winsock_initted = 1;
-
-		if(WSAStartup(2,&datas)){
-            fprintf(stderr, "Non riesco a inizializzare Winsock 2+\n");
-			exit(0);
-        }
-    }
-#endif
 
     if(connecting) {
         textfield_add(mud->text,
@@ -385,8 +393,6 @@ static void readmud(struct session *s)
     if (!rv)
 #endif
     {
-        extern struct session *activesession;
-
 #ifdef TELNET_SUPPORT
         if (rv != -666) {
             char *e = strerror(errno);
@@ -399,8 +405,6 @@ static void readmud(struct session *s)
 #endif
         disconnect();
         
-        newactive_session();
-        mud->activesession = activesession;
         return;
     }
 #ifndef TELNET_SUPPORT
@@ -532,18 +536,13 @@ void write_line_mud(const char *line, struct session *ses)
     strcat(outtext, "\r\n");
     
   if(send(ses->socket, outtext, strlen(outtext), 0) == -1) {
-      extern struct session *activesession;
-      
       char *e = strerror(errno);
 
       if (!e)
-          e = "<UNKNOWN";
+          e = "<UNKNOWN>";
 
       popup_window("Connection aborted\nError: %s (%d)", e, errno);
       disconnect();
-
-      newactive_session();
-      mud->activesession = activesession;
 
       return;
   }

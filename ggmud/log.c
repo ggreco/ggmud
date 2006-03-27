@@ -39,25 +39,6 @@ extern GtkWidget *btn_toolbar_logger;
 
 extern GtkWidget *menu_Tools_Logger;
 
-static gboolean CLOSE_WINDOW = FALSE;
-static GtkWidget *file_dialog;
-
-/*
- * Destroy the Widget that calls this funktion.
- */
-void destroy (GtkWidget *widget, gpointer data)
-{
-    gtk_grab_remove(widget);
-    gtk_widget_destroy (GTK_WIDGET (widget));
-
-    if (CLOSE_WINDOW) {
-        gtk_grab_remove(file_dialog);
-        gtk_widget_destroy (GTK_WIDGET (file_dialog));
-        CLOSE_WINDOW = FALSE;
-    }
-
-}
-
 /*
  * My own popup_window, didn't like the one that is in the file
  * window.c... Perhaps I will change that one some day.
@@ -72,8 +53,6 @@ void my_popup_window(const char *title, const char *message)
 
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW (window), title);
-    gtk_signal_connect (GTK_OBJECT (window), "delete_event",
-                        GTK_SIGNAL_FUNC (destroy), NULL);
     gtk_container_set_border_width (GTK_CONTAINER(window), 10);
     gtk_window_set_policy (GTK_WINDOW (window), FALSE, FALSE, FALSE);
 
@@ -121,11 +100,11 @@ void on_btnOverwrite_clicked (GtkWidget *btn, gpointer data)
     if ((mud->LOG_FILE = fopen(mud->log_filename, "w")) == NULL) {
          sprintf (buf, "Can't open file %s for writing:\n\n %s", mud->log_filename, strerror (errno));
          my_popup_window("GGMud Error", buf);
-         return;
     }
 
     mud->LOGGING = TRUE;
-    CLOSE_WINDOW = TRUE;
+
+    gtk_widget_destroy(gtk_widget_get_toplevel(btn));
 }
 
 /*
@@ -140,11 +119,11 @@ void on_btnAppend_clicked (GtkWidget *btn, gpointer data)
     if ((mud->LOG_FILE = fopen(mud->log_filename, "a")) == NULL) {
          sprintf (buf, "Can't open file %s for appending:\n\n %s", mud->log_filename, strerror (errno));
          my_popup_window("GGMud Error", buf);
-         return;
     }
 
     mud->LOGGING = TRUE;
-    CLOSE_WINDOW = TRUE;
+
+    gtk_widget_destroy(gtk_widget_get_toplevel(btn));
 }
 
 void append_dialog (const gchar *filename)
@@ -170,8 +149,6 @@ void append_dialog (const gchar *filename)
 
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title (GTK_WINDOW (window), "File already exists");
-    gtk_signal_connect (GTK_OBJECT (window), "delete_event",
-                        GTK_SIGNAL_FUNC (destroy), NULL);
     gtk_container_set_border_width (GTK_CONTAINER (window), 10);
     gtk_window_set_policy (GTK_WINDOW (window), FALSE, FALSE, FALSE);
 
@@ -200,9 +177,6 @@ void append_dialog (const gchar *filename)
     gtk_signal_connect_object (GTK_OBJECT(btnOverwrite), "clicked",
                         GTK_SIGNAL_FUNC(on_btnOverwrite_clicked),
                         NULL);
-    gtk_signal_connect_object (GTK_OBJECT(btnOverwrite), "clicked",
-                               GTK_SIGNAL_FUNC(destroy),
-                               GTK_OBJECT (window));
     gtk_container_add (GTK_CONTAINER (hbuttonbox), btnOverwrite);
     gtk_widget_show (btnOverwrite);
 
@@ -210,9 +184,6 @@ void append_dialog (const gchar *filename)
     gtk_signal_connect (GTK_OBJECT(btnAppend), "clicked",
                         GTK_SIGNAL_FUNC(on_btnAppend_clicked),
                         NULL);
-    gtk_signal_connect_object (GTK_OBJECT(btnAppend), "clicked",
-                               GTK_SIGNAL_FUNC(destroy),
-                               GTK_OBJECT (window));
     gtk_container_add (GTK_CONTAINER (hbuttonbox), btnAppend);
     gtk_widget_show (btnAppend);
 
@@ -227,56 +198,6 @@ void append_dialog (const gchar *filename)
     gtk_grab_add (window);
 }
 
-/*
- * The user has made a selection. Verify that it is a legal file
- * and do the appropiate stuff.
- */
-void file_ok_sel (GtkWidget *w, GtkFileSelection *fs)
-{
-    FILE *f;
-    
-    /* Get the filename from file dialog */
-    mud->log_filename = strdup(gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs)));
-
-    /* Check to see if mud->log_filename exists or not */
-    if (f = fopen (mud->log_filename, "r")) {
-        fclose(f);
-        append_dialog(mud->log_filename);
-        return;
-    } else {
-        if ((mud->LOG_FILE = fopen(mud->log_filename, "w")) == NULL) {
-            char buf[256];
-            sprintf (buf, "Can't open file %s for writing:\n\n %s",
-                    mud->log_filename, strerror (errno));
-            
-            my_popup_window("GGMud Error", buf);
-        }
-        else mud->LOGGING = TRUE;
-        /* Is set to TRUE and therefor we are logging :) */
-        /* Close the file dialog */
-        
-        gtk_grab_remove(file_dialog);
-        gtk_widget_destroy (GTK_WIDGET (file_dialog));
-    }
-}
-
-/*
- * Cansel Button pressed on File Dialog
- */
-void cancel_called()
-{
-    /* FIX ME!!!
-     * I don't like to use this functions but I have no choise... The gtk_toggle_button_toggled
-     * function does not work, why I don't know. People on the Internet said that this is the
-     * only way with the current GTK version.
-     *           - Fredrik Andersson
-     */
-    //gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_Tools_Logger), FALSE);
-    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(btn_toolbar_logger), FALSE);
-    gtk_widget_destroy (GTK_WIDGET (file_dialog));
-    //gtk_toggle_button_toggled(GTK_TOGGLE_BUTTON(btn_toolbar_logger));
-
-}
 
 void do_log ()
 {
@@ -291,7 +212,7 @@ void do_log ()
         fclose (mud->LOG_FILE);
         mud->LOGGING = FALSE;
         sprintf (buf, "The log file '%s' is closed.", mud->log_filename);
-        my_popup_window("Sclient Logger", buf);
+        my_popup_window("GGMud Logger", buf);
         return;
     }
 
@@ -304,32 +225,42 @@ void do_log ()
     }
 
     /* Create a new file selection widget */
-    filew = gtk_file_selection_new ("Save Log file as");
+    filew = gtk_file_chooser_dialog_new ("Save Log file as...", 
+                                  GTK_WINDOW(mud->window), 
+                                  GTK_FILE_CHOOSER_ACTION_SAVE,
+                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                  GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+                                  NULL);
 
-    gtk_signal_connect (GTK_OBJECT (filew), "destroy",
-			(GtkSignalFunc) destroy, NULL);
-
-    /* Connect the ok_button to file_ok_sel function */
-    gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (filew)->ok_button),
-			"clicked", (GtkSignalFunc) file_ok_sel, filew );
-
-    /* Connect the cancel_button to destroy the widget */
-    gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (filew)->cancel_button),
-			       "clicked", (GtkSignalFunc) cancel_called,
-			       NULL);
-    gtk_signal_connect_object (GTK_OBJECT (GTK_FILE_SELECTION (filew)->cancel_button),
-			       "clicked", (GtkSignalFunc) gtk_widget_destroy,
-			       GTK_OBJECT (filew));
-
-    /* Lets set the filename, as if this were a save dialog, and we are giving
-       a default filename */
-    gtk_file_selection_set_filename (GTK_FILE_SELECTION(filew), 
+    gtk_file_chooser_set_filename (GTK_FILE_CHOOSER(filew), 
 				     path);
-
-    /* Hide the file managment buttons */
-    gtk_file_selection_hide_fileop_buttons(GTK_FILE_SELECTION (filew));
 
     gtk_widget_show(filew);
 
-    file_dialog = filew;
+    if ( gtk_dialog_run(GTK_DIALOG(filew)) == GTK_RESPONSE_ACCEPT) {
+        FILE *f;
+
+        if (mud->log_filename)
+            free(mud->log_filename);
+
+        mud->log_filename = strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(filew)));
+        
+        if (f = fopen (mud->log_filename, "r")) {
+            fclose(f);
+            append_dialog(mud->log_filename);
+        } else {
+            if ((mud->LOG_FILE = fopen(mud->log_filename, "w")) == NULL) {
+                char buf[256];
+                sprintf (buf, "Can't open file %s for writing:\n\n %s",
+                        mud->log_filename, strerror (errno));
+
+                my_popup_window("GGMud Error", buf);
+            }
+            else mud->LOGGING = TRUE;
+        }
+    }
+    else
+        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(btn_toolbar_logger), FALSE);
+
+    gtk_widget_destroy(filew);
 }

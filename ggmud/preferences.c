@@ -46,14 +46,10 @@ typedef struct {
 
 /* Global variables */
 extern GtkWidget *btnLabel[12];
-extern GtkWidget *menu_Tools_Logger;
 extern GtkWidget *handlebox;
 extern GtkWidget *statusbar;
 
 /* Global ToolBar stuff */
-extern GtkWidget *btn_toolbar_logger;
-extern GtkWidget *btn_toolbar_disconnect;
-extern GtkWidget *btn_toolbar_connect;
 extern int use_tickcounter;
 
 /* Global variables */
@@ -85,26 +81,10 @@ color_struct color_arr[] = {
       {NULL,NULL}
 };
 
-static void tt_file_ok(GtkWidget *w, GtkFileSelection *fs)
-{
-    const char *name = gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs));
-
-    if(*name)
-        read_command(name, NULL);
-
-    gtk_widget_destroy(GTK_WIDGET(fs));
-}
-
 void update_widget_color(color_struct *col)
 {
     if(col->widget) {
-#ifdef HAS_GTK24
         gtk_color_button_set_color(GTK_COLOR_BUTTON(col->widget), col->color);
-#else
-        gtk_widget_modify_bg(col->widget, GTK_STATE_NORMAL, col->color);
-        gtk_widget_modify_bg(col->widget, GTK_STATE_SELECTED, col->color);
-        gtk_widget_modify_bg(col->widget, GTK_STATE_PRELIGHT, col->color);
-#endif
         update_color_tags(col->color);
     }
 }
@@ -119,24 +99,21 @@ void load_zmud_prefs(void)
 void load_tt_prefs(void)
 {
     /* Create a new file selection widget */
-    GtkWidget *filew = gtk_file_selection_new ("Save Log file as");
-
-    gtk_signal_connect (GTK_OBJECT (filew), "destroy",
-			(GtkSignalFunc) gtk_widget_destroy, filew);
-
-    /* Connect the ok_button to file_ok_sel function */
-    gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (filew)->ok_button),
-			"clicked", (GtkSignalFunc) tt_file_ok, filew );
-
-    /* Connect the cancel_button to destroy the widget */
-    gtk_signal_connect_object (GTK_OBJECT (GTK_FILE_SELECTION (filew)->cancel_button),
-			       "clicked", (GtkSignalFunc) gtk_widget_destroy,
-			       GTK_OBJECT (filew));
-
-    /* Hide the file managment buttons */
-    gtk_file_selection_hide_fileop_buttons(GTK_FILE_SELECTION (filew));
+    GtkWidget *filew = gtk_file_chooser_dialog_new ( 
+             "Load TT++/GGMUD command file..", GTK_WINDOW(mud->window),
+             GTK_FILE_CHOOSER_ACTION_OPEN,
+             GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+             GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+             NULL);
 
     gtk_widget_show(filew);
+
+    if (gtk_dialog_run(GTK_DIALOG(filew)) == GTK_RESPONSE_ACCEPT) {
+        read_command(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(filew)), NULL);
+    }
+
+    gtk_widget_destroy(filew);
+    
 }
 
 #ifdef WIN32
@@ -150,7 +127,7 @@ void save_all_prefs(void)
 #ifdef WIN32
     write_command(CONFIG_NAME, NULL);
 
-    popup_window("Configuration written to: " CONFIG_NAME);
+    popup_window("Configuration exported to file " CONFIG_NAME);
 #else
     char buffer[256], *c;
 
@@ -161,7 +138,7 @@ void save_all_prefs(void)
     strcat(buffer, "/" CONFIG_NAME);
     write_command(buffer, NULL);
     
-    sprintf(buffer, "Configuration written to: %s" CONFIG_NAME , c);
+    sprintf(buffer, "Configuration exported to: %s" CONFIG_NAME , c);
     popup_window(buffer);
 #endif
 }
@@ -348,7 +325,6 @@ void toggle_visibility(GtkWidget *widget, GtkWidget *dest)
       gtk_widget_hide (dest);
 }
 
-#ifdef HAS_GTK24
 void color_ok (GtkColorButton *widget, color_struct *col)
 {
     gtk_color_button_get_color(widget, col->color);
@@ -358,45 +334,6 @@ void color_ok (GtkColorButton *widget, color_struct *col)
 
     update_widget_color(col);
 }
-#else
-void color_ok (GtkWidget *widget, GtkWidget *color_sel)
-{
-    color_struct *col = (color_struct *)
-        gtk_object_get_data(GTK_OBJECT(color_sel), "color");
-    
-    gtk_color_selection_get_current_color (
-            GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG(color_sel)->colorsel),
-				   col->color);
-
-    if(!strcmp("background color",col->name))
-        text_bg(mud->text, prefs.BackgroundGdkColor);
-
-    update_widget_color(col);
-
-    gtk_widget_destroy(color_sel);
-}
-
-void color_callback (GtkWidget *widget, color_struct *color)
-{
-    GtkWidget *color_sel;
-    char str[255];
-
-    sprintf(str, "Set color for %s", color->name);
-    color_sel = gtk_color_selection_dialog_new (str);
-    gtk_color_selection_set_current_color (
-            GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG(color_sel)->colorsel),
-				   color->color);
-    gtk_object_set_data (GTK_OBJECT (color_sel), "color", color);
-    gtk_signal_connect( GTK_OBJECT(GTK_COLOR_SELECTION_DIALOG(color_sel)->ok_button),
-			"clicked", GTK_SIGNAL_FUNC(color_ok),
-			color_sel);
-    gtk_signal_connect( GTK_OBJECT(GTK_COLOR_SELECTION_DIALOG(color_sel)->cancel_button),
-			"clicked", GTK_SIGNAL_FUNC(close_window),
-			color_sel);
-    gtk_widget_show(color_sel);
-}
-
-#endif
     
 void color_reset_to_default (GtkWidget *button, gpointer data)
 {
@@ -467,16 +404,12 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy)
   while(color_arr[i].color) {     
       color_row = gtk_hbox_new(TRUE, 0);
       sprintf(tmp, "Color for %s", color_arr[i].name);
-#ifdef HAS_GTK24
+      
       color_arr[i].widget =  gtk_color_button_new_with_color(color_arr[i].color);
       gtk_color_button_set_title(GTK_COLOR_BUTTON(color_arr[i].widget), tmp);
       gtk_signal_connect (GTK_OBJECT (color_arr[i].widget), "color-set",
 			  GTK_SIGNAL_FUNC (color_ok), (gpointer) &color_arr[i]);
-#else
-      color_arr[i].widget =  gtk_button_new();
-      gtk_signal_connect (GTK_OBJECT (color_arr[i].widget), "clicked",
-			  GTK_SIGNAL_FUNC (color_callback), (gpointer) &color_arr[i]);
-#endif
+
       color_label = gtk_label_new(tmp);
       tooltip = gtk_tooltips_new ();
 //      gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
@@ -488,9 +421,7 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy)
       gtk_box_pack_start (GTK_BOX (color_row), color_arr[i].widget, TRUE, TRUE, 3);
       gtk_box_pack_start (GTK_BOX (color_row), color_label, TRUE, TRUE, 1);
       gtk_box_pack_start (GTK_BOX(color_box), color_row, TRUE, TRUE, 1);
-#ifndef HAS_GTK24
-      update_widget_color(&color_arr[i]);
-#endif
+
       i++;
   }
 
