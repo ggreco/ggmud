@@ -47,7 +47,7 @@ GtkWidget *menu_File_Reconnect;
 void reconnect(void)
 {
     if(!connected || !mud->activesession)
-        popup_window("Must be connected first!");
+        popup_window(INFO, "Must be connected first!");
     else {
         char *name, *host, *port;
         
@@ -76,6 +76,27 @@ GList *windows_list = NULL;
 
 extern char *get_arg_in_braces(char *s, char *arg, int flag);
 
+
+void set_style() 
+{
+    extern PangoFontDescription *font_normal;
+    
+    if (!font_normal)
+        return;
+    
+    if (mud && mud->text) {
+        gtk_widget_modify_font(GTK_WIDGET(mud->text), font_normal);
+    }
+
+    GList *l = windows_list;
+
+    while (l) {
+        gtk_widget_modify_font(
+                GTK_WIDGET(((window_entry *)l->data)->listptr), font_normal);
+                
+        l = l->next;
+    }
+}
 
 GtkTextView *new_view(char *name, GtkWidget *parent, int ismain);
 
@@ -318,27 +339,28 @@ save_review(void)
         GtkTextIter start, end;
         GtkTextBuffer *b = gtk_text_view_get_buffer(mud->text);
         FILE *f;    
-        char *buffer;
+        char *buffer, *name;
 
         gtk_text_buffer_get_bounds(b, &start, &end);
 
         buffer = gtk_text_buffer_get_text(b, &start, &end, FALSE);
 
-
-        if( f = fopen(gtk_file_chooser_get_filename(
-                        GTK_FILE_CHOOSER(filew)), "w") ) {
+        name = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(filew));
+        
+        if (( f = fopen(name, "w") )) {
             if (buffer) {
                 fputs(buffer, f);
             }
             else
-                popup_window("Unable to lock review buffer!");
+                popup_window(ERR, "Unable to lock review buffer!");
 
             fclose(f);
         }
         else
-            popup_window( "Unable to open %s for reading.", 
-                    gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(filew)));
+            popup_window(ERR, "Unable to open %s for reading.", name);
 
+        g_free(name);
+        
         if (buffer)
             g_free(buffer);
     }
@@ -359,7 +381,7 @@ void mess_command(char *arg, struct session *s)
     substitute_myvars(right, left, s);
     substitute_vars(left, right, s);
 
-    popup_window(right);
+    popup_window(INFO, right);
 }
 
 void window_command(char *arg, struct session *s)
@@ -472,7 +494,7 @@ void toggle_parsing(GtkToggleButton *togglebutton,
     GdkPixmap *icon;
     GdkBitmap *mask;
     char **image = SC_parsing;
-    GtkWidget *iconw;
+    //GtkWidget *iconw;
 
     if(gtk_toggle_button_get_active(togglebutton)) {
         textfield_add(mud->text, "# PARSING ENABLED\n", MESSAGE_SENT);
@@ -484,8 +506,8 @@ void toggle_parsing(GtkToggleButton *togglebutton,
         image = SC_parsingoff;
     }
 
-    if (icon = gdk_pixmap_create_from_xpm_d ( GTK_WIDGET(togglebutton)->window, 
-            &mask, NULL, image )) {
+    if ((icon = gdk_pixmap_create_from_xpm_d ( GTK_WIDGET(togglebutton)->window, 
+            &mask, NULL, image ))) {
         gtk_pixmap_set (GTK_PIXMAP(GTK_BIN(togglebutton)->child), 
                 icon, mask ); 					/* icon widget */
 
@@ -501,7 +523,7 @@ void toggle_triggers(GtkToggleButton *togglebutton,
     GdkPixmap *icon;
     GdkBitmap *mask;
     char **image = SC_triggers;
-    GtkWidget *iconw;
+    //GtkWidget *iconw;
 
     if(gtk_toggle_button_get_active(togglebutton)) {
         textfield_add(mud->text, "# TRIGGERS ENABLED\n", MESSAGE_SENT);
@@ -513,8 +535,8 @@ void toggle_triggers(GtkToggleButton *togglebutton,
         image = SC_triggersoff;
     }
 
-    if (icon = gdk_pixmap_create_from_xpm_d ( GTK_WIDGET(togglebutton)->window, 
-            &mask, NULL, image )) {
+    if ( (icon = gdk_pixmap_create_from_xpm_d ( GTK_WIDGET(togglebutton)->window, 
+            &mask, NULL, image ))) {
         gtk_pixmap_set (GTK_PIXMAP(GTK_BIN(togglebutton)->child), 
                 icon, mask ); 					/* icon widget */
 
@@ -752,11 +774,10 @@ void
 spawn_gui()
 {
   gint i = 0;
-  gint key = GDK_F1; /* F1 key */
+  //gint key = GDK_F1; /* F1 key */
   GtkWidget *vbox1;
   GtkWidget *menubar;
   GtkWidget *menu;
-  GtkWidget *menuitem;
   GtkWidget *vbox2;
   GtkWidget *hbox1;
   GtkWidget *frame;
@@ -765,7 +786,6 @@ spawn_gui()
   GtkAccelGroup *accel_group;
   GtkWidget *macro_button;
   GtkWidget *fill_block2;
-  GtkWidget *vscrollbar;
   GtkWidget *hbox2;
   GtkWidget *fill_block;
   /*** ToolBar ***/
@@ -1320,7 +1340,7 @@ void clear(int n, GtkTextView *target)
     gtk_text_buffer_set_text(b, "", -1);
 }	
 
-
+#if 0
 void popup_window (const gchar *message, ...)
 {
     va_list va;
@@ -1364,6 +1384,26 @@ void popup_window (const gchar *message, ...)
     gtk_box_pack_start (GTK_BOX (box), button, TRUE, TRUE, 5);
     gtk_widget_show_all (window);
 }
+#else
+void popup_window (int type, const gchar *message, ...)
+{
+    va_list va;
+    gchar       buf[3072];
+    GtkWidget *d;
+
+    va_start(va, message);
+    vsprintf(buf, message, va);
+    va_end(va);
+
+    d = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL,
+                           type, GTK_BUTTONS_OK,
+                           message);
+
+    gtk_dialog_run(GTK_DIALOG(d));
+   
+    gtk_widget_destroy(d);
+}
+#endif
 
 static 
 GtkWidget *create_tv(GtkTextBuffer *buffer, GtkTextView **view)
@@ -1408,7 +1448,7 @@ GtkWidget *create_tv(GtkTextBuffer *buffer, GtkTextView **view)
 
 GtkTextView *new_view(char *name, GtkWidget *parent, int ismain)
 {
-  GtkWidget *templabel, *paned, *sw;
+  GtkWidget *paned, *sw;
   GtkTextView *t1, *t2;
   GtkTextBuffer *buf;
   int w, h;

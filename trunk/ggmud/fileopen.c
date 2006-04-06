@@ -25,6 +25,8 @@
 #endif
 #include <errno.h>
 #include <stdlib.h>
+#include <string.h>
+#include "ggmud.h"
 
 #ifndef WIN32
 
@@ -32,23 +34,22 @@ int check_sclient_dir (gchar *dirname) {
 /* check if the specified directory exists, try to create it if it doesn't */
     struct stat file_stat;
     int return_val = 0;
-    gchar buf[256];
             
     if (!stat(dirname, &file_stat)) {
     /* can we stat ~/.sclient? */
     	if (!S_ISDIR(file_stat.st_mode)) {
     	/* if it's not a directory */
-            popup_window ("%s already exists and is not a directory!", dirname);
+            popup_window (ERR, "%s already exists and is not a directory!", dirname);
         }
     } else {
     /* it must not exist */
-        popup_window ( "%s does not exist, Creating it as a directory.", dirname);
+        popup_window (INFO, "%s does not exist, Creating it as a directory.", dirname);
         if (!mkdir(dirname, 0777)) {
         /* this isn't dangerous, umask modifies it */
-            popup_window ("%s created.", dirname);
+            popup_window (INFO, "%s created.", dirname);
             do_manual();
         } else {
-            popup_window ( "%s NOT created: %s", dirname, strerror (errno));
+            popup_window (ERR, "%s NOT created: %s", dirname, strerror (errno));
             return_val = errno;
         }
     }

@@ -46,7 +46,7 @@ void save_triggers (GtkWidget *w, GtkCList *data)
 {
     FILE *fp;
     
-    if (fp = fileopen (TRIGGER_FILE, "w")) {
+    if ((fp = fileopen (TRIGGER_FILE, "w"))) {
         int done = FALSE;
         gint  row = 0;
         gchar *alias, *replace, *class;
@@ -103,7 +103,7 @@ static void  insert_triggers  (GtkCList *clist)
 
     gtk_clist_freeze(clist);
     
-    while ( list = list->next ) {
+    while ( (list = list->next) ) {
         text[0] = list->left;
         text[1] = list->right;
         text[2] = list->pr;
@@ -293,7 +293,7 @@ void
 update_classes()
 {
     trigger_class *cl = trigger_classes;
-    GtkTreeIter it;
+    // GtkTreeIter it;
 
     if (class_window)
         insert_trigger_classes(GTK_CLIST(
@@ -333,22 +333,22 @@ static void trigger_button_add (GtkWidget *button, GtkCList *data)
     text[2]   = gtk_entry_get_text (GTK_ENTRY (GTK_COMBO(textpri)->entry));
     
     if ( text[0][0] == '\0' || text[1][0] == '\0' ) {
-        popup_window ("Please complete the trigger first.");
+        popup_window (INFO, "Please complete the trigger first.");
         return;
     }
 
     if ( strlen (text[0]) > ALIAS_LEN)  {
-        popup_window ("Trigger string too big.");
+        popup_window (ERR, "Trigger string too big.");
         return;
     }
     
     if ( strlen (text[1]) > REPL_LEN)  {
-        popup_window ("Command string too big.");
+        popup_window (ERR, "Command string too big.");
         return;
     }
 
     if ( strlen (text[2]) > CLASS_LEN)  {
-        popup_window ("Class string too big.");
+        popup_window (ERR, "Class string too big.");
         return;
     }
 
@@ -361,7 +361,7 @@ static void trigger_button_delete (GtkWidget *button, gpointer data) {
     gchar *word;
     
     if ( trigger_selected_row == -1 ) {
-        popup_window ("No selection made.");
+        popup_window (WARN, "No selection made.");
     }
     else {
         char buffer[ALIAS_LEN + 20];
@@ -435,7 +435,7 @@ find_in_list(GtkWidget *widget, GtkCList *clist)
             int row = do_find(clist, finding);
 
             if (row < 0)
-                popup_window("Unable to find '%s' in this list.", finding);
+                popup_window(ERR, "Unable to find '%s' in this list.", finding);
             else {
                 // I hope this will trigger the cbk.
                 gtk_clist_select_row(clist, row, 0);
@@ -449,8 +449,6 @@ find_in_list(GtkWidget *widget, GtkCList *clist)
 void triggers_window(GtkWidget *widget, gpointer data)
 {
     GtkWidget *vbox; 
-    GtkWidget *hbox;
-    GtkWidget *hbox2;
     GtkWidget *hbox3;
     GtkWidget *clist;
     GtkWidget *label, *but;

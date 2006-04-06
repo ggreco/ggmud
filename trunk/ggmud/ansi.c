@@ -743,6 +743,8 @@ char *ansi_parse(char *code )
     return(s);
 }
 
+#include <ctype.h>
+
 char *ParseAnsiColors( char *txt)
 {
   static char buf[BUFFER_SIZE*2];

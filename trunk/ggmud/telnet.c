@@ -218,10 +218,10 @@ int do_telnet_protocol(unsigned char *data,int nb,struct session *ses)
         case ECHO:
             switch(wt)
             {
-            case DO:    answer[1]=WONT; fprintf(stderr, "echo DO\n"); break;
-            case WILL:  answer[1]=DO;  fprintf(stderr, "echo WILL\n"); mud->ent->visible=0; input_line_visible(FALSE); break;
-            case WONT:  answer[1]=DONT; fprintf(stderr, "echo WONT\n"); if (!mud->ent->visible) { mud->ent->visible=1; input_line_visible(TRUE); } break;
-            case DONT:  answer[1]=WONT; fprintf(stderr, "echo DONT\n"); break;
+            case DO:    answer[1]=WONT; break;
+            case WILL:  answer[1]=DO; mud->ent->visible=0; input_line_visible(FALSE); break;
+            case WONT:  answer[1]=DONT; if (!mud->ent->visible) { mud->ent->visible=1; input_line_visible(TRUE); } break;
+            case DONT:  answer[1]=WONT; break;
             };
             break;
         case TERMINAL_TYPE:

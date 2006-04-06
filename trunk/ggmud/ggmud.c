@@ -23,6 +23,8 @@
 #include <signal.h>
 
 ggmud *mud;
+extern void macro_send (GtkWidget *, gint);
+extern void load_win_pos();
 
 /* menu items */
 GtkWidget *menu_File_Connect;
@@ -55,6 +57,7 @@ gint        snoop_keys              (GtkWidget *grab_widget,
 
 #ifdef linux
 #include "prefix.h"
+#include <unistd.h>
 #endif
 
 int main(int argc, char **argv)

@@ -11,14 +11,11 @@ static GtkWidget *high_window = NULL;
 static void
 save_highlights (GtkWidget *button, gpointer data) {
     FILE *fp;
-    gint done = FALSE;
-    gchar *alias, *replace;
-    gint  row = 0;
 
-    if (fp = fileopen (HIGH_FILE, "w")) {
+    if ((fp = fileopen (HIGH_FILE, "w"))) {
         struct listnode *list = mud->activesession ? mud->activesession->highs : common_highs;
         
-        while ( list = list->next ) {
+        while ( (list = list->next) ) {
             fprintf(fp, "#high {%s} {%s}\n", list->right, list->left);
         }
         fclose (fp);
@@ -184,7 +181,7 @@ static void  insert_highlights  (GtkCList *clist)
 
     gtk_clist_freeze(clist);
 
-    while ( list = list->next ) {
+    while ( (list = list->next) ) {
         text[0] = list->left;
         
         strcpy(buffer, list->right);
@@ -246,12 +243,12 @@ static void high_button_add (GtkWidget *button, GtkCList * data)
     j = get_optionmenu_active(fgwidget);
     
     if ( text[0] == '\0'  ) {
-        popup_window ("Please insert some text first.");
+        popup_window (INFO, "Please insert some text first.");
         return;
     }
 
     if ( strlen (text) > ALIAS_LEN) {
-        popup_window ("String too big.");
+        popup_window (ERR, "String too big.");
         return;
     }
     
@@ -267,7 +264,7 @@ static void high_button_delete (GtkWidget *button, GtkCList * data) {
     int selected_row = (int) gtk_object_get_user_data(GTK_OBJECT(data));
  
     if ( selected_row == -1 ) {
-        popup_window ("No selection made.");
+        popup_window (WARN, "No selection made.");
     }
     else {
         char buffer[ALIAS_LEN + 20];
@@ -302,16 +299,9 @@ static void append_options(GtkWidget *w, color_options *options)
 void highlights_window (GtkWidget *widget, gpointer data)
 {
     GtkWidget *vbox;
-    GtkWidget *hbox;
-    GtkWidget *hbox2;
     GtkWidget *hbox3;
     GtkWidget *clist;
-    GtkWidget *button_add;
-    GtkWidget *button_quit;
-    GtkWidget *button_delete;
-    GtkWidget *button_save;
     GtkWidget *label;
-    GtkWidget *separator;
 //    GtkTooltips *tooltip;
     GtkWidget *scrolled_window;
 

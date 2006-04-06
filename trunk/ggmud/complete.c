@@ -27,7 +27,7 @@ save_complete (GtkWidget *button, gpointer data) {
 }
 
 static void 
-add_complete(char *line)
+add_complete(const char *line)
 {
     char buffer[COMPLETE_LEN + 20];
 
@@ -62,24 +62,23 @@ insert_words  (GtkCList *clist)
 static void
 complete_button_add (GtkWidget *button, GtkCList * data)
 {
-    gchar *text;
     GtkEntry *textcomplete = GTK_ENTRY(
             gtk_object_get_data(GTK_OBJECT(data), "entry"));
 
-    text   = gtk_entry_get_text (textcomplete);
+    const gchar *text  = gtk_entry_get_text (textcomplete);
 
     if ( text[0] == '\0' )    {
-        popup_window ("Please insert some text first.");
+        popup_window (INFO, "Please insert some text first.");
         return;
     }
 
     if ( strlen (text) < 4)  {
-        popup_window ("It's unsafe to TAB complete such a short text.");
+        popup_window (WARN, "It's unsafe to TAB complete such a short text.");
         return;
     }
     
     if ( strlen (text) > COMPLETE_LEN)    {
-        popup_window ("Word length too big.");
+        popup_window (ERR, "Word length too big.");
         return;
     }
 
@@ -92,11 +91,9 @@ static void complete_button_delete (GtkWidget *button, GtkCList * data) {
     int selected_row = (int) gtk_object_get_user_data(GTK_OBJECT(data));
 
     if (selected_row == -1 ) {
-        popup_window ("No selection made.");
+        popup_window (WARN, "No selection made.");
     }
     else {
-        char buffer[COMPLETE_LEN + 20];
-        
         gtk_clist_get_text (data, selected_row, 0, &word);
         gtk_object_set_user_data(GTK_OBJECT(data), (void *)-1);
 

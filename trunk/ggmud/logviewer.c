@@ -39,17 +39,12 @@ typedef struct {
 
 } typFileSelectionData;
 
-static   char        *sFilename = NULL; 
 static GtkAccelGroup       *accel_group;
 static GtkTooltips         *tooltips = NULL;
 
-static void menu_New ();
 static void menu_Find ();
 static void menu_Open ();
-static void menu_Save ();
-static void menu_SaveAs ();
 static void menu_Quit ();
-static void ShowMessage (char *szTitle, char *szMessage);
 
 static void 
 LoadFile (char *sFilename)
@@ -60,23 +55,27 @@ LoadFile (char *sFilename)
     struct stat fileStatus;
     long fileLen = 0;
 
-//    gtk_text_freeze (GTK_TEXT (text));
+    GtkTextBuffer *b = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
+    GtkTextIter begin, end;
 
-    gtk_editable_delete_text (GTK_EDITABLE (text), 0, -1);
-
+    gtk_text_buffer_get_bounds(b, &begin, &end);
+    gtk_text_buffer_delete(b, &begin, &end);
+    
     stat (sFilename, &fileStatus);
     fileLen = fileStatus.st_size;
 
     infile = fopen (sFilename, "r");
       
     if (infile) {
-      
-        while ((nchars = fread (buffer, 1, BUF_SIZE - 1, infile)) > 0) {
+        GtkTextBuffer *b = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
+        GtkTextIter it;
 
-            buffer[nchars] = 0;
+        while ((nchars = fread (buffer, 1, BUF_SIZE, infile)) > 0) {
             
-            text_insert (text, buffer);
-          
+            gtk_text_buffer_get_end_iter(b, &it);
+        
+            gtk_text_buffer_insert(b, &it, buffer, nchars);
+
             if (nchars < BUF_SIZE)
                 break;
         }
@@ -84,9 +83,28 @@ LoadFile (char *sFilename)
         fclose (infile);
     }
   
-//    gtk_text_thaw (GTK_TEXT (text));
 }
 
+
+GtkWidget *CreateStockMenuItem(GtkWidget *menu, 
+                           char *stock, 
+                           GtkSignalFunc func,
+                           gpointer data)
+{
+    GtkWidget *menuitem;
+
+    if (accel_group == NULL) 
+        accel_group = gtk_accel_group_new ();
+    
+    menuitem = gtk_image_menu_item_new_from_stock (stock, accel_group);
+    gtk_signal_connect (GTK_OBJECT (menuitem), "activate",
+                    GTK_SIGNAL_FUNC(func), data);
+
+    gtk_menu_append (GTK_MENU (menu), menuitem);
+    gtk_widget_show (menuitem);
+
+    return (menuitem);
+}
 
 GtkWidget *CreateMenuItem (GtkWidget *menu, 
                            char *szName, 
@@ -152,38 +170,20 @@ GtkWidget *CreateMenuCheck (GtkWidget *menu,
 
 void CreateText (GtkWidget *window, GtkWidget *container)
 {
-    GtkWidget *table;
-    GtkWidget *hscrollbar;
-    GtkWidget *vscrollbar;
+    GtkWidget *sw = gtk_scrolled_window_new (NULL, NULL);
+    gtk_widget_show(sw);
 
-    table = gtk_table_new (2, 2, FALSE);
+    gtk_container_add (GTK_CONTAINER (container), sw);
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
+            GTK_POLICY_AUTOMATIC,
+            GTK_POLICY_ALWAYS);
 
-    gtk_container_add (GTK_CONTAINER (container), table);
-
-    gtk_table_set_row_spacing (GTK_TABLE (table), 0, 2);
-    gtk_table_set_col_spacing (GTK_TABLE (table), 0, 2);
-
-    gtk_widget_show (table);
 
     text = gtk_text_view_new ();
+    gtk_container_add(GTK_CONTAINER(sw), (GtkWidget *)text);
     gtk_text_view_set_editable (GTK_TEXT_VIEW (text), TRUE);
 
-    gtk_table_attach (GTK_TABLE (table), text, 0, 1, 0, 1,
-            GTK_EXPAND | GTK_SHRINK | GTK_FILL,
-            GTK_EXPAND | GTK_SHRINK | GTK_FILL, 0, 0);
-
     gtk_widget_show (text);
-
-    hscrollbar = gtk_hscrollbar_new (GTK_TEXT_VIEW (text)->hadjustment);
-    gtk_table_attach (GTK_TABLE (table), hscrollbar, 0, 1, 1, 2,
-            GTK_EXPAND | GTK_FILL | GTK_SHRINK, GTK_FILL, 0, 0);
-    gtk_widget_show (hscrollbar);
-
-    vscrollbar = gtk_vscrollbar_new (GTK_TEXT_VIEW (text)->vadjustment);
-    gtk_table_attach (GTK_TABLE (table), vscrollbar, 1, 2, 0, 1,
-            GTK_FILL, GTK_EXPAND | GTK_SHRINK | GTK_FILL, 0, 0);
-    gtk_widget_show (vscrollbar);
-
 }
 
 GtkWidget *CreateSubMenu (GtkWidget *menubar, char *szName)
@@ -219,26 +219,6 @@ GtkWidget *CreateBarSubMenu (GtkWidget *menu, char *szName)
 }
 
 
-GtkWidget *CreateMenuRadio (GtkWidget *menu, 
-                            char *szName, 
-                            GSList **group,
-                            GtkSignalFunc func, 
-                            gpointer data)
-{
-    GtkWidget *menuitem;
-
-    menuitem = gtk_radio_menu_item_new_with_label (*group, szName);
-    *group = gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (menuitem));
-
-    gtk_menu_append (GTK_MENU (menu), menuitem);
-    gtk_widget_show (menuitem);
-
-    gtk_signal_connect (GTK_OBJECT (menuitem), "toggled",
-                        GTK_SIGNAL_FUNC(func), data);
-
-    return (menuitem);
-}
-
 
 static void CreateMenu (GtkWidget *window, GtkWidget *vbox_main)
 {
@@ -255,27 +235,26 @@ static void CreateMenu (GtkWidget *window, GtkWidget *vbox_main)
 
     menu = CreateBarSubMenu (menubar, "File");
 
-    menuitem = CreateMenuItem (menu, "Open", "^O", 
-                     "Open an existing item", 
+    menuitem = CreateStockMenuItem (menu, GTK_STOCK_OPEN, 
                      GTK_SIGNAL_FUNC (menu_Open), "open");
 
     menuitem = CreateMenuItem (menu, NULL, NULL, 
                      NULL, NULL, NULL);
 
-    menuitem = CreateMenuItem (menu, "Quit", "", 
-                     "What's more descriptive than quit?", 
+    menuitem = CreateStockMenuItem (menu, GTK_STOCK_QUIT, 
                      GTK_SIGNAL_FUNC (menu_Quit), window);
 
     menu = CreateBarSubMenu (menubar, "Search");
 
-    menuitem = CreateMenuItem (menu, "Find", "^F", 
-                     "Find item", 
-                     GTK_SIGNAL_FUNC (menu_Find), "paste");
+    menuitem = CreateStockMenuItem (menu, GTK_STOCK_FIND, 
+                     GTK_SIGNAL_FUNC (menu_Find), "find");
 
 }
 
 void GetFilename (char *sTitle, void (*do_callback) (char *))
 {
+    static gchar *sFilename = NULL;
+
     GtkWidget *filew = gtk_file_chooser_dialog_new (sTitle, GTK_WINDOW(mud->window), 
                                   GTK_FILE_CHOOSER_ACTION_OPEN,
                                   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
@@ -289,10 +268,9 @@ void GetFilename (char *sTitle, void (*do_callback) (char *))
     gtk_widget_show (filew);
 
     if (gtk_dialog_run(GTK_DIALOG(filew)) == GTK_RESPONSE_ACCEPT) {
-        if (sFilename) free (sFilename);
+        if (sFilename) g_free (sFilename);
 
-        sFilename = strdup(
-                gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (filew)));
+        sFilename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (filew));
         
         do_callback(sFilename);
     }
@@ -502,7 +480,7 @@ void FindStringDialog (char *szMessage, void (*YesFunc)(), void (*NoFunc)())
 
     gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog_window)->vbox), 
                         hbox, TRUE, TRUE, 0);
-    button = gtk_button_new_with_label ("Find Next");
+    button = gtk_button_new_from_stock (GTK_STOCK_FIND);
     gtk_signal_connect (GTK_OBJECT (button), "clicked",
 	                GTK_SIGNAL_FUNC (YesFunc),
 	                dialog_window);
@@ -510,7 +488,7 @@ void FindStringDialog (char *szMessage, void (*YesFunc)(), void (*NoFunc)())
 			  button, TRUE, TRUE, 0);
     gtk_widget_show (button);
 
-    button = gtk_button_new_with_label ("Cancel");
+    button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
     gtk_signal_connect (GTK_OBJECT (button), "clicked",
 	                GTK_SIGNAL_FUNC (NoFunc),
 	                dialog_window);
@@ -539,43 +517,5 @@ void CloseShowMessage (GtkWidget *widget, gpointer data)
 void ClearShowMessage (GtkWidget *widget, gpointer data)
 {
     gtk_grab_remove (widget);
-}
-
-void ShowMessage (char *szTitle, char *szMessage)
-{
-    GtkWidget *label;
-    GtkWidget *button;
-    GtkWidget *dialog_window;
-
-    dialog_window = gtk_dialog_new ();
-
-    gtk_signal_connect (GTK_OBJECT (dialog_window), "destroy",
-              GTK_SIGNAL_FUNC (ClearShowMessage),
-              NULL);
-
-    gtk_window_set_title (GTK_WINDOW (dialog_window), szTitle);
-    gtk_container_border_width (GTK_CONTAINER (dialog_window), 0);
-
-    button = gtk_button_new_with_label ("OK");
-
-    gtk_signal_connect (GTK_OBJECT (button), "clicked",
-              GTK_SIGNAL_FUNC (CloseShowMessage),
-              dialog_window);
-
-    GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
-    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog_window)->action_area), 
-              button, TRUE, TRUE, 0);
-    gtk_widget_grab_default (button);
-    gtk_widget_show (button);
-
-    label = gtk_label_new (szMessage);
-
-    gtk_misc_set_padding (GTK_MISC (label), 10, 10);
-    gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog_window)->vbox), 
-              label, TRUE, TRUE, 0);
-    gtk_widget_show (label);
-
-    gtk_widget_show (dialog_window);
-    gtk_grab_add (dialog_window);
 }
 

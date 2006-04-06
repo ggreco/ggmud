@@ -1,6 +1,6 @@
 CROSSDIR = /usr/local/cross-gcc33/i386-mingw32msvc/
 CROSSCC = $(CROSSDIR)/bin/gcc
-GLOBAL_CFLAGS = -g  -DTELNET_SUPPORT
+GLOBAL_CFLAGS = -g  -DTELNET_SUPPORT -Wall
 OBJDIR = obj/
 CC = gcc
 CXX = g++

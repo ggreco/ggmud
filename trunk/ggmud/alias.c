@@ -43,7 +43,7 @@ static void save_aliases (GtkWidget *button, gpointer data)
     gchar *alias, *replace;
     gint  row = 0;
 
-    if (fp = fileopen (ALIAS_FILE, "w")) {
+    if ((fp = fileopen (ALIAS_FILE, "w"))) {
     	while ( !done && (GtkCList*) data) {
             if ( !gtk_clist_get_text ((GtkCList*) data, row, 0, &alias)
                 || !gtk_clist_get_text ((GtkCList*) data, row, 1, &replace) )
@@ -91,7 +91,7 @@ static void  insert_aliases  (GtkCList *clist)
     gtk_clist_clear(clist);
     gtk_clist_freeze(clist);
             
-    while ( list = list->next ) {
+    while ( (list = list->next) ) {
         text[0] = list->left;
         text[1] = list->right;
         gtk_clist_prepend (clist, text);
@@ -127,7 +127,7 @@ static void alias_button_add (GtkWidget *button, gpointer data)
 
     if ( text[0][0] == '\0' || text[1][0] == '\0' )
     {
-        popup_window ("Please complete the alias first.");
+        popup_window (INFO, "Please complete the alias first.");
         return;
     }
 
@@ -135,20 +135,20 @@ static void alias_button_add (GtkWidget *button, gpointer data)
     {
         if ( isspace (text[0][i]) )
         {
-            popup_window ("I can't make an alias of that.");
+            popup_window (ERR, "I can't make an alias of that.");
             return;
         }
     }
 
     if ( strlen (text[0]) > ALIAS_LEN)
     {
-        popup_window ("Alias to big.");
+        popup_window (ERR, "Alias to big.");
         return;
     }
     
     if ( strlen (text[1]) > REPL_LEN)
     {
-        popup_window ("Replace to big.");
+        popup_window (ERR, "Replace to big.");
         return;
     }
 
@@ -160,7 +160,7 @@ static void alias_button_delete (GtkWidget *button, gpointer data) {
     gchar *word;
     
     if ( alias_selected_row == -1 ) {
-        popup_window ("No selection made.");
+        popup_window (WARN, "No selection made.");
     }
     else {
         char buffer[ALIAS_LEN + 20];
@@ -179,13 +179,9 @@ static void alias_button_delete (GtkWidget *button, gpointer data) {
 void window_alias (GtkWidget *widget, gpointer data)
 {
     GtkWidget *vbox, *but;
-    GtkWidget *hbox;
-    GtkWidget *hbox2;
     GtkWidget *hbox3;
     GtkWidget *clist;
     GtkWidget *label;
-    GtkWidget *separator;
-//    GtkTooltips *tooltip;
     GtkWidget *scrolled_window;
 
     gchar     *titles[2] = { "Alias", "Replacement" };
@@ -194,10 +190,6 @@ void window_alias (GtkWidget *widget, gpointer data)
         gtk_window_present(GTK_WINDOW(alias_window));
         return;
     }
-
-//    tooltip = gtk_tooltips_new ();
-//    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
-
 
     alias_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title (GTK_WINDOW (alias_window), "Aliases");

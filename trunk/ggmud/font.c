@@ -34,14 +34,8 @@ GtkWidget   *font_button_save;
 GtkWidget   *entry_fontname;
 GtkWidget *menu_Option_font;
 PangoFontDescription *font_normal = NULL;
-GtkStyle *style;
 
-void set_style() 
-{
-    if (mud && mud->text && font_normal) {
-        gtk_widget_modify_font(GTK_WIDGET(mud->text), font_normal);
-    }
-}
+extern void set_style();
 
 #define DEFAULT_FONT "Monospace 12"
 
@@ -51,7 +45,7 @@ void load_font () {
 
     *value = 0;
     
-    if (fp = fileopen ("font", "r")) {
+    if ((fp = fileopen ("font", "r"))) {
         while (fgets (line, 80, fp)) {
             sscanf (line, "%s %[^\n]", pref, value);
             if (!strcmp (pref, "FontName")) {
@@ -81,9 +75,8 @@ void load_font () {
 
 void save_font () {
     FILE *fp;
-    gchar buf[256];
 
-    if(fp = fileopen("font", "w")) {
+    if ((fp = fileopen("font", "w"))) {
     	if (strlen(font.FontName)) fprintf (fp, "FontName %s\n", font.FontName);
     	fclose (fp);
     }	
@@ -91,7 +84,7 @@ void save_font () {
 
 
 void font_font_selected (GtkWidget *button, GtkFontSelectionDialog *fs) {
-    gchar *temp, buf[256];
+    gchar *temp;
 
     temp = gtk_font_selection_get_font_name (GTK_FONT_SELECTION (fs->fontsel));
 
@@ -108,7 +101,7 @@ void font_font_selected (GtkWidget *button, GtkFontSelectionDialog *fs) {
         }
     }
 
-    popup_window ( "The selected Font isn't valid, be sure to select a font that does exist.");
+    popup_window (ERR, "The selected Font isn't valid, be sure to select a font that does exist.");
 }
 
 void window_font (GtkWidget *button, gpointer data) {

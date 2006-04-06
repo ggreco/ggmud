@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <string.h>
 #include <time.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
@@ -85,6 +86,12 @@ struct prefs_data {
     gint       SaveVars;
 };
 
+#define WARN GTK_MESSAGE_WARNING
+#define ERR GTK_MESSAGE_ERROR
+#define INFO GTK_MESSAGE_INFO
+#define QUEST GTK_MESSAGE_QUESTION
+
+
 #define text_insert(w, text) gtk_text_buffer_set_text(gtk_text_view_get_buffer(GTK_TEXT_VIEW(w)), text, -1)
 #define text_bg(w, color) gtk_widget_modify_base((GtkWidget *)w, GTK_STATE_NORMAL, &color)
 
@@ -120,15 +127,28 @@ extern GtkWidget *menu_File_DisConnect;
 extern GtkWidget *statusbar;
 extern gint statusbar_id;
 
+/* from tintin */
+extern void parse_config(FILE *, struct session *);
+extern struct session *parse_input(char *, struct session *);
+extern void do_one_line(char *, struct session *);
+extern void cleanup_session(struct session *);
+extern int check_one_action(const char *, const char *, struct session *);
+extern int read_buffer_mud(char *, struct session *);
+extern void logit(struct session *, const char *);
+extern struct session *read_command(const char *, struct session *);
+extern struct session *write_command(const char *, struct session *);
+extern void tickon_command(struct session *);
+extern void tickoff_command(struct session *);
+
 /* extprefs.c */
 extern void  create_complete_window    (GtkWidget *widget, gpointer data);
 extern void  gags_window    (GtkWidget *widget, gpointer data);
 extern void  highlights_window    (GtkWidget *widget, gpointer data);
 extern void  variables_window    (GtkWidget *widget, gpointer data);
+extern void  load_gags    ( void );
 extern void  load_aliases    ( void );
 extern void  load_variables    ( void );
 extern void  load_highlights    ( void );
-
 /* wiz.c */
 extern void  load_wizard        ( void );
 
@@ -176,6 +196,7 @@ extern void make_connection ( const char *name, const char *host, const char *po
 extern void open_connection (  const char *name, const char *host, const char *port );
 extern void send_to_connection ( GtkWidget *, gpointer data );
 extern void read_from_connection (gpointer, gint , GdkInputCondition );
+extern void tintin_puts(const char *, struct session *);
 
 /* window.c */
 extern GtkWidget *menu_File_wiz;	
@@ -183,8 +204,8 @@ extern GtkWidget *menu_Option_Font;
 extern GtkWidget *menu_Option_Preference;
 GtkWidget *menu_Option_Colors;
 extern void do_menu(GtkWidget *);
-
-extern void popup_window ( const gchar *message, ... );
+extern void input_line_visible(int);
+extern void popup_window (int type, const gchar *message, ... );
 
 extern GdkFont  *font_bold;
 
@@ -224,6 +245,7 @@ extern void init_colors();
 extern void disp_ansi(int, const char *, GtkTextView *);
 extern void local_disp_ansi(int, const char *, GtkTextView *);
 extern void update_color_tags(GdkColor *);
+extern void swap_blinks(void);
 
 /* BOLD = bright color. LOW = darkish color */
 extern GdkColor color_lightwhite;	/* BOLD white  */

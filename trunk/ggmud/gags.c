@@ -77,17 +77,17 @@ gag_button_add (GtkWidget *button, GtkCList * data)
     text   = gtk_entry_get_text (GTK_ENTRY (textgag  ));
 
     if ( text[0] == '\0' )    {
-        popup_window ("Please insert some text first.");
+        popup_window (INFO, "Please insert some text first.");
         return;
     }
 
     if ( strlen (text) < 4)  {
-        popup_window ("It's unsafe to gag a such short text.");
+        popup_window (WARN, "It's unsafe to gag a such short text.");
         return;
     }
     
     if ( strlen (text) > GAG_LEN)    {
-        popup_window ("Gag value too big.");
+        popup_window (ERR, "Gag value too big.");
         return;
     }
 
@@ -100,7 +100,7 @@ static void gag_button_delete (GtkWidget *button, GtkCList * data) {
     int selected_row = (int) gtk_object_get_user_data(GTK_OBJECT(data));
     
     if (selected_row == -1 ) {
-        popup_window ("No selection made.");
+        popup_window (WARN, "No selection made.");
     }
     else {
         char buffer[GAG_LEN + 20];
