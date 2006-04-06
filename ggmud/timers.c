@@ -3,12 +3,12 @@
 #include "include/ticks.h"
 #include <stdlib.h>
 #include <time.h>
-#include <string.h>
 
 // #alias {celepath} {e;#wait 500;e;#wait 500;s;#wait 500;s;#wait 500;e;#wait 500;n;#wait 500;e;#wait 500;e;#wait 500;e;#wait 500;w;#wait 500;w;#wait 500;s;#wait 500;e;#wait 500}
 
 extern struct session *parse_input(char *, struct session *);
 extern char *get_arg_in_braces(char *s, char *arg, int flag);
+extern void tintin_puts(const char *cptr, struct session *ses);
 
 int use_tickcounter = 0;
 
@@ -55,7 +55,7 @@ void do_gettimer(char *arg, struct session *ses)
   else if(!*right) {
       tintin_puts("#NO TIMER NAME INCLUDED. TRY AGAIN.\n", ses);
   }
-  else if (d = get_timer_by_name(right)) {
+  else if ((d = get_timer_by_name(right))) {
     time_t finish;
     
     if ((ln = searchnode_list(tempvars, left)))
@@ -63,7 +63,7 @@ void do_gettimer(char *arg, struct session *ses)
 
     finish = d->finish - time(NULL);
     
-    sprintf(right, "%d", finish);
+    sprintf(right, "%ld", finish);
     insertnode_list(tempvars, left, right, "0", ALPHA);
     
 //    varnum++;
@@ -160,7 +160,7 @@ void do_timer(char *arg, struct session *ses)
         return;
     }
     
-    if (d = malloc(sizeof(timerdata))) {
+    if ((d = malloc(sizeof(timerdata)))) {
         char buffer[200];
         
         d->last = 0;
@@ -180,11 +180,28 @@ int checktick(void)
     extern int use_tickcounter;
     extern int show_pretick;
     static int last = -1, ttt = -1, using_tickcounter = 0; /* ttt = time to tick */
-    int now, found = 0;
+    time_t now;
+    static time_t last_invisible = 0;
     GList *l = mud->timers;
 
     now = time(0);
 
+// this is a workaround for a cursor invisibility problem with telnet sessions
+    if (mud && mud->activesession) {
+        if (last_invisible) {
+            if (mud->ent->visible) {
+                last_invisible = 0;
+            }
+            else if ((time(NULL) - last_invisible) > 30) {
+                mud->ent->visible = 1;
+                input_line_visible(TRUE);
+            }
+        }
+        else if (!mud->ent->visible) {
+            last_invisible = time(NULL);
+        }
+    }
+    
     swap_blinks();
     
     while (l) {

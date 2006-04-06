@@ -253,7 +253,7 @@ void open_connection (const char *name, const char *host, const char *port)
 {
     struct hostent *he;
     struct sockaddr_in their_addr;
-    int sockfd, onoff = 1, retries = 0;
+    int sockfd, onoff = 1;
 
     if(connecting) {
         textfield_add(mud->text,
@@ -266,7 +266,7 @@ void open_connection (const char *name, const char *host, const char *port)
 #ifdef USE_NOTEBOOK
         new_view(name);
 #else
-        popup_window("You have to close the previous connection!");
+        popup_window(INFO, "You have to close the previous connection!");
         return;
 #endif
     }
@@ -274,7 +274,7 @@ void open_connection (const char *name, const char *host, const char *port)
     /* strerror(3) */
     if ( ( he = gethostbyname (host) ) == NULL )
     {
-        popup_window("Host not found or host name not valid");
+        popup_window(ERR, "Host not found or host name not valid");
         return;
     }
 
@@ -400,7 +400,7 @@ static void readmud(struct session *s)
             if (!e) 
                 e = "<UNKNOWN>";
 
-            popup_window("Connection aborted\nError: %s (%d)", e, errno);
+            popup_window(INFO, "Connection aborted\nError: %s (%d)", e, errno);
         }
 #endif
         disconnect();
@@ -431,9 +431,11 @@ static void readmud(struct session *s)
         s->last_line[0] = '\0';
     }
 
-    if(strlen(buf)>BUFFER_SIZE)
-        syserr("readmud: read one line longer than BUFFERSIZE");
-
+    if(strlen(buf)>BUFFER_SIZE) {
+        popup_window(ERR, "readmud: read one line longer than BUFFERSIZE");
+        return;
+    }
+    
     logit(s, buf);
 
     /* separate into lines and print away */
@@ -482,7 +484,7 @@ void send_to_connection (GtkWidget *widget, gpointer data)
 {
     char buffer[2048];
     const gchar *entry_text;
-    GtkAdjustment *adj = mud->text->vadjustment;
+    // GtkAdjustment *adj = mud->text->vadjustment;
 
     entry_text = gtk_entry_get_text (mud->ent);
 
@@ -541,7 +543,7 @@ void write_line_mud(const char *line, struct session *ses)
       if (!e)
           e = "<UNKNOWN>";
 
-      popup_window("Connection aborted\nError: %s (%d)", e, errno);
+      popup_window(INFO, "Connection aborted\nError: %s (%d)", e, errno);
       disconnect();
 
       return;

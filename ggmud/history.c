@@ -128,6 +128,8 @@ gint change_focus(GtkWidget *w, GdkEventKey *event, gpointer data)
   } else {
       GtkWidget *win = gtk_widget_get_toplevel((GtkWidget *)mud->ent);
       if (event->keyval == GDK_Tab) {
+          extern void toggle_review();
+
           toggle_review();
       }
      

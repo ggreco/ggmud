@@ -33,7 +33,7 @@ void save_macro (gpointer data)
     FILE *fp;
     gint i = 0;
 
-    if (fp = fileopen (MACRO_FILE, "w")) {
+    if ((fp = fileopen (MACRO_FILE, "w"))) {
         while (keys[i]) {
             fprintf (fp, "%s %s\n", keys[i], macro_list[i]);
             i++;
@@ -68,7 +68,7 @@ void load_macro ()
     if (!(macro_list = calloc(12, sizeof (gchar *)))) return;
     for (i = 0; i < 12; i++) if (!(macro_list[i] = calloc(1, sizeof(char)))) return;
 
-    if (fp = fileopen (MACRO_FILE, "r")) {
+    if ((fp = fileopen (MACRO_FILE, "r"))) {
         /* load in the macro's into the entry[] boxes */
         while (fgets (line, sizeof(line) - 1, fp)) {
             value[0] = 0;
@@ -98,8 +98,6 @@ void window_macro (GtkWidget *widget, gpointer data)
   GtkWidget *vbox3;
   GtkWidget *vbox4;
   GtkWidget *vbox5;
-  GtkWidget *hbuttonbox;
-  GtkWidget *button;
   static GtkWidget *entry[12];
   
   if (macro_window) {

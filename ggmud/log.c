@@ -40,69 +40,17 @@ extern GtkWidget *btn_toolbar_logger;
 extern GtkWidget *menu_Tools_Logger;
 
 /*
- * My own popup_window, didn't like the one that is in the file
- * window.c... Perhaps I will change that one some day.
- */
-void my_popup_window(const char *title, const char *message)
-{
-    GtkWidget *window;
-    GtkWidget *vbox;
-    GtkWidget *label;
-    GtkWidget *separator;
-    GtkWidget *btnBox, *btnOk;
-
-    window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW (window), title);
-    gtk_container_set_border_width (GTK_CONTAINER(window), 10);
-    gtk_window_set_policy (GTK_WINDOW (window), FALSE, FALSE, FALSE);
-
-    vbox = gtk_vbox_new (FALSE, 0);
-    gtk_container_add (GTK_CONTAINER (window), vbox);
-    gtk_widget_show (vbox);
-
-    label = gtk_label_new (message);
-    gtk_box_pack_start (GTK_BOX (vbox), label, TRUE, TRUE, 0);
-    gtk_label_set_justify (GTK_LABEL(label), GTK_JUSTIFY_LEFT);
-    gtk_label_set_line_wrap (GTK_LABEL(label), TRUE);
-    gtk_widget_show (label);
-
-    separator = gtk_hseparator_new();
-    gtk_box_pack_start (GTK_BOX(vbox), separator, TRUE, FALSE, 7);
-    gtk_widget_show (separator);
-
-    btnBox = gtk_hbutton_box_new ();
-    gtk_box_pack_end (GTK_BOX (vbox), btnBox, FALSE, TRUE, 0);
-    /* gtk_button_box_set_layout (GTK_BUTTON_BOX (btnBox), GTK_BUTTONBOX_END); */
-    gtk_button_box_set_spacing (GTK_BUTTON_BOX (btnBox), 10);
-    gtk_button_box_set_child_size (GTK_BUTTON_BOX (btnBox), 75, 20);
-    gtk_widget_show (btnBox);
-
-    btnOk = gtk_button_new_with_label ("OK");
-    gtk_box_pack_start (GTK_BOX (btnBox), btnOk, TRUE, FALSE, 0);
-    gtk_signal_connect_object (GTK_OBJECT (btnOk), "clicked",
-                        GTK_SIGNAL_FUNC (gtk_widget_destroy),
-                        GTK_OBJECT (window));
-    gtk_widget_show (btnOk);
-
-    gtk_widget_show (window);
-    gtk_grab_add (window);
-}
-
-/*
  * This function will open the file mud->log_filename for
  * writing.
  */
 void on_btnOverwrite_clicked (GtkWidget *btn, gpointer data)
 {
-    char buf[256];
-
     /* Put code here for file writing */
     if ((mud->LOG_FILE = fopen(mud->log_filename, "w")) == NULL) {
-         sprintf (buf, "Can't open file %s for writing:\n\n %s", mud->log_filename, strerror (errno));
-         my_popup_window("GGMud Error", buf);
+         popup_window(ERR, "Can't open file %s for writing:\n\n %s", mud->log_filename, strerror (errno));
     }
-
-    mud->LOGGING = TRUE;
+    else
+        mud->LOGGING = TRUE;
 
     gtk_widget_destroy(gtk_widget_get_toplevel(btn));
 }
@@ -113,15 +61,12 @@ void on_btnOverwrite_clicked (GtkWidget *btn, gpointer data)
  */
 void on_btnAppend_clicked (GtkWidget *btn, gpointer data)
 {
-    char buf[256];
-
     /* Put code here for file writing */
     if ((mud->LOG_FILE = fopen(mud->log_filename, "a")) == NULL) {
-         sprintf (buf, "Can't open file %s for appending:\n\n %s", mud->log_filename, strerror (errno));
-         my_popup_window("GGMud Error", buf);
+         popup_window(ERR, "Can't open file %s for appending:\n\n %s", mud->log_filename, strerror (errno));
     }
-
-    mud->LOGGING = TRUE;
+    else
+        mud->LOGGING = TRUE;
 
     gtk_widget_destroy(gtk_widget_get_toplevel(btn));
 }
@@ -180,14 +125,14 @@ void append_dialog (const gchar *filename)
     gtk_container_add (GTK_CONTAINER (hbuttonbox), btnOverwrite);
     gtk_widget_show (btnOverwrite);
 
-    btnAppend = gtk_button_new_with_label ("Append");
+    btnAppend = gtk_button_new_from_stock (GTK_STOCK_ADD);
     gtk_signal_connect (GTK_OBJECT(btnAppend), "clicked",
                         GTK_SIGNAL_FUNC(on_btnAppend_clicked),
                         NULL);
     gtk_container_add (GTK_CONTAINER (hbuttonbox), btnAppend);
     gtk_widget_show (btnAppend);
 
-    btnCancel = gtk_button_new_with_label ("Cancel");
+    btnCancel = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
     gtk_signal_connect_object (GTK_OBJECT(btnCancel), "clicked",
                         GTK_SIGNAL_FUNC(gtk_widget_destroy),
                         GTK_OBJECT (window));
@@ -203,7 +148,7 @@ void do_log ()
 {
     GtkWidget *filew;
     const gchar *home;
-    gchar path[256], buf[256];
+    gchar path[256];
 
     /* To Toggle the menu item */
     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_Tools_Logger), GTK_TOGGLE_BUTTON(btn_toolbar_logger)->active);
@@ -211,8 +156,7 @@ void do_log ()
     if (mud->LOGGING) {
         fclose (mud->LOG_FILE);
         mud->LOGGING = FALSE;
-        sprintf (buf, "The log file '%s' is closed.", mud->log_filename);
-        my_popup_window("GGMud Logger", buf);
+        popup_window(INFO, "The log file '%s' is closed.", mud->log_filename);
         return;
     }
 
@@ -241,20 +185,17 @@ void do_log ()
         FILE *f;
 
         if (mud->log_filename)
-            free(mud->log_filename);
+            g_free(mud->log_filename);
 
-        mud->log_filename = strdup(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(filew)));
+        mud->log_filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(filew));
         
-        if (f = fopen (mud->log_filename, "r")) {
+        if ((f = fopen (mud->log_filename, "r"))) {
             fclose(f);
             append_dialog(mud->log_filename);
         } else {
             if ((mud->LOG_FILE = fopen(mud->log_filename, "w")) == NULL) {
-                char buf[256];
-                sprintf (buf, "Can't open file %s for writing:\n\n %s",
+                popup_window (ERR, "Can't open file %s for writing:\n\n %s",
                         mud->log_filename, strerror (errno));
-
-                my_popup_window("GGMud Error", buf);
             }
             else mud->LOGGING = TRUE;
         }

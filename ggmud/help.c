@@ -29,7 +29,7 @@
 
 /* About txt */
 const char * ABOUT_MESSAGE = "\n\n Author:\n"
-"    Gabriele Greco (gabriele.greco@aruba.it)\n"
+"    Gabriele Greco (gabrielegreco@gmail.com)\n"
 "\n"
 " SClient authors:\n"
 "    P.E. Segolsson, Fredrik Andersson\n"
@@ -125,7 +125,7 @@ void do_about (GtkWidget *widget, gpointer data)
   gtk_box_pack_start (GTK_BOX (vbox), hbuttonbox, FALSE, TRUE, 5);
   gtk_container_set_border_width (GTK_CONTAINER (hbuttonbox), 3);
 
-  ok_button = gtk_button_new_with_label ("Ok");
+  ok_button = gtk_button_new_from_stock(GTK_STOCK_OK);
   gtk_signal_connect (GTK_OBJECT (ok_button), "clicked",
                       GTK_SIGNAL_FUNC (close_window), about_window);
   gtk_widget_show (ok_button);
@@ -161,15 +161,6 @@ void do_manual(GtkWidget *widget, gpointer data)
   GtkWidget *text_font;
   GtkWidget *scrolledwindow_color;
   GtkWidget *text_color;
-  GtkWidget *label_contents;
-  GtkWidget *label_wizard;
-  GtkWidget *label_Macros;
-  GtkWidget *label_alias;
-  GtkWidget *label_triggers;
-  GtkWidget *label_logger;
-  GtkWidget *label_logviewer;
-  GtkWidget *label_font;
-  GtkWidget *label_color;
   GtkWidget *hbuttonbox;
   GtkWidget *done_button;
   GtkTextView *oldtext = mud->text;

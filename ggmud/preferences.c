@@ -91,7 +91,7 @@ void update_widget_color(color_struct *col)
 
 void load_zmud_prefs(void)
 {
-    popup_window("Warning, at the moment trigger params (%%d), (%%w)...\nand other custom zmud settings are not imported!");
+    popup_window(WARN, "At the moment trigger params (%%d), (%%w)...\nand other custom zmud settings are not imported!");
 
     load_tt_prefs();
 }
@@ -109,7 +109,9 @@ void load_tt_prefs(void)
     gtk_widget_show(filew);
 
     if (gtk_dialog_run(GTK_DIALOG(filew)) == GTK_RESPONSE_ACCEPT) {
-        read_command(gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(filew)), NULL);
+        gchar *file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(filew));
+        read_command(file, NULL);
+        g_free(file);
     }
 
     gtk_widget_destroy(filew);
@@ -127,7 +129,7 @@ void save_all_prefs(void)
 #ifdef WIN32
     write_command(CONFIG_NAME, NULL);
 
-    popup_window("Configuration exported to file " CONFIG_NAME);
+    popup_window(INFO, "Configuration exported to file " CONFIG_NAME);
 #else
     char buffer[256], *c;
 
@@ -138,8 +140,7 @@ void save_all_prefs(void)
     strcat(buffer, "/" CONFIG_NAME);
     write_command(buffer, NULL);
     
-    sprintf(buffer, "Configuration exported to: %s" CONFIG_NAME , c);
-    popup_window(buffer);
+    popup_window(INFO, "Configuration exported to: %s" CONFIG_NAME , c);
 #endif
 }
 
@@ -165,7 +166,7 @@ void load_prefs ()
 //    prefs.BackgroundColor.pixel = 0;
 //    prefs.DefaultColor = color_white;
 
-    if (fp = fileopen(PREFS_FILE, "r")) {
+    if ((fp = fileopen(PREFS_FILE, "r"))) {
         prefs.SaveVars = prefs.Blinking = prefs.KeepText = prefs.EchoText  = prefs.WordWrap = prefs.DoBeep = TRUE;
 
         while (fgets (line, sizeof(line) - 1, fp)) {
@@ -250,7 +251,7 @@ void save_prefs (GtkWidget *button, gpointer data)
 #define CFGI(x,y) fprintf(fp, "%s=%d\n", x, y)
     FILE *fp;
     
-    if (fp = fileopen (PREFS_FILE, "w")) {
+    if ((fp = fileopen (PREFS_FILE, "w"))) {
         int i=0;
         extern int tick_size;
         
@@ -384,7 +385,6 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy)
 {
   GtkWidget *color_box;
   GtkWidget *color_row;
-  GtkWidget *color_button;
   GtkWidget *color_label;
   GtkWidget *dialog;
   GtkWidget *separator;
@@ -393,7 +393,8 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy)
   GtkWidget *close_button;
   GtkWidget *color_reset_button;
   GtkTooltips *tooltip;
-  char i = 0, *tmp = malloc(255);
+  char  *tmp = malloc(255);
+  int i = 0;
 
   dialog = gtk_dialog_new();
   gtk_window_set_title(GTK_WINDOW(&GTK_DIALOG(dialog)->window), "Colors");
@@ -481,9 +482,6 @@ void window_prefs (GtkWidget *widget, gpointer data)
   GtkWidget *checkbutton_beep;
   GtkWidget *frame_misc, *frame_new;
   GtkWidget *frame_vbox_misc;
-  GtkWidget *prefs_hbuttonbox;
-  GtkWidget *save_button;
-  GtkWidget *close_button;
   GtkWidget *temp;
   GtkTooltips *tooltip;
   GtkWidget *checkbutton_Toolbar;

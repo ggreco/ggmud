@@ -66,7 +66,7 @@ void load_wizard ()
     FILE *fp;
     gchar line[1024], value[1004], name[256];
 
-    if (fp = fileopen (CONN_FILE, "r")) {
+    if ((fp = fileopen (CONN_FILE, "r"))) {
         while (fgets (line, sizeof(line) - 1, fp)) {
             sscanf (line, "%s %[^\n]", name, value);
             if (!strcmp (name, "Connection")) {
@@ -104,7 +104,7 @@ static void save_wizard ()
     WIZARD_DATA *w;
     FILE *fp;
 
-    if (fp = fileopen(CONN_FILE, "w")) {
+    if ((fp = fileopen(CONN_FILE, "w"))) {
     	for (tmp = wizard_connection_list2; tmp; tmp = tmp->next) {
             if (tmp->data) {
                 w = (WIZARD_DATA *) tmp->data;
@@ -211,11 +211,10 @@ static void wizard_button_connect (GtkWidget *button, gpointer data)
 {
     WIZARD_DATA *w;
     gchar *word;
-    gchar buf[256];
 
     if ( wizard_selected_row < 0 )
     {
-        popup_window ("No selection made");
+        popup_window (WARN, "No selection made");
         return;
     }
     
@@ -223,7 +222,7 @@ static void wizard_button_connect (GtkWidget *button, gpointer data)
        wich would crash the client??? */
     if ( connected )
     {
-        popup_window ( "You are already connected.\n"
+        popup_window (INFO, "You are already connected.\n"
 		              "Either disconnect or start \n"
 		              "       an new client.        ");   
         return;
@@ -260,7 +259,7 @@ static void wizard_button_delete (GtkWidget *button, gpointer data)
     
     if ( wizard_selected_row < 0 )
     {
-        popup_window ("No selection made");
+        popup_window (WARN, "No selection made");
         return;
     }
     
@@ -290,13 +289,13 @@ static void wizard_button_modify (GtkWidget *button, gpointer data)
 
     if ( texta[0] == NULL || texta[0][0] == '\0' )
     {
-        popup_window ( "Your connection doesn't have a name." );
+        popup_window (ERR, "Your connection doesn't have a name." );
         return;
     }
 
     if ( (  w = wizard_get_wizard_data (texta[0]) ) == NULL )
     {
-        popup_window ( "As for the moment, everything but the name can be "
+        popup_window (INFO, "As for the moment, everything but the name can be "
                        "changed.\n\nIf you need to change the name of the "
                        "connection, you have to use delete.");
         return;
@@ -333,13 +332,13 @@ static void wizard_button_add (GtkWidget *button, gpointer data)
 
     if ( texta[0] == NULL || texta[0][0] == '\0' )
     {
-        popup_window ( "Your connection doesn't have a name." );
+        popup_window (ERR, "Your connection doesn't have a name." );
         return;
     }
 
     if ( wizard_get_wizard_data (texta[0]) )
     {
-        popup_window ("Can't add an existing connection.");
+        popup_window (WARN, "Can't add an existing connection.");
         return;
     }
 

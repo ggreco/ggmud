@@ -16,7 +16,7 @@ save_variables (GtkWidget *button, gpointer data) {
     gchar *alias, *replace;
     gint  row = 0;
 
-    if (fp = fileopen (VARIABLE_FILE, "w")) {
+    if ((fp = fileopen (VARIABLE_FILE, "w"))) {
     	while ( !done && (GtkCList*) data) {
             if ( !gtk_clist_get_text ((GtkCList*) data, row, 0, &alias)
                 || !gtk_clist_get_text ((GtkCList*) data, row, 1, &replace) )
@@ -43,8 +43,8 @@ void save_vars()
         return;
 
     if (list) {
-        if (fp = fileopen (VARIABLE_FILE, "w")) {
-            while ( list = list->next ) {
+        if ((fp = fileopen (VARIABLE_FILE, "w"))) {
+            while ( (list = list->next) ) {
                 fprintf (fp, "#var {%s} {%s}\n", list->left, list->right);
             }
             fclose(fp);
@@ -62,7 +62,7 @@ insert_variables  (GtkCList *clist)
     gtk_clist_clear(clist);
     gtk_clist_freeze(clist);
 
-    while ( list = list->next ) {
+    while ( (list = list->next) ) {
         text[0] = list->left;
         text[1] = list->right;
         gtk_clist_prepend (GTK_CLIST (clist), text);
@@ -106,7 +106,6 @@ void load_variables ()
     }
 }
 
-
 static void variable_button_add (GtkWidget *button, GtkCList *data)
 {
     const gchar *text[2];
@@ -116,24 +115,24 @@ static void variable_button_add (GtkWidget *button, GtkCList *data)
     text[1]   = gtk_entry_get_text (GTK_ENTRY (textvariablevalue));
 
     if ( text[0][0] == '\0' || text[1][0] == '\0' )    {
-        popup_window ("Please complete the variable first.");
+        popup_window (ERR, "Please complete the variable first.");
         return;
     }
 
     for ( i = 0 ; i < strlen (text[0]) ; i++ )    {
         if ( isspace (text[0][i]) )        {
-            popup_window ("I can't make a variable of that.");
+            popup_window (ERR, "I can't make a variable of that.");
             return;
         }
     }
 
     if ( strlen (text[0]) > VAR_LEN)  {
-        popup_window ("Variable name too big.");
+        popup_window (ERR, "Variable name too big.");
         return;
     }
     
     if ( strlen (text[1]) > VALUE_LEN)    {
-        popup_window ("Variable value too big.");
+        popup_window (ERR, "Variable value too big.");
         return;
     }
 
@@ -147,7 +146,7 @@ static void variable_button_delete (GtkWidget *button, gpointer data) {
     int selected_row = (int) gtk_object_get_user_data(GTK_OBJECT(data));
     
     if ( selected_row == -1 ) {
-        popup_window ("No selection made.");
+        popup_window (WARN, "No selection made.");
     }
     else {
         char buffer[VAR_LEN + 20];
@@ -167,16 +166,9 @@ void
 variables_window(GtkWidget *w, gpointer data)
 {
     GtkWidget *vbox;
-    GtkWidget *hbox;
-    GtkWidget *hbox2;
     GtkWidget *hbox3;
     GtkWidget *clist;
-    GtkWidget *button_add;
-    GtkWidget *button_quit;
-    GtkWidget *button_delete;
-    GtkWidget *button_save;
     GtkWidget *label;
-    GtkWidget *separator;
 //    GtkTooltips *tooltip;
     GtkWidget *scrolled_window;
 
