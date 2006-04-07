@@ -84,10 +84,23 @@ char last_result[BUFFER_SIZE];
 void do_trim(char *result, char * string)
 {
 //    printf("in do_trim( %s )\n", string);
-
+    
     while (*string) {
         if (*string != ' ')
             *result++= *string;
+
+        string++;
+    }
+    
+    *result = 0;
+}
+
+void do_lower(char *result, char * string)
+{
+//    printf("in do_tolower( %s )\n", string);
+
+    while (*string) {
+        *result++= tolower(*string);
 
         string++;
     }
@@ -130,13 +143,15 @@ struct predefined_function
 {
     char *name;
     void (*func)(char *result, char * arg1, char * arg2, char * arg3, char * arg4);
+    int args;
 };
 
 struct predefined_function predefineds[] = 
 {
-    {"trim", do_trim},
-    {"oneword", do_oneword},
-    {NULL, NULL}
+    {"trim", do_trim, 1},
+    {"lower", do_lower, 1},
+    {"oneword", do_oneword, 2},
+    {NULL, NULL, 0}
 };
 
 struct listnode *init_functions()
@@ -146,8 +161,10 @@ struct listnode *init_functions()
 
     while (predefineds[i].name) {
         char buffer[20];
-
-        sprintf(buffer, "%ld", (long)predefineds[i].func);
+/* this should be safe also in 64bit systems: we convert the pointer arg to string
+ * using the correct syntax
+ */
+        sprintf(buffer, "%p %d", predefineds[i].func, predefineds[i].args);
         
         insertnode_list(l, predefineds[i].name, 
                            buffer, "0", ALPHA);
@@ -292,22 +309,14 @@ void substitute_functions(const char *arg, char *result, struct session *ses)
       if (counter==nest+1 && !isdigit(*(arg+counter+1))) {
         if((ln = searchnode_list(predefined_functions, funcname))!=NULL) {
             void (*ptr)(char *r, char *a1, char *a2, char *a3, char *a4);
-            char arg1[BUFFER_SIZE/4], arg2[BUFFER_SIZE/4],
-                 arg3[BUFFER_SIZE/4], arg4[BUFFER_SIZE/4],
-                 myres[BUFFER_SIZE];
-            char *args[4] = {arg1, arg2, arg3, arg4};
-            int i = 0;
+            char *args[4] = {NULL, NULL, NULL, NULL};
+            int i = 0, argnum;
 
-            *arg1 = *arg2 = *arg3 = *arg4 = 0;
-
-            *myres = 0;
+            *temp = 0;
             arg+=counter+funclen;
 //            printf("Found predefined for: %s arg: %s\n", funcname, arg);
                        
-            ptr = atol(ln->right);
-
-            if (*arg=='(') {
-               char bb[BUFFER_SIZE];
+            if (sscanf(ln->right, "%p %d", &ptr, &argnum) == 2 && *arg=='(') {
                arg++;
 
                while (*arg != ')' && *arg != 0) {
@@ -317,33 +326,44 @@ void substitute_functions(const char *arg, char *result, struct session *ses)
                        arg++;
         
                    while(*arg != ' ' && *arg != ',' && *arg != 0 && *arg != ')')
-                       bb[k++] = *arg++;
+                       params[k++] = *arg++;
 
-                   bb[k] = 0;
+                   params[k] = 0;
 
-                   substitute_myvars(bb, args[i], ses);
+                   substitute_myvars(params, temp, ses);
 
-                   if (*arg == ',')
+                   args[i] = strdup(temp);
+                   
+                    *temp = 0;
+
+                   while (*arg == ',' || *arg == ' ')
                        arg++;
                    
                    i++;
                }
 
 
-               if (*arg || i > 0) {
+               if (i == argnum) {
                   if (*arg == ')')
                        arg++;
 /*
                   printf("Processo: %s (%s,%s,%s,%s)\n",
                           funcname, args[0], args[1], args[2], args[3]);
  */
-                   ptr(myres, args[0], args[1], args[2], args[3]);
+                   ptr(result, args[0], args[1], args[2], args[3]);
 
-                   
- /*                  printf("Result: %s\n", myres); */
-                   strcpy(result, myres);
-                   result+= strlen(myres);
+                   result+= strlen(result);
                }
+               else {
+                   int len = sprintf(result, "(wrong args count for %s)", funcname);
+                   arg++;
+
+                   result += len;
+               }
+
+               for (i = 0; i < 4; i++)
+                   if (args[i])
+                       free(args[i]);
             }
 
         }
