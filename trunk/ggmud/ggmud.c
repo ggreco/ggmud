@@ -62,11 +62,12 @@ gint        snoop_keys              (GtkWidget *grab_widget,
 
 int main(int argc, char **argv)
 {
-    char *display;
     extern int checktick(void);
     extern void save_vars(void);
 
 #ifndef WIN32
+    char *display;
+
     signal(SIGPIPE, SIG_IGN);
         
     if(!(display = getenv("DISPLAY")) || !*display) {
@@ -99,10 +100,12 @@ int main(int argc, char **argv)
         }
     }
 
-#elif defined(WIN32)
-    extern void winsock_init();
+#elif defined(WIN32) 
+	{
+		extern void winsock_init();
 
-    winsock_init();
+		winsock_init();
+	}
 #endif
     
     mud = calloc(sizeof(ggmud), 1);
@@ -159,7 +162,7 @@ int main(int argc, char **argv)
     return 0;
 }			
 
-#if 0
+#if defined(WIN32) && !defined(__GNUC__)
 
 int _stdcall
 WinMain (int hInstance, int hPrevInstance, char *lpszCmdLine, int nCmdShow)

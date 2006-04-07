@@ -68,7 +68,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /W3 /Gm /GX /ZI /Od /I "C:\Sviluppo\GTK\include" /I "C:\Sviluppo\GTK\include\glib-2.0" /I "tt" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "C:\Sviluppo\GTK\include" /I "C:\Sviluppo\GTK\include\glib-2.0" /I "tt" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x410 /d "_DEBUG"
@@ -100,6 +100,10 @@ SOURCE=.\ansi.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\complete.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\fileopen.c
 # End Source File
 # Begin Source File
@@ -108,7 +112,19 @@ SOURCE=.\font.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\gags.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\ggmud.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\help.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\highlights.c
 # End Source File
 # Begin Source File
 
@@ -136,11 +152,19 @@ SOURCE=.\preferences.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\sclient.c
+SOURCE=.\telnet.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\timers.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\triggers.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\variables.c
 # End Source File
 # Begin Source File
 
@@ -161,27 +185,23 @@ SOURCE=.\wizard.c
 # End Group
 # Begin Source File
 
-SOURCE="C:\Sviluppo\GTK\lib\gthread-2.0.lib"
+SOURCE="..\..\..\..\GTK-dev\lib\pango-1.0.lib"
 # End Source File
 # Begin Source File
 
-SOURCE="C:\Sviluppo\GTK\lib\glib-2.0.lib"
+SOURCE="..\..\..\..\GTK-dev\lib\gdk-win32-2.0.lib"
 # End Source File
 # Begin Source File
 
-SOURCE="C:\Sviluppo\GTK\lib\gmodule-2.0.lib"
+SOURCE="..\..\..\..\GTK-dev\lib\glib-2.0.lib"
 # End Source File
 # Begin Source File
 
-SOURCE="C:\Sviluppo\GTK\lib\gobject-2.0.lib"
+SOURCE="..\..\..\..\GTK-dev\lib\gobject-2.0.lib"
 # End Source File
 # Begin Source File
 
-SOURCE=C:\Sviluppo\GTK\lib\gdk.lib
-# End Source File
-# Begin Source File
-
-SOURCE=C:\Sviluppo\GTK\lib\gtk.lib
+SOURCE="..\..\..\..\GTK-dev\lib\gtk-win32-2.0.lib"
 # End Source File
 # End Target
 # End Project

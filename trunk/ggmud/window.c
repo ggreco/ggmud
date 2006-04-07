@@ -79,6 +79,7 @@ extern char *get_arg_in_braces(char *s, char *arg, int flag);
 
 void set_style() 
 {
+    GList *l = windows_list;
     extern PangoFontDescription *font_normal;
     
     if (!font_normal)
@@ -87,8 +88,6 @@ void set_style()
     if (mud && mud->text) {
         gtk_widget_modify_font(GTK_WIDGET(mud->text), font_normal);
     }
-
-    GList *l = windows_list;
 
     while (l) {
         gtk_widget_modify_font(
