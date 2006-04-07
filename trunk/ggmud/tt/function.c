@@ -32,6 +32,7 @@ This program is protected under the GNU GPL (See COPYING)
 #elif defined(HAVE_STRINGS_H)
 #include <strings.h>
 #endif
+#include <stdlib.h>
 
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
@@ -79,6 +80,82 @@ char last_result[BUFFER_SIZE];
 /* #function {lastfuncresult} {#nop}                                    */
 /* #showme Last use of a function gave @lastfuncresult as result.       */
 /************************************************************************/
+
+void do_trim(char *result, char * string)
+{
+//    printf("in do_trim( %s )\n", string);
+
+    while (*string) {
+        if (*string != ' ')
+            *result++= *string;
+
+        string++;
+    }
+    
+    *result = 0;
+}
+
+void do_oneword(char *result, char *string, char *word_num)
+{
+    int w = atoi(word_num);
+    char buffer[BUFFER_SIZE];
+    int i = 0;
+    
+//    printf("in do_oneword( %s, %d )\n", string, w);
+    
+    buffer[0] = 0;
+    
+    while (*string) {
+        char *b = buffer;
+
+        while(*string != ' ' && *string != '\t' && *string != 0)
+            *b++=*string++;
+
+        *b = 0;
+        
+        if (w == i) {
+            strcpy(result, buffer);
+            return;
+        }
+        else if (*string)
+            string++;
+
+        i++;
+    }
+
+    strcpy(result, buffer);
+}
+
+struct predefined_function
+{
+    char *name;
+    void (*func)(char *result, char * arg1, char * arg2, char * arg3, char * arg4);
+};
+
+struct predefined_function predefineds[] = 
+{
+    {"trim", do_trim},
+    {"oneword", do_oneword},
+    {NULL, NULL}
+};
+
+struct listnode *init_functions()
+{
+    struct listnode *l = init_list();
+    int i = 0;
+
+    while (predefineds[i].name) {
+        char buffer[20];
+
+        sprintf(buffer, "%ld", (long)predefineds[i].func);
+        
+        insertnode_list(l, predefineds[i].name, 
+                           buffer, "0", ALPHA);
+        i++;
+    }
+
+    return l;
+}
 
 /*************************/
 /* the #function command */
@@ -181,7 +258,9 @@ void substitute_functions(const char *arg, char *result, struct session *ses)
   int i;
   char *cpsource, *cpsource2, end;
   struct listnode *ln, *tempfuncs;
-   
+  extern struct listnode *predefined_functions;
+
+ 
   tempfuncs=(ses) ? ses->myfuncs : common_functions;
   fflush(stdout);
 
@@ -211,7 +290,64 @@ void substitute_functions(const char *arg, char *result, struct session *ses)
       if(specfunc) funclen+=2;
  
       if (counter==nest+1 && !isdigit(*(arg+counter+1))) {
-        if((ln=searchnode_list(tempfuncs, funcname))!= NULL) {
+        if((ln = searchnode_list(predefined_functions, funcname))!=NULL) {
+            void (*ptr)(char *r, char *a1, char *a2, char *a3, char *a4);
+            char arg1[BUFFER_SIZE/4], arg2[BUFFER_SIZE/4],
+                 arg3[BUFFER_SIZE/4], arg4[BUFFER_SIZE/4],
+                 myres[BUFFER_SIZE];
+            char *args[4] = {arg1, arg2, arg3, arg4};
+            int i = 0;
+
+            *arg1 = *arg2 = *arg3 = *arg4 = 0;
+
+            *myres = 0;
+            arg+=counter+funclen;
+//            printf("Found predefined for: %s arg: %s\n", funcname, arg);
+                       
+            ptr = atol(ln->right);
+
+            if (*arg=='(') {
+               char bb[BUFFER_SIZE];
+               arg++;
+
+               while (*arg != ')' && *arg != 0) {
+                   int k = 0;
+                   
+                   while(*arg == ' ')
+                       arg++;
+        
+                   while(*arg != ' ' && *arg != ',' && *arg != 0 && *arg != ')')
+                       bb[k++] = *arg++;
+
+                   bb[k] = 0;
+
+                   substitute_myvars(bb, args[i], ses);
+
+                   if (*arg == ',')
+                       arg++;
+                   
+                   i++;
+               }
+
+
+               if (*arg || i > 0) {
+                  if (*arg == ')')
+                       arg++;
+/*
+                  printf("Processo: %s (%s,%s,%s,%s)\n",
+                          funcname, args[0], args[1], args[2], args[3]);
+ */
+                   ptr(myres, args[0], args[1], args[2], args[3]);
+
+                   
+ /*                  printf("Result: %s\n", myres); */
+                   strcpy(result, myres);
+                   result+= strlen(myres);
+               }
+            }
+
+        }
+        else if((ln=searchnode_list(tempfuncs, funcname))!= NULL) {
           char newcommand[BUFFER_SIZE];
 	  arg+=counter+funclen;
            

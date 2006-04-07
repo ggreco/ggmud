@@ -99,8 +99,10 @@ char homepath[1025];
 char prompt_line[BUFFER_SIZE];
 
 struct session *sessionlist, *activesession;
-struct listnode *common_aliases, *common_actions, *common_subs, *common_myvars;
-struct listnode *common_highs, *common_antisubs, *common_pathdirs, *common_functions;
+struct listnode *common_aliases, *common_actions, *common_subs, *common_myvars,
+                *common_highs, *common_antisubs, *common_pathdirs, *common_functions,
+                *predefined_functions;
+
 char vars[10][BUFFER_SIZE]; /* the %0, %1, %2,....%9 variables */
 char tintin_char = DEFAULT_TINTIN_CHAR;
 char verbatim_char = DEFAULT_VERBATIM_CHAR;    
@@ -139,6 +141,7 @@ int ttmain(int argc, char **argv)
   common_antisubs = init_list();
   common_pathdirs = init_list();
   common_functions = init_list();
+  predefined_functions = init_functions();
   mesvar[0] = DEFAULT_ALIAS_MESS;
   mesvar[1] = DEFAULT_ACTION_MESS;
   mesvar[2] = DEFAULT_SUB_MESS;
