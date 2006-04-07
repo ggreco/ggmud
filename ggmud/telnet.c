@@ -1,6 +1,6 @@
 /* Do all the telnet protocol stuff */
 
-#include <unistd.h>
+//#include <unistd.h>
 #include "config.h"
 #include "ggmud.h"
 
@@ -8,6 +8,8 @@
 //extern void tintin_eprintf(struct session *ses, char *format, ...);
 
 // #define TELNET_DEBUG
+
+#ifdef TELNET_SUPPORT
 
 #define tintin_printf(a, b, args...) if (debugfile) fprintf(debugfile, b, ## args )
 #define tintin_eprintf(a, b, args...) if (debugfile) fprintf(debugfile, b, ## args )
@@ -371,3 +373,5 @@ void telnet_write_line(char *line, struct session *ses)
     if (write(ses->socket, outtext, out-outtext) == -1)
         syserr("write in telnet_write_line()");
 }
+
+#endif
