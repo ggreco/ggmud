@@ -475,7 +475,7 @@ void disp_ansi(int size, const char *in, GtkTextView *target)
 {
     char buffer[256];
     int bufferpos = 0;
-    static int started_code = 0;
+    static int started_code = -1;
     static char ansibuffer[32];
     GtkTextBuffer *tbuff = gtk_text_view_get_buffer(target);
     GtkTextIter iter;
@@ -484,7 +484,7 @@ void disp_ansi(int size, const char *in, GtkTextView *target)
 
     gtk_text_buffer_get_end_iter(tbuff, &iter);
 
-    if (started_code) {
+    if (started_code != -1) {
         int i = 0;
 
         while(in[i] != 'm' && i < size) {
@@ -515,7 +515,7 @@ void disp_ansi(int size, const char *in, GtkTextView *target)
             test_getcol(ansibuffer, started_code);
         }
 
-        started_code = 0;
+        started_code = -1;
     }
 
     while(n < size) {
@@ -579,6 +579,8 @@ void disp_ansi(int size, const char *in, GtkTextView *target)
         else {
             flush_text_buffer(buffer, &bufferpos, &iter, tbuff);
 
+            started_code = 0;
+
             while(in[n] != 'm' && n < size) {
                 n++;
                 
@@ -586,12 +588,13 @@ void disp_ansi(int size, const char *in, GtkTextView *target)
                     ansibuffer[started_code++] = in[n];
             }
 
-            if (n == size && ansibuffer[started_code - 1] != 'm')
+            if ( n == size && 
+                (!started_code || ansibuffer[started_code - 1] != 'm'))
                 return;
 
             test_getcol(ansibuffer, started_code);
 
-            started_code = 0;
+            started_code = -1;
         }
         n++;
     }	
