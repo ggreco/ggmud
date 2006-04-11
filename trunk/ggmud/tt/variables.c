@@ -99,6 +99,9 @@ void var_command(const char *arg, struct session *ses)
     if((ln=searchnode_list(tempvars, left))!=NULL)
       deletenode_list(tempvars, ln);
     insertnode_list(tempvars, left, right, "0", ALPHA);
+#ifdef WITH_LUA
+    add_lua_global(left, right);
+#endif
     varnum++;
     if (mesvar[5] && verbose) {
       sprintf(arg2, "#Ok. $%s is now set to {%s}.",left, right);

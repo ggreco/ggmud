@@ -84,7 +84,6 @@ extern GtkWidget *btn_toolbar_connect;
 
 struct session *new_session(char *, char *, struct session *);
 struct session *newactive_session();
-struct session *parse_input(char *, struct session *);
 
 int hide_input = FALSE;
 

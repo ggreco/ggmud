@@ -256,8 +256,6 @@ gint hist_evt (GtkWidget* w, GdkEventKey* event, gpointer data)
     }
 
     if(keypress) {
-        extern struct session *parse_input(char *, struct session *); // fake prototype
-        
         char temp[20];
 
         temp[0] = keypress;

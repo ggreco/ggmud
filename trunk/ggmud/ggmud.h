@@ -34,6 +34,14 @@
 #define MESSAGE_TICK    5
 #define MESSAGE_LOCAL   6
 
+#ifdef WITH_LUA
+#include "lua/lua.h"
+#include "lua/lauxlib.h"
+#include "lua/lualib.h"
+
+extern void init_lua();
+#endif
+
 typedef struct {
     time_t finish;
     time_t last;
@@ -59,6 +67,9 @@ typedef struct {
     struct session *activesession;
     int input_monitor;
     GList *timers;
+#ifdef WITH_LUA
+    lua_State *lua;
+#endif
 } ggmud;
 
 typedef struct alias_data  ALIAS_DATA;
@@ -129,7 +140,7 @@ extern gint statusbar_id;
 
 /* from tintin */
 extern void parse_config(FILE *, struct session *);
-extern struct session *parse_input(char *, struct session *);
+extern struct session *parse_input(const char *, struct session *);
 extern void do_one_line(char *, struct session *);
 extern void cleanup_session(struct session *);
 extern int check_one_action(const char *, const char *, struct session *);
@@ -174,12 +185,20 @@ extern void  window_macro    (GtkWidget *widget, gpointer data);
 
 
 /* win.c */
+typedef struct {
+    char name[32];
+    GtkWidget *listptr;    
+} window_entry;
+
 extern void spawn_gui( void );
 extern void textfield_add(GtkTextView *, const char *, int);
 extern void textfield_freeze();
 extern void textfield_unfreeze();
 extern void clear(int,GtkTextView *);
 extern void cbox(void);
+extern window_entry *create_new_entry(const char *title, int width, int height);
+extern window_entry *in_window_list(const char *tag);
+
 
 /* font.c */
 extern void window_font ( GtkWidget *widget, gpointer data   );
@@ -286,5 +305,5 @@ extern void AddSimpleBar(GtkWidget *vbox, gpointer *data,
         GtkSignalFunc save_func, GtkSignalFunc close_func
         );
 
-extern char *ParseAnsiColors(char *);
+extern char *ParseAnsiColors(const char *);
 #endif /* _GGMUD_H_ */

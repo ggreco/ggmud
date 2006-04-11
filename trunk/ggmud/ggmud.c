@@ -64,6 +64,9 @@ int main(int argc, char **argv)
 {
     extern int checktick(void);
     extern void save_vars(void);
+#ifdef WITH_LUA
+   	lua_State *l;
+#endif
 
 #ifndef WIN32
     char *display;
@@ -78,7 +81,7 @@ int main(int argc, char **argv)
     gtk_set_locale ();
     gtk_init (&argc, &argv);
     gdk_init (&argc, &argv);
-  
+ 
 // this code set the ggmud path in a way you can find the help file
 #ifdef linux
     {
@@ -120,7 +123,10 @@ int main(int argc, char **argv)
     mud->lines=0;
     mud->maxlines = 300 * 70;	// This will be an option
 
-
+#ifdef WITH_LUA
+    if ((mud->lua = lua_open()))
+        init_lua();
+#endif
     /* load the stuff that needs to be loaded before the GUI comes up! */
     init_colors();
     load_prefs();

@@ -1,11 +1,11 @@
 CROSSDIR = /usr/local/cross-gcc33/i386-mingw32msvc/
 CROSSCC = $(CROSSDIR)/bin/gcc
-GLOBAL_CFLAGS = -g  -DTELNET_SUPPORT -Wall
+GLOBAL_CFLAGS = -g  -DTELNET_SUPPORT -Wall -DWITH_LUA
 OBJDIR = obj/
 CC = gcc
 CXX = g++
-INCDIR = -Itt
-COMMONLIBS = -Ltt -ltt
+INCDIR = -Itt -Ilua
+COMMONLIBS = -Ltt -ltt -Llua -llua
 CFLAGS = $(INCDIR) `pkg-config gtk+-2.0 --cflags` $(GLOBAL_CFLAGS) -DENABLE_BINRELOC -DBR_PTHREADS=0
 
 LIBS = $(COMMONLIBS) `pkg-config gtk+-2.0 --libs` 
@@ -24,7 +24,7 @@ PROJECTNAME = ggmud
 C_SRCS = alias.c ansi.c font.c fileopen.c help.c history.c log.c logviewer.c \
          macro.c net.c preferences.c ggmud.c triggers.c window.c wizard.c \
          variables.c highlights.c gags.c timers.c complete.c prefix.c \
-         telnet.c
+         telnet.c lua.c
 
 DEP_SRCS = $(CXX_SRCS) $(C_SRCS)
 
