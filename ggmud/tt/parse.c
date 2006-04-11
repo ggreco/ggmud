@@ -81,12 +81,12 @@ This program is protected under the GNU GPL (See COPYING)
 /* parse input, check for TINTIN commands and aliases and send to session */
 /**************************************************************************/
 
-extern void wait_command(struct session *ses, char *arg, char *line);
+extern void wait_command(struct session *ses, const char *arg, const char *line);
 
-struct session *parse_input(char *input, struct session *ses)
+struct session *parse_input(const char *input, struct session *ses)
 {
   char command[BUFFER_SIZE], arg[BUFFER_SIZE], result[BUFFER_SIZE];
-  char *input2;
+  const char *input2;
   struct listnode *ln;
 
   if(!term_echoing && activesession == ses) {
@@ -285,6 +285,8 @@ struct session *parse_tintin_command(const char *command, char *arg,
    
   else if(is_abbrev(command, "alias"))
     alias_command(arg, ses);
+  else if(is_abbrev(command, "script"))
+    script_command(arg, ses);
    
   else if(is_abbrev(command, "all"))
     ses = all_command(arg, ses);

@@ -330,12 +330,20 @@ void check_all_actions(const char *line, struct session *ses)
     if(check_one_action(linebuf, ln->left, ses)) {
       char buffer[BUFFER_SIZE], strng[BUFFER_SIZE];
 
-      prepare_actionalias(ln->right, buffer, ses);
-      if(echo && activesession == ses) { 
-        sprintf(strng, "[ACTION: %s]", buffer);
-        tintin_puts2(strng, ses);
+#ifdef WITH_LUA
+      if (*ln->right == '\\') {
+          execute_luatrigger(ln->right + 1, vars, var_len);
       }
-      parse_input(buffer, ses);
+      else
+#endif
+      {
+          prepare_actionalias(ln->right, buffer, ses);
+          if(echo && activesession == ses) { 
+              sprintf(strng, "[ACTION: %s]", buffer);
+              tintin_puts2(strng, ses);
+          }
+          parse_input(buffer, ses);
+      }
 //      return; this prevent the use of multiple actions on a single line
     }
   }

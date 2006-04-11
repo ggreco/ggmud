@@ -62,12 +62,6 @@ void reconnect(void)
     }
 }
 
-
-typedef struct {
-    char name[32];
-    GtkWidget *listptr;    
-} window_entry;
-
 GList *windows_list = NULL;
 
 /******************************/
@@ -115,7 +109,7 @@ void destroy_a_window(GtkWidget *w)
     }
 }
 
-GtkWidget *create_new_window(char *title, int width, int height)
+GtkWidget *create_new_window(const char *title, int width, int height)
 {
     GtkWidget *win, *vbox;
     GtkWidget *list;
@@ -166,7 +160,7 @@ input_line_visible(int state)
     gtk_entry_set_visibility(mud->ent, state);
 }
 
-window_entry *create_new_entry(char *title, int width, int height)
+window_entry *create_new_entry(const char *title, int width, int height)
 {
     window_entry *entry;
     
@@ -271,7 +265,7 @@ void showme_command(char *arg, struct session *ses)
   textfield_add(mud->text, d, MESSAGE_LOCAL);
 }
 
-window_entry *in_window_list(char *tag)
+window_entry *in_window_list(const char *tag)
 {
     GList *l = windows_list;
 
@@ -1339,51 +1333,6 @@ void clear(int n, GtkTextView *target)
     gtk_text_buffer_set_text(b, "", -1);
 }	
 
-#if 0
-void popup_window (const gchar *message, ...)
-{
-    va_list va;
-    GtkWidget *window;
-    GtkWidget *label;
-    GtkWidget *button;
-    GtkWidget *box;
-    GtkWidget *separator, *image, *hbox;
-
-    gchar       buf[3072];
-
-    window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title (GTK_WINDOW (window), "Popup Message");
-
-    box = gtk_vbox_new (FALSE, 3);
-    hbox = gtk_hbox_new (FALSE, 2);
-    gtk_container_set_border_width (GTK_CONTAINER (box), 5);
-    gtk_container_add (GTK_CONTAINER (window), box);
-
-    va_start(va, message);
-    *buf = ' ';
-    vsprintf(buf + 1, message, va);
-    strcat(buf, " ");
-    va_end(va);
-
-    label = gtk_label_new (buf);
-    image = gtk_image_new_from_stock(GTK_STOCK_DIALOG_WARNING, 
-            GTK_ICON_SIZE_DIALOG);
-    
-    gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 5);
-    gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 5);
-    gtk_box_pack_start (GTK_BOX (box), hbox, FALSE, FALSE, 5);
- 
-    separator = gtk_hseparator_new ();
-    gtk_box_pack_start (GTK_BOX (box), separator, TRUE, TRUE, 0);
- 
-    button = gtk_button_new_from_stock (GTK_STOCK_OK);
-    gtk_signal_connect (GTK_OBJECT (button), "clicked",
-            GTK_SIGNAL_FUNC (close_window),
-            window);
-    gtk_box_pack_start (GTK_BOX (box), button, TRUE, TRUE, 5);
-    gtk_widget_show_all (window);
-}
-#else
 void popup_window (int type, const gchar *message, ...)
 {
     va_list va;
@@ -1396,13 +1345,12 @@ void popup_window (int type, const gchar *message, ...)
 
     d = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL,
                            type, GTK_BUTTONS_OK,
-                           message);
+                           buf);
 
     gtk_dialog_run(GTK_DIALOG(d));
    
     gtk_widget_destroy(d);
 }
-#endif
 
 static 
 GtkWidget *create_tv(GtkTextBuffer *buffer, GtkTextView **view)
