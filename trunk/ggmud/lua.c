@@ -3,36 +3,25 @@
 #include "ggmud.h"
 #include "config.h"
 
-void do_luashow(lua_State *s)
+int do_luashow(lua_State *s)
 {
-  if (lua_gettop(s) < 1)
-      return;
-  
-  if (lua_isstring(s, 1)) {
-      char *d = ParseAnsiColors(lua_tostring(s, 1));
+  const char *msg = luaL_checkstring(s, 1);
+  char *d = ParseAnsiColors(msg);
 
-      strcat(d, "\n");
+  strcat(d, "\n");
+  textfield_add(mud->text, d, MESSAGE_LOCAL);
 
-      textfield_add(mud->text, d, MESSAGE_LOCAL);
-  }
+  return 0;
 }
 
-void do_luawindow(lua_State *s)
+int do_luawindow(lua_State *s)
 {
     window_entry *entry;
-    const char *left = NULL, *right = NULL;
+    const char *left = luaL_checkstring(s,1), 
+	       *right = luaL_checkstring(s,2);
 
-    if (lua_gettop(s) < 1)
-        return;
-
-    if (lua_isstring(s, 1))
-        left = lua_tostring(s,1);
-    
-    if (lua_isstring(s, 2))
-        right = lua_tostring(s,2);
-
-    if(!left || !*left || strlen(left) > 31)
-        return;
+    if(!*left || strlen(left) > 31)
+        return 0;
 
     if(!(entry = in_window_list(left))) {
         int width = 400, height = 300;
@@ -43,7 +32,7 @@ void do_luawindow(lua_State *s)
     }
 
 
-    if(right && *right && entry) {
+    if(*right && entry) {
         char t1[BUFFER_SIZE], t2[BUFFER_SIZE];
         char *result;
         substitute_myvars(right, t1, s);
@@ -52,23 +41,23 @@ void do_luawindow(lua_State *s)
         strcat(result, "\n");
         textfield_add((GtkTextView *)entry->listptr, result , MESSAGE_LOCAL);
     }
+
+    return 0;
 }
 
-void do_luasend(lua_State *s)
+int do_luasend(lua_State *s)
 {
-    if (lua_gettop(s) < 1)
-        return;
-
     if (mud->activesession) {
-        const char *t = lua_tostring(s, 1);
+        const char *t = luaL_checkstring(s, 1);
         mud->activesession = parse_input(t, mud->activesession);
     }
+
+    return 0;
 }
 
 void script_command(char *arg, struct session *ses)
 {
   char left[BUFFER_SIZE], buffer[BUFFER_SIZE];
-
 
   get_arg_in_braces(arg, left, 1);
 
@@ -80,7 +69,8 @@ void script_command(char *arg, struct session *ses)
   }
 
   if (lua_pcall(mud->lua, 0, 0, 0)) {
-      sprintf(buffer, "Error in LUA script: %s\n", left);
+      sprintf(buffer, "Error in LUA script %s: %s\n", left,
+		      lua_tostring(L, -1));
       textfield_add(mud->text, buffer, MESSAGE_ERR);
   }
 }
@@ -105,23 +95,29 @@ void execute_luatrigger(const char *name, char **vars, int *var_len)
     }
 }
 
-void do_luatrigger(lua_State *s)
+int do_luatrigger(lua_State *s)
 {
     char buffer[1024];
+    const char *trig = luaL_checkstring(s, 1);  
     
-    if (lua_gettop(s) < 2 || 
-        !lua_isstring(s, 1) || 
-        lua_isstring(s, 2))
-        return;
+    if (!lua_isfunction(s, 2)) {
+	    char buffer[512];
+	    sprintf(buffer, "%s is not a function!\n", lua_tostring(s, 2));
+	    textfield_add(mud->text, buffer, MESSAGE_ERR);
+	    return 0;
+    }
     
     sprintf(buffer, "#action {%s} {\\%s} {scripting}",
-            lua_tostring(s, 1), lua_tostring(s, 2));
+            trig, lua_tostring(s, 2));
             
     parse_input(buffer, NULL);
+
+    return 0;
 }
 
-void do_luatimer(lua_State *s)
+int do_luatimer(lua_State *s)
 {
+	return 0;
 }
 
 void init_lua()
