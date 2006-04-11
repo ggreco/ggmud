@@ -23,7 +23,7 @@ This program is protected under the GNU GPL (See COPYING)
 #ifndef __PARSE_H__
 #define __PARSE_H__
 extern int timeofday;
-extern struct session *parse_input(char *input, struct session *ses);
+extern struct session *parse_input(const char *input, struct session *ses);
 extern int is_speedwalk_dirs(const char *cp);
 extern void do_speedwalk(const char *cp, struct session *ses);
 extern struct session *parse_tintin_command(const char *command, char *arg, struct session *ses);
