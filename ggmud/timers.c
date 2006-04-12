@@ -185,6 +185,20 @@ int checktick(void)
 
     now = time(0);
 
+#ifdef WITH_LUA
+    if (mud->lua_idle_function) {
+        lua_getglobal(mud->lua, mud->lua_idle_function);
+
+        if (lua_pcall(mud->lua, 0, 0, 0) != 0) {
+            char buffer[1024];
+            sprintf(buffer, "Error running idle function %s: %s\n", 
+                    mud->lua_idle_function, lua_tostring(mud->lua, -1));
+            textfield_add(mud->text, buffer, MESSAGE_ERR);
+            lua_pop(mud->lua, 1);
+        }
+    }
+#endif
+    
 // this is a workaround for a cursor invisibility problem with telnet sessions
     if (mud && mud->activesession) {
         if (last_invisible) {

@@ -82,6 +82,7 @@ This program is protected under the GNU GPL (See COPYING)
 /**************************************************************************/
 
 extern void wait_command(struct session *ses, const char *arg, const char *line);
+extern char lua_char;
 
 struct session *parse_input(const char *input, struct session *ses)
 {
@@ -125,7 +126,14 @@ struct session *parse_input(const char *input, struct session *ses)
   while(*input2) {
     if(*input2 == ';')
       input2++;
-    
+   
+#ifdef WITH_LUA
+    if (*input2 == lua_char) {
+        input2 = call_luafunction(input2 + 1);
+        continue;
+    }
+#endif
+
     input2 = (char *)get_arg_stop_spaces(input2, command);
     input2 = (char *)get_arg_all(input2, arg);
 

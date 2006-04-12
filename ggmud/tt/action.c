@@ -52,7 +52,7 @@ static int var_len[10];
 static const char *var_ptr[10];
 
 trigger_class *trigger_classes = NULL;
-
+extern char lua_char;
 
 /***********************/
 /* the #action command */
@@ -331,8 +331,8 @@ void check_all_actions(const char *line, struct session *ses)
       char buffer[BUFFER_SIZE], strng[BUFFER_SIZE];
 
 #ifdef WITH_LUA
-      if (*ln->right == '\\') {
-          execute_luatrigger(ln->right + 1, vars, var_len);
+      if (*ln->right == lua_char) {
+          execute_luatrigger(ln->right + 1, var_ptr, var_len);
       }
       else
 #endif

@@ -69,6 +69,7 @@ typedef struct {
     GList *timers;
 #ifdef WITH_LUA
     lua_State *lua;
+    char *lua_idle_function;
 #endif
 } ggmud;
 

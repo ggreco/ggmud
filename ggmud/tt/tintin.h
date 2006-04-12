@@ -70,6 +70,7 @@ This program is protected under the GNU GPL (See COPYING)
 #define DEFAULT_VERBATIM_CHAR '\\'        /* if an input starts with this
                                              char, it will be sent 'as is'
                                              to the MUD */
+#define DEFAULT_LUA_CHAR '&'
 #ifndef DEFAULT_FILE_DIR
 #define DEFAULT_FILE_DIR "/usr/local/lib/tintin" /* Path to Tintin files, or HOME */
 #endif
