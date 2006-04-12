@@ -92,8 +92,18 @@ extern int prompt_on;
 /*
  * Global Variables
  */
-int connected;
+int connected = FALSE;
 static int connecting = 0;
+
+void set_connected(int value)
+{
+    connected = value;
+#ifdef WITH_LUA
+    lua_pushstring(mud->lua, "connected");
+    lua_pushboolean(mud->lua, value);
+    lua_settable(mud->lua, LUA_GLOBALSINDEX);
+#endif
+}
 
 static void printline(const char *str, int isaprompt)
 {    
@@ -172,7 +182,8 @@ void disconnect ( void )
         gtk_main_iteration(); // to ensure the input is removed
 
     textfield_add (mud->text,  "\n*** Connection closed.\n", MESSAGE_NORMAL);
-    connected = FALSE;
+    set_connected(FALSE);
+    
     gtk_widget_set_sensitive (menu_File_Connect, TRUE);
     gtk_widget_set_sensitive (btn_toolbar_connect, TRUE);
     gtk_widget_set_sensitive (menu_File_DisConnect, FALSE);
@@ -222,7 +233,7 @@ connection_part_two(int sockfd, struct tempdata *mystr)
     mud->input_monitor = gdk_input_add (sockfd, GDK_INPUT_READ,
     				   read_from_connection,
     				   mud->activesession );
-    connected = TRUE;
+    set_connected(TRUE);
     gtk_widget_set_sensitive (menu_File_Connect, FALSE);
     gtk_widget_set_sensitive (btn_toolbar_connect, FALSE);
     gtk_widget_set_sensitive (menu_File_DisConnect, TRUE);

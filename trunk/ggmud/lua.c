@@ -61,16 +61,23 @@ void script_command(char *arg, struct session *ses)
 
   get_arg_in_braces(arg, left, 1);
 
+  if (!strstr(left, ".lua") && !strchr(left, ".")) {
+      strcat(left, ".lua");
+  }
+  
   if (luaL_loadfile(mud->lua, left)) {
 
-      sprintf(buffer, "Unable to load LUA script: %s\n", left);
+      sprintf(buffer, "Unable to load LUA script %s: %s\n", left,
+              lua_tostring(mud->lua, -1));
       textfield_add(mud->text, buffer, MESSAGE_ERR);
+      lua_pop(mud->lua, 1);
       return;
   }
 
   if (lua_pcall(mud->lua, 0, 0, 0)) {
       sprintf(buffer, "Error in LUA script %s: %s\n", left,
-		      lua_tostring(L, -1));
+		      lua_tostring(mud->lua, -1));
+      lua_pop(mud->lua, 1);
       textfield_add(mud->text, buffer, MESSAGE_ERR);
   }
 }
@@ -83,15 +90,17 @@ void execute_luatrigger(const char *name, char **vars, int *var_len)
 
     for (i = 0; i < 10; i++) {
         if (var_len[i] > 0) {
-            lua_pushstring(mud->lua, vars[i]);
+            lua_pushlstring(mud->lua, vars[i], var_len[i]);
             args++;
         }
     }
 
     if (lua_pcall(mud->lua, args, 0, 0) != 0) {
       char buffer[1024];
-      sprintf(buffer, "Error running function %s with %d args\n", name, args);
+      sprintf(buffer, "Error running function %s with %d args: %s\n", 
+              name, args, lua_tostring(mud->lua, -1));
       textfield_add(mud->text, buffer, MESSAGE_ERR);
+      lua_pop(mud->lua, 1);
     }
 }
 
@@ -99,19 +108,68 @@ int do_luatrigger(lua_State *s)
 {
     char buffer[1024];
     const char *trig = luaL_checkstring(s, 1);  
+    const char *func = luaL_checkstring(s, 2);
     
-    if (!lua_isfunction(s, 2)) {
-	    char buffer[512];
-	    sprintf(buffer, "%s is not a function!\n", lua_tostring(s, 2));
-	    textfield_add(mud->text, buffer, MESSAGE_ERR);
-	    return 0;
-    }
-    
-    sprintf(buffer, "#action {%s} {\\%s} {scripting}",
-            trig, lua_tostring(s, 2));
+    sprintf(buffer, "#action {%s} {&%s} {scripting}",
+            trig, func);
             
     parse_input(buffer, NULL);
 
+    return 0;
+}
+
+int do_luaclear(lua_State *s)
+{
+    if (lua_gettop(s) == 0)
+        clear_text_widget(mud->text);
+    else {
+        const char *win = luaL_checkstring(s, 1);  
+        int width, height;
+        window_entry *entry;
+
+        if (lua_gettop(s) == 2)
+            width = lua_tonumber(s, 2);
+        else
+            width = 400;
+        
+        if (lua_gettop(s) == 3)
+            height = lua_tonumber(s, 3);
+        else
+            height = 300;
+        
+        if(!(entry = in_window_list(win))) {
+            create_new_entry(win, width, height); // creo la nuova finestra nel caso non ci sia
+            gtk_window_activate_focus(GTK_WINDOW(mud->window));
+        }
+        else
+            clear_text_widget(GTK_TEXT_VIEW(entry->listptr));
+
+    }
+
+    return 0;
+}
+
+int do_luauntrigger(lua_State *s)
+{
+    char buffer[1024];
+    const char *trig = luaL_checkstring(s, 1);  
+    
+    sprintf(buffer, "#unaction {%s}", trig);
+            
+    parse_input(buffer, NULL);
+
+    return 0;
+}
+
+int do_luaidle(lua_State *s)
+{
+    const char *trig = luaL_checkstring(s, 1);  
+    
+    if (mud->lua_idle_function)
+        free(mud->lua_idle_function);
+    
+    mud->lua_idle_function = strdup(trig);
+    
     return 0;
 }
 
@@ -120,10 +178,76 @@ int do_luatimer(lua_State *s)
 	return 0;
 }
 
+const char *call_luafunction(const char *string)
+{
+    char name[256], arg[256];
+    int i = 0, args = 0;
+    
+    while (*string != '(' && *string != ' ' && *string != '\t' && *string != 0)
+        name[i++] = *string++;
+    
+    if (!i)
+        return;
+
+    name[i] = 0;
+
+    lua_getglobal(mud->lua, name);
+   
+    while (*string == ' ' || *string == '\t')
+        string++;
+
+    if (*string) {
+        if (*string != '(') {
+            lua_pop(mud->lua, 1);
+            return string;
+        }
+        else
+            string++;
+
+        while (*string && *string != ')') {
+            if (*string == ',')
+                string++;
+
+            i = 0;
+
+            while (*string == ' ')
+                string++;
+            
+            while (*string != ',' && *string != ')')
+                arg[i++] = *string++;
+
+            arg[i] = 0;
+
+            lua_pushstring(mud->lua, arg);
+            
+            args++;
+        }
+
+        if (*string != ')') {
+            lua_pop(mud->lua, 1 + args);
+            return string;
+        }
+    }
+    
+    if (lua_pcall(mud->lua, args, 0, 0) != 0) {
+      char buffer[1024];
+      sprintf(buffer, "Error running function %s with %d args: %s\n", 
+              name, args, lua_tostring(mud->lua, -1));
+      textfield_add(mud->text, buffer, MESSAGE_ERR);
+      lua_pop(mud->lua, 1);
+    }
+
+    return string + 1;
+}
+
 void init_lua()
 {
     luaopen_base(mud->lua);
-
+    luaopen_table(mud->lua);            /* opens the table library */
+//    luaopen_io(mud->lua);               /* opens the I/O library */
+    luaopen_string(mud->lua);           /* opens the string lib. */
+    luaopen_math(mud->lua); 
+    
     // set version number
 
     lua_pushstring(mud->lua, "VERSION");
@@ -136,8 +260,11 @@ void init_lua()
     lua_register(mud->lua, "window", do_luawindow);
 
     lua_register(mud->lua, "trigger", do_luatrigger);
+    lua_register(mud->lua, "untrigger", do_luauntrigger);
     lua_register(mud->lua, "send", do_luasend);
     lua_register(mud->lua, "timer", do_luatimer);
+    lua_register(mud->lua, "idle_function", do_luaidle);
+    lua_register(mud->lua, "clear", do_luaclear);
 }
 
 void add_lua_global(const char *v1, const char *v2)

@@ -106,6 +106,7 @@ struct listnode *common_aliases, *common_actions, *common_subs, *common_myvars,
 char vars[10][BUFFER_SIZE]; /* the %0, %1, %2,....%9 variables */
 char tintin_char = DEFAULT_TINTIN_CHAR;
 char verbatim_char = DEFAULT_VERBATIM_CHAR;    
+char lua_char = DEFAULT_LUA_CHAR;
 char system_com[80] = SYSTEM_COMMAND_DEFAULT;
 int retries = MAX_RETRY;
 int time_before_try = TIME_BETWEEN_RETRIES;
