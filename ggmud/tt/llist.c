@@ -167,7 +167,7 @@ struct listnode *copy_list(struct listnode *sourcelist, int mode)
 /* priority (dependent on mode) - Mods by Joann Ellsworth 2/2/94 */
 /*****************************************************************/
 
-void insertnode_list(struct listnode *listhead,
+struct listnode *insertnode_list(struct listnode *listhead,
 		     const char *ltext, const char *rtext, const char *prtext,
 		     int mode)
 {
@@ -196,8 +196,10 @@ void insertnode_list(struct listnode *listhead,
 
     nptrlast->next = newnode;
     newnode->next = NULL;
-    return;
+    return newnode;
   }
+
+  return newnode;
 }
 
 /*****************************/
