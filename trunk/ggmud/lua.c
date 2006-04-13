@@ -240,14 +240,51 @@ const char *call_luafunction(const char *string)
     return string + 1;
 }
 
+
+static int get_string(lua_State* L)
+{
+  printf("Chiamata get_string!\n");
+  char **var=(char **) lua_touserdata(L,2);
+  lua_pushstring(L,*var);
+  return 1;
+}
+
+static int set_string(lua_State* L)
+{
+  printf("Chiamata set_string!\n");
+  char ** var=(char **) lua_touserdata(L,2);
+  const char *c =  lua_tostring(L,3);
+  free(*var);
+  *var = strdup(c);
+  return 0;
+}
+
+// function __index(object, key)
+static int __index(lua_State* L) // object, key
+{
+    printf("Chiamata index!\n");
+    // get object's metatable
+    lua_getmetatable(L, 1);      // object, key, mt
+
+    // lookup key inside mt
+    lua_pushvalue(L, 2);          // object, key, mt, key
+    lua_rawget(L, -2);           // object, key, mt, mt[key]
+
+    // return one value from the top of the stack
+    return 1;
+}
+
+
+
+
 void init_lua()
 {
     luaopen_base(mud->lua);
     luaopen_table(mud->lua);            /* opens the table library */
-//    luaopen_io(mud->lua);               /* opens the I/O library */
+    //    luaopen_io(mud->lua);               /* opens the I/O library */
     luaopen_string(mud->lua);           /* opens the string lib. */
     luaopen_math(mud->lua); 
-    
+
     // set version number
 
     lua_pushstring(mud->lua, "VERSION");
@@ -265,16 +302,53 @@ void init_lua()
     lua_register(mud->lua, "timer", do_luatimer);
     lua_register(mud->lua, "idle_function", do_luaidle);
     lua_register(mud->lua, "clear", do_luaclear);
+
+#if 0
+    mystring = lua_newtag(mud->lua);
+
+    lua_pushcfunction(mud->lua, get_string); 
+    lua_settagmethod(mud->lua, mystring, "getglobal");
+    lua_pushcfunction(mud->lua, set_string);
+    lua_settagmethod(mud->lua, mystring, "setglobal");
+#endif
+
+#ifdef BROKEN
+    // Create: the metatable.
+    luaL_newmetatable(mud->lua, "mystring");
+    lua_pushstring(mud->lua, "__index");
+    lua_pushcfunction(mud->lua, __index);
+    lua_rawset(mud->lua, -3); 
+
+// Add the Print function.
+    lua_pushstring(mud->lua, "__get");
+    lua_pushcfunction(mud->lua, get_string);
+    lua_rawset(mud->lua, -3); 
+    lua_pushstring(mud->lua, "__newindex");
+    lua_pushcfunction(mud->lua, set_string);
+    lua_settable(mud->lua, -3);
+#endif
 }
 
-void add_lua_global(const char *v1, const char *v2)
+void add_lua_global(const char *v1, const char **v2)
 {
     if (!mud->lua)
         return;
-            
+#if 0
+    lua_pushusertag(mud->lua, v2, mystring);
+    lua_setglobal(mud->lua, v1);
+#elif defined(BROKEN)
     lua_pushstring(mud->lua, v1);
-    lua_pushstring(mud->lua, v2);
+    lua_pushlightuserdata(mud->lua, v2);
+    lua_getmetatable(mud->lua, "mystring");
+    lua_setmetatable(mud->lua, -2);
+    lua_rawset(mud->lua, LUA_GLOBALSINDEX);
+#else
+    lua_pushstring(mud->lua, v1);
+    lua_pushstring(mud->lua, *v2);
     lua_settable(mud->lua, LUA_GLOBALSINDEX);
+#endif
+
+    
 }
 
 #endif

@@ -27,7 +27,7 @@ extern struct listnode *init_list(void);
 extern void kill_list(struct listnode *nptr);
 extern void kill_all(struct session *ses, int mode);
 extern struct listnode *copy_list(struct listnode *sourcelist, int mode);
-extern void insertnode_list(struct listnode *listhead, const char *ltext, const char *rtext, const char *prtext, int mode);
+extern struct listnode *insertnode_list(struct listnode *listhead, const char *ltext, const char *rtext, const char *prtext, int mode);
 extern void deletenode_list(struct listnode *listhead, struct listnode *nptr);
 extern struct listnode *searchnode_list(struct listnode *listhead, const char *cptr);
 extern struct listnode *searchnode_list_begin(struct listnode *listhead, const char *cptr, int mode);

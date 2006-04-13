@@ -96,12 +96,18 @@ void var_command(const char *arg, struct session *ses)
   }
 
   else {
-    if((ln=searchnode_list(tempvars, left))!=NULL)
-      deletenode_list(tempvars, ln);
-    insertnode_list(tempvars, left, right, "0", ALPHA);
+    if((ln=searchnode_list(tempvars, left))!=NULL) {
+        if (ln->right)
+            free(ln->right);
+        
+        ln->right = strdup(right);
+    }
+    else {
+        ln = insertnode_list(tempvars, left, right, "0", ALPHA);
 #ifdef WITH_LUA
-    add_lua_global(left, right);
+        add_lua_global(ln->left, &(ln->right));
 #endif
+    }
     varnum++;
     if (mesvar[5] && verbose) {
       sprintf(arg2, "#Ok. $%s is now set to {%s}.",left, right);
@@ -162,81 +168,82 @@ void unvar_command(const char *arg, struct session *ses)
 
 void substitute_myvariables(const char *arg, char *result, struct session *ses)
 {
-  char varname[BUFFER_SIZE], temp[BUFFER_SIZE];
-  int nest=0,counter,varlen;
-  int specvar;
-  struct listnode *ln, *tempvars;
+    char varname[BUFFER_SIZE], temp[BUFFER_SIZE];
+    int nest=0,counter,varlen;
+    int specvar;
+    struct listnode *ln, *tempvars;
 
-  tempvars=(ses) ? ses->myvars : common_myvars;
-  fflush(stdout);
-  while(*arg) {
-    if(*arg=='$') { /* substitute variable */
-      counter=0;
-      while (*(arg+counter)=='$')
-	counter++;
-      varlen=0;
+    tempvars=(ses) ? ses->myvars : common_myvars;
+    fflush(stdout);
+    while(*arg) {
+        if(*arg=='$') { /* substitute variable */
+            counter=0;
+            while (*(arg+counter)=='$')
+                counter++;
+            varlen=0;
 
-/* ${name} code added by Sverre Normann */
-      if(*(arg+counter)!=DEFAULT_OPEN) {
-        specvar=FALSE;
-        while(isalpha(*(arg+varlen+counter)))
-          varlen++;  
-        if (varlen>0)
-          strncpy(varname,arg+counter,varlen);
-        *(varname+varlen)='\0';
-      } else {
-        specvar=TRUE;
-        get_arg_in_braces(arg+counter, temp, 0);
-        substitute_myvars(temp, varname, ses);      /* RECURSIVE CALL */
-        varlen=strlen(temp);
-      }
+            /* ${name} code added by Sverre Normann */
+            if(*(arg+counter)!=DEFAULT_OPEN) {
+                specvar=FALSE;
+                while(isalpha(*(arg+varlen+counter)))
+                    varlen++;  
+                if (varlen>0)
+                    strncpy(varname,arg+counter,varlen);
+                *(varname+varlen)='\0';
+            } else {
+                specvar=TRUE;
+                get_arg_in_braces(arg+counter, temp, 0);
+                substitute_myvars(temp, varname, ses);      /* RECURSIVE CALL */
+                varlen=strlen(temp);
+            }
 
-      if(specvar) varlen+=2;
+            if(specvar) varlen+=2;
 
-      if (counter==nest+1 && !isdigit(*(arg+counter+1))) {
-        if((ln=searchnode_list(tempvars, varname))!= NULL) {
-	  strcpy(result, ln->right);
-          result+=strlen(ln->right);
-          arg+=counter+varlen;
-	} else {
-	  /* secstotick code added by Sverre Normann */
-          if (strcmp(varname,"secstotick")) {
-	    strncpy(result,arg,counter+varlen);
-            result+=varlen+counter;
-          }
-          else {
-            char buf[BUFFER_SIZE];
-            sprintf(buf,"%d",timetilltick());
-            strcpy(result, buf);
-            result+=strlen(buf);
-          }
-          arg+=counter+varlen;
-        }
-      } else  {  
-          strncpy(result,arg,counter+varlen);
-          result+=varlen+counter;
-          arg+=varlen+counter;
-      }
+            if (counter==nest+1 && !isdigit(*(arg+counter+1))) {
+                if((ln=searchnode_list(tempvars, varname))!= NULL) {
+                    
+                    strcpy(result, ln->right);
+                    result+=strlen(ln->right);
+                    arg+=counter+varlen;
+                } else {
+                    /* secstotick code added by Sverre Normann */
+                    if (strcmp(varname,"secstotick")) {
+                        strncpy(result,arg,counter+varlen);
+                        result+=varlen+counter;
+                    }
+                    else {
+                        char buf[BUFFER_SIZE];
+                        sprintf(buf,"%d",timetilltick());
+                        strcpy(result, buf);
+                        result+=strlen(buf);
+                    }
+                    arg+=counter+varlen;
+                }
+            } else  {  
+                strncpy(result,arg,counter+varlen);
+                result+=varlen+counter;
+                arg+=varlen+counter;
+            }
 #ifdef BIG5
-      // for Big5 encoding
-    } else if(*arg & 0x80) {
-      *result++ = *arg++;
-      if(*arg)
-	*result++ = *arg++;
+            // for Big5 encoding
+        } else if(*arg & 0x80) {
+            *result++ = *arg++;
+            if(*arg)
+                *result++ = *arg++;
 #endif
-    } else if (*arg==DEFAULT_OPEN) {
-      nest++;
-      *result++= *arg++;
-    } else if (*arg==DEFAULT_CLOSE) {
-      nest--;
-      *result++= *arg++;
-    } else if (*arg=='\\' && *(arg+1)=='$' && nest==0) {
-      arg++;
-      *result++= *arg++;
-    } else
-      *result++= *arg++;
-  }
-  *result='\0';
+        } else if (*arg==DEFAULT_OPEN) {
+            nest++;
+            *result++= *arg++;
+        } else if (*arg==DEFAULT_CLOSE) {
+            nest--;
+            *result++= *arg++;
+        } else if (*arg=='\\' && *(arg+1)=='$' && nest==0) {
+            arg++;
+            *result++= *arg++;
+        } else
+            *result++= *arg++;
+    }
+    *result='\0';
 }
 
 

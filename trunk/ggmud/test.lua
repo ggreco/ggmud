@@ -15,6 +15,7 @@ punti_gemma = 0
 punti_totali = 0
 idle_loops = 0
 
+is_afk = false
 logged = false
 combat = false
 in_group = false
@@ -109,10 +110,10 @@ function myidle()
        return
    end
 
-   idle_loops++
+   idle_loops = idle_loops + 1
    
 -- se non sono in combattimento lancio uno score
-   if idle_loops > 60 and combat == false then
+   if idle_loops > 60 and combat == false and is_afk == false then
        idle_loops = 0
        send("score")
    end
@@ -188,12 +189,17 @@ function handle_ask(c, t) handle_speaks(c, t, "$c0006") end
 function handle_say(c, t) handle_speaks(c, t, "$c0015") end
 function handle_gt(c, t) handle_speaks(c, t, "$c0012") end
 
+function set_afk_on() is_afk = true show("$c0015AFK mode $c0009ON$c0007") end
+function set_afk_off() is_afk = false show("$c0015AFK mode $c0009OFF$c0007") end
+
 show("$c0015Started script configuration for $c0011Mongo$c0007...")
 
-dump("tank", tank)
-dump("Guida:", leader)
+-- dump("tank", tank)
+-- dump("Guida:", leader)
 dump("Versione programma:", VERSION)
-
+print(pippo)
+-- pippo = "Fanculo!"
+-- print("Pippo: " .. pippo)
 
 trigger("^##%1>", "grab_prompt")
 
@@ -221,6 +227,9 @@ trigger("^::%1:: '%2", "handle_think");
 trigger("^[%1] dice alla gilda '%2", "handle_ctell");
 trigger("^[%1] '%2", "handle_ot");
 
+-- AFK mode
+trigger("^Ti allontani", "set_afk_on");
+trigger("^Ritorni alla", "set_afk_off");
 -- idle
 idle_function("myidle");
 
