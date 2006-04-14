@@ -86,6 +86,9 @@ void var_command(const char *arg, struct session *ses)
   else if(*left && !*right) {
     if ((ln=search_node_with_wild(tempvars,left))!=NULL) {
       while((tempvars=search_node_with_wild(tempvars, left))!=NULL) {
+#ifdef WITH_LUA
+        get_lua_global(tempvars->left, &(tempvars->right));
+#endif
         shownode_list(tempvars);
       }
       prompt(ses);
@@ -104,10 +107,10 @@ void var_command(const char *arg, struct session *ses)
     }
     else {
         ln = insertnode_list(tempvars, left, right, "0", ALPHA);
-#ifdef WITH_LUA
-        add_lua_global(ln->left, &(ln->right));
-#endif
     }
+#ifdef WITH_LUA
+    add_lua_global(ln->left, &(ln->right));
+#endif
     varnum++;
     if (mesvar[5] && verbose) {
       sprintf(arg2, "#Ok. $%s is now set to {%s}.",left, right);
@@ -202,7 +205,7 @@ void substitute_myvariables(const char *arg, char *result, struct session *ses)
             if (counter==nest+1 && !isdigit(*(arg+counter+1))) {
                 if((ln=searchnode_list(tempvars, varname))!= NULL) {
 #ifdef WITH_LUA
-		    get_lua_global(varname, &(ln->right));
+                    get_lua_global(varname, &(ln->right));
 #endif
                     strcpy(result, ln->right);
                     result+=strlen(ln->right);
@@ -262,29 +265,32 @@ void substitute_myvariables(const char *arg, char *result, struct session *ses)
 /*****************************************************/
 void getvarvalue_command(const char *arg, struct session *ses)
 {
-  char   left[BUFFER_SIZE], right[BUFFER_SIZE],
-         temp[BUFFER_SIZE];
-  struct listnode *ln, *tempvars;
-  
-  tempvars = (ses) ?  ses->myvars : common_myvars;
-  arg=get_arg_in_braces(arg, left, 0);
-  arg=get_arg_in_braces(arg, right, 1);
-  if (!*left || !*right) {
-    tintin_puts2("#Syntax: #getvarvalue {dest var} {source var}", ses);
-  } else {
-    substitute_vars(left,temp);
-    substitute_myvars(temp,left,ses);
-    substitute_vars(right,temp);
-    substitute_myvars(temp,right,ses);
+    char   left[BUFFER_SIZE], right[BUFFER_SIZE],
+    temp[BUFFER_SIZE];
+    struct listnode *ln, *tempvars;
 
-    if((ln=searchnode_list(tempvars, right))!= NULL) {
-      sprintf(temp,"{%s} {%s}",left,ln->right);
-      var_command(temp, ses);
+    tempvars = (ses) ?  ses->myvars : common_myvars;
+    arg=get_arg_in_braces(arg, left, 0);
+    arg=get_arg_in_braces(arg, right, 1);
+    if (!*left || !*right) {
+        tintin_puts2("#Syntax: #getvarvalue {dest var} {source var}", ses);
+    } else {
+        substitute_vars(left,temp);
+        substitute_myvars(temp,left,ses);
+        substitute_vars(right,temp);
+        substitute_myvars(temp,right,ses);
+
+        if((ln=searchnode_list(tempvars, right))!= NULL) {
+#ifdef WITH_LUA
+            get_lua_global(right, &(ln->right));
+#endif
+            sprintf(temp,"{%s} {%s}",left,ln->right);
+            var_command(temp, ses);
+        }
+        else {
+            tintin_puts2("#Error in #getvarvalue: variable does not exists",ses);
+        }
     }
-    else {
-      tintin_puts2("#Error in #getvarvalue: variable does not exists",ses);
-    }
-  }
 }
 
 
@@ -386,26 +392,35 @@ void getitemnr_command(const char *arg, struct session *ses)
 /*************************/
 void tolower_command(const char *arg, struct session *ses)
 {
-  char left[BUFFER_SIZE], right[BUFFER_SIZE], arg2[BUFFER_SIZE], *p;
-  struct listnode *tempvars, *ln;
+    char left[BUFFER_SIZE], right[BUFFER_SIZE], arg2[BUFFER_SIZE], *p;
+    struct listnode *tempvars, *ln;
 
-  tempvars = (ses) ? ses->myvars : common_myvars;
-  arg = get_arg_in_braces(arg, left,0);
-  arg = get_arg_in_braces(arg, right,1);
-  if (!*left || !*right) {
-    tintin_puts2("#Syntax: #tolower <var> <text>", ses);
-  } else {
-    if ((ln=searchnode_list(tempvars, left)) != NULL)
-      deletenode_list(tempvars, ln);
-    for (p=right; *p; p++)
-      *p = tolower(*p);
-    insertnode_list(tempvars, left, right, "0", ALPHA);
-    varnum++;
-    if (mesvar[5]) {
-      sprintf(arg2, "#Ok. $%s is now set to {%s}.",left, right);
-      tintin_puts2(arg2, ses);
+    tempvars = (ses) ? ses->myvars : common_myvars;
+    arg = get_arg_in_braces(arg, left,0);
+    arg = get_arg_in_braces(arg, right,1);
+    if (!*left || !*right) {
+        tintin_puts2("#Syntax: #tolower <var> <text>", ses);
+    } else {
+        for (p=right; *p; p++)
+            *p = tolower(*p);
+
+        if ((ln=searchnode_list(tempvars, left)) != NULL) {
+            free(ln->right);
+            ln->right = strdup(right);
+        }
+        else 
+            ln = insertnode_list(tempvars, left, right, "0", ALPHA);
+
+#ifdef WITH_LUA
+        add_lua_global(ln->left, &(ln->right));
+#endif
+
+        varnum++;
+        if (mesvar[5]) {
+            sprintf(arg2, "#Ok. $%s is now set to {%s}.",left, right);
+            tintin_puts2(arg2, ses);
+        }
     }
-  }
 }
 
 /*************************/
@@ -413,26 +428,34 @@ void tolower_command(const char *arg, struct session *ses)
 /*************************/
 void toupper_command(const char *arg, struct session *ses)
 {
-  char left[BUFFER_SIZE], right[BUFFER_SIZE], arg2[BUFFER_SIZE], *p;
-  struct listnode *tempvars, *ln;
+    char left[BUFFER_SIZE], right[BUFFER_SIZE], arg2[BUFFER_SIZE], *p;
+    struct listnode *tempvars, *ln;
 
-  tempvars = (ses) ? ses->myvars : common_myvars;
-  arg = get_arg_in_braces(arg, left,0);
-  arg = get_arg_in_braces(arg, right,1);
-  if (!*left || !*right) {
-    tintin_puts2("#Syntax: #toupper <var> <text>", ses);
-  } else {
-    if ((ln=searchnode_list(tempvars, left)) != NULL)
-      deletenode_list(tempvars, ln);
-    for (p=right; *p; p++)
-      *p = toupper(*p);
-    insertnode_list(tempvars, left, right, "0", ALPHA);
-    varnum++;
-    if (mesvar[5]) {
-      sprintf(arg2, "#Ok. $%s is now set to {%s}.",left, right);
-      tintin_puts2(arg2, ses);
+    tempvars = (ses) ? ses->myvars : common_myvars;
+    arg = get_arg_in_braces(arg, left,0);
+    arg = get_arg_in_braces(arg, right,1);
+    if (!*left || !*right) {
+        tintin_puts2("#Syntax: #toupper <var> <text>", ses);
+    } else {
+        for (p=right; *p; p++)
+            *p = toupper(*p);
+
+        if ((ln=searchnode_list(tempvars, left)) != NULL) {
+            free(ln->right);
+            ln->right = strdup(right);
+        }
+        else
+            ln = insertnode_list(tempvars, left, right, "0", ALPHA);
+
+#ifdef WITH_LUA
+        add_lua_global(ln->left, &(ln->right));
+#endif
+        varnum++;
+        if (mesvar[5]) {
+            sprintf(arg2, "#Ok. $%s is now set to {%s}.",left, right);
+            tintin_puts2(arg2, ses);
+        }
     }
-  }
 }
 
 /************************************************/
@@ -566,8 +589,12 @@ void removestring_command(const char *arg, struct session *ses)
       strcpy(buf, " ");
 
     if(strcmp(buf, ln->right)) {
-      deletenode_list(tempvars, ln);
-      insertnode_list(tempvars, left, buf, "0", ALPHA);
+      free(ln->right);
+      ln->right = strdup(buf);
+#ifdef WITH_LUA
+      add_lua_global(ln->left, &(ln->right));
+#endif
+
       varnum++;
       if(mesvar[5]) {
         sprintf(arg2, "#Ok. $%s is now set to {%s}.", left, buf);

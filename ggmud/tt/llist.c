@@ -191,7 +191,7 @@ struct listnode *insertnode_list(struct listnode *listhead,
       if(strcmp(ltext, nptr->left) <= 0) {
 	newnode->next = nptr;
 	nptrlast->next = newnode;
-	return;
+	return newnode;
       }
 
     nptrlast->next = newnode;

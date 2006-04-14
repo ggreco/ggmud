@@ -16,6 +16,7 @@ punti_totali = 0
 idle_loops = 0
 
 is_afk = false
+is_hide = false
 logged = false
 combat = false
 in_group = false
@@ -23,8 +24,18 @@ berserked = false
 full_auto = false
 use_autoassist = true
 weapon = "UNDEF"
+danno = "UNDEF"
+
+local function set_hide_off()
+    if is_hide then
+        is_hide = false
+        show("$c0015HIDE mode $c0009OFF$c0007")    
+    end
+end
 
 function autoassist(pg, stato)
+    set_hide_off()
+    
     if combat == true or use_autoassist == false then
         return
     end
@@ -48,8 +59,6 @@ function autoassist_ok(pg) autoassist(pg, true) end
 
 function update_status()
     clear("Status")
-
-    local danno = "UNDEF"
     
     if weapon == asl then
         danno = "SLASH"
@@ -59,22 +68,28 @@ function update_status()
         danno = "PIERCE"
     end
 
-    local combat_state = "$c0011IDLE$c0007";
+    local combat_state = "$c0011IDLE$c0007"
+
     if combat == true then
-        combat_state = "$c0011COMBAT$c0007";
+        combat_state = "$c0011COMBAT$c0007"
     end
     
-    window("Status", "$c0007Arma: $c0014" .. danno .. " $c0007($c0015" .. weapon .. "$c0007) " .. combat_state);
-    window("Status", "Group leader: $c0015" .. leader .. " $c0007Tank: $c0015" .. tank)
-    window("Status", "XP: $c0015" .. actualexp .. " $c0007Gold: $c0015" .. actualgold .. "$c0007 Align: $c0015".. align);
-    window("Status", "D: $c0015" .. diamanti .. " $c0007S: $c0010" .. smeraldi .. " $c0007 R: $c0009" .. rubini .. " $c0007Z: $c0005" .. zaffiri)
-    window("Status", "Punti gemma: $c0015" .. punti_gemma .. " $c0007totali: $c0015" .. punti_totali)
+    window("Status", "$c0007Arma: $c0014" .. danno .. " $c0007($c0015" .. weapon .. 
+                       "$c0007) " .. combat_state ..
+                     "\nGroup leader: $c0015" .. leader .. " $c0007Tank: $c0015" .. tank ..
+                     "\n$c0007XP: $c0015" .. actualexp .. " $c0007Gold: $c0015" .. actualgold .. 
+                       "$c0007 Align: $c0015".. align ..
+                     "\n$c0007D: $c0015" .. diamanti .. " $c0007S: $c0010" .. smeraldi .. 
+                       " $c0007 R: $c0009" .. rubini .. " $c0007Z: $c0005" .. zaffiri ..
+                     "\n$c0007Punti gemma: $c0015" .. punti_gemma .. 
+                       " $c0007totali: $c0015" .. punti_totali)
 end
 
 --  1164(1164) hit, 55(100) mana e 52(155) punti di
 
 function score_line_health(line)
-    _, _, actual_hp, max_hp, actual_move, max_move = string.find(line, "(%d+)%((%d+)%) hit, %d+%(%d+%) mana e (%d+)%((%d+)%) punti")
+    _, _, actual_hp, max_hp, actual_move, max_move = 
+                string.find(line, "(%d+)%((%d+)%) hit, %d+%(%d+%) mana e (%d+)%((%d+)%) punti")
 end
 
 function score_line_gemme(d, s, r, z)
@@ -94,6 +109,8 @@ function score_line_align(a)
 end
 
 function score_line_punti(g, t)
+    set_hide_off()
+
     punti_gemma = g
     punti_totali = t
 
@@ -105,7 +122,7 @@ function myidle()
        return
    end
 
-   if max_hp == 0 then
+   if max_hp == 0 and idle_loops > 10 then
        send("score;group")
        return
    end
@@ -113,7 +130,10 @@ function myidle()
    idle_loops = idle_loops + 1
    
 -- se non sono in combattimento lancio uno score
-   if idle_loops > 60 and combat == false and is_afk == false then
+   if idle_loops > 75 and 
+      combat == false and 
+      is_afk == false and 
+      is_hide == false then
        idle_loops = 0
        send("score")
    end
@@ -128,6 +148,7 @@ function grab_prompt(p)
 
     if string.find(p, "nessuno") == nil then
         if combat == false then
+            set_hide_off() 
             combat = true
             update_status()
         end
@@ -141,8 +162,11 @@ end
 
 function changeweapon(w)
     local wt = string.lower(w)
-    
-    if leader == "mongo" then
+   
+    set_hide_off() 
+
+-- dico in gossip l'arma se sono capogruppo
+    if string.lower(leader) == "mongo" then
         send("gt " .. w)
     end
 
@@ -157,8 +181,10 @@ function changeweapon(w)
     end
  
     if oldweapon == "UNDEF" then
-        oldweapon = asl
-        send("rem " .. api .. ";rem " .. abl)
+        send("rem " .. asl .. ";rem " .. api .. 
+             ";rem " .. abl .. ";wield " .. weapon)
+           
+        return 
     end
 
     if oldweapon == weapon then
@@ -174,6 +200,25 @@ function handle_speaks(p, t, c)
 
     if c == namecol then
         namecol = "$c0006"
+    end
+  
+    local i = string.find(p, " ")
+
+    
+-- Se e` polato tolgo l'estensione
+    if i then
+        p = string.sub(p, 0, i - 1)
+    end
+    
+-- Gestisco qui i cambi d'arma
+    if p == leader then
+        if t == "pierce'" then
+            changeweapon(pierce)
+        elseif t == "slash'" then
+            changeweapon(slash)
+        elseif t == "blunt'" then
+            changeweapon(blunt)
+        end
     end
     
     window("speaks", c .. "(" .. namecol .. p .. c .. ") '" .. t )
@@ -191,15 +236,72 @@ function handle_gt(c, t) handle_speaks(c, t, "$c0012") end
 
 function set_afk_on() is_afk = true show("$c0015AFK mode $c0009ON$c0007") end
 function set_afk_off() is_afk = false show("$c0015AFK mode $c0009OFF$c0007") end
+function set_hide_on() is_hide = true show("$c0015HIDE mode $c0009ON$c0007") end
+function berserk_ok() bersok = bersok + 1 berserked = true update_status() end
+function berserk_ko() bersfail = bersfail + 1 berserked = false end
+
+function set_berserk_off()
+    if berserked then 
+        berserked = false 
+        update_status() 
+    end 
+end
+    
+function bersrep()
+    local total = bersok + bersfail
+    local perc = bersok * 100 / total     
+    
+    send(string.format("gt Su un totale di $c0014%d$c0012 BERSERK ne ho azzeccati $c0015%d$c0012 pari al $c0011%d%%", 
+                       total, bersok, perc) )
+end
+
+function bashrep()
+    local total = bashok + bashfail
+    local perc = bashok * 100 / total
+    
+    send(string.format("gt Su un totale di $c0014%d$c0012 BASH ne ho azzeccati $c0015%d$c0012 pari al $c0011%d%%", 
+                       total, bashok, perc) )
+end
+
+local function color(colstring)
+    local number = tonumber(colstring)
+
+    if number < 40 then
+        return "$c0009" .. number
+    elseif number < 75 then
+        return "$c0011" .. number
+    elseif number < 100 then
+        return "$c0002" .. number 
+    else
+        return "$c0010" .. number
+    end
+end
+
+function group_normal(name, hp, mana, move)
+    if string.find(name, "(Capo)") or string.find(name, "(O)") then
+        return
+    end
+   
+    window("group", string.format("$c0009%16s $c0015H:%4s $c0015M:%4s $c0015V:%4s%%",
+                        string.gsub(name, " ", ""), 
+                        color(hp), color(mana), color(move) ) )
+end
+
+function group_leader(name, hp, mana, move)
+    set_hide_off()
+    clear("group")
+    leader = string.gsub(name, " ", "")
+    
+    window("group", string.format("$c0009%16s $c0015H:%4s $c0015M:%4s $c0015V:%4s%%",
+                        leader, color(hp), color(mana), color(move) ) )
+
+end
 
 show("$c0015Started script configuration for $c0011Mongo$c0007...")
 
 -- dump("tank", tank)
 -- dump("Guida:", leader)
 dump("Versione programma:", VERSION)
-print(pippo)
--- pippo = "Fanculo!"
--- print("Pippo: " .. pippo)
 
 trigger("^##%1>", "grab_prompt")
 
@@ -227,9 +329,21 @@ trigger("^::%1:: '%2", "handle_think");
 trigger("^[%1] dice alla gilda '%2", "handle_ctell");
 trigger("^[%1] '%2", "handle_ot");
 
+-- Berserk
+trigger("rabbia ti pervade", "berserk_ok");
+trigger("sei calmato", "set_berserk_off");
+trigger("raggiungere la furia che", "berserk_ko");
+
 -- AFK mode
+trigger("^Cerchi di conf", "set_hide_on");
 trigger("^Ti allontani", "set_afk_on");
 trigger("^Ritorni alla", "set_afk_off");
+
+-- GROUP window
+trigger("%1 (Capo) HP: %2% MANA: %3% MV: %4%", "group_leader")
+trigger("%1 (O) HP:%2% MANA:%3% MV:%4%", "group_normal")
+trigger("%1 HP:%2% MANA:%3% MV:%4%", "group_normal")
+
 -- idle
 idle_function("myidle");
 
