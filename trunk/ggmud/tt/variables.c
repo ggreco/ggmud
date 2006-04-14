@@ -201,7 +201,9 @@ void substitute_myvariables(const char *arg, char *result, struct session *ses)
 
             if (counter==nest+1 && !isdigit(*(arg+counter+1))) {
                 if((ln=searchnode_list(tempvars, varname))!= NULL) {
-                    
+#ifdef WITH_LUA
+		    get_lua_global(varname, &(ln->right));
+#endif
                     strcpy(result, ln->right);
                     result+=strlen(ln->right);
                     arg+=counter+varlen;

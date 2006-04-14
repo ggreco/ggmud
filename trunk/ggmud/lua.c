@@ -187,7 +187,7 @@ const char *call_luafunction(const char *string)
         name[i++] = *string++;
     
     if (!i)
-        return;
+        return string;
 
     name[i] = 0;
 
@@ -327,6 +327,23 @@ void init_lua()
     lua_pushcfunction(mud->lua, set_string);
     lua_settable(mud->lua, -3);
 #endif
+}
+
+void get_lua_global(const char *key, char **value)
+{
+	const char *v;
+	
+	lua_getglobal(mud->lua, key);
+
+	v = lua_tostring(mud->lua, -1);
+
+	if (strcmp(v, *value)) {
+		if (*value)
+			free(*value);
+		*value = strdup(v);
+	}
+	
+	lua_pop(mud->lua, 1);
 }
 
 void add_lua_global(const char *v1, const char **v2)
