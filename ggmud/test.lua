@@ -122,11 +122,6 @@ function myidle()
        return
    end
 
-   if max_hp == 0 and idle_loops > 10 then
-       send("score;group")
-       return
-   end
-
    idle_loops = idle_loops + 1
    
 -- se non sono in combattimento lancio uno score
@@ -198,18 +193,18 @@ end
 function handle_speaks(p, t, c)
     local namecol = "$c0015"
 
+-- I say hanno il colore del nome diverso e non hanno lo strip del nome
     if c == namecol then
         namecol = "$c0006"
-    end
-  
-    local i = string.find(p, " ")
+    else
+   		local i = string.find(p, " ")
 
-    
 -- Se e` polato tolgo l'estensione
-    if i then
-        p = string.sub(p, 0, i - 1)
+	    if i then
+        	p = string.sub(p, 0, i - 1)
+	    end
     end
-    
+
 -- Gestisco qui i cambi d'arma
     if p == leader then
         if t == "pierce'" then
@@ -263,17 +258,15 @@ function bashrep()
                        total, bashok, perc) )
 end
 
-local function color(colstring)
-    local number = tonumber(colstring)
-
+local function color(number)
     if number < 40 then
-        return "$c0009" .. number
+        return "$c0009"
     elseif number < 75 then
-        return "$c0011" .. number
+        return "$c0011"
     elseif number < 100 then
-        return "$c0002" .. number 
+        return "$c0002" 
     else
-        return "$c0010" .. number
+        return "$c0010"
     end
 end
 
@@ -282,18 +275,26 @@ function group_normal(name, hp, mana, move)
         return
     end
    
-    window("group", string.format("$c0009%16s $c0015H:%4s $c0015M:%4s $c0015V:%4s%%",
+    local h = tonumber(hp)
+    local m = tonumber(mana)
+    local v = tonumber(move)
+
+    window("group", string.format("$c0009%16s $c0015H:%s%3d%% $c0015M:%s%3d%% $c0015V:%s%3d%%",
                         string.gsub(name, " ", ""), 
-                        color(hp), color(mana), color(move) ) )
+                        color(h), h,  color(m), m, color(v), v ) )
 end
 
 function group_leader(name, hp, mana, move)
     set_hide_off()
     clear("group")
     leader = string.gsub(name, " ", "")
-    
-    window("group", string.format("$c0009%16s $c0015H:%4s $c0015M:%4s $c0015V:%4s%%",
-                        leader, color(hp), color(mana), color(move) ) )
+
+    local h = tonumber(hp)
+    local m = tonumber(mana)
+    local v = tonumber(move)
+
+    window("group", string.format("$c0009%16s $c0015H:%s%3d%% $c0015M:%s%3d%% $c0015V:%s%3d%%",
+                        leader, color(h), h, color(m), m, color(v), v ) )
 
 end
 
