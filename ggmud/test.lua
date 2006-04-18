@@ -20,6 +20,7 @@ is_hide = false
 logged = false
 combat = false
 in_group = false
+standing = true
 berserked = false
 full_auto = false
 use_autoassist = true
@@ -70,10 +71,24 @@ function update_status()
 
     local combat_state = "$c0011IDLE$c0007"
 
+    local combat_details = ""
+
     if combat == true then
         combat_state = "$c0011COMBAT$c0007"
+
+        if standing then
+            combat_details = "\n$c0010STANDING"
+        else
+            combat_details = "\n$C0009RESTING"
+        end
+
+        if berserked then
+            combat_details = combat_details .. " $c0011BERSERKED"
+        end
     end
     
+
+  
     window("Status", "$c0007Arma: $c0014" .. danno .. " $c0007($c0015" .. weapon .. 
                        "$c0007) " .. combat_state ..
                      "\nGroup leader: $c0015" .. leader .. " $c0007Tank: $c0015" .. tank ..
@@ -82,7 +97,7 @@ function update_status()
                      "\n$c0007D: $c0015" .. diamanti .. " $c0007S: $c0010" .. smeraldi .. 
                        " $c0007 R: $c0009" .. rubini .. " $c0007Z: $c0005" .. zaffiri ..
                      "\n$c0007Punti gemma: $c0015" .. punti_gemma .. 
-                       " $c0007totali: $c0015" .. punti_totali)
+                       " $c0007totali: $c0015" .. punti_totali .. combat_details)
 end
 
 --  1164(1164) hit, 55(100) mana e 52(155) punti di
@@ -178,7 +193,8 @@ function changeweapon(w)
     if oldweapon == "UNDEF" then
         send("rem " .. asl .. ";rem " .. api .. 
              ";rem " .. abl .. ";wield " .. weapon)
-           
+
+        update_status()   
         return 
     end
 
@@ -234,6 +250,14 @@ function set_afk_off() is_afk = false show("$c0015AFK mode $c0009OFF$c0007") end
 function set_hide_on() is_hide = true show("$c0015HIDE mode $c0009ON$c0007") end
 function berserk_ok() bersok = bersok + 1 berserked = true update_status() end
 function berserk_ko() bersfail = bersfail + 1 berserked = false end
+function bash_ok() bashok = bashok + 1 end
+function bash_ko() bashfail = bashfail + 1 standing = false update_status() send("stand") end
+function standing_ok()
+	if standing == false then 
+		standing = true 
+		update_status() 
+	end 
+end
 
 function set_berserk_off()
     if berserked then 
@@ -330,10 +354,14 @@ trigger("^::%1:: '%2", "handle_think");
 trigger("^[%1] dice alla gilda '%2", "handle_ctell");
 trigger("^[%1] '%2", "handle_ot");
 
--- Berserk
+-- Berserk/Bash counters
 trigger("rabbia ti pervade", "berserk_ok");
 trigger("sei calmato", "set_berserk_off");
 trigger("raggiungere la furia che", "berserk_ko");
+trigger("schiva il tuo urto", "bash_ko")
+trigger("ai una forte spinta", "bash_ok")
+trigger("gia` in piedi", "standing_ok")
+trigger("i alzi.", "standing_ok")
 
 -- AFK mode
 trigger("^Cerchi di conf", "set_hide_on");
