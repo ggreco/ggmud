@@ -96,6 +96,7 @@ struct prefs_data {
     GdkColor BackgroundGdkColor; /* Red, Green, Blue */
     GdkColor DefaultGdkColor; /* Red, Green, Blue */
     gint       SaveVars;
+    char *LuaConfig;
 };
 
 #define WARN GTK_MESSAGE_WARNING

@@ -161,6 +161,10 @@ int main(int argc, char **argv)
     load_triggers();
     load_tabs();
 
+#ifdef WITH_LUA
+    if (prefs.LuaConfig)
+	    script_command(prefs.LuaConfig);
+#endif
     gtk_window_present(GTK_WINDOW(mud->window));
     gtk_key_snooper_install(snoop_keys, mud);
     gtk_main();

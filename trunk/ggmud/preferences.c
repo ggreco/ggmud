@@ -53,7 +53,7 @@ extern GtkWidget *statusbar;
 extern int use_tickcounter;
 
 /* Global variables */
-PREFS_DATA prefs;
+PREFS_DATA prefs = {0};
 
 #ifndef min
     #define min(x,y) ((x) > (y) ? (y) : (x))
@@ -168,6 +168,7 @@ void load_prefs ()
 
     if ((fp = fileopen(PREFS_FILE, "r"))) {
         prefs.SaveVars = prefs.Blinking = prefs.KeepText = prefs.EchoText  = prefs.WordWrap = prefs.DoBeep = TRUE;
+        prefs.LuaConfig = NULL;
 
         while (fgets (line, sizeof(line) - 1, fp)) {
             sscanf (line, "%[^=]=%[^\n]", pref, value);
@@ -207,6 +208,13 @@ void load_prefs ()
                 } else {
                     use_tickcounter = 0;
                 }
+	        } else if (!strcmp(pref, "LuaConfig")) {
+                FILE *f = fopen(value, "r");
+                
+                if (f) {
+                   fclose(f);
+                   prefs.LuaConfig = strdup(value);
+                }
             } else { // import colors
                 int i = 0;
                 
@@ -245,10 +253,46 @@ void load_prefs ()
     }
 }
 
+void change_script(GtkEntry *entry, PREFS_DATA *p)
+{
+        const char *text = gtk_entry_get_text(entry);
+
+        if (!p->LuaConfig || strcmp(p->LuaConfig, text)) {
+            if (p->LuaConfig)
+                    free(p->LuaConfig);
+
+            if (*text)
+                p->LuaConfig = strdup(text);
+            else
+                p->LuaConfig = NULL;
+        }
+}
+
+void change_file(GtkWidget *from, GtkEntry *dest)
+{
+        GtkWidget *filew = gtk_file_chooser_dialog_new ( 
+                        "Select a startup LUA script..", GTK_WINDOW(gtk_widget_get_toplevel(from)),
+                        GTK_FILE_CHOOSER_ACTION_OPEN,
+                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                        GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
+                        NULL);
+
+        gtk_widget_show(filew);
+
+        if (gtk_dialog_run(GTK_DIALOG(filew)) == GTK_RESPONSE_ACCEPT) {
+                gchar *file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(filew));
+                gtk_entry_set_text(dest, file);
+                g_free(file);
+        }
+
+        gtk_widget_destroy(filew);
+}
+
 void save_prefs (GtkWidget *button, gpointer data) 
 {
 #define CFGW(x,y) fprintf(fp, "%s=%s\n", x, y ? "On" : "Off")
 #define CFGI(x,y) fprintf(fp, "%s=%d\n", x, y)
+#define CFGS(x,y) fprintf(fp, "%s=%s\n", x, y)
     FILE *fp;
     
     if ((fp = fileopen (PREFS_FILE, "w"))) {
@@ -266,6 +310,7 @@ void save_prefs (GtkWidget *button, gpointer data)
         CFGW("Statusbar", prefs.Statusbar);
         CFGI("TickSize", tick_size);
         CFGI("ReviewSize", mud->maxlines);
+        CFGS("LuaConfig", prefs.LuaConfig);
 
         CFGW("TickCounter", use_tickcounter);
 
@@ -491,6 +536,8 @@ void window_prefs (GtkWidget *widget, gpointer data)
   GtkWidget *checkbutton_Tickcounter;
   GtkWidget *entry_TickSize;
   GtkWidget *entry_ReviewSize;
+  GtkWidget *entry_LuaConfig;
+  GtkWidget *im;
   
   prefs_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title (GTK_WINDOW (prefs_window), "Preferences");
@@ -708,6 +755,31 @@ void window_prefs (GtkWidget *widget, gpointer data)
   gtk_widget_show (vbox3);
   gtk_container_add(GTK_CONTAINER(frame_new), vbox3);
 
+// Lua configuration
+  hbox = gtk_hbox_new(FALSE, 0);
+  gtk_widget_show(hbox);
+  gtk_box_pack_start (GTK_BOX (vbox3), hbox, TRUE, TRUE, 0);
+ 
+  temp = gtk_label_new("Lua startup script:");
+  gtk_widget_show(temp);
+  gtk_box_pack_start (GTK_BOX (hbox), temp, TRUE, TRUE, 0);
+ 
+  entry_LuaConfig = gtk_entry_new();
+  if (prefs.LuaConfig)
+          gtk_entry_set_text(GTK_ENTRY(entry_LuaConfig), prefs.LuaConfig);
+
+  gtk_widget_show(entry_LuaConfig);
+  gtk_box_pack_start (GTK_BOX (hbox), entry_LuaConfig, TRUE, TRUE, 0);
+  temp = gtk_button_new();
+  im = gtk_image_new_from_stock(GTK_STOCK_OPEN, GTK_ICON_SIZE_BUTTON);
+  gtk_container_add(GTK_CONTAINER(temp), im);
+  gtk_widget_show(im);
+  gtk_widget_show(temp);
+  gtk_box_pack_start (GTK_BOX (hbox), temp, FALSE, FALSE, 0);
+  gtk_signal_connect(GTK_OBJECT(temp), "clicked", GTK_SIGNAL_FUNC(change_file),
+                  entry_LuaConfig);
+  gtk_signal_connect(GTK_OBJECT(entry_LuaConfig), "changed", GTK_SIGNAL_FUNC(change_script),
+                        &prefs);
 // review size
   hbox = gtk_hbox_new(FALSE, 0);
   gtk_widget_show(hbox);
