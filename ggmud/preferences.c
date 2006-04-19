@@ -758,7 +758,7 @@ void window_prefs (GtkWidget *widget, gpointer data)
 // Lua configuration
   hbox = gtk_hbox_new(FALSE, 0);
   gtk_widget_show(hbox);
-  gtk_box_pack_start (GTK_BOX (vbox3), hbox, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (vbox3), hbox, FALSE, FALSE, 0);
  
   temp = gtk_label_new("Lua startup script:");
   gtk_widget_show(temp);
