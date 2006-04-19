@@ -224,11 +224,11 @@ function handle_speaks(p, t, c)
 -- Gestisco qui i cambi d'arma
     if p == leader then
         if t == "pierce'" then
-            changeweapon(pierce)
+            changeweapon("pierce")
         elseif t == "slash'" then
-            changeweapon(slash)
+            changeweapon("slash")
         elseif t == "blunt'" then
-            changeweapon(blunt)
+            changeweapon("blunt")
         end
     end
     
