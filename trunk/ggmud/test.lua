@@ -26,11 +26,31 @@ full_auto = false
 use_autoassist = true
 weapon = "UNDEF"
 danno = "UNDEF"
+bashtarget = nil
 
 local function set_hide_off()
     if is_hide then
         is_hide = false
         show("$c0015HIDE mode $c0009OFF$c0007")    
+    end
+end
+
+function set_nastrobash(target)
+    if bashtarget == target then
+        return
+    elseif target == "" then
+        bashtarget = nil
+        return
+    end
+
+    bashtarget = target
+    show("$C0015AVVIO $c0011NASTROBASH $c0009" .. bashtarget)
+    send("bash " .. bashtarget)
+end
+
+function nastrobash()
+    if bashtarget then
+        send("bash " .. bashtarget)
     end
 end
 
@@ -158,6 +178,7 @@ function grab_prompt(p)
 
     if string.find(p, "nessuno") == nil then
         if combat == false then
+            bashtarget = nil
             set_hide_off() 
             combat = true
             update_status()
@@ -250,8 +271,8 @@ function set_afk_off() is_afk = false show("$c0015AFK mode $c0009OFF$c0007") end
 function set_hide_on() is_hide = true show("$c0015HIDE mode $c0009ON$c0007") end
 function berserk_ok() bersok = bersok + 1 berserked = true update_status() end
 function berserk_ko() bersfail = bersfail + 1 berserked = false end
-function bash_ok() bashok = bashok + 1 end
-function bash_ko() bashfail = bashfail + 1 standing = false update_status() send("stand") end
+function bash_ok() bashok = bashok + 1 bashtarget = nil end
+function bash_ko() bashfail = bashfail + 1 standing = false update_status() send("stand") bashtarget = nil end
 function standing_ok()
 	if standing == false then 
 		standing = true 
@@ -333,7 +354,7 @@ trigger("^##%1>", "grab_prompt")
 -- autoassist
 trigger("violenta spinta di %1 fa perdere", "autoassist_ok");
 trigger("travolto da %1 che perde", "autoassist_ko");
-
+trigger("^Chi vuoi colpire?", "nastrobash");
 -- status
 trigger("Tu hai %1 movimento", "score_line_health")
 trigger("i %1 diamanti e %2 smeraldi, %3 rubini e %4 zaff", "score_line_gemme")
