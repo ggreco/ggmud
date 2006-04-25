@@ -27,6 +27,7 @@ use_autoassist = true
 weapon = "UNDEF"
 danno = "UNDEF"
 bashtarget = nil
+do_not_remove_afk = false
 
 local function set_hide_off()
     if is_hide then
@@ -267,7 +268,7 @@ function handle_say(c, t) handle_speaks(c, t, "$c0015") end
 function handle_gt(c, t) handle_speaks(c, t, "$c0012") end
 
 function set_afk_on() is_afk = true show("$c0015AFK mode $c0009ON$c0007") end
-function set_afk_off() is_afk = false show("$c0015AFK mode $c0009OFF$c0007") end
+function set_afk_off() if do_not_remove_afk == false then is_afk = false show("$c0015AFK mode $c0009OFF$c0007") else do_not_remove_afk = false end end
 function set_hide_on() is_hide = true show("$c0015HIDE mode $c0009ON$c0007") end
 function berserk_ok() bersok = bersok + 1 berserked = true update_status() end
 function berserk_ko() bersfail = bersfail + 1 berserked = false end
@@ -278,6 +279,12 @@ function standing_ok()
 		standing = true 
 		update_status() 
 	end 
+end
+
+function disarm_ko()
+	standing = false
+	update_status()
+	send("stand")
 end
 
 function set_berserk_off()
@@ -312,6 +319,13 @@ local function color(number)
         return "$c0002" 
     else
         return "$c0010"
+    end
+end
+
+function check_afk()
+    if is_afk then
+	do_not_remove_afk = true
+	send("afk")
     end
 end
 
@@ -376,18 +390,20 @@ trigger("^[%1] dice alla gilda '%2", "handle_ctell");
 trigger("^[%1] '%2", "handle_ot");
 
 -- Berserk/Bash counters
-trigger("rabbia ti pervade", "berserk_ok");
-trigger("sei calmato", "set_berserk_off");
-trigger("raggiungere la furia che", "berserk_ko");
+trigger("rabbia ti pervade", "berserk_ok")
+trigger("sei calmato", "set_berserk_off")
+trigger("raggiungere la furia che", "berserk_ko")
 trigger("schiva il tuo urto", "bash_ko")
 trigger("ai una forte spinta", "bash_ok")
 trigger("gia` in piedi", "standing_ok")
 trigger("i alzi.", "standing_ok")
+trigger("Tenti di disarmare", "disarm_ko")
 
 -- AFK mode
 trigger("^Cerchi di conf", "set_hide_on");
 trigger("^Ti allontani", "set_afk_on");
 trigger("^Ritorni alla", "set_afk_off");
+trigger("ti ordina '", "check_afk");
 
 -- GROUP window
 trigger("%1 (Capo) HP: %2% MANA: %3% MV: %4%", "group_leader")

@@ -33,11 +33,8 @@ int do_luawindow(lua_State *s)
 
 
     if(*right && entry) {
-        char t1[BUFFER_SIZE], t2[BUFFER_SIZE];
         char *result;
-        substitute_myvars(right, t1, s);
-        substitute_vars(t1, t2, s);
-        result = ParseAnsiColors(t2);
+        result = ParseAnsiColors(right);
         strcat(result, "\n");
         textfield_add((GtkTextView *)entry->listptr, result , MESSAGE_LOCAL);
     }
