@@ -1,6 +1,7 @@
-/*  Sclient
+/*  GGMud
  *  Copyright (C) 1999 Heathen (the.heathen@swipnet.se)
  *                1999 Drizzt  (doc.day@swipnet.se)
+ *                2003 Gabry (gabrielegreco@gmail.com)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -61,7 +62,11 @@ void save_triggers (GtkWidget *w, GtkCList *data)
                 done = TRUE;
                 break;
             }
-            fprintf (fp, "#action {%s} {%s} {%s}\n", alias, replace, class);
+
+            // don't save scripting triggers
+            if (strcmp(class, "scripting"))
+                fprintf (fp, "#action {%s} {%s} {%s}\n", alias, replace, class);
+
             row++;      
         }
         fclose (fp);
@@ -104,11 +109,15 @@ static void  insert_triggers  (GtkCList *clist)
     gtk_clist_freeze(clist);
     
     while ( (list = list->next) ) {
+        // doesn't show scripting triggers
+        if (!strcmp(list->pr, "scripting"))
+            continue;
+        
         text[0] = list->left;
         text[1] = list->right;
         text[2] = list->pr;
         text[3] = "";
-        row = gtk_clist_prepend (clist, text);
+        row = gtk_clist_append (clist, text);
 
         if (list->enabled)
             gtk_clist_set_pixmap(clist, row, 3, enabled_pixmap, enabled_mask);
@@ -347,6 +356,11 @@ static void trigger_button_add (GtkWidget *button, GtkCList *data)
         return;
     }
 
+    if (!strcmp(text[2], "scripting")) {
+        popup_window(ERR, "You cannot define SCRIPTING triggers at hand,\nyou should use LUA!");
+        return;
+    }
+    
     if ( strlen (text[2]) > CLASS_LEN)  {
         popup_window (ERR, "Class string too big.");
         return;

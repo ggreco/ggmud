@@ -1,6 +1,7 @@
-/*  Sclient
+/*  GGMud
  *  Copyright (C) 1999 Heathen (the.heathen@swipnet.se)
- *		  1999 Drizzt  (doc.day@swipnet.se)
+ *                1999 Drizzt  (doc.day@swipnet.se)
+ *                2003 Gabry (gabrielegreco@gmail.com)
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -16,8 +17,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
-
-/* ripped straight from amcl and altered a bit ;) */
 
 
 #include "config.h"
