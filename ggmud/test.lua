@@ -281,6 +281,14 @@ function standing_ok()
 	end 
 end
 
+function standing_ko()
+	if standing == true then 
+		standing = false 
+		update_status() 
+        send("stand")
+	end 
+end
+
 function disarm_ko()
 	standing = false
 	update_status()
@@ -398,6 +406,8 @@ trigger("ai una forte spinta", "bash_ok")
 trigger("gia` in piedi", "standing_ok")
 trigger("i alzi.", "standing_ok")
 trigger("Tenti di disarmare", "disarm_ko")
+trigger("ti manda a gambe", "standing_ko")
+trigger("Tenti di disarmare", "standing_ko")
 
 -- AFK mode
 trigger("^Cerchi di conf", "set_hide_on");
