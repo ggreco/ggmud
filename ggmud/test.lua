@@ -73,6 +73,8 @@ function autoassist(pg, stato)
             end
         end
     end
+
+    check_afk()
 end
 
 function autoassist_ko(pg) autoassist(pg, false) end
@@ -228,6 +230,16 @@ function changeweapon(w)
     end
 end
 
+function is_article(str)
+	local s = string.lower(str)
+
+	if s == "il" or s == "lo" or s == "la" or s == "un" or s == "una" or
+	   s == "a" or s == "the" then
+		return true
+	end
+
+	return false
+end
 function handle_speaks(p, t, c)
     local namecol = "$c0015"
 
@@ -235,12 +247,21 @@ function handle_speaks(p, t, c)
     if c == namecol then
         namecol = "$c0006"
     else
-   		local i = string.find(p, " ")
+        local i = string.find(p, " ")
 
 -- Se e` polato tolgo l'estensione
-	    if i then
-        	p = string.sub(p, 0, i - 1)
-	    end
+	if i then
+            local first = string.sub(p, 0, i - 1)
+
+            if is_article(first) == false then
+                p = first
+            end
+        end
+    end
+
+-- Gestisco l'afk
+    if is_afk and c == "$c0013" then
+        send("tele " .. p .. " [messaggio automatico] sono AFK ti rispondero` appena posso!")
     end
 
 -- Gestisco qui i cambi d'arma
@@ -273,7 +294,7 @@ function set_hide_on() is_hide = true show("$c0015HIDE mode $c0009ON$c0007") end
 function berserk_ok() bersok = bersok + 1 berserked = true update_status() end
 function berserk_ko() bersfail = bersfail + 1 berserked = false end
 function bash_ok() bashok = bashok + 1 bashtarget = nil end
-function bash_ko() bashfail = bashfail + 1 standing = false update_status() send("stand") bashtarget = nil end
+function bash_ko() bashfail = bashfail + 1 standing = false update_status() send("stand") check_afk() bashtarget = nil end
 function standing_ok()
 	if standing == false then 
 		standing = true 
@@ -286,6 +307,8 @@ function standing_ko()
 		standing = false 
 		update_status() 
         send("stand")
+
+        check_afk()
 	end 
 end
 
@@ -293,6 +316,7 @@ function disarm_ko()
 	standing = false
 	update_status()
 	send("stand")
+        check_afk()
 end
 
 function set_berserk_off()
