@@ -40,7 +40,7 @@ CROSSCFLAGS = $(INCDIR) -I$(CROSSDIR)/include/glib-2.0  \
 
 # -fnative-struct corrispondente di -mms-bifields nel vecchio mingw32 -s
 
-CROSSLIBS = -s -Ltt -lttw32 -lgtk-win32-2.0.dll -lgdk-win32-2.0.dll \
+CROSSLIBS = -s -Ltt -Llua -lttw32 -lluaw32 -lgtk-win32-2.0.dll -lgdk-win32-2.0.dll \
             -latk-1.0.dll -lgdk_pixbuf-2.0.dll -lpango-1.0.dll -lpangowin32-1.0.dll \
             -lgmodule-2.0.dll -lgobject-2.0.dll -lglib-2.0.dll -lws2_32
 
@@ -69,10 +69,19 @@ tt/libtt.a: tt/*.c
 tt/libttw32.a: tt/*.c
 	$(MAKE) -C tt win32
 
-$(PROJECTNAME): $(OBJS) tt/libtt.a
+lua/liblua.a:
+	$(MAKE) -C lua linux
+ 
+lua/libluaw32.a: lua/*c
+    $(MAKE) -C lua clean
+	$(MAKE) -C lua "LUA_A=libluaw32.a" "LUA_T=lua.exe" \
+	"CC=$(CROSSDIR)bin/gcc" "RANLIB=$(CROSSDIR)/bin/ranlib" \
+    "AR=$(CROSSDIR)bin/ar rcu" "MYLIBS=" "MYLDFLAGS=-s" lua.exe
+
+$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a
 	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) $(LIBS)
 
-$(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a
+$(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a lua/libluaw32.a
 	$(CROSSCC) $(CROSSCFLAGS) $(WINOBJS) -o $(PROJECTNAME).exe $(CROSSLIBS)
 
 clean: 

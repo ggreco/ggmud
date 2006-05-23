@@ -52,7 +52,7 @@ insert_words  (GtkCList *clist)
 
     do {
         text[0] = list->word;
-        gtk_clist_prepend (GTK_CLIST (clist), text);
+        gtk_clist_append (GTK_CLIST (clist), text);
     }
     while ( (list = list->next) );
     

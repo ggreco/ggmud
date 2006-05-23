@@ -226,7 +226,7 @@ static void  insert_highlights  (GtkCList *clist)
         else
             text[2] = "None";
         
-        gtk_clist_prepend (clist, text);
+        gtk_clist_append (clist, text);
     }
     gtk_clist_thaw(clist);
 

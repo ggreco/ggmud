@@ -95,7 +95,7 @@ static void  insert_aliases  (GtkCList *clist)
     while ( (list = list->next) ) {
         text[0] = list->left;
         text[1] = list->right;
-        gtk_clist_prepend (clist, text);
+        gtk_clist_append (clist, text);
     }
     gtk_clist_thaw(clist);
 }

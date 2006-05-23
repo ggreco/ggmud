@@ -240,6 +240,22 @@ function is_article(str)
 
 	return false
 end
+
+function group_me(p)
+   local i = string.find(p, " ")
+
+-- Se e` polato tolgo l'estensione
+	if i then
+        local first = string.sub(p, 0, i - 1)
+
+        if is_article(first) == false then
+            p = first
+        end
+    end
+
+    send("group " .. p)
+end    
+
 function handle_speaks(p, t, c)
     local namecol = "$c0015"
 
@@ -404,7 +420,7 @@ trigger("^Chi vuoi colpire?", "nastrobash");
 -- status
 trigger("Tu hai %1 movimento", "score_line_health")
 trigger("i %1 diamanti e %2 smeraldi, %3 rubini e %4 zaff", "score_line_gemme")
-trigger("effettuato %1 punti gemma su %2 punti", "score_line_punti");
+trigger("effettuato %1 punti gemma e %2 punti", "score_line_punti");
 trigger("effettuato %1 exp, ed hai %2 monete", "score_line_stats");
 trigger("allineamento e`: %1", "score_line_align");
 
@@ -443,6 +459,9 @@ trigger("ti ordina '", "check_afk");
 trigger("%1 (Capo) HP: %2% MANA: %3% MV: %4%", "group_leader")
 trigger("%1 (O) HP:%2% MANA:%3% MV:%4%", "group_normal")
 trigger("%1 HP:%2% MANA:%3% MV:%4%", "group_normal")
+
+-- autogroup
+trigger("%1 inizia a seguirti", "group_me")
 
 -- idle
 idle_function("myidle");

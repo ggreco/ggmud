@@ -65,7 +65,7 @@ insert_variables  (GtkCList *clist)
     while ( (list = list->next) ) {
         text[0] = list->left;
         text[1] = list->right;
-        gtk_clist_prepend (GTK_CLIST (clist), text);
+        gtk_clist_append(GTK_CLIST (clist), text);
     }
 
     gtk_clist_thaw(clist);
