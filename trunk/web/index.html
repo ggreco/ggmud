@@ -41,18 +41,18 @@ semplicity of the <span style="font-weight: bold;">SClient</span>
 window handling code, so I put them together and started working on it.<br>
       <h3>Where can I use it?</h3>
 GGMud wants to be as portable as possible, provided the target system
-has a <a href="http://www.gtk.org">GTK</a> implementation. Actually
-I'm developing Linux, Windows and MacOSX versions. The latter one needs
-the Apple X11 server and the Fink GTK package, most users already have
-them since they are needed to use <a href="www.gimp.org">GIMP</a>!<br>
+has a <a href="http://www.gtk.org">GTK 2.x</a> implementation. Actually
+I'm developing and supporting actively Linux, Windows and MacOSX versions, but it can be easily built on every system with that GTK2 supports. The latter one needs
+the Apple X11 server (X11User.pkg, available in Panther and Tiger installation DVDs), most users already have
+it since it's needed to use <a href="www.gimp.org">GIMP</a>!<br>
       <h3>Ok, what are the features?</h3>
 Here is a short summary of GGMud features:<br>
       <ul>
-        <li>ANSI 16 color output</li>
+        <li>ANSI 16 color output with split screen review buffer</li>
         <li>Separate input line with history</li>
         <li>Connection wizard with autologin</li>
         <li>Aliases</li>
-        <li>Triggers</li>
+        <li>Triggers (with class support)</li>
         <li>Highlights</li>
         <li>Gags</li>
         <li>Numeric keypad walking</li>
@@ -63,7 +63,9 @@ Here is a short summary of GGMud features:<br>
         <li>Macros with function keys</li>
         <li>Multiple windows support</li>
         <li>Timers</li>
+        <li><b>FULLY</b> scriptability through <a href="www.lua.org">LUA</a></li>
         <li>Logging</li>
+        <li>ASCII file configuration files to be as portable as possible and editable by hand</li>
       </ul>
       <h3>What's the future of this project?</h3>
 Well, I use it daily so I'd like to make it as complete as I can,
@@ -93,7 +95,7 @@ or on the link on the sidebar on the right!<br>
         <li><a
  href="http://sourceforge.net/project/showfiles.php?group_id=91114">Download</a></li>
         <li><a href="http://sourceforge.net/projects/ggmud">Project page</a></li>
-        <li><a href="http://cvs.sourceforge.net/viewcvs.py/ggmud/">Browse
+        <li><a href="http://ggmud.cvs.sourceforge.net/ggmud">Browse
 CVS</a><br>
         </li>
       </ul>
@@ -103,7 +105,7 @@ CVS</a><br>
     <tr>
       <td style="vertical-align: top;"><br>
       </td>
-      <td style="vertical-align: top;">Updated: 30 Sept 2004</td>
+      <td style="vertical-align: top;">Updated: 30 Aug 2006</td>
     </tr>
   </tbody>
 </table>
