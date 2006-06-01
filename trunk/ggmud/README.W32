@@ -1,7 +1,5 @@
-The Windows version of GGMud needs the GTK toolkit, if you don't have it
-you can download it from the GGMud project page: 
+To build the Windows version of GGMud you need the GTK toolkit version 2.
 
-http://sourceforge.net/projects/ggmud
-
-Place the libraries in the ggmud drawer.
+The binary version is provided as self-extracting installer package and
+has a version of the GTK runtime builtin.
 

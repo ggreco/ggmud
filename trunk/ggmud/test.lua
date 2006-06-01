@@ -278,6 +278,7 @@ function handle_speaks(p, t, c)
 -- Gestisco l'afk
     if is_afk and c == "$c0013" then
         send("tele " .. p .. " [messaggio automatico] sono AFK ti rispondero` appena posso!")
+        send("afk");
     end
 
 -- Gestisco qui i cambi d'arma
@@ -304,7 +305,7 @@ function handle_ask(c, t) handle_speaks(c, t, "$c0006") end
 function handle_say(c, t) handle_speaks(c, t, "$c0015") end
 function handle_gt(c, t) handle_speaks(c, t, "$c0012") end
 
-function set_afk_on() is_afk = true show("$c0015AFK mode $c0009ON$c0007") end
+function set_afk_on() is_afk = true show("$c0015AFK mode $c0009ON$c0007") do_not_remove_afk = false end
 function set_afk_off() if do_not_remove_afk == false then is_afk = false show("$c0015AFK mode $c0009OFF$c0007") else do_not_remove_afk = false end end
 function set_hide_on() is_hide = true show("$c0015HIDE mode $c0009ON$c0007") end
 function berserk_ok() bersok = bersok + 1 berserked = true update_status() end
