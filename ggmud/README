@@ -1,36 +1,36 @@
 GGMud
 -----
 
-GGMud is a graphical mud client, it uses GTK 1.2.x for its graphic
+GGMud is a graphical mud client, it uses GTK 2.x for its graphic
 window and support most of the tt++ command set.
 
-Actually GGMud is born from a MERGE of the command line client 
-tintin++ and the graphical client SClient. 
+GGMud is born from a MERGE of the command line client tintin++ and 
+the graphical client SClient. From its origins 3 years ago I've made
+a lot of changes and now there is really very few code from his
+predecessors :)
 
-In the current stage most of the ggmud configuration should be made
-manually editing the file .tintinrc placed in your home directory,
-or building your alias/trigger/highlight and gag online with the 
-correct commands (#action, #alias, #high, #gag).
-
-The syntax is the tintin++ one.
+The GGMUD configuration may be done through gui or through command line,
+the full set of tintin++ commands is supported, also a few zmud commands
+are supported.
 
 Requirements
 ------------
 Linux:
  glibc 2.x
- gtk 1.2.x
+ gtk 2.x
 Win32:
- gtk 1.3
+ gtk 2.x (builtin in the installer)
 MacOSX:
  Apple or Fink X11 server
- GTK 1.2.x
+ GTK 2.x (builtin in the app bundle)
 
 Features
 --------
-- ANSI output window with scrollbar
-- Input window with history and automatic selection (zmud like behaviour)
+- ANSI output window with scrollbar and split window for the review buffer
+- Fully scriptable through a simple but powerful LUA interface  (see test.lua to view the potentials)
+- Input window with history and automatic selection (zmud like behaviour) and tab completion
 - Aliases
-- Triggers
+- Triggers (with classes)
 - Highlights
 - Gags
 - Tick counter
