@@ -165,6 +165,10 @@ int main(int argc, char **argv)
     load_triggers();
     load_tabs();
 
+#ifdef __APPLE__
+    chdir("GGMud.app/Contents/Resources/bin");
+#endif
+
 #ifdef WITH_LUA
     if (prefs.LuaConfig)
 	    script_command(prefs.LuaConfig);
