@@ -82,7 +82,11 @@ This program is protected under the GNU GPL (See COPYING)
 #define CONFIG_FILE "tt.conf" /* tt's configuration file DSC */
 
 #ifndef DEFAULT_HELP_FILE
+#ifdef __APPLE__
+#define DEFAULT_HELP_FILE "GGMud.app/Contents/Resources/bin/gg_help.txt"
+#else    
 #define DEFAULT_HELP_FILE "gg_help.txt" /* Default name for the help file */
+#endif
 #endif
 #define COMPLETE_FILE "complete"
 typedef struct list_s {

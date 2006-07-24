@@ -71,9 +71,7 @@ const char * LOGGER_MESSAGE =
 
 /* Logviewer txt */
 const char * LOGVIEWER_MESSAGE =
-"This tool is quite broken, it will be useful in the future to examine log\n"
-"files without having to use an external editor. For the moment just stick\n"
-"with your favorite text editor (PS: GVIM rulez :-0 )";
+"This tool is useful to examine log files without using an external editor.\n";
 
 /* Font txt */
 const char * FONT_MESSAGE = 

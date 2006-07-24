@@ -15,6 +15,7 @@ punti_gemma = 0
 punti_totali = 0
 idle_loops = 0
 
+echo_weapon = false
 is_afk = false
 is_hide = false
 logged = false
@@ -200,7 +201,7 @@ function changeweapon(w)
     set_hide_off() 
 
 -- dico in gossip l'arma se sono capogruppo
-    if string.lower(leader) == "mongo" then
+    if string.lower(leader) == "mongo" and echo_weapon then
         send("gt " .. w)
     end
 
@@ -277,8 +278,7 @@ function handle_speaks(p, t, c)
 
 -- Gestisco l'afk
     if is_afk and c == "$c0013" then
-        send("tele " .. p .. " [messaggio automatico] sono AFK ti rispondero` appena posso!")
-        send("afk");
+        send("tele " .. p .. " [messaggio automatico] sono AFK ti rispondero` appena posso!;afk")
     end
 
 -- Gestisco qui i cambi d'arma

@@ -314,10 +314,8 @@ update_classes()
     }
     
     while (cl) {
-        if (!strcmp(cl->name, "scripting"))
-            continue;
-
-        classes_store = g_list_append(classes_store, (void *)cl->name);
+        if (strcmp(cl->name, "scripting")) // do not add scripting triggers to the list
+            classes_store = g_list_append(classes_store, (void *)cl->name);
         
         cl = cl->next;
     }
