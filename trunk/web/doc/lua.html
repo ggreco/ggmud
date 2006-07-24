@@ -31,7 +31,7 @@ From inside a LUA script you have access to a range of GGMud specific interface 
     <b>show</b> - Display some text on the main window<p>
     Syntax: <code>show( string )</code><p>
     This function let you show some string on the main output window of the client, the string may
-    contain classical DIKU like color codes to change the font color (<code>$c0000</code> is black 
+    contain classical <a href="colors.html">DIKU like color codes</a> to change the font color (<code>$c0000</code> is black 
     <code>$c0015</code> is white). The string is only show on the output window, the text you enter 
     is not sent to the mud.<p>
     Example:<ul> <code>show ( "$c0009Script loaded, client version $c0015" .. VERSION)</code><p>...this will print the text "script loaded, client version" in RED with appended the version string of GGMud in white.</ul>
@@ -111,8 +111,33 @@ From inside a LUA script you have access to a range of GGMud specific interface 
 <h3>Variables &amp; functions</h3>
     Every <b>global</b> lua variable is visible to GGMud, every GGMud defined variable (with the <b>#var</b> command) is visible to 
     the LUA scripts as global variable. So it's safe to assume that given a certain variable name their values in LUA and in the
-    GGMud internal scripting engine is the same. Every GGMud variable is treated as string.<p>
-    
+    GGMud internal scripting engine is the same. Every GGMud variable is exported as string, anyway the weak type checking of LUA let you do arithmetical operations on these variables.<p>
+    You can access any non local LUA function from GGMud, this can be useful to embed LUA code in you aliases, to call a LUA function you have to prefix his name with the <b>&amp;</b> character, you can then include function parameters in between braces, the function must be called with the correct number of parameters or you will get a LUA runtime error.<p>
+    Example:<ul>
+        <code>
+            <b>GGMud alias (provided you have three weapons called pierce slash blunt):</b><br><br>
+            #action slash {&amp;changeweapon(slash)}<br>
+            #action blunt {&amp;changeweapon(blunt)}<br>
+            #action pierce {&amp;changeweapon(pierce)}<br>
+            <br>
+            <b>LUA script (previously loaded via #script or at GGMud startup):</b><br><br>
+            weapontype = "UNDEF"<br>
+            <br>
+            function changeweapon(wt)<br>
+            &nbsp;&nbsp;if wt == weapontype then<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;show("You are already using damage type " .. wt)<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;return<br>
+            &nbsp;&nbsp;end<br>
+            <br>
+            &nbsp;&nbsp;if weapontype="UNDEF" then<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;send("rem slash;rem pierce;rem blunt")<br>
+            &nbsp;&nbsp;else<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;send("rem " .. weapontype)<br>
+            &nbsp;&nbsp;end<br><br>
+            &nbsp;&nbsp;send("wield " .. wt)<br>
+            &nbsp;&nbsp;weapontype = wt<br>
+            end<br>
+    </ul>
     <b>NOTE:</b> The <b>save variables</b> option in the preferences window can be used to save the value of the variables 
     defined through the GGMud GUI or the #var command, so if you want to keep the value of a LUA variable across playing sessions you should define the variable in the GGMud interface and not in your LUA scripts, you cannot define it in BOTH places otherwise the last loaded value will be the variable value and this is not wanted.
 <p>
