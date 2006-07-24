@@ -237,6 +237,7 @@ connection_part_two(int sockfd, struct tempdata *mystr)
     gtk_widget_set_sensitive (btn_toolbar_connect, FALSE);
     gtk_widget_set_sensitive (menu_File_DisConnect, TRUE);
     gtk_widget_set_sensitive (btn_toolbar_disconnect, TRUE);
+
 }
 
 void stop_connecting(GtkWidget *widget, struct tempdata *data)
@@ -488,7 +489,31 @@ static void readmud(struct session *s)
 
 void read_from_connection (gpointer data, gint source, GdkInputCondition condition)
 {
+    extern WIZARD_DATA *wizard_autologin;
+
     readmud((struct session *)data);
+
+    if (wizard_autologin) {
+        char buf[255];
+
+        if (wizard_autologin->autologin) {
+            if (wizard_autologin->playername) {
+                connection_send (wizard_autologin->playername);
+                connection_send ("\n");
+            }
+            if (wizard_autologin->password) {
+                connection_send (wizard_autologin->password);
+                connection_send ("\n");
+            }
+        }
+
+        sprintf (buf, "Connected to %s - GGMud %s", wizard_autologin->name, VERSION);
+        gtk_window_set_title (GTK_WINDOW (mud->window), buf);
+
+        wiz_destructify();
+
+        wizard_autologin = NULL;
+    }
 }
 
 void send_to_connection (GtkWidget *widget, gpointer data)

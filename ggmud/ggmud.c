@@ -46,7 +46,7 @@ gchar **macro_list;
 gchar *keys[] = {"F1", "F2", "F3", "F4", "F5",
 	         "F6", "F7", "F8", "F9", "F10", "F11", "F12", NULL};
 
-gint        snoop_keys              (GtkWidget *grab_widget,
+gint snoop_keys (GtkWidget *grab_widget,
                                              GdkEventKey *event,
                                              ggmud *mud)
 {
@@ -63,6 +63,18 @@ gint        snoop_keys              (GtkWidget *grab_widget,
 #include "prefix.h"
 #include <unistd.h>
 #endif
+
+void
+set_default_prefs(void)
+{
+    prefs.DefaultGdkColor.red = 50000;
+    prefs.DefaultGdkColor.green = 50000;
+    prefs.DefaultGdkColor.blue = 50000;
+    prefs.KeepText = 1;
+    prefs.EchoText = 1;
+    prefs.WordWrap = 1;
+    prefs.DoBeep = 1;
+}
 
 int main(int argc, char **argv)
 {
@@ -133,6 +145,9 @@ int main(int argc, char **argv)
 #endif
     /* load the stuff that needs to be loaded before the GUI comes up! */
     init_colors();
+
+    set_default_prefs();
+
     load_prefs();
     load_font();
 
@@ -165,9 +180,7 @@ int main(int argc, char **argv)
     load_triggers();
     load_tabs();
 
-#ifdef __APPLE__
-    chdir("GGMud.app/Contents/Resources/bin");
-#endif
+//    chdir("GGMud.app/Contents/Resources/bin"); it was needed to find the help file
 
 #ifdef WITH_LUA
     if (prefs.LuaConfig)

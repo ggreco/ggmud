@@ -43,8 +43,9 @@ static GtkWidget   *button_update;
 static GtkWidget   *button_delete;
 static GtkWidget   *button_connect;
 static GList       *wizard_connection_list2;
+WIZARD_DATA *wizard_autologin = NULL;
 
-static void
+void
 wiz_destructify()
 {
     gtk_widget_hide(wizard_window);
@@ -238,22 +239,8 @@ static void wizard_button_connect (GtkWidget *button, gpointer data)
 
     make_connection (w->name, w->hostname, w->port);
 
-    if ( connected )
-    {
-        gchar buf[256];
-        
-        if (  w->autologin && w->playername && w->password )
-        {
-            connection_send (w->playername);
-            connection_send ("\n");
-            connection_send (w->password);
-            connection_send ("\n");
-        }
-    	wiz_destructify();
-        
-        sprintf (buf, "Connected to %s - GGMud %s", w->name, VERSION);
-        gtk_window_set_title (GTK_WINDOW (mud->window), buf);
-    }
+    wizard_autologin = w;
+
 }
 
 static void wizard_button_delete (GtkWidget *button, gpointer data)

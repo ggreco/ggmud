@@ -299,31 +299,16 @@ void init_lua()
     lua_register(mud->lua, "timer", do_luatimer);
     lua_register(mud->lua, "idle_function", do_luaidle);
     lua_register(mud->lua, "clear", do_luaclear);
+}
 
-#if 0
-    mystring = lua_newtag(mud->lua);
+void add_lua_global(const char *v1, const char **v2)
+{
+    if (!mud->lua)
+        return;
 
-    lua_pushcfunction(mud->lua, get_string); 
-    lua_settagmethod(mud->lua, mystring, "getglobal");
-    lua_pushcfunction(mud->lua, set_string);
-    lua_settagmethod(mud->lua, mystring, "setglobal");
-#endif
-
-#ifdef BROKEN
-    // Create: the metatable.
-    luaL_newmetatable(mud->lua, "mystring");
-    lua_pushstring(mud->lua, "__index");
-    lua_pushcfunction(mud->lua, __index);
-    lua_rawset(mud->lua, -3); 
-
-// Add the Print function.
-    lua_pushstring(mud->lua, "__get");
-    lua_pushcfunction(mud->lua, get_string);
-    lua_rawset(mud->lua, -3); 
-    lua_pushstring(mud->lua, "__newindex");
-    lua_pushcfunction(mud->lua, set_string);
-    lua_settable(mud->lua, -3);
-#endif
+    lua_pushstring(mud->lua, v1);
+    lua_pushstring(mud->lua, *v2);
+    lua_settable(mud->lua, LUA_GLOBALSINDEX);
 }
 
 void get_lua_global(const char *key, char **value)
@@ -332,37 +317,20 @@ void get_lua_global(const char *key, char **value)
 	
 	lua_getglobal(mud->lua, key);
 
-	v = lua_tostring(mud->lua, -1);
+    if (v = lua_tostring(mud->lua, -1)) {
 
-	if (strcmp(v, *value)) {
-		if (*value)
-			free(*value);
-		*value = strdup(v);
-	}
-	
-	lua_pop(mud->lua, 1);
+        if (strcmp(v, *value)) {
+            if (*value)
+                free(*value);
+            *value = strdup(v);
+        }
+
+    }
+    else 
+        add_lua_global(key, value);
+
+    lua_pop(mud->lua, 1);
 }
 
-void add_lua_global(const char *v1, const char **v2)
-{
-    if (!mud->lua)
-        return;
-#if 0
-    lua_pushusertag(mud->lua, v2, mystring);
-    lua_setglobal(mud->lua, v1);
-#elif defined(BROKEN)
-    lua_pushstring(mud->lua, v1);
-    lua_pushlightuserdata(mud->lua, v2);
-    lua_getmetatable(mud->lua, "mystring");
-    lua_setmetatable(mud->lua, -2);
-    lua_rawset(mud->lua, LUA_GLOBALSINDEX);
-#else
-    lua_pushstring(mud->lua, v1);
-    lua_pushstring(mud->lua, *v2);
-    lua_settable(mud->lua, LUA_GLOBALSINDEX);
-#endif
-
-    
-}
 
 #endif

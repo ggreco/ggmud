@@ -45,6 +45,9 @@ void save_vars()
     if (list) {
         if ((fp = fileopen (VARIABLE_FILE, "w"))) {
             while ( (list = list->next) ) {
+#ifdef WITH_LUA
+                get_lua_global(list->left, &(list->right));
+#endif
                 fprintf (fp, "#var {%s} {%s}\n", list->left, list->right);
             }
             fclose(fp);
@@ -64,6 +67,9 @@ insert_variables  (GtkCList *clist)
 
     while ( (list = list->next) ) {
         text[0] = list->left;
+#ifdef WITH_LUA
+        get_lua_global(list->left, &(list->right));
+#endif
         text[1] = list->right;
         gtk_clist_append(GTK_CLIST (clist), text);
     }
