@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>GGMud Manual</title>
+</head>
+<body>
+<h1 style="text-align: center;"><span style="color: rgb(255, 0, 0);">G<span
+ style="color: rgb(51, 51, 255);"> G<span style="color: rgb(255, 0, 0);">
+M<span style="color: rgb(51, 51, 255);"> u<span
+ style="color: rgb(255, 0, 0);"> d</span></span></span></span></span></h1>
+<div style="text-align: center;">...a new <span
+ style="font-weight: bold;">powerful</span>, <span
+ style="font-weight: bold;">opensource </span>and <span
+ style="font-weight: bold;">multiplatform </span>MUD client.<br>
+</div><hr><br>
+<h2 style="text-align: left; font-weight: bold;">Changing text color</b></h2>
+<span style="font-weight: bold;"><br>
+</span>
+<p>
+The <b>window</b> and <b>say</b> commands let you display some text on a the main window or in a different window, you can use the same syntax you use in DIKU-derived MUDs to change the colors of your items or of the chat messages to change the color of the text on your client window.<p>
+
+For instance if you use the command:<p>
+<code>
+    #say $C0015SANC ENDED!
+</code>
+<p>
+You will display the text SANC ENDED in light white (ansi color 15). Obviously the color will be different if you have remapped it by hand with the <b>Colors</b> menu item.
+<p>
+Here is a simple table of the available color codes. Using the syntax <b>$Cxxxx</b> you can use any of the sixteen available colors both as foreground and background and also as blinking colors (if you have enabled blinking). The first digit of the color code is the color mode, if <b>0</b> you'll see normal text, if <b>1</b> the background will have a full intensity color, if <b>2</b> the text will be revered, if <b>5</b> the text will blink. The second digit is the background color, it can go from <b>0</b> to <b>7</b>, if the first digit is <b>1</b> it will use colors from <b>8</b> to <b>15</b>.  The last two digits of the color code are the foreground color, this can go from <b>00</b> to <b>15</b>.<p>
+<table bgcolor="#000000">
+    <tr style="color: rgb(150,150,150);font-weight: bold;">
+        <td colspan=2>Dark colors</td><td colspan=2 style="color: rgb(250,250,250);font-weight: bold;">Light colors</td>
+        </tr>
+    <tr style="color: rgb(250,250,250);font-weight: bold;">
+        <td >Color</td> <td> Code </td>         <td >Color</td> <td> Code </td>
+
+    </tr>
+    <tr>
+        <td style="color: rgb(0,0,0);font-weight: bold;">black</td> <td style="color: rgb(255,255,0);font-weight: bold;"> $c0000</td>
+        <td style="color: rgb(100,100,100);font-weight: bold;">dark gray</td> <td style="color: rgb(255,255,0);font-weight: bold;"> $c0008</td>
+    </tr>
+    <tr>
+        <td style="color: rgb(128,0,0);font-weight: bold;">dark red</td> <td style="color: rgb(255,255,0);font-weight: bold;"> $c0001</td>
+        <td style="color: rgb(255,0,0);font-weight: bold;">light red</td> <td style="color: rgb(255,255,0);font-weight: bold;"> $c0009</td>        
+    </tr>
+    <tr>
+        <td style="color: rgb(0,128,0);font-weight: bold;">dark green</td> <td style="color: rgb(255,255,0);font-weight: bold;"> $c0002</td>
+        <td style="color: rgb(0,255,0);font-weight: bold;">light green</td> <td style="color: rgb(255,255,0);font-weight: bold;"> $c0010</td>
+    </tr>
+    <tr>
+        <td style="color: rgb(127,127,0);font-weight: bold;">brown</td> <td style="color: rgb(255,255,0);font-weight: bold;"> $c0003</td>
+        <td style="color: rgb(255,255,0);font-weight: bold;">yellow</td> <td style="color: rgb(255,255,0);font-weight: bold;"> $c0011</td>
+    </tr>
+    <tr>
+        <td style="color: rgb(0,0,127);font-weight: bold;">blue</td> <td style="color: rgb(255,255,0);font-weight: bold;"> $c0004</td>
+        <td style="color: rgb(0,0,255);font-weight: bold;">light blue</td> <td style="color: rgb(255,255,0);font-weight: bold;"> $c0012</td>
+    </tr>
+    <tr>
+        <td style="color: rgb(128,0,128);font-weight: bold;">purple</td> <td style="color: rgb(255,255,0);font-weight: bold;"> $c0005</td>
+        <td style="color: rgb(255,0,255);font-weight: bold;">light purple</td> <td style="color: rgb(255,255,0);font-weight: bold;"> $c0013</td>
+    </tr>
+    <tr>
+        <td style="color: rgb(0,128,128);font-weight: bold;">cyan</td> <td style="color: rgb(255,255,0);font-weight: bold;"> $c0006</td>
+        <td style="color: rgb(0,255,255);font-weight: bold;">light cyan</td> <td style="color: rgb(255,255,0);font-weight: bold;"> $c0014</td>
+    </tr>
+    <tr>
+        <td style="color: rgb(180,180,180);font-weight: bold;">gray</td> <td style="color: rgb(255,255,0);font-weight: bold;"> $c0007</td>
+        <td style="color: rgb(255,255,255);font-weight: bold;">white</td> <td style="color: rgb(255,255,0);font-weight: bold;"> $c0015</td>
+    </tr>
+</table><p>
+Other examples:<p>
+
+Blinking white: <b>$c5015</b><br>
+Yellow on light green bg: <b>$c1011</b>
+
+<p>
+<hr>
+<div style="text-align: right;"><a href="index.html">Return to index</a></div>
+</body>
+</html>
