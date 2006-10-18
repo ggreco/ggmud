@@ -91,6 +91,8 @@ function update_status()
         danno = "BLUNT"
     elseif weapon == api then
         danno = "PIERCE"
+    elseif weapon == area then
+        danno = "AREA"
     end
 
     local combat_state = "$c0011IDLE$c0007"
@@ -213,10 +215,12 @@ function changeweapon(w)
         weapon = asl
     elseif wt == "blunt" then
         weapon = abl
+    elseif wt == "area" then
+        weapon = area
     end
  
     if oldweapon == "UNDEF" then
-        send("rem " .. asl .. ";rem " .. api .. 
+        send("rem " .. asl .. ";rem " .. api .. ";rem " .. area .. 
              ";rem " .. abl .. ";wield " .. weapon)
 
         update_status()   
@@ -306,7 +310,7 @@ function handle_say(c, t) handle_speaks(c, t, "$c0015") end
 function handle_gt(c, t) handle_speaks(c, t, "$c0012") end
 
 function set_afk_on() is_afk = true show("$c0015AFK mode $c0009ON$c0007") do_not_remove_afk = false end
-function set_afk_off() if do_not_remove_afk == false then is_afk = false show("$c0015AFK mode $c0009OFF$c0007") else do_not_remove_afk = false end end
+function set_afk_off() if do_not_remove_afk == false then is_afk = false show("$c0015AFK mode $c0009OFF$c0007") else send("afk") end end
 function set_hide_on() is_hide = true show("$c0015HIDE mode $c0009ON$c0007") end
 function berserk_ok() bersok = bersok + 1 berserked = true update_status() end
 function berserk_ko() bersfail = bersfail + 1 berserked = false end
@@ -333,7 +337,7 @@ function disarm_ko()
 	standing = false
 	update_status()
 	send("stand")
-        check_afk()
+    check_afk()
 end
 
 function set_berserk_off()
@@ -372,9 +376,9 @@ local function color(number)
 end
 
 function check_afk()
-    if is_afk then
-	do_not_remove_afk = true
-	send("afk")
+    if is_afk == true then
+    	do_not_remove_afk = true
+--    	send("afk")
     end
 end
 
@@ -417,7 +421,7 @@ trigger("^##%1>", "grab_prompt")
 -- autoassist
 trigger("violenta spinta di %1 fa perdere", "autoassist_ok");
 trigger("travolto da %1 che perde", "autoassist_ko");
-trigger("^Chi vuoi colpire?", "nastrobash");
+trigger("hi vuoi colpi", "nastrobash");
 -- status
 trigger("Tu hai %1 movimento", "score_line_health")
 trigger("i %1 diamanti e %2 smeraldi, %3 rubini e %4 zaff", "score_line_gemme")

@@ -25,6 +25,14 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include "tintin.h"
+#ifndef WIN32
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#else
+#include <winsock2.h>
+#endif
+#include "socks.h"
 
 #define MESSAGE_ERR     0
 #define MESSAGE_NORMAL  1
@@ -71,6 +79,7 @@ typedef struct {
     lua_State *lua;
     char *lua_idle_function;
 #endif
+    struct connreq *conn;
 } ggmud;
 
 typedef struct alias_data  ALIAS_DATA;
@@ -97,6 +106,12 @@ struct prefs_data {
     GdkColor DefaultGdkColor; /* Red, Green, Blue */
     gint       SaveVars;
     char *LuaConfig;
+    gint    UseSocks;
+    int socks_protocol;
+    char socks_user[32];
+    char socks_password[32];
+    char socks_addr[64];
+    unsigned short socks_port;
 };
 
 #define WARN GTK_MESSAGE_WARNING
