@@ -220,7 +220,7 @@ GtkWidget *CreateBarSubMenu (GtkWidget *menu, char *szName)
 
 
 
-static void CreateMenu (GtkWidget *window, GtkWidget *vbox_main)
+static void MyCreateMenu (GtkWidget *window, GtkWidget *vbox_main)
 {
     GtkWidget *menubar;
     GtkWidget *menu;
@@ -305,7 +305,7 @@ void log_viewer()
 
     gtk_widget_realize (window);
     
-    CreateMenu (window, main_vbox);
+    MyCreateMenu (window, main_vbox);
     CreateText (window, main_vbox);
 /* need to rewrite the whole window for this to work!!
     gdk_window_set_background(GTK_TEXT(text)->text_area,

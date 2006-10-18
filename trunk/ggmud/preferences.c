@@ -33,6 +33,8 @@
 #include <string.h>
 #include "ggmud.h"
 #include "ansi.h"
+#include "interface.h"
+#include "support.h"
 
 #ifdef WIN32
 #define PREFS_FILE "ggmud.prf"
@@ -160,81 +162,107 @@ gdouble *gdk_color_to_gdouble (GdkColor *gdkcolor)
 }
 
 extern int tick_size;
- 
+
+static const char *boolean_keys[] = {
+    "KeepText", "EchoText", "WordWrap", "Blinking",
+    "DoBeep", "Toolbar", "Macrobuttons", "Statusbar",
+    "SaveVars", "UseSocks", "TickCounter", NULL
+};
+
+static gint *boolean_values[] = {
+    &prefs.KeepText, &prefs.EchoText, &prefs.WordWrap, &prefs.Blinking,
+    &prefs.DoBeep, &prefs.Toolbar, &prefs.Macrobuttons, &prefs.Statusbar,
+    &prefs.SaveVars, &prefs.UseSocks, &use_tickcounter, NULL
+};
+
+int check_boolean_keys(const char *pref, const char *value)
+{
+    int i = 0;
+
+    while (boolean_keys[i]) {
+        if (!strcmp(pref, boolean_keys[i])) {
+            if (!strcmp(value, "Off"))
+                *(boolean_values[i]) = FALSE;
+            else
+                *(boolean_values[i]) = TRUE;
+
+            return 1;
+        }
+
+        i++;
+    }
+
+    return 0;
+}
+
 void load_prefs () 
 {
     FILE *fp;
     gchar line[255], pref[100], value[230];
 
-//    prefs.BackgroundColor = color_black;
-//    prefs.BackgroundColor.pixel = 0;
-//    prefs.DefaultColor = color_white;
+    //    prefs.BackgroundColor = color_black;
+    //    prefs.BackgroundColor.pixel = 0;
+    //    prefs.DefaultColor = color_white;
+
 
     if ((fp = fileopen(PREFS_FILE, "r"))) {
         prefs.SaveVars = prefs.Blinking = prefs.KeepText = prefs.EchoText  = prefs.WordWrap = prefs.DoBeep = TRUE;
+        prefs.UseSocks = FALSE;
         prefs.LuaConfig = NULL;
 
         while (fgets (line, sizeof(line) - 1, fp)) {
             sscanf (line, "%[^=]=%[^\n]", pref, value);
-            if (!strcmp(value, "Off")) {
-                if (!strcmp (pref, "KeepText")) {
-                    prefs.KeepText = FALSE;
-                } else if (!strcmp (pref, "SaveVars")) {
-                    prefs.SaveVars = FALSE;
-                } else if (!strcmp (pref, "Blinking")) {
-                    prefs.Blinking = FALSE;
-                } else if (!strcmp (pref, "EchoText")) {
-                    prefs.EchoText = FALSE;
-                } else if (!strcmp (pref, "Wordwrap")) {
-                    prefs.WordWrap = FALSE;
-                } else if (!strcmp (pref, "Beep")) {
-                    prefs.DoBeep = FALSE;
-                } else if (!strcmp(pref, "Toolbar")) {
-                    prefs.Toolbar = FALSE;
-                } else if (!strcmp (pref, "Macrobuttons")) {
-                    prefs.Macrobuttons = FALSE;
-                } else if (!strcmp (pref, "Statusbar")) {
-                    prefs.Statusbar = FALSE;
-                }
+
+            // if we find a key we skip the remaining part of the line
+            if (check_boolean_keys(pref, value)) 
+                continue;
+
+            if (!strcmp(pref, "SocksUser")) {
+                strncpy(prefs.socks_user, value, sizeof(prefs.socks_user));
+            }
+            else if (!strcmp(pref, "SocksPwd")) {
+                strncpy(prefs.socks_password, value, sizeof(prefs.socks_password));
+            }
+            else if (!strcmp(pref, "SocksAddress")) {
+                strncpy(prefs.socks_addr, value, sizeof(prefs.socks_addr));
+            }
+            else if (!strcmp(pref, "SocksProtocol")) {
+                prefs.socks_protocol = atoi(value);
+            } else if (!strcmp(pref, "SocksPort")) {
+                prefs.socks_port = atoi(value);
             } else if (!strcmp(pref, "ReviewSize")) {
                 int temp = atoi(value);
-                
+
                 if(temp > 100 && temp < 100000)
                     mud->maxlines = temp;
             } else if (!strcmp(pref, "TickSize")) {
                 int temp = atoi(value);
-                
+
                 if(temp > 10 && temp < 1000)
                     tick_size = temp;
-            } else if (!strcmp(pref, "TickCounter")) {
-                if(!strcmp(value, "On")) {
-                    use_tickcounter = 1;
-                } else {
-                    use_tickcounter = 0;
-                }
-	        } else if (!strcmp(pref, "LuaConfig")) {
+            } else if (!strcmp(pref, "LuaConfig")) {
                 FILE *f = fopen(value, "r");
-                
+
                 if (f) {
-                   fclose(f);
-                   prefs.LuaConfig = strdup(value);
+                    fclose(f);
+                    prefs.LuaConfig = strdup(value);
                 }
             } else { // import colors
                 int i = 0;
-                
+
                 while(color_arr[i].name) {	    
                     if(!strcmp (color_arr[i].name, pref)) {
                         int red, green, blue;
-                        
+
                         if (sscanf(value, "(%u,%u,%u)",
-                                &red,
-                                &green,
-                                &blue) == 3) {
+                                    &red,
+                                    &green,
+                                    &blue) == 3) {
 
                             color_arr[i].color->red = red;
                             color_arr[i].color->green = green;
                             color_arr[i].color->blue = blue;
-                            
+
                             if(!gdk_color_alloc(gdk_colormap_get_system(), 
                                         color_arr[i].color)) {
 
@@ -255,6 +283,7 @@ void load_prefs ()
         }
         fclose (fp);
     }
+
 }
 
 void change_script(GtkEntry *entry, PREFS_DATA *p)
@@ -302,21 +331,23 @@ void save_prefs (GtkWidget *button, gpointer data)
     if ((fp = fileopen (PREFS_FILE, "w"))) {
         int i=0;
         extern int tick_size;
-        
-        CFGW("KeepText", prefs.KeepText);
-    	CFGW("EchoText", prefs.EchoText);
-        CFGW("Wordwrap", prefs.WordWrap);
-        CFGW("Blinking", prefs.Blinking);
-        CFGW("SaveVars", prefs.SaveVars);
-    	CFGW("Beep", prefs.DoBeep);
-        CFGW("Toolbar", prefs.Toolbar);
-        CFGW("Macrobuttons", prefs.Macrobuttons);
-        CFGW("Statusbar", prefs.Statusbar);
+       
+
+        while(boolean_keys[i]) {
+            CFGW(boolean_keys[i], *boolean_values[i]);
+            i++;
+        }
+
         CFGI("TickSize", tick_size);
         CFGI("ReviewSize", mud->maxlines);
         CFGS("LuaConfig", prefs.LuaConfig);
+        CFGS("SocksAddress", prefs.socks_addr);
+        CFGI("SocksProtocol", prefs.socks_protocol);
+        CFGI("SocksPort", prefs.socks_port);
+        CFGS("SocksUser", prefs.socks_user);
+        CFGS("SocksPwd", prefs.socks_password);
 
-        CFGW("TickCounter", use_tickcounter);
+        i = 0;
 
         while(color_arr[i].name) {
     	    fprintf(fp, "%s=(%u,%u,%u)\n",color_arr[i].name,
@@ -326,6 +357,8 @@ void save_prefs (GtkWidget *button, gpointer data)
     	}
     	fclose (fp);
     }
+
+    gtk_widget_destroy(gtk_widget_get_toplevel(button));
 }
 
 void change_tick_size (GtkWidget *widget, ggmud *mud)
@@ -350,6 +383,106 @@ void check_tickcounter (GtkWidget *widget, GtkWidget *entry_TickSize)
     }
 
     gtk_widget_set_sensitive(entry_TickSize, GTK_TOGGLE_BUTTON (widget)->active);
+}
+
+void on_socks_ok_clicked(GtkWidget *button)
+{
+    int port;
+
+    port = atoi(gtk_entry_get_text(
+                GTK_ENTRY(lookup_widget(button, "entry_socks_port"))));
+
+    if (port < 1 || port > 65535) {
+        popup_window(ERR, "Invalid Port number!");
+        return;
+    }
+
+    if (gtk_toggle_button_get_active(
+                GTK_TOGGLE_BUTTON(lookup_widget(button, "checkbutton_pwd_auth")))) {
+        const char *user, *pwd;
+
+        user = gtk_entry_get_text(
+                GTK_ENTRY(lookup_widget(button, "entry_socks_user"))); 
+        pwd = gtk_entry_get_text(
+                GTK_ENTRY(lookup_widget(button, "entry_socks_password"))); 
+
+        if (!*user || !*pwd) {
+            popup_window(ERR, "Invalid username or password!");
+            return;
+        }
+
+        strcpy(prefs.socks_user, user);
+        strcpy(prefs.socks_password, pwd);
+    }
+
+    strncpy(prefs.socks_addr, gtk_entry_get_text(
+                GTK_ENTRY(lookup_widget(button, "entry_socks_addr"))), 
+                sizeof(prefs.socks_addr));
+
+    prefs.socks_port = port;
+
+    if (gtk_toggle_button_get_active(
+                GTK_TOGGLE_BUTTON(lookup_widget(button, "radiobutton_v4"))))
+        prefs.socks_protocol = 4;
+    else
+        prefs.socks_protocol = 5;
+
+    gtk_widget_destroy(gtk_widget_get_toplevel(button));
+}
+
+void on_socks_ko_clicked(GtkWidget *button)
+{
+    gtk_widget_destroy(gtk_widget_get_toplevel(button));
+}
+
+void change_socks_settings()
+{
+    GtkWidget *w = create_window_socks_settings();
+    char buffer[32];
+
+    if (prefs.socks_protocol != 5) {
+        gtk_toggle_button_set_active(
+                GTK_TOGGLE_BUTTON(lookup_widget(w, "radiobutton_v4")), TRUE);
+        gtk_widget_hide(lookup_widget(w, "frame_pwd_auth"));
+    }
+    else {
+        gtk_widget_show(lookup_widget(w, "frame_pwd_auth"));
+        gtk_toggle_button_set_active(
+                GTK_TOGGLE_BUTTON(lookup_widget(w, "radiobutton_v5")), TRUE);
+    }
+
+    gtk_entry_set_text(GTK_ENTRY(lookup_widget(w, "entry_socks_addr")),
+                prefs.socks_addr);
+
+    sprintf(buffer, "%d", prefs.socks_port);
+    gtk_entry_set_text(GTK_ENTRY(lookup_widget(w, "entry_socks_port")),
+                buffer);
+
+    gtk_widget_set_sensitive(
+            lookup_widget(w, "table_pwd_auth"),
+            *prefs.socks_user && *prefs.socks_password);
+    gtk_toggle_button_set_active(
+                GTK_TOGGLE_BUTTON(lookup_widget(w, "checkbutton_pwd_auth")),
+                *prefs.socks_user && *prefs.socks_password);
+    
+
+    gtk_entry_set_text(GTK_ENTRY(lookup_widget(w, "entry_socks_user")),
+                prefs.socks_user);
+    gtk_entry_set_text(GTK_ENTRY(lookup_widget(w, "entry_socks_password")),
+                prefs.socks_password);
+
+    gtk_widget_show(w);
+}
+
+static void set_socks(GtkToggleButton *toggle, gint unused)
+{
+    if (gtk_toggle_button_get_active(toggle)) {
+        prefs.UseSocks = 1;
+
+        change_socks_settings();
+    }
+    else
+        prefs.UseSocks = 0;
 }
 
 static void check_toggle (GtkWidget *widget, gint *var)
@@ -489,13 +622,12 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy)
   gtk_button_box_set_spacing (GTK_BUTTON_BOX (color_hbuttonbox), 5);
   gtk_button_box_set_child_ipadding (GTK_BUTTON_BOX (color_hbuttonbox), 5, 0);
 
-  save_button = gtk_button_new_with_label ("Save");
+  save_button = gtk_button_new_from_stock (GTK_STOCK_SAVE);
   gtk_signal_connect_object (GTK_OBJECT (save_button), "clicked",
                              GTK_SIGNAL_FUNC (save_prefs),
                              NULL);
   gtk_widget_show (save_button);
   gtk_container_add (GTK_CONTAINER (color_hbuttonbox), save_button);
-  gtk_container_border_width (GTK_CONTAINER (save_button), 3);
 
   color_reset_button = gtk_button_new_with_label ("Reset colors to default");
   gtk_signal_connect_object (GTK_OBJECT (color_reset_button), "clicked",
@@ -503,15 +635,13 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy)
                              NULL);
   gtk_widget_show (color_reset_button);
   gtk_container_add (GTK_CONTAINER (color_hbuttonbox), color_reset_button);
-  gtk_container_border_width (GTK_CONTAINER (color_reset_button), 3);
 
-  close_button = gtk_button_new_with_label ("Close");
+  close_button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
   gtk_signal_connect (GTK_OBJECT (close_button), "clicked",
                              GTK_SIGNAL_FUNC (color_prefs_done),
 			     dialog);
   gtk_widget_show (close_button);
   gtk_container_add (GTK_CONTAINER (color_hbuttonbox), close_button);
-  gtk_container_border_width (GTK_CONTAINER (close_button), 3);
 
   gtk_widget_show(dialog);
 }
@@ -537,6 +667,7 @@ void window_prefs (GtkWidget *widget, gpointer data)
   GtkWidget *checkbutton_Macrobuttons;
   GtkWidget *checkbutton_Statusbar;
   GtkWidget *checkbutton_savevars;
+  GtkWidget *checkbutton_socks;
   GtkWidget *checkbutton_Tickcounter;
   GtkWidget *entry_TickSize;
   GtkWidget *entry_ReviewSize;
@@ -801,8 +932,19 @@ void window_prefs (GtkWidget *widget, gpointer data)
                         NULL);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_savevars), prefs.SaveVars);
   gtk_widget_show (checkbutton_savevars);
-  gtk_box_pack_start (GTK_BOX (vbox3), checkbutton_savevars, TRUE, TRUE, 0);
   
+
+
+  gtk_box_pack_start (GTK_BOX (vbox3), checkbutton_savevars, TRUE, TRUE, 0);
+
+  checkbutton_socks = gtk_check_button_new_with_label ("Use a Socks proxy");
+  gtk_widget_show (checkbutton_socks);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_socks), prefs.UseSocks);
+  gtk_box_pack_start (GTK_BOX (vbox3), checkbutton_socks, TRUE, TRUE, 0);
+
+  gtk_signal_connect (GTK_OBJECT (checkbutton_socks), "toggled",
+                      GTK_SIGNAL_FUNC (set_socks), NULL);
+
   temp = (GtkWidget *)gtk_adjustment_new (mud->maxlines, 1000, 1000000, 100, 10000, 10000);
   entry_ReviewSize = gtk_spin_button_new (GTK_ADJUSTMENT (temp), 1, 0);
 
@@ -814,7 +956,7 @@ void window_prefs (GtkWidget *widget, gpointer data)
           "The size in lines of the review buffer.",
           NULL);
   gtk_box_pack_start (GTK_BOX (hbox), entry_ReviewSize, TRUE, TRUE, 0);
-  
+
 // button box
   AddSimpleBar(vbox, NULL, 
           GTK_SIGNAL_FUNC(save_prefs), GTK_SIGNAL_FUNC(close_window));

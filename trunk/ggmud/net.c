@@ -189,7 +189,12 @@ void disconnect ( void )
     gtk_widget_set_sensitive (btn_toolbar_disconnect, FALSE);
     gtk_window_set_title (GTK_WINDOW (mud->window), "GGMud "VERSION"");
     cleanup_session(mud->activesession);
-    
+
+    if (mud->conn) {
+        kill_socks_request(mud->conn);
+        mud->conn = NULL;
+    }
+ 
     newactive_session();
     mud->activesession = activesession;
 }
@@ -219,19 +224,40 @@ void
 connection_part_two(int sockfd, struct tempdata *mystr)
 {
     int onoff = 0;
-    
+
     ioctl(sockfd, FIONBIO, (char *)&onoff);
 
-    textfield_add (mud->text, "\n*** Connection established.\n", MESSAGE_NORMAL);
+    if (mud->conn) {
+        int rc;
 
-    {
-        if ((mud->activesession = new_session(mystr->name, mystr->hostport, mud->activesession)))
-            mud->activesession->socket = sockfd;
+        textfield_add (mud->text, "\n*** Connection with SOCKS Server established.\n", MESSAGE_NORMAL);
+
+        mud->conn->state = CONNECTED;
+
+        if ( (rc = handle_request(mud->conn)) != 0) {
+            textfield_add (mud->text, "\n*** Connection FAILED.\n", MESSAGE_ERR);
+            popup_window(ERR, "Unable to create the connection to %s/%d\n"
+                              "through SOCKS%d proxy %s/%d, error (%d):\n"
+                              "%s",
+                              mystr->name, mystr->hostport, prefs.socks_protocol,
+                              prefs.socks_addr, prefs.socks_port, rc,
+                              strerror(rc));
+            free(mud->conn);
+            mud->conn = NULL;
+            sockclose(sockfd);
+
+            return;
+        }
     }
-    
+    else
+        textfield_add (mud->text, "\n*** Connection established.\n", MESSAGE_NORMAL);
+
+    if ((mud->activesession = new_session(mystr->name, mystr->hostport, mud->activesession)))
+        mud->activesession->socket = sockfd;
+
     mud->input_monitor = gdk_input_add (sockfd, GDK_INPUT_READ,
-    				   read_from_connection,
-    				   mud->activesession );
+            read_from_connection,
+            mud->activesession );
     set_connected(TRUE);
     gtk_widget_set_sensitive (menu_File_Connect, FALSE);
     gtk_widget_set_sensitive (btn_toolbar_connect, FALSE);
@@ -245,6 +271,12 @@ void stop_connecting(GtkWidget *widget, struct tempdata *data)
     connecting = 0;
     gdk_input_remove(mud->input_monitor);
     sockclose(data->sock);
+
+    if (mud->conn) {
+        kill_socks_request(mud->conn);
+        mud->conn = NULL;
+    }
+
     textfield_add(mud->text, "\n*** connection ABORTED.\n",
             MESSAGE_NORMAL);
     
@@ -259,6 +291,54 @@ void connection_cbk (gpointer data, gint source, GdkInputCondition condition)
     gtk_widget_destroy(((struct tempdata *)data)->window);
     connection_part_two(source, (struct tempdata *)data);
     free(data);
+}
+
+int 
+is_valid_ip(char *ip)
+{
+	unsigned long ipaddr;
+    char *start = ip;
+    int len = strlen(ip), i;
+    int dots = 0;
+    int test;
+
+    if (len < 7 || len > 15)
+        return FALSE;
+    
+    for (i = 0; i < len; i++) {
+        if (ip[i] == '.') {
+            
+            dots++;
+
+            if (!*start)
+                return FALSE;
+            
+            ip[i] = 0;
+            test = atoi(start);
+            ip[i] = '.';
+            
+            if (test < 0 || test > 255)
+                return FALSE;
+
+            start = ip + i + 1;
+        }
+        else if (ip[i]>'9' || ip[i]<'0')
+            return FALSE;
+    }
+
+    test = atoi(start);
+
+    if (test < 0 || test > 255 || dots != 3)
+        return FALSE;
+
+    if ( (ipaddr = inet_addr(ip)) == INADDR_NONE)
+        return FALSE;
+       
+    // vieto gli indirizzi broadcast
+    if (((unsigned char *)&ipaddr)[3] == 255)
+        return FALSE;
+
+    return TRUE;
 }
 
 void open_connection (const char *name, const char *host, const char *port)
@@ -286,7 +366,7 @@ void open_connection (const char *name, const char *host, const char *port)
     /* strerror(3) */
     if ( ( he = gethostbyname (host) ) == NULL )
     {
-        popup_window(ERR, "Host not found or host name not valid");
+        popup_window(ERR, "Host not found or host name not valid (%s)", host);
         return;
     }
 
@@ -299,6 +379,31 @@ void open_connection (const char *name, const char *host, const char *port)
     their_addr.sin_port   = htons( (short)atoi (port));
     their_addr.sin_addr   = *((struct in_addr *)he->h_addr);
     bzero (&(their_addr.sin_zero), 8);
+
+    if (prefs.UseSocks) {
+        struct sockaddr_in sock_server;
+
+        if (!is_valid_ip(prefs.socks_addr)) {
+            if (!(he = gethostbyname(prefs.socks_addr))) {
+                popup_window(ERR, "Socks server %s not found on DNS", prefs.socks_addr);
+                sockclose(sockfd);
+                return;
+            }
+
+            sock_server.sin_addr   = *((struct in_addr *)he->h_addr);       
+        }
+        else
+            sock_server.sin_addr.s_addr   = inet_addr(prefs.socks_addr);
+
+        sock_server.sin_family = AF_INET;
+        sock_server.sin_port   = htons(prefs.socks_port);
+        
+        bzero (&(sock_server.sin_zero), 8);
+
+        mud->conn = new_socks_request(sockfd, &their_addr, &sock_server);
+
+        their_addr = sock_server;
+    }
 
     ioctl(sockfd, FIONBIO, (char *)&onoff);
     
