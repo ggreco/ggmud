@@ -846,7 +846,7 @@ spawn_gui()
               GTK_SIGNAL_FUNC(cbox),  GDK_C, GDK_MOD1_MASK);
   
   if (gtk_minor_version > 7)
-      menu_File_Connect = add_stock_item(menu, accel_group, "gtk-disconnect", 
+      menu_File_DisConnect = add_stock_item(menu, accel_group, "gtk-disconnect", 
               GTK_SIGNAL_FUNC(disconnect));
   else
       menu_File_DisConnect = add_menu_item(menu, accel_group, "Disconnect", 
