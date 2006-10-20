@@ -214,10 +214,14 @@ void setup_pixmaps()
 {
     extern GdkPixmap *enabled_pixmap, *disabled_pixmap;
     extern GdkBitmap *enabled_mask, *disabled_mask;
-   
+//    GtkWidget *i1 = gtk_image_new_from_stock(GTK_STOCK_YES, GTK_ICON_SIZE_BUTTON);
+//    GtkWidget *i2 = gtk_image_new_from_stock(GTK_STOCK_NO, GTK_ICON_SIZE_BUTTON);
+
     enabled_pixmap = gdk_pixmap_create_from_xpm_d ( mud->window->window, &enabled_mask, &mud->window->style->white, yes_xpm );
     disabled_pixmap = gdk_pixmap_create_from_xpm_d ( mud->window->window, &disabled_mask, &mud->window->style->white, no_xpm );
 
+//    gtk_image_get_pixmap(GTK_IMAGE(i1), &enabled_pixmap, &enabled_mask);
+//    gtk_image_get_pixmap(GTK_IMAGE(i2), &disabled_pixmap, &disabled_mask);
 }
 
 void write_win_pos(char *name, FILE *dest, GtkWidget *widget)

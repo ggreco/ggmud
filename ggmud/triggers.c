@@ -279,6 +279,8 @@ void triggerclass_window(GtkWidget *widget, gpointer data )
     gtk_clist_set_column_justification (GTK_CLIST (clist), 0, GTK_JUSTIFY_LEFT);
     gtk_clist_set_column_justification (GTK_CLIST (clist), 1, GTK_JUSTIFY_LEFT);
 
+    gtk_clist_set_row_height (GTK_CLIST (clist), 20);
+
     gtk_clist_column_titles_show (GTK_CLIST (clist));
 
     gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (scrolled_window), clist);
