@@ -48,9 +48,15 @@ void show_msg(int code, const char *pattern, ...)
 {
     va_list va;
     va_start(va, pattern);
-    
-    fprintf(stderr, errtype[code]);
-    vfprintf(stderr, pattern, va);
+   
+    if (!code) { // print only errors
+        char buffer[512];
+
+        strcpy(buffer, "SOCKS: ");
+        vsprintf(buffer + strlen(buffer), pattern, va);
+
+        textfield_add (mud->text, buffer, MESSAGE_ERR);
+    }
 
     va_end(va);
 }
