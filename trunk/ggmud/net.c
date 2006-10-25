@@ -615,8 +615,6 @@ void read_from_connection (gpointer data, gint source, GdkInputCondition conditi
         sprintf (buf, "Connected to %s - GGMud %s", wizard_autologin->name, VERSION);
         gtk_window_set_title (GTK_WINDOW (mud->window), buf);
 
-        wiz_destructify();
-
         wizard_autologin = NULL;
     }
 }

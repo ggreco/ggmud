@@ -186,6 +186,10 @@ int main(int argc, char **argv)
     if (prefs.LuaConfig)
 	    script_command(prefs.LuaConfig);
 #endif
+
+    if (prefs.WizAtStartup)
+        do_wiz(NULL, NULL);
+
     gtk_window_present(GTK_WINDOW(mud->window));
     gtk_key_snooper_install(snoop_keys, mud);
     gtk_main();

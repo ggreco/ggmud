@@ -3,3 +3,5 @@
  */
 
 GtkWidget* create_window_socks_settings (void);
+GtkWidget* create_window_preferences (void);
+GtkWidget* create_window_wizard (void);

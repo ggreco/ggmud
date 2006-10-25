@@ -256,3 +256,673 @@ create_window_socks_settings (void)
   return window_socks_settings;
 }
 
+GtkWidget*
+create_window_preferences (void)
+{
+  GtkWidget *window_preferences;
+  GtkWidget *vbox3;
+  GtkWidget *hbox1;
+  GtkWidget *vbox4;
+  GtkWidget *frame7;
+  GtkWidget *vbox8;
+  GtkWidget *checkbutton_echo;
+  GtkWidget *checkbutton_ww;
+  GtkWidget *checkbutton_blink;
+  GtkWidget *checkbutton_beep;
+  GtkWidget *label11;
+  GtkWidget *frame6;
+  GtkWidget *vbox7;
+  GtkWidget *checkbutton_keep;
+  GtkWidget *checkbutton_toolbar;
+  GtkWidget *checkbutton_macro;
+  GtkWidget *checkbutton_statusbar;
+  GtkWidget *label10;
+  GtkWidget *vbox5;
+  GtkWidget *frame4;
+  GtkWidget *vbox6;
+  GtkWidget *checkbutton_tickcounter;
+  GtkWidget *hbox2;
+  GtkWidget *label12;
+  GtkObject *spinbutton_ticklength_adj;
+  GtkWidget *spinbutton_ticklength;
+  GtkWidget *label8;
+  GtkWidget *frame5;
+  GtkWidget *vbox9;
+  GtkWidget *hbox5;
+  GtkWidget *label14;
+  GtkWidget *hbox6;
+  GtkWidget *entry_lua_script;
+  GtkWidget *button7;
+  GtkWidget *image1;
+  GtkWidget *hbox4;
+  GtkWidget *label13;
+  GtkObject *spinbutton_review_adj;
+  GtkWidget *spinbutton_review;
+  GtkWidget *checkbutton_save_vars;
+  GtkWidget *hbox3;
+  GtkWidget *checkbutton_use_proxy;
+  GtkWidget *button_socks_settings;
+  GtkWidget *checkbutton_wizard;
+  GtkWidget *label9;
+  GtkWidget *hseparator2;
+  GtkWidget *hbuttonbox2;
+  GtkWidget *button3;
+  GtkWidget *button4;
+  GtkWidget *button5;
+  GtkTooltips *tooltips;
+
+  tooltips = gtk_tooltips_new ();
+
+  window_preferences = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_container_set_border_width (GTK_CONTAINER (window_preferences), 4);
+  gtk_window_set_title (GTK_WINDOW (window_preferences), "Preferences");
+  gtk_window_set_position (GTK_WINDOW (window_preferences), GTK_WIN_POS_MOUSE);
+
+  vbox3 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox3);
+  gtk_container_add (GTK_CONTAINER (window_preferences), vbox3);
+
+  hbox1 = gtk_hbox_new (FALSE, 8);
+  gtk_widget_show (hbox1);
+  gtk_box_pack_start (GTK_BOX (vbox3), hbox1, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox1), 8);
+
+  vbox4 = gtk_vbox_new (FALSE, 8);
+  gtk_widget_show (vbox4);
+  gtk_box_pack_start (GTK_BOX (hbox1), vbox4, TRUE, TRUE, 0);
+
+  frame7 = gtk_frame_new (NULL);
+  gtk_widget_show (frame7);
+  gtk_box_pack_start (GTK_BOX (vbox4), frame7, TRUE, TRUE, 0);
+
+  vbox8 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox8);
+  gtk_container_add (GTK_CONTAINER (frame7), vbox8);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox8), 4);
+
+  checkbutton_echo = gtk_check_button_new_with_mnemonic ("Echo Text");
+  gtk_widget_show (checkbutton_echo);
+  gtk_box_pack_start (GTK_BOX (vbox8), checkbutton_echo, TRUE, FALSE, 0);
+  gtk_tooltips_set_tip (tooltips, checkbutton_echo, "Display in the output window the commands you send to the MUD.", NULL);
+
+  checkbutton_ww = gtk_check_button_new_with_mnemonic ("Word Wrap");
+  gtk_widget_show (checkbutton_ww);
+  gtk_box_pack_start (GTK_BOX (vbox8), checkbutton_ww, TRUE, FALSE, 0);
+  gtk_tooltips_set_tip (tooltips, checkbutton_ww, "If the window is too small wraps long lines to the following line.", NULL);
+
+  checkbutton_blink = gtk_check_button_new_with_mnemonic ("Enable Text Blinking");
+  gtk_widget_show (checkbutton_blink);
+  gtk_box_pack_start (GTK_BOX (vbox8), checkbutton_blink, TRUE, FALSE, 0);
+  gtk_tooltips_set_tip (tooltips, checkbutton_blink, "Enable blinking text in muds, may slow down scrolling on slower machines.", NULL);
+
+  checkbutton_beep = gtk_check_button_new_with_mnemonic ("Emit Beeps");
+  gtk_widget_show (checkbutton_beep);
+  gtk_box_pack_start (GTK_BOX (vbox8), checkbutton_beep, TRUE, FALSE, 0);
+  gtk_tooltips_set_tip (tooltips, checkbutton_beep, "Allow the output to generate system beeps.", NULL);
+
+  label11 = gtk_label_new ("<b>Output</b>");
+  gtk_widget_show (label11);
+  gtk_frame_set_label_widget (GTK_FRAME (frame7), label11);
+  gtk_label_set_use_markup (GTK_LABEL (label11), TRUE);
+  gtk_label_set_justify (GTK_LABEL (label11), GTK_JUSTIFY_LEFT);
+
+  frame6 = gtk_frame_new (NULL);
+  gtk_widget_show (frame6);
+  gtk_box_pack_start (GTK_BOX (vbox4), frame6, TRUE, TRUE, 0);
+
+  vbox7 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox7);
+  gtk_container_add (GTK_CONTAINER (frame6), vbox7);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox7), 4);
+
+  checkbutton_keep = gtk_check_button_new_with_mnemonic ("Keep Text Entered");
+  gtk_widget_show (checkbutton_keep);
+  gtk_box_pack_start (GTK_BOX (vbox7), checkbutton_keep, TRUE, FALSE, 0);
+  gtk_tooltips_set_tip (tooltips, checkbutton_keep, "After sending a command to the mud keep the text you sent in your input line.", NULL);
+
+  checkbutton_toolbar = gtk_check_button_new_with_mnemonic ("Show Toolbar");
+  gtk_widget_show (checkbutton_toolbar);
+  gtk_box_pack_start (GTK_BOX (vbox7), checkbutton_toolbar, TRUE, FALSE, 0);
+  gtk_tooltips_set_tip (tooltips, checkbutton_toolbar, "View the toolbar on the GGMud main window", NULL);
+
+  checkbutton_macro = gtk_check_button_new_with_mnemonic ("Show Macro Buttons");
+  gtk_widget_show (checkbutton_macro);
+  gtk_box_pack_start (GTK_BOX (vbox7), checkbutton_macro, TRUE, FALSE, 0);
+  gtk_tooltips_set_tip (tooltips, checkbutton_macro, "View (and be able to click) macro buttons on the main GGMud window", NULL);
+
+  checkbutton_statusbar = gtk_check_button_new_with_mnemonic ("Show Statusbar");
+  gtk_widget_show (checkbutton_statusbar);
+  gtk_box_pack_start (GTK_BOX (vbox7), checkbutton_statusbar, TRUE, FALSE, 0);
+  gtk_tooltips_set_tip (tooltips, checkbutton_statusbar, "View the statusbar on the main GGMud window", NULL);
+
+  label10 = gtk_label_new ("<b>Interface</b>");
+  gtk_widget_show (label10);
+  gtk_frame_set_label_widget (GTK_FRAME (frame6), label10);
+  gtk_label_set_use_markup (GTK_LABEL (label10), TRUE);
+  gtk_label_set_justify (GTK_LABEL (label10), GTK_JUSTIFY_LEFT);
+
+  vbox5 = gtk_vbox_new (FALSE, 8);
+  gtk_widget_show (vbox5);
+  gtk_box_pack_start (GTK_BOX (hbox1), vbox5, TRUE, TRUE, 0);
+
+  frame4 = gtk_frame_new (NULL);
+  gtk_widget_show (frame4);
+  gtk_box_pack_start (GTK_BOX (vbox5), frame4, TRUE, TRUE, 0);
+
+  vbox6 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox6);
+  gtk_container_add (GTK_CONTAINER (frame4), vbox6);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox6), 4);
+
+  checkbutton_tickcounter = gtk_check_button_new_with_mnemonic ("Use Tick Counter");
+  gtk_widget_show (checkbutton_tickcounter);
+  gtk_box_pack_start (GTK_BOX (vbox6), checkbutton_tickcounter, TRUE, FALSE, 4);
+  gtk_tooltips_set_tip (tooltips, checkbutton_tickcounter, "Enable the use of the tick counter.", NULL);
+
+  hbox2 = gtk_hbox_new (FALSE, 4);
+  gtk_widget_show (hbox2);
+  gtk_box_pack_start (GTK_BOX (vbox6), hbox2, TRUE, FALSE, 0);
+
+  label12 = gtk_label_new ("Tick length:");
+  gtk_widget_show (label12);
+  gtk_box_pack_start (GTK_BOX (hbox2), label12, FALSE, FALSE, 0);
+  gtk_label_set_justify (GTK_LABEL (label12), GTK_JUSTIFY_LEFT);
+
+  spinbutton_ticklength_adj = gtk_adjustment_new (74, 0, 500, 1, 10, 10);
+  spinbutton_ticklength = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton_ticklength_adj), 1, 0);
+  gtk_widget_show (spinbutton_ticklength);
+  gtk_box_pack_start (GTK_BOX (hbox2), spinbutton_ticklength, FALSE, FALSE, 0);
+  gtk_tooltips_set_tip (tooltips, spinbutton_ticklength, "Length of the tick in seconds", NULL);
+
+  label8 = gtk_label_new ("<b>Tick counter</b>");
+  gtk_widget_show (label8);
+  gtk_frame_set_label_widget (GTK_FRAME (frame4), label8);
+  gtk_label_set_use_markup (GTK_LABEL (label8), TRUE);
+  gtk_label_set_justify (GTK_LABEL (label8), GTK_JUSTIFY_LEFT);
+
+  frame5 = gtk_frame_new (NULL);
+  gtk_widget_show (frame5);
+  gtk_box_pack_start (GTK_BOX (vbox5), frame5, TRUE, TRUE, 0);
+
+  vbox9 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox9);
+  gtk_container_add (GTK_CONTAINER (frame5), vbox9);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox9), 4);
+
+  hbox5 = gtk_hbox_new (FALSE, 4);
+  gtk_widget_show (hbox5);
+  gtk_box_pack_start (GTK_BOX (vbox9), hbox5, TRUE, FALSE, 0);
+
+  label14 = gtk_label_new ("<b>LUA</b> startup:");
+  gtk_widget_show (label14);
+  gtk_box_pack_start (GTK_BOX (hbox5), label14, FALSE, FALSE, 0);
+  gtk_label_set_use_markup (GTK_LABEL (label14), TRUE);
+  gtk_label_set_justify (GTK_LABEL (label14), GTK_JUSTIFY_LEFT);
+
+  hbox6 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox6);
+  gtk_box_pack_start (GTK_BOX (hbox5), hbox6, TRUE, TRUE, 0);
+
+  entry_lua_script = gtk_entry_new ();
+  gtk_widget_show (entry_lua_script);
+  gtk_box_pack_start (GTK_BOX (hbox6), entry_lua_script, TRUE, TRUE, 0);
+
+  button7 = gtk_button_new ();
+  gtk_widget_show (button7);
+  gtk_box_pack_start (GTK_BOX (hbox6), button7, FALSE, FALSE, 0);
+  gtk_button_set_relief (GTK_BUTTON (button7), GTK_RELIEF_HALF);
+
+  image1 = gtk_image_new_from_stock ("gtk-open", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_show (image1);
+  gtk_container_add (GTK_CONTAINER (button7), image1);
+
+  hbox4 = gtk_hbox_new (FALSE, 4);
+  gtk_widget_show (hbox4);
+  gtk_box_pack_start (GTK_BOX (vbox9), hbox4, TRUE, FALSE, 0);
+
+  label13 = gtk_label_new ("Review buffer lines:");
+  gtk_widget_show (label13);
+  gtk_box_pack_start (GTK_BOX (hbox4), label13, FALSE, FALSE, 0);
+  gtk_label_set_justify (GTK_LABEL (label13), GTK_JUSTIFY_LEFT);
+
+  spinbutton_review_adj = gtk_adjustment_new (10000, 0, 1e+06, 10, 1000, 1000);
+  spinbutton_review = gtk_spin_button_new (GTK_ADJUSTMENT (spinbutton_review_adj), 1, 0);
+  gtk_widget_show (spinbutton_review);
+  gtk_box_pack_start (GTK_BOX (hbox4), spinbutton_review, TRUE, TRUE, 0);
+  gtk_tooltips_set_tip (tooltips, spinbutton_review, "Number of lines to be kept in the main window buffer", NULL);
+
+  checkbutton_save_vars = gtk_check_button_new_with_mnemonic ("Save Variables");
+  gtk_widget_show (checkbutton_save_vars);
+  gtk_box_pack_start (GTK_BOX (vbox9), checkbutton_save_vars, TRUE, FALSE, 0);
+  gtk_tooltips_set_tip (tooltips, checkbutton_save_vars, "Save variable values when you quit the program.", NULL);
+
+  hbox3 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox3);
+  gtk_box_pack_start (GTK_BOX (vbox9), hbox3, TRUE, FALSE, 0);
+
+  checkbutton_use_proxy = gtk_check_button_new_with_mnemonic ("Use a SOCKS proxy");
+  gtk_widget_show (checkbutton_use_proxy);
+  gtk_box_pack_start (GTK_BOX (hbox3), checkbutton_use_proxy, FALSE, FALSE, 0);
+  gtk_tooltips_set_tip (tooltips, checkbutton_use_proxy, "Connect through a proxy.", NULL);
+
+  button_socks_settings = gtk_button_new_with_mnemonic ("Settings");
+  gtk_widget_show (button_socks_settings);
+  gtk_box_pack_start (GTK_BOX (hbox3), button_socks_settings, TRUE, FALSE, 0);
+  gtk_tooltips_set_tip (tooltips, button_socks_settings, "Edit socks proxy settings", NULL);
+  gtk_button_set_relief (GTK_BUTTON (button_socks_settings), GTK_RELIEF_HALF);
+
+  checkbutton_wizard = gtk_check_button_new_with_mnemonic ("Open Wizard at Startup");
+  gtk_widget_show (checkbutton_wizard);
+  gtk_box_pack_start (GTK_BOX (vbox9), checkbutton_wizard, FALSE, FALSE, 0);
+  gtk_tooltips_set_tip (tooltips, checkbutton_wizard, "Open the Connection Wizard every time you start GGMud.", NULL);
+
+  label9 = gtk_label_new ("<b>Other options</b>");
+  gtk_widget_show (label9);
+  gtk_frame_set_label_widget (GTK_FRAME (frame5), label9);
+  gtk_label_set_use_markup (GTK_LABEL (label9), TRUE);
+  gtk_label_set_justify (GTK_LABEL (label9), GTK_JUSTIFY_LEFT);
+
+  hseparator2 = gtk_hseparator_new ();
+  gtk_widget_show (hseparator2);
+  gtk_box_pack_start (GTK_BOX (vbox3), hseparator2, FALSE, FALSE, 4);
+
+  hbuttonbox2 = gtk_hbutton_box_new ();
+  gtk_widget_show (hbuttonbox2);
+  gtk_box_pack_start (GTK_BOX (vbox3), hbuttonbox2, FALSE, FALSE, 0);
+
+  button3 = gtk_button_new_from_stock ("gtk-ok");
+  gtk_widget_show (button3);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox2), button3);
+  GTK_WIDGET_SET_FLAGS (button3, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button3, "Use settings", NULL);
+
+  button4 = gtk_button_new_from_stock ("gtk-save");
+  gtk_widget_show (button4);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox2), button4);
+  GTK_WIDGET_SET_FLAGS (button4, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button4, "Save and use settings", NULL);
+
+  button5 = gtk_button_new_from_stock ("gtk-cancel");
+  gtk_widget_show (button5);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox2), button5);
+  GTK_WIDGET_SET_FLAGS (button5, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button5, "Restore original settings.", NULL);
+
+  g_signal_connect ((gpointer) checkbutton_tickcounter, "toggled",
+                    G_CALLBACK (on_checkbutton_tickcounter_toggled),
+                    NULL);
+  g_signal_connect ((gpointer) button7, "clicked",
+                    G_CALLBACK (on_button_browse_lua_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) checkbutton_use_proxy, "toggled",
+                    G_CALLBACK (on_checkbutton_use_proxy_toggled),
+                    NULL);
+  g_signal_connect ((gpointer) button_socks_settings, "clicked",
+                    G_CALLBACK (on_button_proxy_settings_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button3, "clicked",
+                    G_CALLBACK (on_button_preferences_ok_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button4, "clicked",
+                    G_CALLBACK (on_button_preferences_save_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button5, "clicked",
+                    G_CALLBACK (close_a_gui_window),
+                    NULL);
+
+  /* Store pointers to all widgets, for use by lookup_widget(). */
+  GLADE_HOOKUP_OBJECT_NO_REF (window_preferences, window_preferences, "window_preferences");
+  GLADE_HOOKUP_OBJECT (window_preferences, vbox3, "vbox3");
+  GLADE_HOOKUP_OBJECT (window_preferences, hbox1, "hbox1");
+  GLADE_HOOKUP_OBJECT (window_preferences, vbox4, "vbox4");
+  GLADE_HOOKUP_OBJECT (window_preferences, frame7, "frame7");
+  GLADE_HOOKUP_OBJECT (window_preferences, vbox8, "vbox8");
+  GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_echo, "checkbutton_echo");
+  GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_ww, "checkbutton_ww");
+  GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_blink, "checkbutton_blink");
+  GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_beep, "checkbutton_beep");
+  GLADE_HOOKUP_OBJECT (window_preferences, label11, "label11");
+  GLADE_HOOKUP_OBJECT (window_preferences, frame6, "frame6");
+  GLADE_HOOKUP_OBJECT (window_preferences, vbox7, "vbox7");
+  GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_keep, "checkbutton_keep");
+  GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_toolbar, "checkbutton_toolbar");
+  GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_macro, "checkbutton_macro");
+  GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_statusbar, "checkbutton_statusbar");
+  GLADE_HOOKUP_OBJECT (window_preferences, label10, "label10");
+  GLADE_HOOKUP_OBJECT (window_preferences, vbox5, "vbox5");
+  GLADE_HOOKUP_OBJECT (window_preferences, frame4, "frame4");
+  GLADE_HOOKUP_OBJECT (window_preferences, vbox6, "vbox6");
+  GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_tickcounter, "checkbutton_tickcounter");
+  GLADE_HOOKUP_OBJECT (window_preferences, hbox2, "hbox2");
+  GLADE_HOOKUP_OBJECT (window_preferences, label12, "label12");
+  GLADE_HOOKUP_OBJECT (window_preferences, spinbutton_ticklength, "spinbutton_ticklength");
+  GLADE_HOOKUP_OBJECT (window_preferences, label8, "label8");
+  GLADE_HOOKUP_OBJECT (window_preferences, frame5, "frame5");
+  GLADE_HOOKUP_OBJECT (window_preferences, vbox9, "vbox9");
+  GLADE_HOOKUP_OBJECT (window_preferences, hbox5, "hbox5");
+  GLADE_HOOKUP_OBJECT (window_preferences, label14, "label14");
+  GLADE_HOOKUP_OBJECT (window_preferences, hbox6, "hbox6");
+  GLADE_HOOKUP_OBJECT (window_preferences, entry_lua_script, "entry_lua_script");
+  GLADE_HOOKUP_OBJECT (window_preferences, button7, "button7");
+  GLADE_HOOKUP_OBJECT (window_preferences, image1, "image1");
+  GLADE_HOOKUP_OBJECT (window_preferences, hbox4, "hbox4");
+  GLADE_HOOKUP_OBJECT (window_preferences, label13, "label13");
+  GLADE_HOOKUP_OBJECT (window_preferences, spinbutton_review, "spinbutton_review");
+  GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_save_vars, "checkbutton_save_vars");
+  GLADE_HOOKUP_OBJECT (window_preferences, hbox3, "hbox3");
+  GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_use_proxy, "checkbutton_use_proxy");
+  GLADE_HOOKUP_OBJECT (window_preferences, button_socks_settings, "button_socks_settings");
+  GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_wizard, "checkbutton_wizard");
+  GLADE_HOOKUP_OBJECT (window_preferences, label9, "label9");
+  GLADE_HOOKUP_OBJECT (window_preferences, hseparator2, "hseparator2");
+  GLADE_HOOKUP_OBJECT (window_preferences, hbuttonbox2, "hbuttonbox2");
+  GLADE_HOOKUP_OBJECT (window_preferences, button3, "button3");
+  GLADE_HOOKUP_OBJECT (window_preferences, button4, "button4");
+  GLADE_HOOKUP_OBJECT (window_preferences, button5, "button5");
+  GLADE_HOOKUP_OBJECT_NO_REF (window_preferences, tooltips, "tooltips");
+
+  return window_preferences;
+}
+
+GtkWidget*
+create_window_wizard (void)
+{
+  GtkWidget *window_wizard;
+  GtkWidget *vbox10;
+  GtkWidget *hbox7;
+  GtkWidget *scrolledwindow1;
+  GtkWidget *clist_conns;
+  GtkWidget *hbox8;
+  GtkWidget *image2;
+  GtkWidget *label15;
+  GtkWidget *frame8;
+  GtkWidget *vbox11;
+  GtkWidget *table3;
+  GtkWidget *label21;
+  GtkWidget *label20;
+  GtkWidget *label19;
+  GtkWidget *entry_name;
+  GtkWidget *entry_host;
+  GtkWidget *entry_port;
+  GtkWidget *frame9;
+  GtkWidget *table_autologin;
+  GtkWidget *label17;
+  GtkWidget *label18;
+  GtkWidget *entry_char_name;
+  GtkWidget *entry_pwd;
+  GtkWidget *checkbutton_autologin;
+  GtkWidget *hbuttonbox4;
+  GtkWidget *button11;
+  GtkWidget *button_update;
+  GtkWidget *button_delete;
+  GtkWidget *label16;
+  GtkWidget *hseparator3;
+  GtkWidget *hbuttonbox3;
+  GtkWidget *button_ok;
+  GtkWidget *button9;
+  GtkWidget *button10;
+  GtkTooltips *tooltips;
+
+  tooltips = gtk_tooltips_new ();
+
+  window_wizard = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_container_set_border_width (GTK_CONTAINER (window_wizard), 4);
+  gtk_window_set_title (GTK_WINDOW (window_wizard), "Connection Wizard");
+  gtk_window_set_position (GTK_WINDOW (window_wizard), GTK_WIN_POS_CENTER);
+
+  vbox10 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox10);
+  gtk_container_add (GTK_CONTAINER (window_wizard), vbox10);
+
+  hbox7 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox7);
+  gtk_box_pack_start (GTK_BOX (vbox10), hbox7, TRUE, TRUE, 0);
+
+  scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
+  gtk_widget_show (scrolledwindow1);
+  gtk_box_pack_start (GTK_BOX (hbox7), scrolledwindow1, TRUE, TRUE, 0);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+
+  clist_conns = gtk_clist_new (1);
+  gtk_widget_show (clist_conns);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow1), clist_conns);
+  gtk_tooltips_set_tip (tooltips, clist_conns, "Select a connection from this list and click OK to connect", NULL);
+  gtk_clist_set_column_width (GTK_CLIST (clist_conns), 0, 151);
+  gtk_clist_column_titles_show (GTK_CLIST (clist_conns));
+
+  hbox8 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox8);
+  gtk_clist_set_column_widget (GTK_CLIST (clist_conns), 0, hbox8);
+
+  image2 = gtk_image_new_from_stock ("gtk-justify-fill", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_show (image2);
+  gtk_box_pack_start (GTK_BOX (hbox8), image2, FALSE, FALSE, 0);
+
+  label15 = gtk_label_new ("<b>Connection name</b>");
+  gtk_widget_show (label15);
+  gtk_box_pack_start (GTK_BOX (hbox8), label15, FALSE, FALSE, 0);
+  gtk_label_set_use_markup (GTK_LABEL (label15), TRUE);
+  gtk_label_set_justify (GTK_LABEL (label15), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_padding (GTK_MISC (label15), 4, 0);
+
+  frame8 = gtk_frame_new (NULL);
+  gtk_widget_show (frame8);
+  gtk_box_pack_start (GTK_BOX (hbox7), frame8, TRUE, TRUE, 0);
+
+  vbox11 = gtk_vbox_new (FALSE, 2);
+  gtk_widget_show (vbox11);
+  gtk_container_add (GTK_CONTAINER (frame8), vbox11);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox11), 2);
+
+  table3 = gtk_table_new (3, 2, FALSE);
+  gtk_widget_show (table3);
+  gtk_box_pack_start (GTK_BOX (vbox11), table3, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (table3), 8);
+  gtk_table_set_row_spacings (GTK_TABLE (table3), 8);
+  gtk_table_set_col_spacings (GTK_TABLE (table3), 8);
+
+  label21 = gtk_label_new ("Port:");
+  gtk_widget_show (label21);
+  gtk_table_attach (GTK_TABLE (table3), label21, 0, 1, 2, 3,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_label_set_justify (GTK_LABEL (label21), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_alignment (GTK_MISC (label21), 1, 0.5);
+
+  label20 = gtk_label_new ("Host:");
+  gtk_widget_show (label20);
+  gtk_table_attach (GTK_TABLE (table3), label20, 0, 1, 1, 2,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_label_set_justify (GTK_LABEL (label20), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_alignment (GTK_MISC (label20), 1, 0.5);
+
+  label19 = gtk_label_new ("Name:");
+  gtk_widget_show (label19);
+  gtk_table_attach (GTK_TABLE (table3), label19, 0, 1, 0, 1,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_label_set_justify (GTK_LABEL (label19), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_alignment (GTK_MISC (label19), 1, 0.5);
+
+  entry_name = gtk_entry_new ();
+  gtk_widget_show (entry_name);
+  gtk_table_attach (GTK_TABLE (table3), entry_name, 1, 2, 0, 1,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_tooltips_set_tip (tooltips, entry_name, "This is the name used in this wizard to identify these connection datas (host, port and optionally name/pwd)", NULL);
+
+  entry_host = gtk_entry_new ();
+  gtk_widget_show (entry_host);
+  gtk_table_attach (GTK_TABLE (table3), entry_host, 1, 2, 1, 2,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_tooltips_set_tip (tooltips, entry_host, "This is the hostname or the IP address the MUD is located on.", NULL);
+
+  entry_port = gtk_entry_new ();
+  gtk_widget_show (entry_port);
+  gtk_table_attach (GTK_TABLE (table3), entry_port, 1, 2, 2, 3,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_tooltips_set_tip (tooltips, entry_port, "This is the port to connect to on the specified hostname to connect to the MUD service.", NULL);
+
+  frame9 = gtk_frame_new (NULL);
+  gtk_widget_show (frame9);
+  gtk_box_pack_start (GTK_BOX (vbox11), frame9, TRUE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame9), 4);
+
+  table_autologin = gtk_table_new (2, 2, FALSE);
+  gtk_widget_show (table_autologin);
+  gtk_container_add (GTK_CONTAINER (frame9), table_autologin);
+  gtk_container_set_border_width (GTK_CONTAINER (table_autologin), 8);
+  gtk_table_set_row_spacings (GTK_TABLE (table_autologin), 8);
+  gtk_table_set_col_spacings (GTK_TABLE (table_autologin), 8);
+
+  label17 = gtk_label_new ("Character name:");
+  gtk_widget_show (label17);
+  gtk_table_attach (GTK_TABLE (table_autologin), label17, 0, 1, 0, 1,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_label_set_justify (GTK_LABEL (label17), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_alignment (GTK_MISC (label17), 0, 0.5);
+
+  label18 = gtk_label_new ("Password:");
+  gtk_widget_show (label18);
+  gtk_table_attach (GTK_TABLE (table_autologin), label18, 0, 1, 1, 2,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_label_set_justify (GTK_LABEL (label18), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_alignment (GTK_MISC (label18), 0, 0.5);
+
+  entry_char_name = gtk_entry_new ();
+  gtk_widget_show (entry_char_name);
+  gtk_table_attach (GTK_TABLE (table_autologin), entry_char_name, 1, 2, 0, 1,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+
+  entry_pwd = gtk_entry_new ();
+  gtk_widget_show (entry_pwd);
+  gtk_table_attach (GTK_TABLE (table_autologin), entry_pwd, 1, 2, 1, 2,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_entry_set_visibility (GTK_ENTRY (entry_pwd), FALSE);
+
+  checkbutton_autologin = gtk_check_button_new_with_mnemonic ("enable autologin");
+  gtk_widget_show (checkbutton_autologin);
+  gtk_frame_set_label_widget (GTK_FRAME (frame9), checkbutton_autologin);
+  gtk_container_set_border_width (GTK_CONTAINER (checkbutton_autologin), 2);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_autologin), TRUE);
+
+  hbuttonbox4 = gtk_hbutton_box_new ();
+  gtk_widget_show (hbuttonbox4);
+  gtk_box_pack_start (GTK_BOX (vbox11), hbuttonbox4, TRUE, TRUE, 0);
+
+  button11 = gtk_button_new_from_stock ("gtk-add");
+  gtk_widget_show (button11);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox4), button11);
+  GTK_WIDGET_SET_FLAGS (button11, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button11, "Use this button to add a new connection to the Wizard connection list.", NULL);
+
+  button_update = gtk_button_new_from_stock ("gtk-apply");
+  gtk_widget_show (button_update);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox4), button_update);
+  GTK_WIDGET_SET_FLAGS (button_update, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button_update, "Use this button to apply changes to an existing connection", NULL);
+
+  button_delete = gtk_button_new_from_stock ("gtk-delete");
+  gtk_widget_show (button_delete);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox4), button_delete);
+  GTK_WIDGET_SET_FLAGS (button_delete, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button_delete, "Use this option to remove from the connection list the actually selected connection(s).", NULL);
+
+  label16 = gtk_label_new ("<b>Details</b>");
+  gtk_widget_show (label16);
+  gtk_frame_set_label_widget (GTK_FRAME (frame8), label16);
+  gtk_label_set_use_markup (GTK_LABEL (label16), TRUE);
+  gtk_label_set_justify (GTK_LABEL (label16), GTK_JUSTIFY_LEFT);
+
+  hseparator3 = gtk_hseparator_new ();
+  gtk_widget_show (hseparator3);
+  gtk_box_pack_start (GTK_BOX (vbox10), hseparator3, FALSE, FALSE, 4);
+
+  hbuttonbox3 = gtk_hbutton_box_new ();
+  gtk_widget_show (hbuttonbox3);
+  gtk_box_pack_start (GTK_BOX (vbox10), hbuttonbox3, FALSE, FALSE, 0);
+
+  button_ok = gtk_button_new_from_stock ("gtk-ok");
+  gtk_widget_show (button_ok);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox3), button_ok);
+  GTK_WIDGET_SET_FLAGS (button_ok, GTK_CAN_DEFAULT);
+
+  button9 = gtk_button_new_from_stock ("gtk-save");
+  gtk_widget_show (button9);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox3), button9);
+  GTK_WIDGET_SET_FLAGS (button9, GTK_CAN_DEFAULT);
+
+  button10 = gtk_button_new_from_stock ("gtk-close");
+  gtk_widget_show (button10);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox3), button10);
+  GTK_WIDGET_SET_FLAGS (button10, GTK_CAN_DEFAULT);
+
+  g_signal_connect ((gpointer) checkbutton_autologin, "toggled",
+                    G_CALLBACK (on_checkbutton_autologin_toggled),
+                    NULL);
+  g_signal_connect ((gpointer) button11, "clicked",
+                    G_CALLBACK (on_button_wiz_add_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button_update, "clicked",
+                    G_CALLBACK (on_button_wiz_apply_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button_delete, "clicked",
+                    G_CALLBACK (on_button_wiz_delete_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button_ok, "clicked",
+                    G_CALLBACK (on_wiz_ok_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button9, "clicked",
+                    G_CALLBACK (on_wiz_save__clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button10, "clicked",
+                    G_CALLBACK (close_a_gui_window),
+                    NULL);
+
+  /* Store pointers to all widgets, for use by lookup_widget(). */
+  GLADE_HOOKUP_OBJECT_NO_REF (window_wizard, window_wizard, "window_wizard");
+  GLADE_HOOKUP_OBJECT (window_wizard, vbox10, "vbox10");
+  GLADE_HOOKUP_OBJECT (window_wizard, hbox7, "hbox7");
+  GLADE_HOOKUP_OBJECT (window_wizard, scrolledwindow1, "scrolledwindow1");
+  GLADE_HOOKUP_OBJECT (window_wizard, clist_conns, "clist_conns");
+  GLADE_HOOKUP_OBJECT (window_wizard, hbox8, "hbox8");
+  GLADE_HOOKUP_OBJECT (window_wizard, image2, "image2");
+  GLADE_HOOKUP_OBJECT (window_wizard, label15, "label15");
+  GLADE_HOOKUP_OBJECT (window_wizard, frame8, "frame8");
+  GLADE_HOOKUP_OBJECT (window_wizard, vbox11, "vbox11");
+  GLADE_HOOKUP_OBJECT (window_wizard, table3, "table3");
+  GLADE_HOOKUP_OBJECT (window_wizard, label21, "label21");
+  GLADE_HOOKUP_OBJECT (window_wizard, label20, "label20");
+  GLADE_HOOKUP_OBJECT (window_wizard, label19, "label19");
+  GLADE_HOOKUP_OBJECT (window_wizard, entry_name, "entry_name");
+  GLADE_HOOKUP_OBJECT (window_wizard, entry_host, "entry_host");
+  GLADE_HOOKUP_OBJECT (window_wizard, entry_port, "entry_port");
+  GLADE_HOOKUP_OBJECT (window_wizard, frame9, "frame9");
+  GLADE_HOOKUP_OBJECT (window_wizard, table_autologin, "table_autologin");
+  GLADE_HOOKUP_OBJECT (window_wizard, label17, "label17");
+  GLADE_HOOKUP_OBJECT (window_wizard, label18, "label18");
+  GLADE_HOOKUP_OBJECT (window_wizard, entry_char_name, "entry_char_name");
+  GLADE_HOOKUP_OBJECT (window_wizard, entry_pwd, "entry_pwd");
+  GLADE_HOOKUP_OBJECT (window_wizard, checkbutton_autologin, "checkbutton_autologin");
+  GLADE_HOOKUP_OBJECT (window_wizard, hbuttonbox4, "hbuttonbox4");
+  GLADE_HOOKUP_OBJECT (window_wizard, button11, "button11");
+  GLADE_HOOKUP_OBJECT (window_wizard, button_update, "button_update");
+  GLADE_HOOKUP_OBJECT (window_wizard, button_delete, "button_delete");
+  GLADE_HOOKUP_OBJECT (window_wizard, label16, "label16");
+  GLADE_HOOKUP_OBJECT (window_wizard, hseparator3, "hseparator3");
+  GLADE_HOOKUP_OBJECT (window_wizard, hbuttonbox3, "hbuttonbox3");
+  GLADE_HOOKUP_OBJECT (window_wizard, button_ok, "button_ok");
+  GLADE_HOOKUP_OBJECT (window_wizard, button9, "button9");
+  GLADE_HOOKUP_OBJECT (window_wizard, button10, "button10");
+  GLADE_HOOKUP_OBJECT_NO_REF (window_wizard, tooltips, "tooltips");
+
+  return window_wizard;
+}
+
