@@ -112,6 +112,7 @@ struct prefs_data {
     char socks_password[32];
     char socks_addr[64];
     unsigned short socks_port;
+    gint WizAtStartup;
 };
 
 #define WARN GTK_MESSAGE_WARNING

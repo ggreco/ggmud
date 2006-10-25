@@ -166,13 +166,15 @@ extern int tick_size;
 static const char *boolean_keys[] = {
     "KeepText", "EchoText", "WordWrap", "Blinking",
     "DoBeep", "Toolbar", "Macrobuttons", "Statusbar",
-    "SaveVars", "UseSocks", "TickCounter", NULL
+    "SaveVars", "UseSocks", "TickCounter", "WizAtStartup",
+    NULL
 };
 
 static gint *boolean_values[] = {
     &prefs.KeepText, &prefs.EchoText, &prefs.WordWrap, &prefs.Blinking,
     &prefs.DoBeep, &prefs.Toolbar, &prefs.Macrobuttons, &prefs.Statusbar,
-    &prefs.SaveVars, &prefs.UseSocks, &use_tickcounter, NULL
+    &prefs.SaveVars, &prefs.UseSocks, &use_tickcounter, &prefs.WizAtStartup,
+    NULL
 };
 
 int check_boolean_keys(const char *pref, const char *value)
@@ -207,7 +209,7 @@ void load_prefs ()
 
     if ((fp = fileopen(PREFS_FILE, "r"))) {
         prefs.SaveVars = prefs.Blinking = prefs.KeepText = prefs.EchoText  = prefs.WordWrap = prefs.DoBeep = TRUE;
-        prefs.UseSocks = FALSE;
+        prefs.UseSocks = prefs.WizAtStartup = FALSE;
         prefs.LuaConfig = NULL;
 
         while (fgets (line, sizeof(line) - 1, fp)) {
@@ -286,21 +288,6 @@ void load_prefs ()
 
 }
 
-void change_script(GtkEntry *entry, PREFS_DATA *p)
-{
-        const char *text = gtk_entry_get_text(entry);
-
-        if (!p->LuaConfig || strcmp(p->LuaConfig, text)) {
-            if (p->LuaConfig)
-                    free(p->LuaConfig);
-
-            if (*text)
-                p->LuaConfig = strdup(text);
-            else
-                p->LuaConfig = NULL;
-        }
-}
-
 void change_file(GtkWidget *from, GtkEntry *dest)
 {
         GtkWidget *filew = gtk_file_chooser_dialog_new ( 
@@ -321,7 +308,7 @@ void change_file(GtkWidget *from, GtkEntry *dest)
         gtk_widget_destroy(filew);
 }
 
-void save_prefs (GtkWidget *button, gpointer data) 
+static void save_prefs (GtkWidget *button, gpointer data) 
 {
 #define CFGW(x,y) fprintf(fp, "%s=%s\n", x, y ? "On" : "Off")
 #define CFGI(x,y) fprintf(fp, "%s=%d\n", x, y)
@@ -361,29 +348,6 @@ void save_prefs (GtkWidget *button, gpointer data)
     gtk_widget_destroy(gtk_widget_get_toplevel(button));
 }
 
-void change_tick_size (GtkWidget *widget, ggmud *mud)
-{
-    tick_size = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-}
-
-void change_review_size (GtkWidget *widget, ggmud *mud)
-{
-    mud->maxlines = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-}
-
-void check_tickcounter (GtkWidget *widget, GtkWidget *entry_TickSize)
-{
-    if ( GTK_TOGGLE_BUTTON (widget)->active ) {
-        tickon_command( mud->activesession);
-        use_tickcounter = 1;
-    }
-    else {
-        tickoff_command( mud->activesession);
-        use_tickcounter = 0;
-    }
-
-    gtk_widget_set_sensitive(entry_TickSize, GTK_TOGGLE_BUTTON (widget)->active);
-}
 
 void on_socks_ok_clicked(GtkWidget *button)
 {
@@ -472,40 +436,6 @@ void change_socks_settings()
                 prefs.socks_password);
 
     gtk_widget_show(w);
-}
-
-static void set_socks(GtkToggleButton *toggle, gint unused)
-{
-    if (gtk_toggle_button_get_active(toggle)) {
-        prefs.UseSocks = 1;
-
-        change_socks_settings();
-    }
-    else
-        prefs.UseSocks = 0;
-}
-
-static void check_toggle (GtkWidget *widget, gint *var)
-{
-    if ( GTK_TOGGLE_BUTTON (widget)->active )
-        *var = TRUE;
-    else
-        *var = FALSE;
-}
-
-/* wordwrapper for the main textwindow */
-void text_toggle_word_wrap (GtkWidget *checkbutton_wrap, GtkWidget *text)
-{
-  gtk_text_view_set_wrap_mode(mud->text, GTK_TOGGLE_BUTTON(checkbutton_wrap)->active ? 
-          GTK_WRAP_CHAR : GTK_WRAP_NONE);
-}
-
-void toggle_visibility(GtkWidget *widget, GtkWidget *dest)
-{
-  if ( GTK_TOGGLE_BUTTON (widget)->active )
-      gtk_widget_show(dest);
-  else
-      gtk_widget_hide (dest);
 }
 
 void color_ok (GtkColorButton *widget, color_struct *col)
@@ -646,321 +576,167 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy)
   gtk_widget_show(dialog);
 }
 
+void prefs_apply_settings(GtkWidget *prefs_window)
+{
+    const char *t;
+
+    prefs.KeepText = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+                lookup_widget(prefs_window, "checkbutton_keep")));
+
+    prefs.EchoText = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+                lookup_widget(prefs_window, "checkbutton_echo")));
+
+    prefs.WordWrap = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+                lookup_widget(prefs_window, "checkbutton_ww")));
+
+    gtk_text_view_set_wrap_mode(mud->text, prefs.WordWrap ? 
+            GTK_WRAP_CHAR : GTK_WRAP_NONE);
+
+    prefs.Blinking = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+                lookup_widget(prefs_window, "checkbutton_blink")));
+
+    if ((prefs.Toolbar = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+                        lookup_widget(prefs_window, "checkbutton_toolbar")))))
+        gtk_widget_show(handlebox);
+    else
+        gtk_widget_hide(handlebox);
+
+    if ((prefs.Macrobuttons = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+                        lookup_widget(prefs_window, "checkbutton_macro")))))
+        gtk_widget_show(mud->macrobuttons);
+    else
+        gtk_widget_hide(mud->macrobuttons);
+
+    if ((prefs.Statusbar = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+                        lookup_widget(prefs_window, "checkbutton_statusbar")))))
+        gtk_widget_show(statusbar);
+    else
+        gtk_widget_hide(statusbar);
+
+    tick_size = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(
+                lookup_widget(prefs_window, "spinbutton_ticklength")));
+
+    if ((use_tickcounter = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+                        lookup_widget(prefs_window, "checkbutton_tickcounter")))) ) {
+        tickon_command( mud->activesession);
+    }
+    else {
+        tickoff_command( mud->activesession);
+    }
+
+    mud->maxlines = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(
+                lookup_widget(prefs_window, "spinbutton_review")));
+
+    if ((t = gtk_entry_get_text(GTK_ENTRY(
+                      lookup_widget(prefs_window, "entry_lua_script"))))) {
+        if (prefs.LuaConfig) {
+            free(prefs.LuaConfig);
+            prefs.LuaConfig = NULL;
+        }
+
+        if (*t) {
+            prefs.LuaConfig = strdup(t);
+        }
+    }
+
+    prefs.SaveVars = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+                lookup_widget(prefs_window, "checkbutton_save_vars")));
+    prefs.UseSocks = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+                lookup_widget(prefs_window, "checkbutton_use_proxy")));
+    prefs.WizAtStartup = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+                lookup_widget(prefs_window, "checkbutton_wizard")));
+
+}
+
+void
+on_button_browse_lua_clicked           (GtkButton       *button,
+                                        gpointer         user_data)
+{
+    GtkWidget *w = lookup_widget((GtkWidget *)button,
+            "entry_lua_script");
+
+    change_file((GtkWidget *)button, GTK_ENTRY(w));
+}
+
+
+void
+on_button_proxy_settings_clicked       (GtkButton       *button,
+                                        gpointer         user_data)
+{
+    change_socks_settings();
+}
+
+
+void
+on_button_preferences_ok_clicked       (GtkButton       *button,
+                                        gpointer         user_data)
+{
+    GtkWidget *w = gtk_widget_get_toplevel((GtkWidget *)button);
+
+    prefs_apply_settings(w);
+    gtk_widget_destroy(w);
+}
+
+
+void
+on_button_preferences_save_clicked     (GtkButton       *button,
+                                        gpointer         user_data)
+{
+    prefs_apply_settings(gtk_widget_get_toplevel((GtkWidget *)button));
+    save_prefs((GtkWidget *)button, user_data);
+}
+
+
 void window_prefs (GtkWidget *widget, gpointer data)
 {
-  GtkWidget *prefs_window;
-  GtkWidget *vbox, *hbox, *vbox2, *vbox3;
-  GtkWidget *frame_entry;
-  GtkWidget *frame_vbox;
-  GtkWidget *checkbutton_keep;
-  GtkWidget *checkbutton_echo;
-  GtkWidget *frame_text;
-  GtkWidget *frame_vbox_text;
-  GtkWidget *checkbutton_wrap;
-  GtkWidget *checkbutton_blinking;
-  GtkWidget *checkbutton_beep;
-  GtkWidget *frame_misc, *frame_new;
-  GtkWidget *frame_vbox_misc;
-  GtkWidget *temp;
-  GtkTooltips *tooltip;
-  GtkWidget *checkbutton_Toolbar;
-  GtkWidget *checkbutton_Macrobuttons;
-  GtkWidget *checkbutton_Statusbar;
-  GtkWidget *checkbutton_savevars;
-  GtkWidget *checkbutton_socks;
-  GtkWidget *checkbutton_Tickcounter;
-  GtkWidget *entry_TickSize;
-  GtkWidget *entry_ReviewSize;
-  GtkWidget *entry_LuaConfig;
-  GtkWidget *im;
+  GtkWidget *prefs_window = create_window_preferences();
+
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+          lookup_widget(prefs_window, "checkbutton_keep")), prefs.KeepText);
+
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+          lookup_widget(prefs_window, "checkbutton_echo")), prefs.EchoText);
+
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+          lookup_widget(prefs_window, "checkbutton_ww")), prefs.WordWrap);
+
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+          lookup_widget(prefs_window, "checkbutton_blink")), prefs.Blinking);
+
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+          lookup_widget(prefs_window, "checkbutton_beep")), prefs.DoBeep);
+
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+          lookup_widget(prefs_window, "checkbutton_toolbar")), prefs.Toolbar);
+
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+          lookup_widget(prefs_window, "checkbutton_macro")), prefs.Macrobuttons);
+
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+          lookup_widget(prefs_window, "checkbutton_statusbar")), prefs.Statusbar);
   
-  prefs_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title (GTK_WINDOW (prefs_window), "Preferences");
-  gtk_window_set_policy (GTK_WINDOW (prefs_window), TRUE, TRUE, TRUE);
-  gtk_signal_connect (GTK_OBJECT (prefs_window), "destroy",
-                             GTK_SIGNAL_FUNC(close_window), prefs_window );
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+          lookup_widget(prefs_window, "checkbutton_tickcounter")), use_tickcounter);
 
-  vbox = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox);
-  gtk_container_add (GTK_CONTAINER (prefs_window), vbox);
-  hbox = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbox, TRUE, TRUE, 0);
-  vbox2 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox2);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox2, TRUE, TRUE, 0);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(
+          lookup_widget(prefs_window, "spinbutton_ticklength")), tick_size);
 
-  frame_entry = gtk_frame_new ("Entry box Options");
-  gtk_widget_show (frame_entry);
-  gtk_box_pack_start (GTK_BOX (vbox2), frame_entry, TRUE, TRUE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (frame_entry), 7);
-  gtk_frame_set_label_align (GTK_FRAME (frame_entry), 0.07, 0.5);
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(
+          lookup_widget(prefs_window, "spinbutton_review")), mud->maxlines);
 
-  frame_vbox = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (frame_vbox);
-  gtk_container_add (GTK_CONTAINER (frame_entry), frame_vbox);
-  gtk_container_set_border_width (GTK_CONTAINER (frame_vbox), 6);
-
-  checkbutton_keep = gtk_check_button_new_with_label ("Keep Text Entered");
-  gtk_signal_connect (GTK_OBJECT (checkbutton_keep), "toggled",
-                      GTK_SIGNAL_FUNC (check_toggle),
-                      &prefs.KeepText);
-  tooltip = gtk_tooltips_new ();
-//  gtk_tooltips_set_colors (tooltip1, &color_lightyellow, &color_black);
-  gtk_tooltips_set_tip (tooltip, checkbutton_keep,
-                        "With this toggled on, the text you have entered and sent "
-                        "to the connection, will be left in the entry box but "
-                        "seleceted.", NULL);
-  gtk_widget_show (checkbutton_keep);
-  gtk_box_pack_start (GTK_BOX (frame_vbox), checkbutton_keep, TRUE, TRUE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_keep), prefs.KeepText);
-
-  checkbutton_echo = gtk_check_button_new_with_label ("Echo Text");
-  gtk_signal_connect (GTK_OBJECT (checkbutton_echo), "toggled",
-                      GTK_SIGNAL_FUNC (check_toggle), &prefs.EchoText);
-  
-  gtk_tooltips_set_tip (tooltip, checkbutton_echo,
-                        "With this toggled on, all the text you type and "
-                        "enter will be echoed on the connection so you can "
-                        "control what you are sending."
-                        "\nSome people think this is annoying, and therefor this "
-                        "is an options.",
-                        NULL);
-  gtk_widget_show (checkbutton_echo);
-  gtk_box_pack_start (GTK_BOX (frame_vbox), checkbutton_echo, TRUE, TRUE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_echo), prefs.EchoText);
-
-  frame_text = gtk_frame_new ("Main Window Options");
-  gtk_widget_show (frame_text);
-  gtk_box_pack_start (GTK_BOX (vbox2), frame_text, TRUE, TRUE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (frame_text), 7);
-  gtk_frame_set_label_align (GTK_FRAME (frame_text), 0.07, 0.5);
-
-  frame_vbox_text = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (frame_vbox_text);
-  gtk_container_add (GTK_CONTAINER (frame_text), frame_vbox_text);
-  gtk_container_set_border_width (GTK_CONTAINER (frame_vbox_text), 6);
-
-  checkbutton_wrap = gtk_check_button_new_with_label ("Word Wrap");
-  gtk_signal_connect (GTK_OBJECT (checkbutton_wrap), "toggled",
-                      GTK_SIGNAL_FUNC (check_toggle), &prefs.WordWrap);
-  gtk_signal_connect (GTK_OBJECT(checkbutton_wrap), "toggled",
-		      GTK_SIGNAL_FUNC(text_toggle_word_wrap), mud->text);
-
-  gtk_tooltips_set_tip (tooltip, checkbutton_wrap,
-                        "Wordwrap the lines in the main window!",
-                        NULL);
-  gtk_widget_show (checkbutton_wrap);
-  gtk_box_pack_start (GTK_BOX (frame_vbox_text), checkbutton_wrap, TRUE, TRUE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_wrap), prefs.WordWrap);
-
-  checkbutton_blinking = gtk_check_button_new_with_label ("Text blinking");
-  gtk_signal_connect (GTK_OBJECT (checkbutton_blinking), "toggled",
-                      GTK_SIGNAL_FUNC (check_toggle), &prefs.Blinking);
-
-  gtk_tooltips_set_tip (tooltip, checkbutton_blinking,
-                        "Enable/disable text blinking.",
-                        NULL);
-  gtk_widget_show (checkbutton_blinking);
-  gtk_box_pack_start (GTK_BOX (frame_vbox_text), checkbutton_blinking, TRUE, TRUE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_blinking), prefs.Blinking);
-
-  checkbutton_beep = gtk_check_button_new_with_label ("Emit Beeps");
-  gtk_signal_connect (GTK_OBJECT (checkbutton_beep), "toggled",
-                      GTK_SIGNAL_FUNC (check_toggle),
-                      &prefs.DoBeep);
-
-  gtk_tooltips_set_tip (tooltip, checkbutton_beep,
-                        "If enabled SClient will emit the beep (system bell) sound.",
-                        NULL);
-  gtk_widget_show (checkbutton_beep);
-  gtk_box_pack_start (GTK_BOX (frame_vbox_text), checkbutton_beep, TRUE, TRUE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_beep), prefs.DoBeep);
-
-  frame_misc = gtk_frame_new ("General Options");
-  gtk_widget_show (frame_misc);
-  gtk_box_pack_start (GTK_BOX (vbox2), frame_misc, TRUE, TRUE, 0);
-  gtk_container_set_border_width (GTK_CONTAINER (frame_misc), 7);
-  gtk_frame_set_label_align (GTK_FRAME (frame_misc), 0.07, 0.5);
-
-  frame_vbox_misc = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (frame_vbox_misc);
-  gtk_container_add (GTK_CONTAINER (frame_misc), frame_vbox_misc);
-  gtk_container_set_border_width (GTK_CONTAINER (frame_vbox_misc), 6);
-
-  checkbutton_Toolbar = gtk_check_button_new_with_label ("Show/Hide Toolbar");
-  gtk_signal_connect (GTK_OBJECT (checkbutton_Toolbar),"toggled",
-                       GTK_SIGNAL_FUNC (check_toggle), &prefs.Toolbar);
-  gtk_signal_connect (GTK_OBJECT (checkbutton_Toolbar),"toggled",
-                       GTK_SIGNAL_FUNC (toggle_visibility), handlebox);
-
-  gtk_tooltips_set_tip (tooltip, checkbutton_Toolbar,
-                        "Toggle this on to hide the Toolbar.",
-                        NULL);
-  gtk_widget_show (checkbutton_Toolbar);
-  gtk_box_pack_start (GTK_BOX (frame_vbox_misc), checkbutton_Toolbar, TRUE, TRUE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_Toolbar), prefs.Toolbar);
-
-
-  checkbutton_Macrobuttons = gtk_check_button_new_with_label ("Show/Hide Macro buttons");
-  gtk_signal_connect (GTK_OBJECT (checkbutton_Macrobuttons),"toggled",
-                       GTK_SIGNAL_FUNC (check_toggle), &prefs.Macrobuttons);
-  gtk_signal_connect (GTK_OBJECT (checkbutton_Macrobuttons),"toggled",
-                       GTK_SIGNAL_FUNC (toggle_visibility), mud->macrobuttons);
-
-  gtk_tooltips_set_tip (tooltip, checkbutton_Macrobuttons,
-                        "Toggle this on to hide the Macro buttons.",
-                        NULL);
-  gtk_widget_show (checkbutton_Macrobuttons);
-  gtk_box_pack_start (GTK_BOX (frame_vbox_misc), checkbutton_Macrobuttons, TRUE, TRUE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_Macrobuttons), prefs.Macrobuttons);
-
-  checkbutton_Statusbar = gtk_check_button_new_with_label ("Show/Hide Statusbar");
-  
-  gtk_signal_connect (GTK_OBJECT (checkbutton_Statusbar),"toggled",
-                       GTK_SIGNAL_FUNC (check_toggle), &prefs.Statusbar);
-  gtk_signal_connect (GTK_OBJECT (checkbutton_Statusbar),"toggled",
-                       GTK_SIGNAL_FUNC (toggle_visibility), statusbar );
-
-  gtk_tooltips_set_tip (tooltip, checkbutton_Statusbar,
-                        "Toggle this on to hide the Statusbar.",
-                        NULL);
-  gtk_widget_show (checkbutton_Statusbar);
-  gtk_box_pack_start (GTK_BOX (frame_vbox_misc), checkbutton_Statusbar, TRUE, TRUE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_Statusbar), prefs.Statusbar);
-
-  
-// new options
-  vbox2 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox2);
-  gtk_box_pack_start (GTK_BOX (hbox), vbox2, TRUE, TRUE, 0);
-
-// ticks
-  frame_new = gtk_frame_new ("Tickcounter Options");
-  gtk_widget_show (frame_new);
-  gtk_box_pack_start (GTK_BOX (vbox2), frame_new, TRUE, TRUE, 0);
-  vbox3 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox3);
-
-  
-  gtk_container_add(GTK_CONTAINER(frame_new), vbox3);
-  
-// tickcounter
-  checkbutton_Tickcounter = gtk_check_button_new_with_label ("Use TickCounter");
-
-  gtk_tooltips_set_tip (tooltip, checkbutton_Tickcounter,
-                        "Toggle this to enable/disable the builtin tickcounter.",
-                        NULL);
-  
-  gtk_widget_show (checkbutton_Tickcounter);
-  
-  gtk_box_pack_start (GTK_BOX (vbox3), checkbutton_Tickcounter, TRUE, TRUE, 0);
-// ticksize
-  hbox = gtk_hbox_new(FALSE, 0);
-  gtk_widget_show(hbox);
-  gtk_box_pack_start (GTK_BOX (vbox3), hbox, TRUE, TRUE, 0);
-  temp = gtk_label_new("Tick length:");
-  gtk_widget_show(temp);
-  gtk_box_pack_start (GTK_BOX (hbox), temp, TRUE, TRUE, 0);
-  temp = (GtkWidget *)gtk_adjustment_new (tick_size, 10, 1000, 1, 10, 10);
-  entry_TickSize = gtk_spin_button_new (GTK_ADJUSTMENT (temp), 1, 0);
-
-  gtk_signal_connect(GTK_OBJECT(entry_TickSize), "changed", 
-                        GTK_SIGNAL_FUNC(change_tick_size), mud);
-  
-  gtk_signal_connect (GTK_OBJECT (checkbutton_Tickcounter),"toggled",
-                       GTK_SIGNAL_FUNC (check_tickcounter), entry_TickSize);
-  
-  gtk_widget_show(entry_TickSize);
-
-  if (use_tickcounter)
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(checkbutton_Tickcounter), TRUE);
-  else 
-      gtk_widget_set_sensitive(entry_TickSize, FALSE);
-  
-  gtk_box_pack_start (GTK_BOX (hbox), entry_TickSize, TRUE, TRUE, 0);
-  gtk_tooltips_set_tip(tooltip, entry_TickSize,
-          "The length of the tick in seconds", NULL);
-  
-// other
-  frame_new = gtk_frame_new ("Other Options");
-  gtk_widget_show (frame_new);
-  gtk_box_pack_start (GTK_BOX (vbox2), frame_new, TRUE, TRUE, 0);
-  vbox3 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox3);
-  gtk_container_add(GTK_CONTAINER(frame_new), vbox3);
-
-// Lua configuration
-  hbox = gtk_hbox_new(FALSE, 0);
-  gtk_widget_show(hbox);
-  gtk_box_pack_start (GTK_BOX (vbox3), hbox, FALSE, FALSE, 0);
- 
-  temp = gtk_label_new("Lua startup script:");
-  gtk_widget_show(temp);
-  gtk_box_pack_start (GTK_BOX (hbox), temp, TRUE, TRUE, 0);
- 
-  entry_LuaConfig = gtk_entry_new();
   if (prefs.LuaConfig)
-          gtk_entry_set_text(GTK_ENTRY(entry_LuaConfig), prefs.LuaConfig);
+          gtk_entry_set_text(GTK_ENTRY(
+                      lookup_widget(prefs_window, "entry_lua_script")), prefs.LuaConfig);
 
-  gtk_widget_show(entry_LuaConfig);
-  gtk_box_pack_start (GTK_BOX (hbox), entry_LuaConfig, TRUE, TRUE, 0);
-  temp = gtk_button_new();
-  im = gtk_image_new_from_stock(GTK_STOCK_OPEN, GTK_ICON_SIZE_BUTTON);
-  gtk_container_add(GTK_CONTAINER(temp), im);
-  gtk_widget_show(im);
-  gtk_widget_show(temp);
-  gtk_box_pack_start (GTK_BOX (hbox), temp, FALSE, FALSE, 0);
-  gtk_signal_connect(GTK_OBJECT(temp), "clicked", GTK_SIGNAL_FUNC(change_file),
-                  entry_LuaConfig);
-  gtk_signal_connect(GTK_OBJECT(entry_LuaConfig), "changed", GTK_SIGNAL_FUNC(change_script),
-                        &prefs);
-// review size
-  hbox = gtk_hbox_new(FALSE, 0);
-  gtk_widget_show(hbox);
-  gtk_box_pack_start (GTK_BOX (vbox3), hbox, TRUE, TRUE, 0);
- 
-  temp = gtk_label_new("Review lines:");
-  gtk_widget_show(temp);
-  gtk_box_pack_start (GTK_BOX (hbox), temp, TRUE, TRUE, 0);
-  checkbutton_savevars = gtk_check_button_new_with_label ("Save variables");
-  gtk_signal_connect (GTK_OBJECT (checkbutton_savevars), "toggled",
-                      GTK_SIGNAL_FUNC (check_toggle), &prefs.SaveVars);
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+          lookup_widget(prefs_window, "checkbutton_save_vars")), prefs.SaveVars);
 
-  gtk_tooltips_set_tip (tooltip, checkbutton_savevars,
-                        "Save variable values on program exit.",
-                        NULL);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_savevars), prefs.SaveVars);
-  gtk_widget_show (checkbutton_savevars);
-  
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+          lookup_widget(prefs_window, "checkbutton_use_proxy")), prefs.UseSocks);
 
+  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+          lookup_widget(prefs_window, "checkbutton_wizard")), prefs.WizAtStartup);
 
-  gtk_box_pack_start (GTK_BOX (vbox3), checkbutton_savevars, TRUE, TRUE, 0);
-
-  checkbutton_socks = gtk_check_button_new_with_label ("Use a Socks proxy");
-  gtk_widget_show (checkbutton_socks);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_socks), prefs.UseSocks);
-  gtk_box_pack_start (GTK_BOX (vbox3), checkbutton_socks, TRUE, TRUE, 0);
-
-  gtk_signal_connect (GTK_OBJECT (checkbutton_socks), "toggled",
-                      GTK_SIGNAL_FUNC (set_socks), NULL);
-
-  temp = (GtkWidget *)gtk_adjustment_new (mud->maxlines, 1000, 1000000, 100, 10000, 10000);
-  entry_ReviewSize = gtk_spin_button_new (GTK_ADJUSTMENT (temp), 1, 0);
-
-  gtk_signal_connect(GTK_OBJECT(entry_ReviewSize), "changed", 
-                        GTK_SIGNAL_FUNC(change_review_size), mud);
-  gtk_widget_show(entry_ReviewSize);
-
-  gtk_tooltips_set_tip(tooltip, entry_ReviewSize,
-          "The size in lines of the review buffer.",
-          NULL);
-  gtk_box_pack_start (GTK_BOX (hbox), entry_ReviewSize, TRUE, TRUE, 0);
-
-// button box
-  AddSimpleBar(vbox, NULL, 
-          GTK_SIGNAL_FUNC(save_prefs), GTK_SIGNAL_FUNC(close_window));
-  
   gtk_widget_show (prefs_window);
 }
 
