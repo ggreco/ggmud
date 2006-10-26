@@ -202,6 +202,9 @@ void telnet_resize_all(void)
 }
 #endif
 
+#define TELOPT_COMPRESS 85
+#define TELOPT_COMPRESS2 86
+
 int do_telnet_protocol(unsigned char *data,int nb,struct session *ses)
 {
     unsigned char *cp = data+1;
@@ -226,6 +229,7 @@ int do_telnet_protocol(unsigned char *data,int nb,struct session *ses)
     case WONT:
     case DO:
     case DONT:
+
         if (nb<3)
             return -1;
         wt=*(cp++);
@@ -235,6 +239,7 @@ int do_telnet_protocol(unsigned char *data,int nb,struct session *ses)
 #endif
         answer[0]=IAC;
         answer[2]=*cp;
+
         switch(*cp)
         {
         case ECHO:

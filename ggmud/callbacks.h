@@ -77,3 +77,7 @@ on_wiz_save__clicked                   (GtkButton       *button,
 void
 close_a_gui_window                     (GtkButton       *button,
                                         gpointer         user_data);
+
+void
+close_a_gui_window                     (GtkButton       *button,
+                                        gpointer         user_data);

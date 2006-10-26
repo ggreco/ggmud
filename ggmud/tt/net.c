@@ -287,21 +287,14 @@ int read_buffer_mud(char *buffer, struct session *ses)
 {
     int i, didget, b;
     char *cpsource, *cpdest;
-#define tmpbuf ses->telnet_buf
-#define len ses->telnet_buflen
-
-#if 0
-    if (!ses->issocket)
-    {
-        didget=read(ses->socket, buffer, INPUT_CHUNK);
-        if (didget<=0)
-            return -1;
-        ses->more_coming=(didget==INPUT_CHUNK);
-        buffer[didget]=0;
-        return didget;
-    }
+    char tmpbuf[INPUT_CHUNK + 1];
+#ifdef ENABLE_MCCP
+	const char  *string;
+	int   mccp_i;
+    char *mccp_buffer;
 #endif
-    didget = recv(ses->socket, tmpbuf+len, INPUT_CHUNK-len, 0);
+
+    didget = recv(ses->socket, tmpbuf, INPUT_CHUNK, 0);
 
     if (didget < 0)
         return -1;
@@ -309,25 +302,37 @@ int read_buffer_mud(char *buffer, struct session *ses)
     else if (didget == 0)
         return -666;
 
-    *(tmpbuf+len+didget)=0;
-#if 0
-    tintin_printf(ses,"~8~text:[%s]~-1~",tmpbuf);
-#endif
     ses->old_more_coming = ses->more_coming;
  
-    if ((didget+=len) == INPUT_CHUNK)
+    if (didget == INPUT_CHUNK)
         ses->more_coming = 1;
     else
         ses->more_coming = 0;
-    len=0;
-//    ses->ga=0;
 
     tmpbuf[didget]=0;
-    cpsource = tmpbuf;
+
     cpdest = buffer;
+#ifdef ENABLE_MCCP
+    mudcompress_receive(ses->mccp, tmpbuf, didget);
+
+	while((mccp_i = mudcompress_pending(ses->mccp)) > 0)
+	{
+		mccp_buffer = calloc(1, mccp_i + 1 + ses->telnet_buflen);
+		mudcompress_get(ses->mccp, mccp_buffer + ses->telnet_buflen, mccp_i);
+
+        if (ses->telnet_buflen) {
+            memcpy(mccp_buffer, ses->telnet_buf, ses->telnet_buflen);
+            ses->telnet_buflen = 0;
+        }
+
+        i = mccp_i;
+        cpsource = mccp_buffer;
+#else
+    cpsource = tmpbuf;
     i = didget;
-    while (i > 0)
-    {
+#endif
+   
+    while (i > 0) {
         switch(*(unsigned char *)cpsource)
         {
         case 0:
@@ -340,10 +345,10 @@ int read_buffer_mud(char *buffer, struct session *ses)
             switch(b)
             {
             case -1:
-                len=i;
-                memmove(tmpbuf, cpsource, i);
-                *cpdest=0;
-                return didget-len;
+                memmove(ses->telnet_buf + ses->telnet_buflen, cpsource, i);
+                ses->telnet_buflen+=i;
+                i = 0;
+                break;
             case -2:
             	i-=2;
             	didget-=2;
@@ -368,8 +373,19 @@ int read_buffer_mud(char *buffer, struct session *ses)
             i--;
         }
     }
+
+#ifdef ENABLE_MCCP
+        free(mccp_buffer);
+	}
+   
+	if ((string = mudcompress_response(ses->mccp)) 
+            != NULL) {
+		send (ses->socket, string, strlen(string), 0);
+ 	}
+#endif  
     *cpdest = '\0';
-    return didget;
+
+    return strlen(buffer);
 }
 #endif
 

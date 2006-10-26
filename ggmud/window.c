@@ -24,6 +24,8 @@
 #include "config.h"
 #include "pixmaps.h"	// ToolBar Icons
 #include "ansi.h"
+#include "interface.h"
+#include "support.h"
 
 extern void log_viewer();
 extern void alt_send_to_connection  (gchar *text);
@@ -210,15 +212,18 @@ void load_win_pos()
     gdk_window_raise(gtk_widget_get_toplevel(mud->window)->window);
 }
 
-void setup_pixmaps()
+extern GdkPixmap *enabled_pixmap, *disabled_pixmap;
+extern GdkBitmap *enabled_mask, *disabled_mask;
+
+void setup_pixmaps(GtkWidget *w)
 {
-    extern GdkPixmap *enabled_pixmap, *disabled_pixmap;
-    extern GdkBitmap *enabled_mask, *disabled_mask;
 //    GtkWidget *i1 = gtk_image_new_from_stock(GTK_STOCK_YES, GTK_ICON_SIZE_BUTTON);
 //    GtkWidget *i2 = gtk_image_new_from_stock(GTK_STOCK_NO, GTK_ICON_SIZE_BUTTON);
 
-    enabled_pixmap = gdk_pixmap_create_from_xpm_d ( mud->window->window, &enabled_mask, &mud->window->style->white, yes_xpm );
-    disabled_pixmap = gdk_pixmap_create_from_xpm_d ( mud->window->window, &disabled_mask, &mud->window->style->white, no_xpm );
+    enabled_pixmap = gdk_pixmap_create_from_xpm_d ( w->window,
+            &enabled_mask, &mud->window->style->white, yes_xpm );
+    disabled_pixmap = gdk_pixmap_create_from_xpm_d ( w->window,
+            &disabled_mask, &mud->window->style->white, no_xpm );
 
 //    gtk_image_get_pixmap(GTK_IMAGE(i1), &enabled_pixmap, &enabled_mask);
 //    gtk_image_get_pixmap(GTK_IMAGE(i2), &disabled_pixmap, &disabled_mask);
@@ -771,6 +776,50 @@ void toggle_review(void)
     }
 }
 
+#ifdef ENABLE_MCCP
+void mccp_status()
+{
+    char buffer[256];
+    unsigned long comp, uncomp;
+
+    if (!connected) {
+        popup_window(INFO, "MCCP status can be determined only if connected.");
+        return;
+    }
+
+    GtkWidget *w = create_window_mccp_status();
+    
+    if (mudcompress_compressing(mud->activesession->mccp)) {
+        gtk_image_set_from_pixmap(GTK_IMAGE(
+                    lookup_widget(w, "image_mccp_status")), enabled_pixmap, enabled_mask);
+
+        gtk_label_set_markup(GTK_LABEL(
+                    lookup_widget(w, "label_mccp_status")), "<b>MCCP protocol is active</b>");
+    }
+    else {
+        gtk_image_set_from_pixmap(GTK_IMAGE(
+                    lookup_widget(w, "image_mccp_status")), disabled_pixmap, disabled_mask);
+
+        gtk_label_set_markup(GTK_LABEL(
+                    lookup_widget(w, "label_mccp_status")), "<b>MCCP protocol is inactive</b>");
+    }
+
+    mudcompress_stats(mud->activesession->mccp, &comp, &uncomp);
+
+    sprintf(buffer, "<big>%ld</big>", comp);
+
+    gtk_label_set_markup(GTK_LABEL(
+                lookup_widget(w, "label_comp")), buffer);
+
+    sprintf(buffer, "<big>%ld</big>", uncomp);
+
+    gtk_label_set_markup(GTK_LABEL(
+                lookup_widget(w, "label_uncomp")), buffer);
+
+    gtk_widget_show(w);
+}
+#endif
+
 void
 spawn_gui()
 {
@@ -807,8 +856,10 @@ spawn_gui()
 
   /*** ToolBar End ***/
 
+
   /* create the main window */
   mud->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+
   gtk_widget_set_usize (mud->window, 640, 480);
   gtk_container_border_width (GTK_CONTAINER (mud->window), 3);
   gtk_window_set_title (GTK_WINDOW (mud->window), "GGMud "VERSION"");
@@ -893,7 +944,10 @@ spawn_gui()
   add_menu_item(menu, NULL, "Log Viewer", GTK_SIGNAL_FUNC(log_viewer), 0, 0);
   add_separator(menu);
   add_menu_item(menu, NULL, "Enable/disable trigger classes", GTK_SIGNAL_FUNC(triggerclass_window), 0, 0);
-
+#ifdef ENABLE_MCCP
+  add_separator(menu);
+  add_menu_item(menu, NULL, "MCCP status", GTK_SIGNAL_FUNC(mccp_status), 0, 0);
+#endif
   
   /* help menu */
   menu = add_menu (menubar, "Help");
@@ -1235,6 +1289,8 @@ spawn_gui()
   statusbar_id = gtk_statusbar_get_context_id(GTK_STATUSBAR(statusbar), "Statusbar");
   gtk_statusbar_push (GTK_STATUSBAR(statusbar), statusbar_id, "Ready");
   macro_btnLabel_change();
+
+  setup_pixmaps(mud->window);
 
 }
 /* FOR THE WINDOW BUFFER FUNCTION */

@@ -194,7 +194,6 @@ void disconnect ( void )
         kill_socks_request(mud->conn);
         mud->conn = NULL;
     }
- 
     newactive_session();
     mud->activesession = activesession;
 }
@@ -487,11 +486,10 @@ int check_status(const char *buf, struct session *ses)
 /* btw: i don't tested my fix very much, so it's up to you.               */
 static void readmud(struct session *s)
 {
-    char thebuffer[2*BUFFER_SIZE+1], *buf, *line, *next_line;
+    char thebuffer[3*BUFFER_SIZE + 1], *buf, *line, *next_line; // made bigger to support MCCP
     /* char mybuf[512]; */
     char linebuf[BUFFER_SIZE], header[BUFFER_SIZE];
     int rv, headerlen;
-
     /* If not connected, return.  - ycjhi */
     if(!ZOMBI_IS_ALIVE(s))
         return ;
@@ -529,7 +527,8 @@ static void readmud(struct session *s)
         syserr("readmud: read"); // this call ends the program
     }
 #endif
-    buf[++rv] = '\0';
+
+//    buf[rv] = '\0'; not needed we add it in read_data_mud.
 
     /* changed by DasI */
     if( s->snoopstatus && (s != mud->activesession))

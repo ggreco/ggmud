@@ -89,8 +89,6 @@ void load_triggers()
 GdkPixmap *enabled_pixmap = NULL, *disabled_pixmap = NULL;
 GdkBitmap *enabled_mask = NULL, *disabled_mask = NULL;
 
-extern void setup_pixmaps();
-
 
 #include "include/llist.h"
 
@@ -101,9 +99,6 @@ static void  insert_triggers  (GtkCList *clist)
     struct listnode *list = mud->activesession ? mud->activesession->actions : common_actions;
     int row;
     
-    if (!enabled_pixmap)
-        setup_pixmaps();
-
     gtk_clist_clear (clist);
 
     gtk_clist_freeze(clist);
@@ -142,9 +137,6 @@ static void insert_trigger_classes(GtkCList *clist)
     trigger_class *cl = trigger_classes;
     int row;
    
-    if (!enabled_pixmap)
-        setup_pixmaps();
-
     gtk_clist_clear (clist);
 
     gtk_clist_freeze(clist);

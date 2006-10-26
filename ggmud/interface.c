@@ -926,3 +926,123 @@ create_window_wizard (void)
   return window_wizard;
 }
 
+GtkWidget*
+create_window_mccp_status (void)
+{
+  GtkWidget *window_mccp_status;
+  GtkWidget *vbox12;
+  GtkWidget *vbox13;
+  GtkWidget *hbox9;
+  GtkWidget *image_mccp_status;
+  GtkWidget *label_mccp_status;
+  GtkWidget *hbox10;
+  GtkWidget *frame10;
+  GtkWidget *label_comp;
+  GtkWidget *label23;
+  GtkWidget *frame11;
+  GtkWidget *label_uncomp;
+  GtkWidget *label24;
+  GtkWidget *hseparator4;
+  GtkWidget *button12;
+
+  window_mccp_status = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_container_set_border_width (GTK_CONTAINER (window_mccp_status), 8);
+  gtk_window_set_title (GTK_WINDOW (window_mccp_status), "MCCP status");
+  gtk_window_set_position (GTK_WINDOW (window_mccp_status), GTK_WIN_POS_MOUSE);
+
+  vbox12 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox12);
+  gtk_container_add (GTK_CONTAINER (window_mccp_status), vbox12);
+
+  vbox13 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox13);
+  gtk_box_pack_start (GTK_BOX (vbox12), vbox13, TRUE, TRUE, 0);
+
+  hbox9 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox9);
+  gtk_box_pack_start (GTK_BOX (vbox13), hbox9, TRUE, TRUE, 0);
+
+  image_mccp_status = create_pixmap (window_mccp_status, NULL);
+  gtk_widget_show (image_mccp_status);
+  gtk_box_pack_start (GTK_BOX (hbox9), image_mccp_status, FALSE, FALSE, 0);
+  gtk_misc_set_padding (GTK_MISC (image_mccp_status), 4, 4);
+
+  label_mccp_status = gtk_label_new ("<b>todo</b>");
+  gtk_widget_show (label_mccp_status);
+  gtk_box_pack_start (GTK_BOX (hbox9), label_mccp_status, FALSE, FALSE, 0);
+  gtk_label_set_use_markup (GTK_LABEL (label_mccp_status), TRUE);
+  gtk_label_set_justify (GTK_LABEL (label_mccp_status), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_padding (GTK_MISC (label_mccp_status), 8, 8);
+
+  hbox10 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox10);
+  gtk_box_pack_start (GTK_BOX (vbox13), hbox10, TRUE, TRUE, 0);
+
+  frame10 = gtk_frame_new (NULL);
+  gtk_widget_show (frame10);
+  gtk_box_pack_start (GTK_BOX (hbox10), frame10, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame10), 8);
+
+  label_comp = gtk_label_new (".");
+  gtk_widget_show (label_comp);
+  gtk_container_add (GTK_CONTAINER (frame10), label_comp);
+  gtk_label_set_use_markup (GTK_LABEL (label_comp), TRUE);
+  gtk_label_set_justify (GTK_LABEL (label_comp), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_padding (GTK_MISC (label_comp), 8, 8);
+
+  label23 = gtk_label_new ("<b>Bytes received</b>");
+  gtk_widget_show (label23);
+  gtk_frame_set_label_widget (GTK_FRAME (frame10), label23);
+  gtk_label_set_use_markup (GTK_LABEL (label23), TRUE);
+  gtk_label_set_justify (GTK_LABEL (label23), GTK_JUSTIFY_LEFT);
+
+  frame11 = gtk_frame_new (NULL);
+  gtk_widget_show (frame11);
+  gtk_box_pack_start (GTK_BOX (hbox10), frame11, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame11), 8);
+
+  label_uncomp = gtk_label_new (".");
+  gtk_widget_show (label_uncomp);
+  gtk_container_add (GTK_CONTAINER (frame11), label_uncomp);
+  gtk_label_set_use_markup (GTK_LABEL (label_uncomp), TRUE);
+  gtk_label_set_justify (GTK_LABEL (label_uncomp), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_padding (GTK_MISC (label_uncomp), 8, 8);
+
+  label24 = gtk_label_new ("<b>Bytes decompressed</b>");
+  gtk_widget_show (label24);
+  gtk_frame_set_label_widget (GTK_FRAME (frame11), label24);
+  gtk_label_set_use_markup (GTK_LABEL (label24), TRUE);
+  gtk_label_set_justify (GTK_LABEL (label24), GTK_JUSTIFY_LEFT);
+
+  hseparator4 = gtk_hseparator_new ();
+  gtk_widget_show (hseparator4);
+  gtk_box_pack_start (GTK_BOX (vbox12), hseparator4, FALSE, FALSE, 4);
+
+  button12 = gtk_button_new_from_stock ("gtk-ok");
+  gtk_widget_show (button12);
+  gtk_box_pack_start (GTK_BOX (vbox12), button12, FALSE, FALSE, 0);
+
+  g_signal_connect ((gpointer) button12, "clicked",
+                    G_CALLBACK (close_a_gui_window),
+                    NULL);
+
+  /* Store pointers to all widgets, for use by lookup_widget(). */
+  GLADE_HOOKUP_OBJECT_NO_REF (window_mccp_status, window_mccp_status, "window_mccp_status");
+  GLADE_HOOKUP_OBJECT (window_mccp_status, vbox12, "vbox12");
+  GLADE_HOOKUP_OBJECT (window_mccp_status, vbox13, "vbox13");
+  GLADE_HOOKUP_OBJECT (window_mccp_status, hbox9, "hbox9");
+  GLADE_HOOKUP_OBJECT (window_mccp_status, image_mccp_status, "image_mccp_status");
+  GLADE_HOOKUP_OBJECT (window_mccp_status, label_mccp_status, "label_mccp_status");
+  GLADE_HOOKUP_OBJECT (window_mccp_status, hbox10, "hbox10");
+  GLADE_HOOKUP_OBJECT (window_mccp_status, frame10, "frame10");
+  GLADE_HOOKUP_OBJECT (window_mccp_status, label_comp, "label_comp");
+  GLADE_HOOKUP_OBJECT (window_mccp_status, label23, "label23");
+  GLADE_HOOKUP_OBJECT (window_mccp_status, frame11, "frame11");
+  GLADE_HOOKUP_OBJECT (window_mccp_status, label_uncomp, "label_uncomp");
+  GLADE_HOOKUP_OBJECT (window_mccp_status, label24, "label24");
+  GLADE_HOOKUP_OBJECT (window_mccp_status, hseparator4, "hseparator4");
+  GLADE_HOOKUP_OBJECT (window_mccp_status, button12, "button12");
+
+  return window_mccp_status;
+}
+
