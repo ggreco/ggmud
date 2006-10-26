@@ -281,6 +281,9 @@ struct session *new_session(const char *name, const char *address,
   newsession->telnet_buf = malloc(INPUT_CHUNK);
   newsession->telnet_buflen = 0;
 #endif
+#ifdef ENABLE_MCCP
+  newsession->mccp = mudcompress_new();
+#endif
   sessionlist = newsession;
   activesession = newsession;  
   sessionsstarted++;
@@ -356,6 +359,9 @@ void cleanup_nonzombi_session(struct session *ses)
 
   if(ses->lowlogfile) /* lowlevel logging - ycjhi */
     fclose(ses->lowlogfile);
+#ifdef ENABLE_MCCP
+  mudcompress_delete(ses->mccp);
+#endif
 
   free(ses->address);
   free(ses->name);
@@ -407,6 +413,9 @@ void cleanup_zombi_session(struct session *ses)
   ses->ignore = DEFAULT_IGNORE;
   ses->more_coming = 0;
   ses->old_more_coming = 0;
+#ifdef ENABLE_MCCP
+  mudcompress_delete(ses->mccp);
+#endif
 
   /* I think that there could be still remaining problems but it works :) */
 }

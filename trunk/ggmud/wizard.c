@@ -316,10 +316,12 @@ void on_button_wiz_add_clicked (GtkWidget *button, gpointer data)
         return;
     }
 
-    gtk_clist_append ((GtkCList *) data, (void *)texta);
+    gtk_clist_append (GTK_CLIST(
+                lookup_widget(button, "clist_conns")), (void *)texta);
 
     if ( !wizard_connection_list2 || !wizard_connection_list2->data )
-        gtk_clist_select_row ((GtkCList *) data, 0, 0);
+        gtk_clist_select_row (GTK_CLIST(
+                lookup_widget(button, "clist_conns")), 0, 0);
 
     w = (WIZARD_DATA *) calloc( sizeof (WIZARD_DATA), 1);
 

@@ -80,9 +80,6 @@ int main(int argc, char **argv)
 {
     extern int checktick(void);
     extern void save_vars(void);
-#ifdef WITH_LUA
-   	lua_State *l;
-#endif
 
 #ifndef WIN32
     char *display;

@@ -1,14 +1,15 @@
 CROSSDIR = /usr/local/cross-gcc33/i386-mingw32msvc/
 CROSSCC = $(CROSSDIR)/bin/gcc
-GLOBAL_CFLAGS = -g  -DTELNET_SUPPORT -Wall -DWITH_LUA
+
+GLOBAL_CFLAGS = -g  -DTELNET_SUPPORT -Wall -DWITH_LUA -DENABLE_MCCP -I../zlib
 OBJDIR = obj/
 CC = gcc
 CXX = g++
-INCDIR = -Itt -Ilua
-COMMONLIBS = -Ltt -ltt -Llua -llua
+INCDIR = -Itt -Ilua -Izlib
+COMMONLIBS = -Ltt -ltt -Llua -llua -Lzlib -lz
 CFLAGS = $(INCDIR) `pkg-config gtk+-2.0 --cflags` $(GLOBAL_CFLAGS) -DENABLE_BINRELOC -DBR_PTHREADS=0
 
-LIBS = $(COMMONLIBS) `pkg-config gtk+-2.0 --libs` 
+LIBS = $(COMMONLIBS) `pkg-config gtk+-2.0 --libs`
 
 VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )
 OS:=	$(uname)
@@ -24,7 +25,7 @@ PROJECTNAME = ggmud
 C_SRCS = alias.c ansi.c font.c fileopen.c help.c history.c log.c logviewer.c \
          macro.c net.c preferences.c ggmud.c triggers.c window.c wizard.c \
          variables.c highlights.c gags.c timers.c complete.c prefix.c \
-         telnet.c lua.c interface.c callbacks.c support.c socks.c
+         telnet.c lua.c interface.c callbacks.c support.c socks.c 
 
 DEP_SRCS = $(CXX_SRCS) $(C_SRCS)
 
@@ -40,7 +41,7 @@ CROSSCFLAGS = $(INCDIR) -I$(CROSSDIR)/include/glib-2.0  \
 
 # -fnative-struct corrispondente di -mms-bifields nel vecchio mingw32 -s
 
-CROSSLIBS = -s -Ltt -Llua -lttw32 -lluaw32 -lgtk-win32-2.0.dll -lgdk-win32-2.0.dll \
+CROSSLIBS = -s -Ltt -Llua -Lzlib -lttw32 -lluaw32 -lzw32 -lgtk-win32-2.0.dll -lgdk-win32-2.0.dll \
             -latk-1.0.dll -lgdk_pixbuf-2.0.dll -lpango-1.0.dll -lpangowin32-1.0.dll \
             -lgmodule-2.0.dll -lgobject-2.0.dll -lglib-2.0.dll -lws2_32
 
@@ -69,6 +70,12 @@ tt/libtt.a: tt/*.c
 tt/libttw32.a: tt/*.c
 	$(MAKE) -C tt win32
 
+zlib/libzw32.a: zlib/*c
+	CC=$(CROSSCC) AR=$(CROSSDIR)/bin/ar RANLIB=$(CROSSDIR)/bin/ranlib $(MAKE) -C zlib libzw32.a
+
+zlib/libz.a: zlib/*c
+	$(MAKE) -C zlib libz.a
+
 lua/liblua.a:
 	$(MAKE) -C lua linux
  
@@ -78,10 +85,10 @@ lua/libluaw32.a: lua/*c
 	"CC=$(CROSSDIR)bin/gcc" "RANLIB=$(CROSSDIR)/bin/ranlib" \
     "AR=$(CROSSDIR)bin/ar rcu" "MYLIBS=" "MYLDFLAGS=-s" lua.exe
 
-$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a
+$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libz.a
 	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) $(LIBS)
 
-$(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a lua/libluaw32.a
+$(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a lua/libluaw32.a zlib/libzw32.a
 	$(CROSSCC) $(CROSSCFLAGS) $(WINOBJS) -o $(PROJECTNAME).exe $(CROSSLIBS)
 
 clean: 

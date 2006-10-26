@@ -241,6 +241,9 @@ struct completenode {
   struct completenode *next;
   char *strng;
 };
+#ifdef ENABLE_MCCP
+#include "mccpDecompress.h"
+#endif
 
 struct session {
   struct session *next;
@@ -286,6 +289,9 @@ struct session {
 #ifdef TELNET_SUPPORT
   char *telnet_buf;
   int telnet_buflen;
+#endif
+#ifdef ENABLE_MCCP
+  mc_state *mccp;
 #endif
 };
 
