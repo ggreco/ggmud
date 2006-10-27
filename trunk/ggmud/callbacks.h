@@ -81,3 +81,46 @@ close_a_gui_window                     (GtkButton       *button,
 void
 close_a_gui_window                     (GtkButton       *button,
                                         gpointer         user_data);
+
+void
+on_button_capture_clicked              (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_macro_save_clicked                  (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+close_a_gui_window                     (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_clist_macros_select_row             (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);
+
+void
+on_clist_macros_unselect_row           (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);
+
+gboolean
+on_entry_shortcut_key_press_event      (GtkWidget       *widget,
+                                        GdkEventKey     *event,
+                                        gpointer         user_data);
+
+void
+on_me_button_add_clicked               (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_me_button_mod_clicked               (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_me_button_del_clicked               (GtkButton       *button,
+                                        gpointer         user_data);

@@ -679,10 +679,6 @@ void cbox()
 }
 
 
-void macro_send (GtkWidget *widget, gint button) {
-    parse_input(macro_list[button], mud->activesession);
-}
-
 /*
  * This Function vil toggle the logger
  */
@@ -690,17 +686,6 @@ void toggle_logger (GtkWidget *menuitem, gpointer data)
 {
     /* Toggle the toolbar logger button and do the stuff */
     gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(btn_toolbar_logger), GTK_CHECK_MENU_ITEM(menuitem)->active);
-}
-
-/* Change Macro buttons labels
- */
-void macro_btnLabel_change() {
-    gint i;
-    
-    for (i = 0; i < 12; i++) {
-       gtk_label_set_text(GTK_LABEL(btnLabel[i]), macro_list[i]);
-       gtk_misc_set_alignment (GTK_MISC(btnLabel[i]), LorC(macro_list[i]), 0.5);
-    }
 }
 
 /*
@@ -823,18 +808,13 @@ void mccp_status()
 void
 spawn_gui()
 {
-  gint i = 0;
   //gint key = GDK_F1; /* F1 key */
   GtkWidget *vbox1;
   GtkWidget *menubar;
   GtkWidget *menu;
   GtkWidget *vbox2;
   GtkWidget *hbox1;
-  GtkWidget *frame;
-  GtkWidget *table;
-  GtkWidget *macro_label;
   GtkAccelGroup *accel_group;
-  GtkWidget *macro_button;
   GtkWidget *fill_block2;
   GtkWidget *hbox2;
   GtkWidget *fill_block;
@@ -1155,44 +1135,6 @@ spawn_gui()
   else 
       gtk_widget_hide (mud->macrobuttons);
 
-  /* Macro frame */
-  frame = gtk_frame_new ("Macros");
-  gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (mud->macrobuttons), frame, FALSE, FALSE, 0);
-  gtk_container_border_width (GTK_CONTAINER (frame), 3);
-  gtk_frame_set_label_align (GTK_FRAME (frame), 0.03, 0.5);
-
-  table = gtk_table_new (12, 2, FALSE);
-  gtk_widget_show (table);
-  gtk_container_add (GTK_CONTAINER (frame), table);
-
-  /* Macro buttons */
-  while (keys[i]) {
-      /* the labels that are beside the macro buttons */
-      macro_label = gtk_label_new (keys[i]);
-      gtk_widget_show (macro_label);
-      gtk_table_attach (GTK_TABLE (table), macro_label, 0, 1, i, i+1,
-                       (GtkAttachOptions) GTK_EXPAND | GTK_FILL,
-		       (GtkAttachOptions) GTK_EXPAND | GTK_FILL, 0, 0);
-      /* Macro buttons with accel. keys F1-F12 */
-      macro_button = gtk_button_new();
-      gtk_widget_show (macro_button);
-      gtk_table_attach (GTK_TABLE (table), macro_button, 1, 2, i, i+1,
-                       (GtkAttachOptions) GTK_EXPAND | GTK_FILL,
-		       (GtkAttachOptions) GTK_EXPAND, 0, 0);
-      gtk_widget_set_usize (macro_button, 65, 26);
-      gtk_container_border_width (GTK_CONTAINER (macro_button), 3);
-      gtk_signal_connect (GTK_OBJECT (macro_button), "clicked",
-                          GTK_SIGNAL_FUNC (macro_send), (gpointer) i);
-#if 0      
-      gtk_widget_add_accelerator (macro_button, "clicked", accel_group,
-                                  key++, 0, 0 /*GTK_ACCEL_VISIBLE*/);
-#endif
-      btnLabel[i] = gtk_label_new(macro_list[i]);
-      gtk_container_add (GTK_CONTAINER(macro_button), btnLabel[i]);
-      gtk_widget_show(btnLabel[i]);
-      i++;
-  }
   /* just a empty label we use as a fillblock so it should look nice */
   fill_block2 = gtk_label_new ("");
   gtk_widget_show (fill_block2);
@@ -1288,7 +1230,6 @@ spawn_gui()
   
   statusbar_id = gtk_statusbar_get_context_id(GTK_STATUSBAR(statusbar), "Statusbar");
   gtk_statusbar_push (GTK_STATUSBAR(statusbar), statusbar_id, "Ready");
-  macro_btnLabel_change();
 
   setup_pixmaps(mud->window);
 
