@@ -150,7 +150,6 @@ extern void  load_triggers    ( void );
 extern void triggers_window ();
 
 extern ggmud *mud;
-extern gchar **macro_list;
 extern GtkWidget *menu_File_Connect;
 extern GtkWidget *menu_File_DisConnect;
 extern GtkWidget *statusbar;
@@ -200,7 +199,7 @@ extern void hist_clear();
 /* macro.c */
 extern void  load_macro    ( void );
 extern void  window_macro    (GtkWidget *widget, gpointer data);
-
+extern gint check_macro(gint, gint);
 
 /* win.c */
 typedef struct {

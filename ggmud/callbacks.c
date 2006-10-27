@@ -9,7 +9,6 @@
 #include "support.h"
 
 
-
 void
 on_radiobutton_v4_clicked              (GtkButton       *button,
                                         gpointer         user_data)
@@ -68,6 +67,7 @@ on_checkbutton_use_proxy_toggled       (GtkToggleButton *togglebutton,
 }
 
 
+
 void
 on_checkbutton_autologin_toggled       (GtkToggleButton *togglebutton,
                                         gpointer         user_data)
@@ -76,4 +76,6 @@ on_checkbutton_autologin_toggled       (GtkToggleButton *togglebutton,
                 "table_autologin"),
             gtk_toggle_button_get_active(togglebutton));    
 }
+
+
 

@@ -27,7 +27,6 @@
 #include <signal.h>
 
 ggmud *mud;
-extern void macro_send (GtkWidget *, gint);
 extern void load_win_pos();
 
 /* menu items */
@@ -39,21 +38,21 @@ GtkWidget *statusbar;
 gint statusbar_id;
 
 /* Global macro list */
-gchar **macro_list;
-
 
 /* Initialize the list of keys */
 gchar *keys[] = {"F1", "F2", "F3", "F4", "F5",
 	         "F6", "F7", "F8", "F9", "F10", "F11", "F12", NULL};
 
+
 gint snoop_keys (GtkWidget *grab_widget,
                                              GdkEventKey *event,
                                              ggmud *mud)
 {
-   if (event->type == GDK_KEY_PRESS &&
-       event->keyval >= GDK_F1 && event->keyval <= GDK_F12) {
-       macro_send(NULL , event->keyval - GDK_F1);
-       return TRUE;
+   extern gint capture_enabled;
+
+   if (event->type == GDK_KEY_PRESS && !capture_enabled) {
+       return check_macro(event->state , 
+               gdk_keyval_to_upper(event->keyval));
    }
    else
        return FALSE;

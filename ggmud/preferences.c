@@ -576,77 +576,6 @@ void color_prefs (GtkWidget *widget, GtkWidget *dummy)
   gtk_widget_show(dialog);
 }
 
-void prefs_apply_settings(GtkWidget *prefs_window)
-{
-    const char *t;
-
-    prefs.KeepText = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-                lookup_widget(prefs_window, "checkbutton_keep")));
-
-    prefs.EchoText = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-                lookup_widget(prefs_window, "checkbutton_echo")));
-
-    prefs.WordWrap = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-                lookup_widget(prefs_window, "checkbutton_ww")));
-
-    gtk_text_view_set_wrap_mode(mud->text, prefs.WordWrap ? 
-            GTK_WRAP_CHAR : GTK_WRAP_NONE);
-
-    prefs.Blinking = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-                lookup_widget(prefs_window, "checkbutton_blink")));
-
-    if ((prefs.Toolbar = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-                        lookup_widget(prefs_window, "checkbutton_toolbar")))))
-        gtk_widget_show(handlebox);
-    else
-        gtk_widget_hide(handlebox);
-
-    if ((prefs.Macrobuttons = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-                        lookup_widget(prefs_window, "checkbutton_macro")))))
-        gtk_widget_show(mud->macrobuttons);
-    else
-        gtk_widget_hide(mud->macrobuttons);
-
-    if ((prefs.Statusbar = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-                        lookup_widget(prefs_window, "checkbutton_statusbar")))))
-        gtk_widget_show(statusbar);
-    else
-        gtk_widget_hide(statusbar);
-
-    tick_size = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(
-                lookup_widget(prefs_window, "spinbutton_ticklength")));
-
-    if ((use_tickcounter = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-                        lookup_widget(prefs_window, "checkbutton_tickcounter")))) ) {
-        tickon_command( mud->activesession);
-    }
-    else {
-        tickoff_command( mud->activesession);
-    }
-
-    mud->maxlines = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(
-                lookup_widget(prefs_window, "spinbutton_review")));
-
-    if ((t = gtk_entry_get_text(GTK_ENTRY(
-                      lookup_widget(prefs_window, "entry_lua_script"))))) {
-        if (prefs.LuaConfig) {
-            free(prefs.LuaConfig);
-            prefs.LuaConfig = NULL;
-        }
-
-        if (*t) {
-            prefs.LuaConfig = strdup(t);
-        }
-    }
-
-    prefs.SaveVars = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-                lookup_widget(prefs_window, "checkbutton_save_vars")));
-    prefs.UseSocks = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-                lookup_widget(prefs_window, "checkbutton_use_proxy")));
-    prefs.WizAtStartup = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
-                lookup_widget(prefs_window, "checkbutton_wizard")));
-
-}
 
 void
 on_button_browse_lua_clicked           (GtkButton       *button,
@@ -667,6 +596,121 @@ on_button_proxy_settings_clicked       (GtkButton       *button,
 }
 
 
+typedef struct {
+    char *label;
+    int *value;
+} checkbutton;
+
+checkbutton prefs_buttons[] = {
+    {"checkbutton_keep", &prefs.KeepText},
+    {"checkbutton_echo", &prefs.EchoText},
+    {"checkbutton_ww", &prefs.WordWrap},
+    {"checkbutton_blink", &prefs.Blinking},
+    {"checkbutton_toolbar", &prefs.Toolbar},
+    {"checkbutton_macro", &prefs.Macrobuttons},
+    {"checkbutton_statusbar", &prefs.Statusbar},
+    {"checkbutton_tickcounter", &use_tickcounter},
+    {"checkbutton_beep", &prefs.DoBeep},
+    {"checkbutton_save_vars", &prefs.SaveVars},
+    {"checkbutton_use_proxy", &prefs.UseSocks},
+    {"checkbutton_wizard", &prefs.WizAtStartup},
+    {NULL, NULL}
+};
+
+void
+set_checkbutton(GtkWidget *w, const char *name, int var)
+{
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+                lookup_widget(w, name)), var);
+}
+
+void
+get_checkbutton(GtkWidget *w, const char *name, int *var)
+{
+    *var = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+                lookup_widget(w, name)));
+}
+
+void prefs_apply_settings(GtkWidget *prefs_window)
+{
+    const char *t;
+    int i = 0;
+
+    while (prefs_buttons[i].label) {
+        get_checkbutton(prefs_window, 
+                prefs_buttons[i].label, 
+                prefs_buttons[i].value);
+
+        i++;
+    }
+
+    gtk_text_view_set_wrap_mode(mud->text, prefs.WordWrap ? 
+            GTK_WRAP_CHAR : GTK_WRAP_NONE);
+
+    if (prefs.Toolbar)
+        gtk_widget_show(handlebox);
+    else
+        gtk_widget_hide(handlebox);
+
+    if (prefs.Macrobuttons && mud->macrobuttons)
+        gtk_widget_show(mud->macrobuttons);
+    else
+        gtk_widget_hide(mud->macrobuttons);
+
+    if (prefs.Statusbar )
+        gtk_widget_show(statusbar);
+    else
+        gtk_widget_hide(statusbar);
+
+    tick_size = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(
+                lookup_widget(prefs_window, "spinbutton_ticklength")));
+
+    if (use_tickcounter  )
+        tickon_command( mud->activesession);
+    else 
+        tickoff_command( mud->activesession);
+
+    mud->maxlines = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(
+                lookup_widget(prefs_window, "spinbutton_review")));
+
+    if ((t = gtk_entry_get_text(GTK_ENTRY(
+                        lookup_widget(prefs_window, "entry_lua_script"))))) {
+        if (prefs.LuaConfig) {
+            free(prefs.LuaConfig);
+            prefs.LuaConfig = NULL;
+        }
+
+        if (*t) {
+            prefs.LuaConfig = strdup(t);
+        }
+    }
+}
+
+void window_prefs (GtkWidget *widget, gpointer data)
+{
+  GtkWidget *prefs_window = create_window_preferences();
+  int i = 0;
+
+  while (prefs_buttons[i].label) {
+      set_checkbutton(prefs_window, 
+                      prefs_buttons[i].label, 
+                      *prefs_buttons[i].value);
+
+      i++;
+  }
+
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(
+          lookup_widget(prefs_window, "spinbutton_ticklength")), tick_size);
+
+  gtk_spin_button_set_value(GTK_SPIN_BUTTON(
+          lookup_widget(prefs_window, "spinbutton_review")), mud->maxlines);
+
+  gtk_entry_set_text(GTK_ENTRY(
+          lookup_widget(prefs_window, "entry_lua_script")), prefs.LuaConfig ? prefs.LuaConfig : "");
+
+  gtk_widget_show (prefs_window);
+}
+
 void
 on_button_preferences_ok_clicked       (GtkButton       *button,
                                         gpointer         user_data)
@@ -677,7 +721,6 @@ on_button_preferences_ok_clicked       (GtkButton       *button,
     gtk_widget_destroy(w);
 }
 
-
 void
 on_button_preferences_save_clicked     (GtkButton       *button,
                                         gpointer         user_data)
@@ -686,57 +729,4 @@ on_button_preferences_save_clicked     (GtkButton       *button,
     save_prefs((GtkWidget *)button, user_data);
 }
 
-
-void window_prefs (GtkWidget *widget, gpointer data)
-{
-  GtkWidget *prefs_window = create_window_preferences();
-
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-          lookup_widget(prefs_window, "checkbutton_keep")), prefs.KeepText);
-
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-          lookup_widget(prefs_window, "checkbutton_echo")), prefs.EchoText);
-
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-          lookup_widget(prefs_window, "checkbutton_ww")), prefs.WordWrap);
-
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-          lookup_widget(prefs_window, "checkbutton_blink")), prefs.Blinking);
-
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-          lookup_widget(prefs_window, "checkbutton_beep")), prefs.DoBeep);
-
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-          lookup_widget(prefs_window, "checkbutton_toolbar")), prefs.Toolbar);
-
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-          lookup_widget(prefs_window, "checkbutton_macro")), prefs.Macrobuttons);
-
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-          lookup_widget(prefs_window, "checkbutton_statusbar")), prefs.Statusbar);
-  
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-          lookup_widget(prefs_window, "checkbutton_tickcounter")), use_tickcounter);
-
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(
-          lookup_widget(prefs_window, "spinbutton_ticklength")), tick_size);
-
-  gtk_spin_button_set_value(GTK_SPIN_BUTTON(
-          lookup_widget(prefs_window, "spinbutton_review")), mud->maxlines);
-
-  if (prefs.LuaConfig)
-          gtk_entry_set_text(GTK_ENTRY(
-                      lookup_widget(prefs_window, "entry_lua_script")), prefs.LuaConfig);
-
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-          lookup_widget(prefs_window, "checkbutton_save_vars")), prefs.SaveVars);
-
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-          lookup_widget(prefs_window, "checkbutton_use_proxy")), prefs.UseSocks);
-
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
-          lookup_widget(prefs_window, "checkbutton_wizard")), prefs.WizAtStartup);
-
-  gtk_widget_show (prefs_window);
-}
 

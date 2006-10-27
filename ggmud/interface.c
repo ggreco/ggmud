@@ -274,8 +274,8 @@ create_window_preferences (void)
   GtkWidget *vbox7;
   GtkWidget *checkbutton_keep;
   GtkWidget *checkbutton_toolbar;
-  GtkWidget *checkbutton_macro;
   GtkWidget *checkbutton_statusbar;
+  GtkWidget *checkbutton_macro;
   GtkWidget *label10;
   GtkWidget *vbox5;
   GtkWidget *frame4;
@@ -385,15 +385,15 @@ create_window_preferences (void)
   gtk_box_pack_start (GTK_BOX (vbox7), checkbutton_toolbar, TRUE, FALSE, 0);
   gtk_tooltips_set_tip (tooltips, checkbutton_toolbar, "View the toolbar on the GGMud main window", NULL);
 
-  checkbutton_macro = gtk_check_button_new_with_mnemonic ("Show Macro Buttons");
-  gtk_widget_show (checkbutton_macro);
-  gtk_box_pack_start (GTK_BOX (vbox7), checkbutton_macro, TRUE, FALSE, 0);
-  gtk_tooltips_set_tip (tooltips, checkbutton_macro, "View (and be able to click) macro buttons on the main GGMud window", NULL);
-
   checkbutton_statusbar = gtk_check_button_new_with_mnemonic ("Show Statusbar");
   gtk_widget_show (checkbutton_statusbar);
   gtk_box_pack_start (GTK_BOX (vbox7), checkbutton_statusbar, TRUE, FALSE, 0);
   gtk_tooltips_set_tip (tooltips, checkbutton_statusbar, "View the statusbar on the main GGMud window", NULL);
+
+  checkbutton_macro = gtk_check_button_new_with_mnemonic ("Show Macro buttons");
+  gtk_widget_show (checkbutton_macro);
+  gtk_box_pack_start (GTK_BOX (vbox7), checkbutton_macro, FALSE, FALSE, 0);
+  gtk_tooltips_set_tip (tooltips, checkbutton_macro, "View the statusbar on the main GGMud window", NULL);
 
   label10 = gtk_label_new ("<b>Interface</b>");
   gtk_widget_show (label10);
@@ -586,8 +586,8 @@ create_window_preferences (void)
   GLADE_HOOKUP_OBJECT (window_preferences, vbox7, "vbox7");
   GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_keep, "checkbutton_keep");
   GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_toolbar, "checkbutton_toolbar");
-  GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_macro, "checkbutton_macro");
   GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_statusbar, "checkbutton_statusbar");
+  GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_macro, "checkbutton_macro");
   GLADE_HOOKUP_OBJECT (window_preferences, label10, "label10");
   GLADE_HOOKUP_OBJECT (window_preferences, vbox5, "vbox5");
   GLADE_HOOKUP_OBJECT (window_preferences, frame4, "frame4");
@@ -1044,5 +1044,274 @@ create_window_mccp_status (void)
   GLADE_HOOKUP_OBJECT (window_mccp_status, button12, "button12");
 
   return window_mccp_status;
+}
+
+GtkWidget*
+create_window_macro_editor (void)
+{
+  GtkWidget *window_macro_editor;
+  GtkWidget *vbox14;
+  GtkWidget *hbox11;
+  GtkWidget *frame12;
+  GtkWidget *scrolledwindow2;
+  GtkWidget *clist_macros;
+  GtkWidget *label30;
+  GtkWidget *label31;
+  GtkWidget *label25;
+  GtkWidget *vbox15;
+  GtkWidget *frame13;
+  GtkWidget *hbox12;
+  GtkWidget *entry_shortcut;
+  GtkWidget *button_capture;
+  GtkWidget *alignment1;
+  GtkWidget *hbox13;
+  GtkWidget *image3;
+  GtkWidget *label27;
+  GtkWidget *label26;
+  GtkWidget *frame14;
+  GtkWidget *hbox14;
+  GtkWidget *entry_cmd;
+  GtkWidget *label28;
+  GtkWidget *hbox15;
+  GtkWidget *button_add;
+  GtkWidget *button_mod;
+  GtkWidget *alignment2;
+  GtkWidget *hbox16;
+  GtkWidget *image4;
+  GtkWidget *label29;
+  GtkWidget *button_del;
+  GtkWidget *hseparator5;
+  GtkWidget *hbuttonbox5;
+  GtkWidget *button13;
+  GtkWidget *button14;
+
+  window_macro_editor = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_container_set_border_width (GTK_CONTAINER (window_macro_editor), 4);
+  gtk_window_set_title (GTK_WINDOW (window_macro_editor), "Macro Editor");
+  gtk_window_set_position (GTK_WINDOW (window_macro_editor), GTK_WIN_POS_CENTER);
+  gtk_window_set_default_size (GTK_WINDOW (window_macro_editor), 640, 480);
+
+  vbox14 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox14);
+  gtk_container_add (GTK_CONTAINER (window_macro_editor), vbox14);
+
+  hbox11 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox11);
+  gtk_box_pack_start (GTK_BOX (vbox14), hbox11, TRUE, TRUE, 0);
+
+  frame12 = gtk_frame_new (NULL);
+  gtk_widget_show (frame12);
+  gtk_box_pack_start (GTK_BOX (hbox11), frame12, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame12), 4);
+
+  scrolledwindow2 = gtk_scrolled_window_new (NULL, NULL);
+  gtk_widget_show (scrolledwindow2);
+  gtk_container_add (GTK_CONTAINER (frame12), scrolledwindow2);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow2), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+
+  clist_macros = gtk_clist_new (2);
+  gtk_widget_show (clist_macros);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow2), clist_macros);
+  gtk_container_set_border_width (GTK_CONTAINER (clist_macros), 4);
+  gtk_clist_set_column_width (GTK_CLIST (clist_macros), 0, 146);
+  gtk_clist_set_column_width (GTK_CLIST (clist_macros), 1, 80);
+  gtk_clist_column_titles_show (GTK_CLIST (clist_macros));
+
+  label30 = gtk_label_new ("Shortcut");
+  gtk_widget_show (label30);
+  gtk_clist_set_column_widget (GTK_CLIST (clist_macros), 0, label30);
+  gtk_label_set_justify (GTK_LABEL (label30), GTK_JUSTIFY_LEFT);
+
+  label31 = gtk_label_new ("Commands");
+  gtk_widget_show (label31);
+  gtk_clist_set_column_widget (GTK_CLIST (clist_macros), 1, label31);
+  gtk_label_set_justify (GTK_LABEL (label31), GTK_JUSTIFY_LEFT);
+
+  label25 = gtk_label_new ("<b>Macro List</b>");
+  gtk_widget_show (label25);
+  gtk_frame_set_label_widget (GTK_FRAME (frame12), label25);
+  gtk_label_set_use_markup (GTK_LABEL (label25), TRUE);
+  gtk_label_set_justify (GTK_LABEL (label25), GTK_JUSTIFY_LEFT);
+
+  vbox15 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox15);
+  gtk_box_pack_start (GTK_BOX (hbox11), vbox15, FALSE, FALSE, 0);
+
+  frame13 = gtk_frame_new (NULL);
+  gtk_widget_show (frame13);
+  gtk_box_pack_start (GTK_BOX (vbox15), frame13, TRUE, FALSE, 0);
+
+  hbox12 = gtk_hbox_new (FALSE, 4);
+  gtk_widget_show (hbox12);
+  gtk_container_add (GTK_CONTAINER (frame13), hbox12);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox12), 8);
+
+  entry_shortcut = gtk_entry_new ();
+  gtk_widget_show (entry_shortcut);
+  gtk_box_pack_start (GTK_BOX (hbox12), entry_shortcut, TRUE, TRUE, 0);
+
+  button_capture = gtk_button_new ();
+  gtk_widget_show (button_capture);
+  gtk_box_pack_start (GTK_BOX (hbox12), button_capture, FALSE, FALSE, 0);
+
+  alignment1 = gtk_alignment_new (0.5, 0.5, 0, 0);
+  gtk_widget_show (alignment1);
+  gtk_container_add (GTK_CONTAINER (button_capture), alignment1);
+
+  hbox13 = gtk_hbox_new (FALSE, 2);
+  gtk_widget_show (hbox13);
+  gtk_container_add (GTK_CONTAINER (alignment1), hbox13);
+
+  image3 = gtk_image_new_from_stock ("gtk-find", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_show (image3);
+  gtk_box_pack_start (GTK_BOX (hbox13), image3, FALSE, FALSE, 0);
+
+  label27 = gtk_label_new_with_mnemonic ("Capture");
+  gtk_widget_show (label27);
+  gtk_box_pack_start (GTK_BOX (hbox13), label27, FALSE, FALSE, 0);
+  gtk_label_set_justify (GTK_LABEL (label27), GTK_JUSTIFY_LEFT);
+
+  label26 = gtk_label_new ("Shortcut");
+  gtk_widget_show (label26);
+  gtk_frame_set_label_widget (GTK_FRAME (frame13), label26);
+  gtk_label_set_justify (GTK_LABEL (label26), GTK_JUSTIFY_LEFT);
+
+  frame14 = gtk_frame_new (NULL);
+  gtk_widget_show (frame14);
+  gtk_box_pack_start (GTK_BOX (vbox15), frame14, TRUE, FALSE, 0);
+
+  hbox14 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox14);
+  gtk_container_add (GTK_CONTAINER (frame14), hbox14);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox14), 8);
+
+  entry_cmd = gtk_entry_new ();
+  gtk_widget_show (entry_cmd);
+  gtk_box_pack_start (GTK_BOX (hbox14), entry_cmd, TRUE, TRUE, 0);
+
+  label28 = gtk_label_new ("Commands");
+  gtk_widget_show (label28);
+  gtk_frame_set_label_widget (GTK_FRAME (frame14), label28);
+  gtk_label_set_justify (GTK_LABEL (label28), GTK_JUSTIFY_LEFT);
+
+  hbox15 = gtk_hbox_new (FALSE, 4);
+  gtk_widget_show (hbox15);
+  gtk_box_pack_start (GTK_BOX (vbox15), hbox15, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox15), 4);
+
+  button_add = gtk_button_new_from_stock ("gtk-add");
+  gtk_widget_show (button_add);
+  gtk_box_pack_start (GTK_BOX (hbox15), button_add, TRUE, TRUE, 0);
+
+  button_mod = gtk_button_new ();
+  gtk_widget_show (button_mod);
+  gtk_box_pack_start (GTK_BOX (hbox15), button_mod, TRUE, TRUE, 0);
+
+  alignment2 = gtk_alignment_new (0.5, 0.5, 0, 0);
+  gtk_widget_show (alignment2);
+  gtk_container_add (GTK_CONTAINER (button_mod), alignment2);
+
+  hbox16 = gtk_hbox_new (FALSE, 2);
+  gtk_widget_show (hbox16);
+  gtk_container_add (GTK_CONTAINER (alignment2), hbox16);
+
+  image4 = gtk_image_new_from_stock ("gtk-justify-fill", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_show (image4);
+  gtk_box_pack_start (GTK_BOX (hbox16), image4, FALSE, FALSE, 0);
+
+  label29 = gtk_label_new_with_mnemonic ("Modify");
+  gtk_widget_show (label29);
+  gtk_box_pack_start (GTK_BOX (hbox16), label29, FALSE, FALSE, 0);
+  gtk_label_set_justify (GTK_LABEL (label29), GTK_JUSTIFY_LEFT);
+
+  button_del = gtk_button_new_from_stock ("gtk-delete");
+  gtk_widget_show (button_del);
+  gtk_box_pack_start (GTK_BOX (hbox15), button_del, TRUE, TRUE, 0);
+
+  hseparator5 = gtk_hseparator_new ();
+  gtk_widget_show (hseparator5);
+  gtk_box_pack_start (GTK_BOX (vbox14), hseparator5, FALSE, FALSE, 4);
+
+  hbuttonbox5 = gtk_hbutton_box_new ();
+  gtk_widget_show (hbuttonbox5);
+  gtk_box_pack_start (GTK_BOX (vbox14), hbuttonbox5, FALSE, FALSE, 0);
+  gtk_button_box_set_layout (GTK_BUTTON_BOX (hbuttonbox5), GTK_BUTTONBOX_SPREAD);
+
+  button13 = gtk_button_new_from_stock ("gtk-save");
+  gtk_widget_show (button13);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox5), button13);
+  GTK_WIDGET_SET_FLAGS (button13, GTK_CAN_DEFAULT);
+
+  button14 = gtk_button_new_from_stock ("gtk-close");
+  gtk_widget_show (button14);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox5), button14);
+  GTK_WIDGET_SET_FLAGS (button14, GTK_CAN_DEFAULT);
+
+  g_signal_connect ((gpointer) clist_macros, "select_row",
+                    G_CALLBACK (on_clist_macros_select_row),
+                    NULL);
+  g_signal_connect ((gpointer) clist_macros, "unselect_row",
+                    G_CALLBACK (on_clist_macros_unselect_row),
+                    NULL);
+  g_signal_connect ((gpointer) entry_shortcut, "key_press_event",
+                    G_CALLBACK (on_entry_shortcut_key_press_event),
+                    NULL);
+  g_signal_connect ((gpointer) button_capture, "clicked",
+                    G_CALLBACK (on_button_capture_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button_add, "clicked",
+                    G_CALLBACK (on_me_button_add_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button_mod, "clicked",
+                    G_CALLBACK (on_me_button_mod_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button_del, "clicked",
+                    G_CALLBACK (on_me_button_del_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button13, "clicked",
+                    G_CALLBACK (on_macro_save_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button14, "clicked",
+                    G_CALLBACK (close_a_gui_window),
+                    NULL);
+
+  /* Store pointers to all widgets, for use by lookup_widget(). */
+  GLADE_HOOKUP_OBJECT_NO_REF (window_macro_editor, window_macro_editor, "window_macro_editor");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, vbox14, "vbox14");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, hbox11, "hbox11");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, frame12, "frame12");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, scrolledwindow2, "scrolledwindow2");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, clist_macros, "clist_macros");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, label30, "label30");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, label31, "label31");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, label25, "label25");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, vbox15, "vbox15");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, frame13, "frame13");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, hbox12, "hbox12");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, entry_shortcut, "entry_shortcut");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, button_capture, "button_capture");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, alignment1, "alignment1");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, hbox13, "hbox13");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, image3, "image3");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, label27, "label27");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, label26, "label26");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, frame14, "frame14");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, hbox14, "hbox14");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, entry_cmd, "entry_cmd");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, label28, "label28");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, hbox15, "hbox15");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, button_add, "button_add");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, button_mod, "button_mod");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, alignment2, "alignment2");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, hbox16, "hbox16");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, image4, "image4");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, label29, "label29");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, button_del, "button_del");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, hseparator5, "hseparator5");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, hbuttonbox5, "hbuttonbox5");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, button13, "button13");
+  GLADE_HOOKUP_OBJECT (window_macro_editor, button14, "button14");
+
+  return window_macro_editor;
 }
 
