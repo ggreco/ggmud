@@ -64,7 +64,7 @@ void script_command(char *arg, struct session *ses)
   
   if (luaL_loadfile(mud->lua, left)) {
 
-      sprintf(buffer, "Unable to load LUA script %s: %s\n", left,
+      snprintf(buffer, BUFFER_SIZE, "Unable to load LUA script %s: %s\n", left,
               lua_tostring(mud->lua, -1));
       textfield_add(mud->text, buffer, MESSAGE_ERR);
       lua_pop(mud->lua, 1);
@@ -72,7 +72,29 @@ void script_command(char *arg, struct session *ses)
   }
 
   if (lua_pcall(mud->lua, 0, 0, 0)) {
-      sprintf(buffer, "Error in LUA script %s: %s\n", left,
+      snprintf(buffer, BUFFER_SIZE, "Error in LUA script %s: %s\n", left,
+		      lua_tostring(mud->lua, -1));
+      lua_pop(mud->lua, 1);
+      textfield_add(mud->text, buffer, MESSAGE_ERR);
+  }
+}
+
+void lua_command(char *arg, struct session *ses)
+{
+  char left[BUFFER_SIZE], buffer[BUFFER_SIZE];
+
+  get_arg_all(arg, left);
+
+  if (luaL_loadstring(mud->lua, left)) {
+      snprintf(buffer, BUFFER_SIZE, "Unable to load LUA script %s: %s\n", left,
+              lua_tostring(mud->lua, -1));
+      textfield_add(mud->text, buffer, MESSAGE_ERR);
+      lua_pop(mud->lua, 1);
+      return;
+  }
+
+  if (lua_pcall(mud->lua, 0, 0, 0)) {
+      snprintf(buffer, BUFFER_SIZE, "Error in LUA script %s: %s\n", left,
 		      lua_tostring(mud->lua, -1));
       lua_pop(mud->lua, 1);
       textfield_add(mud->text, buffer, MESSAGE_ERR);
