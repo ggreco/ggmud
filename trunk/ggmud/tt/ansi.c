@@ -123,6 +123,29 @@ int skip_ansi(const char *str)
   return(!*str ? skip : skip+1);
 }
 
+/******************************************************************/
+/* returns the actual amount line must be advanced to skip len    */
+/* non-ansi characters                                            */
+/******************************************************************/
+
+int skip_non_ansi(const char *line, int len)
+{
+  int ansi = 0, nonansi = 0;
+  int n;
+
+  while(line && *line && nonansi < len) {
+    if (n = skip_ansi(line)) {
+      ansi += n;
+      line += n;
+    } else {
+      ++nonansi;
+      ++line;
+    }
+  }
+
+  return ansi + nonansi;
+}
+
 /* Strip the ansi code sequences from a string. */
 
 char *strip_ansi(const char *str, char *buffer)

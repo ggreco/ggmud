@@ -295,6 +295,8 @@ struct session *parse_tintin_command(const char *command, char *arg,
     alias_command(arg, ses);
   else if(is_abbrev(command, "script"))
     script_command(arg, ses);
+  else if(is_abbrev(command, "lua"))
+    lua_command(arg, ses);
    
   else if(is_abbrev(command, "all"))
     ses = all_command(arg, ses);

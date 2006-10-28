@@ -386,39 +386,44 @@ int check_one_action(const char *line, const char *action, struct session *ses)
 
 int check_a_action(const char *line, const char *action, struct session *ses)
 {   
+  char line_noansi[BUFFER_SIZE];
   char result[BUFFER_SIZE];
-  char *temp2, *tptr = result;
-  const char *line2;
+  char *temp2, *tptr = result, *naptr = line_noansi;
+  const char *naptr2;
   int  i, len, flag;
+
+  strip_ansi(line, line_noansi);
 
   for(i = 0; i < 10; i++)
     var_len[i] = -1;
   substitute_myvars(action, result, ses);
 
   if(*tptr == '^') {
-    if((len = match_a_string(line, ++tptr)) == -1)
+    if((len = match_a_string(line_noansi, ++tptr)) == -1)
       return(FALSE);
-    line += len;
+    line += skip_non_ansi(line, len);
+    naptr += len;
     tptr += len;
   }
   else {
     flag = TRUE;
     len = -1;
-    while(*line && flag)
-      if((len = match_a_string(line, tptr)) != -1)
+    while(*naptr && flag)
+      if((len = match_a_string(naptr, tptr)) != -1)
         flag = FALSE;
       else
-        line++;
+        line += skip_non_ansi(line, 1), naptr++;
 
     if(len != -1) {
-      line += len;
+      line += skip_non_ansi(line, len);
+      naptr += len;
       tptr += len;
     }
     else
       return(FALSE);
   }
 
-  while(*line && *tptr) {
+  while(*naptr && *tptr) {
     temp2 = tptr+2;
     if(!*temp2) {
       var_len[tptr[1]-'0'] = strlen(line);
@@ -426,20 +431,21 @@ int check_a_action(const char *line, const char *action, struct session *ses)
       return(TRUE);
     }
 
-    line2 = line;
+    naptr2 = naptr;
     flag = TRUE;
     len = -1;
 
-    while(*line2 && flag)
-      if((len = match_a_string(line2, temp2)) != -1)
+    while(*naptr2 && flag)
+      if((len = match_a_string(naptr2, temp2)) != -1)
         flag = FALSE;
       else 
-        line2++;
+        naptr2++;
 
     if(len != -1) {
-      var_len[tptr[1]-'0'] = line2-line;
       var_ptr[tptr[1]-'0'] = line;
-      line = line2+len;
+      line += var_len[tptr[1]-'0'] = skip_non_ansi(line, naptr2-naptr);
+      line += skip_non_ansi(line, len);
+      naptr = naptr2+len;
       tptr = temp2+len;
     }
     else
