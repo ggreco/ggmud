@@ -102,8 +102,10 @@ struct prefs_data {
     gint       Statusbar;
     GtkTextTag *BackgroundColor; /* Red, Green, Blue */
     GtkTextTag *DefaultColor; /* Red, Green, Blue */
+    GtkTextTag *BrightColor;
     GdkColor BackgroundGdkColor; /* Red, Green, Blue */
     GdkColor DefaultGdkColor; /* Red, Green, Blue */
+    GdkColor BrightGdkColor;
     gint       SaveVars;
     char *LuaConfig;
     gint    UseSocks;

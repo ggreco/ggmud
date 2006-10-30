@@ -547,7 +547,7 @@ static void readmud(struct session *s)
         s->last_line[0] = '\0';
     }
 
-    if(strlen(buf)>BUFFER_SIZE) {
+    if(strlen(buf)> (BUFFER_SIZE * 2)) {
         popup_window(ERR, "readmud: read one line longer than BUFFERSIZE");
         return;
     }
