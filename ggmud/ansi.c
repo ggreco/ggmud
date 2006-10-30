@@ -67,6 +67,10 @@ GdkColor default_color_black;		/* LOW black */
 GtkTextTag *fg_col;		/* Foreground color */
 GtkTextTag *bg_col;		/* background color */
 
+int fg_col_i, bg_col_i;         /* Indices of fg_col and bg_col */
+int fg_bright, bg_bright;       /* Use bright versions of fg_col and bg_col */
+int fg_blink;                   /* Use blinking version of fg_col */
+
 /* from bezerk */
 gushort convert_color (unsigned c)
 {
@@ -225,9 +229,17 @@ void init_colors ()
         g_object_set(prefs.DefaultColor, "foreground-gdk", &color_white, NULL);
         bg_col = prefs.BackgroundColor = gtk_text_tag_new(NULL);
         g_object_set(prefs.BackgroundColor, "background-gdk", &color_black, NULL);
+        fg_col_i = -1;
+        fg_bright = 0;
+        bg_col_i = -1;
+        bg_bright = 0;
 
-        gtk_text_tag_table_add(tag_table, bg_col);
-        gtk_text_tag_table_add(tag_table, fg_col);
+        prefs.BrightColor = gtk_text_tag_new(NULL);
+        g_object_set(prefs.BrightColor, "foreground-gdk", &color_lightwhite, NULL);
+
+        gtk_text_tag_table_add(tag_table, prefs.BackgroundColor);
+        gtk_text_tag_table_add(tag_table, prefs.DefaultColor);
+        gtk_text_tag_table_add(tag_table, prefs.BrightColor);
     }
 }
 
@@ -257,7 +269,7 @@ void swap_blinks(void)
         }        
     }
     
-    blink ^= 1;
+    blink = !blink;
 }
 
 void update_color_tags(GdkColor *color)
@@ -270,6 +282,9 @@ void update_color_tags(GdkColor *color)
     else if (color == &prefs.DefaultGdkColor) {
         g_object_set(prefs.DefaultColor, "foreground-gdk", color, NULL);
     }
+    else if (color == &prefs.BrightGdkColor) {
+        g_object_set(prefs.BrightColor, "foreground-gdk", color, NULL);
+    }
     else for (i = 0; i < 8; i++) {
         for (j = 0; j < 2; j++) {
             if (orig_colors[j][i] == color) {
@@ -280,133 +295,108 @@ void update_color_tags(GdkColor *color)
     }
 }
 
-static int
-get_first(int in)
+/* fgb:    new fg brightness value  (-1 == no change)
+ * fgi:    new fg index value       (-1 == no change; -2 == default)
+ * bgb:    new bg brightness value  (-1 == no change)
+ * bgi:    new bg index value       (-1 == no change; -2 == default)
+ * blink:  new fg blink value       (-1 == no change) */
+void set_colors(int fgb, int fgi, int bgb, int bgi, int blink)
 {
-    in -= '0';
+    if (fgb >= 0)
+      fg_bright = fgb;
+    if (fgi >= 0 || fgi == -2)
+      fg_col_i = fgi;
+    if (bgb >= 0)
+      bg_bright = bgb;
+    if (bgi >= 0 || bgi == -2)
+      bg_col_i = bgi;
+    if (blink >= 0)
+      fg_blink = blink;
 
-    if(in < 0 || in > 1)
-        return 1; // return bright color for default
+    /* currently, default color can't blink */
+    if (fg_bright && fg_col_i < 0) /* bright default */
+      fg_col = prefs.BrightColor;
+    else if (fg_col_i < 0)         /* dim default */
+      fg_col = prefs.DefaultColor;
+    else if (fg_blink)             /* blinking color */
+      fg_col = blink_colors[fg_bright][fg_col_i];
+    else                           /* normal color */
+      fg_col = fg_colors[fg_bright][fg_col_i];
 
-    return in;
+    if (bg_col_i < 0)              /* default background */
+      bg_col = prefs.BackgroundColor;
+    else                           /* other background */
+      bg_col = bg_colors[bg_bright][bg_col_i];
 }
 
-static int
-get_second(int in)
+#define reset_colors()   (set_colors(0,-2,0,-2,0))
+#define set_fg_bright(b) (set_colors((b),-1,-1,-1,-1))
+#define set_bg_bright(b) (set_colors(-1,-1,(b),-1,-1))
+#define set_fg_color(c)  (set_colors(-1,(c),-1,-1,-1))
+#define set_bg_color(c)  (set_colors(-1,-1,-1,(c),-1))
+#define set_blink(b)     (set_colors(-1,-1,-1,-1,(b)))
+
+void test_getcol(const char *code, int n)
 {
-    in -= '0';
+    static int grcm = 1;
+    const char *final = code + n-1;
+    char *next;
 
-    if(in < 0 || in > 7)
-        return 7; // return white for default
-
-    return in;
-}
-
-void test_getcol(const char *tmp, int bleh)
-{
 #ifdef debug
-    printf("code(%d): %.9s\n", bleh, tmp);
+    printf("code(%d): %s\n", n, code);
 #endif
     
-    switch(bleh){
+    /* if the code is an SGR, and the current GRCM is replace,
+       then do a reset */
+    if (!grcm && *final == 'm')
+      reset_colors();
 
-        case 2: if( tmp[0]== '[' && tmp[1] == 'm') {
-                    fg_col = prefs.DefaultColor; 
-                    bg_col = prefs.BackgroundColor;
-                    return;
-                } 
-                break;
-        case 3: if(!strncmp(tmp,"[0m",3)) {
-                    fg_col = prefs.DefaultColor;
-                    return;
-                }
-                if(!strncmp(tmp,"[1m",3)) {
-                    fg_col = fg_colors[1][7]; // light white
-                    return;
-                }
-                break;
-        case 4:
-                if(tmp[1] == '3') {
-                    fg_col = fg_colors[0][get_second(tmp[2])];
-                    return;
-                }
-                else if(tmp[1] == '4') {
-                    bg_col = bg_colors[0][get_second(tmp[2])];
-                    return;
-                }
-                
-                break;
-        case 6:
-                // code of type [X;[3|4]Ym
-parse6chars:        
-                if(tmp[1] == '0' || tmp[1] == '1') {
-                    if(tmp[3] == '3') {
-                        fg_col = fg_colors[get_first(tmp[1])][get_second(tmp[4])];
-                    }
-                    else if(tmp[3] == '4')
-                        bg_col = bg_colors[get_first(tmp[1])][get_second(tmp[4])];
-                    return;
-                }
-                else if(tmp[1] == '7') {
-                    fg_col = fg_colors[0][0]; // black
-                    bg_col = bg_colors[1][get_second(tmp[4])];
-                    return;
-                }
-                
-                break;
-        case 7:
-                if(tmp[1] == ';') {
-//                    printf("7 chars code!\n");
-                    tmp++;
-                    goto parse6chars;
-                }
-                break;
-        case 8:
-                if(tmp[5] == '3') {
-                    fg_col = fg_colors[get_first(tmp[3])][get_second(tmp[6])];
+    while (code != NULL && code < final) {
+      long int attr;
+      
+      /* advance pointer to next decimal number */
+      while (*code == ';') {
+        if (++code == final)
+          return;
+      }
 
-                    return;
-                }
-                break;
-// added by GG, doesn't handle correctly blinking codes but works
-// with 11 chars ansi codes
-        case 11:
-                if (tmp[3] == '4') {
-                    if( (tmp[1] == '1' || tmp[1] == '5') && 
-                            tmp[4] == '0') // lasciamo lo sfondo nero
-                        bg_col = bg_colors[0][0]; // black;
-                    else {
-                        bg_col = bg_colors[get_first(tmp[1])][get_second(tmp[4])];
-                    }
-                }
-                if (tmp[8] == '3') {
-                    if (tmp[1] == '5')
-                        fg_col = blink_colors[get_first(tmp[6])][get_second(tmp[9])];
-                    else
-                        fg_col = fg_colors[get_first(tmp[6])][get_second(tmp[9])];
-                }
-                return;
-        case 9:
-                if (tmp[3] == '4') {
-                    if(tmp[4] != '0') {
-                        bg_col = bg_colors[1][get_second(tmp[4])];
-                    }
-                    else
-                        bg_col = bg_colors[0][0]; // lasciamo lo sfondo nero
-                }
-                if (tmp[6] == '3') {
-                    int a = get_first(tmp[1]);
-                    int b = get_second(tmp[7]);
-                    
-                    fg_col = fg_colors[a][b];
-                }
-                return;
+      /* read the number */
+      attr = strtol(code, &next, 10);
+      if (next == code) {
+        /* strtol failed */
+        code++;
+        continue;
+      }
 
-        default:
-                break;
+      switch (*final) {
+      case 'h':  /* Set Mode (SM) */
+        if (attr == 21) /* GRCM */
+          grcm = 1;
+        break;
+
+      case 'l':  /* Reset Mode (RM) */
+        if (attr == 21) /* GRCM */
+          grcm = 0;
+        break;
+
+      case 'm':  /* Select Graphic Rendition (SGR) */
+        if (attr == 0) /* total reset */
+          reset_colors();
+        else if (attr == 1) /* change to bright */
+          set_fg_bright(1);
+        else if (attr == 2) /* change to dim */
+          set_fg_bright(0);
+        else if (attr == 5) /* change to blinking */
+          set_blink(1);
+        else if (attr >= 30 && attr <= 37) /* change foreground hue */
+          set_fg_color(attr - 30);
+        else if (attr >= 40 && attr <= 47) /* change background hue */
+          set_bg_color(attr - 40);
+        break;
+      }
+
+      code = next;
     }
-
-    fg_col = prefs.DefaultColor;
 }
 
 static void
@@ -441,8 +431,10 @@ void local_disp_ansi(int size, const char *in, GtkTextView *target)
 
     gtk_text_buffer_get_end_iter(tbuff, &iter);
 
+    /*
     fg_col=prefs.DefaultColor;
     bg_col=prefs.BackgroundColor;
+    */
 
     while(n < size) {
         /* plain text no color nothing */
@@ -455,15 +447,22 @@ void local_disp_ansi(int size, const char *in, GtkTextView *target)
         /* color and special signs -> stripp it! */
         else {
             int started_code = 0;
+
+            if (in[++n] != '[')
+              continue;
+            n++;
+
             flush_text_buffer(buffer, &bufferpos, &iter, tbuff);
-           
-            while(in[n] != 'm' && n < size) {
-                n++;
-                
+
+            while(in[n] < 0x40 && n < size) {
                 if (in[n] != 0)
                     ansibuffer[started_code++] = in[n];
+                n++;
             }
 
+            if (n < size)
+              ansibuffer[started_code++] = in[n];
+            ansibuffer[started_code] = '\0';
             test_getcol(ansibuffer, started_code);
         }
         n++;
@@ -476,7 +475,7 @@ void disp_ansi(int size, const char *in, GtkTextView *target)
 {
     char buffer[256];
     int bufferpos = 0;
-    static int started_code = -1;
+    static int started_code = -2;
     static char ansibuffer[32];
     GtkTextBuffer *tbuff = gtk_text_view_get_buffer(target);
     GtkTextIter iter;
@@ -485,79 +484,46 @@ void disp_ansi(int size, const char *in, GtkTextView *target)
 
     gtk_text_buffer_get_end_iter(tbuff, &iter);
 
-    if (started_code != -1) {
-        int i = 0;
-
-        while(in[i] != 'm' && i < size) {
-            if (in[i] == 27)
-                started_code = 0;
-            else if (in[i] != 0)
-                ansibuffer[started_code++] = in[i];
-
-            i++;
-        }
-
-        if (i == size ) {
-#ifdef SUPERDEBUG
-            fprintf(stderr, "Received packet of %d bytes without a full ansi code\n", size);
-            dump_buffer(in, size);
-            fprintf(stderr, "Actual ansibuffer: ");
-            dump_buffer(ansibuffer, started_code);
-#endif
-            return;
-        }
-        else
-            ansibuffer[started_code++] = in[i++]; // I've to skip the m in the end of the code too
-
-        in += i;
-        size -= i;
-            
-        if ( started_code < 12) {
-            test_getcol(ansibuffer, started_code);
-        }
-
-        started_code = -1;
-    }
-
     while(n < size) {
+
+        /* saw ESC, expect next character to be '[' */
+        if (started_code == -1) {
+            if (in[n] == '[') {
+                started_code++;
+                n++;
+                continue;
+            } else {
+                /* invalid ansi code */
+                started_code = -2;
+            }
+        }
+
+        /* continuation of ansi code */
+        if (started_code >= 0) {
+  
+            /* end of ansi code */
+            if (in[n] >= 0x40 && in[n] < 0x7f) {
+                ansibuffer[started_code++] = in[n];
+                ansibuffer[started_code] = '\0';
+                test_getcol(ansibuffer, started_code);
+                started_code = -2;
+            }
+            else
+                ansibuffer[started_code++] = in[n];
+
+            n++;
+            continue;
+        }
 
         /* stripp out goofy signs like linefeeds.... */
         if (in[n] == '\r' || in[n] == 0) {
             n++;
-
             continue;
         }
 
         if (in[n] < 0) {
             n++;
             continue;
-#if 0
-        /* mask the password at login */
-
-            if (in[n+2] == 1) {
-                if(in[n+1] == -5)
-                    mud->ent->visible = 0;
-                if(in[n+1] == -4)
-                    mud->ent->visible = 1;
-                n+=3;
-            }
-            else if (mud->activesession) {
-                int b=do_telnet_protocol(in + n, size - n, mud->activesession);
-                
-                fprintf(stderr, "Telnet protocol returned: %d, buffer: ", b);
-                dump_buffer(in + n, 5);
-
-                switch(b)
-                {
-                    case -1:
-                        // this is the situation when the telnet code does not end in the packet. 
-                        return;
-                    default:
-                        n += b;
-                        continue;
-                }
-            }
-#endif
         }
 
         /* we have intercepted the beep character */
@@ -569,34 +535,19 @@ void disp_ansi(int size, const char *in, GtkTextView *target)
             continue;
         }
 
-        /* plain text no color nothing */
-        if(in[n] != 27) {
-            buffer[bufferpos++] = in[n];
-
-            if(bufferpos == sizeof(buffer)) // flush_text_buffer resets internally bufferpos
-                flush_text_buffer(buffer, &bufferpos, &iter, tbuff);    
-        }
-        /* color and special signs -> stripp it! */
-        else {
+        /* beginning of ansi code */
+        if(in[n] == 27) {
             flush_text_buffer(buffer, &bufferpos, &iter, tbuff);
-
-            started_code = 0;
-
-            while(in[n] != 'm' && n < size) {
-                n++;
-                
-                if (in[n] != 0)
-                    ansibuffer[started_code++] = in[n];
-            }
-
-            if ( n == size && 
-                (!started_code || ansibuffer[started_code - 1] != 'm'))
-                return;
-
-            test_getcol(ansibuffer, started_code);
-
-            started_code = -1;
+            started_code++;
+            n++;
+            continue;
         }
+
+        /* plain text no color nothing */
+        buffer[bufferpos++] = in[n];
+
+        if(bufferpos == sizeof(buffer)) // flush_text_buffer resets internally bufferpos
+            flush_text_buffer(buffer, &bufferpos, &iter, tbuff);    
         n++;
     }	
 

@@ -83,7 +83,8 @@ color_struct color_arr[] = {
       {&color_black, "black", NULL},
       {&color_lightblack, "light black", NULL},
       {&prefs.BackgroundGdkColor, "background color", NULL},
-      {&prefs.DefaultGdkColor, "default color", NULL},      
+      {&prefs.DefaultGdkColor, "default color", NULL},
+      {&prefs.BrightGdkColor, "bright default color", NULL},
       {NULL,NULL}
 };
 
@@ -470,6 +471,7 @@ void color_reset_to_default (GtkWidget *button, gpointer data)
     color_lightblack	= default_color_lightblack;
     prefs.BackgroundGdkColor	= color_black;
     prefs.DefaultGdkColor	= color_white;
+    prefs.BrightGdkColor        = color_lightwhite;
 
     text_bg(mud->text, prefs.BackgroundGdkColor);
 
