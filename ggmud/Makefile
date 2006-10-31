@@ -15,9 +15,6 @@ VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )
 OS:=	$(uname)
 MAKE=	make
 
-if ${OS} == FreeBSD || ${OS} == NetBSD || ${OS} == OpenBSD
-	MAKE	=	gmake
-
 export GLOBAL_CFLAGS
 
 PROJECTNAME = ggmud
