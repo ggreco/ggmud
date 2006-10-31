@@ -298,11 +298,8 @@ static int __index(lua_State* L) // object, key
 
 void init_lua()
 {
-    luaopen_base(mud->lua);
-    luaopen_table(mud->lua);            /* opens the table library */
-    //    luaopen_io(mud->lua);               /* opens the I/O library */
-    luaopen_string(mud->lua);           /* opens the string lib. */
-    luaopen_math(mud->lua); 
+    /* load libraries */
+    luaL_openlibs(mud->lua);
 
     // set version number
 
