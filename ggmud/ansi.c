@@ -322,7 +322,7 @@ void set_colors(int fgb, int fgi, int bgb, int bgi, int blink)
       fg_col = blink_colors[fg_bright][fg_col_i];
     else                           /* normal color */
       fg_col = fg_colors[fg_bright][fg_col_i];
-    
+
     if (bg_col_i < 0)              /* default background */
       bg_col = prefs.BackgroundColor;
     else                           /* other background */
@@ -341,9 +341,8 @@ void test_getcol(const char *code, int n)
     static int grcm = 1;
     const char *final = code + n-1;
     char *next;
-    int bright_flag = -1;
-    
-#ifdef debug 
+
+#ifdef debug
     printf("code(%d): %s\n", n, code);
 #endif
     
@@ -381,23 +380,20 @@ void test_getcol(const char *code, int n)
         break;
 
       case 'm':  /* Select Graphic Rendition (SGR) */
-
         if (attr == 0) /* total reset */
           reset_colors();
         else if (attr == 1) /* change to bright */
-          bright_flag = 1;
+          set_fg_bright(1);
         else if (attr == 2) /* change to dim */
-          bright_flag = 0;
+          set_fg_bright(0);
+        else if (attr == 9) /* change bg bright GGMUD EXTENSION */
+          set_bg_bright(1);
         else if (attr == 5) /* change to blinking */
           set_blink(1);
-        else if (attr >= 30 && attr <= 37) {/* change foreground hue */
-          set_colors(bright_flag, attr-30, -1, -1, -1);
-          bright_flag = -1;
-        }
-        else if (attr >= 40 && attr <= 47) {/* change background hue */
-          set_colors(-1, -1, bright_flag, attr-40, -1);
-          bright_flag = -1;
-        }
+        else if (attr >= 30 && attr <= 37) /* change foreground hue */
+          set_fg_color(attr - 30);
+        else if (attr >= 40 && attr <= 47) /* change background hue */
+          set_bg_color(attr - 40);
         break;
       }
 
