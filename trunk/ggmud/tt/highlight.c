@@ -220,9 +220,11 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
   int code;
   int just_highlighted = 0;
   
-  strcpy(result, DEFAULT_BEGIN_COLOR);
   tmp1 = htype;
   tmp2 = tmp1;
+#if 1
+  strcpy(result, DEFAULT_BEGIN_COLOR);
+
   while(*tmp2) {
       tmp2++;
       while(*tmp2 && *tmp2 != ',')
@@ -240,7 +242,7 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
           if(just_highlighted)
               strcat(result, "30;");
           else
-              strcat(result, "0;30;");
+              strcat(result, "2;30;");
 
           just_highlighted = 0;
       }
@@ -248,7 +250,7 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
           if(just_highlighted)
               strcat(result, "31;");
           else
-              strcat(result, "0;31;");
+              strcat(result, "2;31;");
 
           just_highlighted = 0;
       }
@@ -256,7 +258,7 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
           if(just_highlighted)
               strcat(result, "32;");
           else
-              strcat(result, "0;32;");
+              strcat(result, "2;32;");
 
           just_highlighted = 0;
       }
@@ -264,7 +266,7 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
           if(just_highlighted)
               strcat(result, "33;");
           else
-              strcat(result, "0;33;");
+              strcat(result, "2;33;");
 
           just_highlighted = 0;
       }
@@ -272,7 +274,7 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
           if(just_highlighted)
               strcat(result, "34;");
           else
-              strcat(result, "0;34;");
+              strcat(result, "2;34;");
 
           just_highlighted = 0;
       }
@@ -280,7 +282,7 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
           if(just_highlighted)
               strcat(result, "35;");
           else
-              strcat(result, "0;35;");
+              strcat(result, "2;35;");
 
           just_highlighted = 0;
       }
@@ -288,7 +290,7 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
           if(just_highlighted)
               strcat(result, "36;");
           else
-              strcat(result, "0;36;");
+              strcat(result, "2;36;");
 
           just_highlighted = 0;
       }
@@ -296,7 +298,7 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
           if(just_highlighted)
               strcat(result, "37;");
           else
-              strcat(result, "0;37;");
+              strcat(result, "2;37;");
 
           just_highlighted = 0;
       }
@@ -320,7 +322,7 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
           if(just_highlighted)
               strcat(result, "40;");
           else
-              strcat(result, "0;40;");
+              strcat(result, "2;40;");
 
           just_highlighted = 0;
       }
@@ -328,7 +330,7 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
           if(just_highlighted)
               strcat(result, "41;");
           else
-              strcat(result, "0;41;");
+              strcat(result, "2;41;");
 
           just_highlighted = 0;
       }
@@ -336,7 +338,7 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
           if(just_highlighted)
               strcat(result, "42;");
           else
-              strcat(result, "0;42;");
+              strcat(result, "2;42;");
 
           just_highlighted = 0;
       }
@@ -344,7 +346,7 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
           if(just_highlighted)
               strcat(result, "43;");
           else
-              strcat(result, "0;43;");
+              strcat(result, "2;43;");
 
           just_highlighted = 0;
       }
@@ -352,7 +354,7 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
           if(just_highlighted)
               strcat(result, "44;");
           else
-              strcat(result, "0;44;");
+              strcat(result, "2;44;");
 
           just_highlighted = 0;
       }
@@ -360,7 +362,7 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
           if(just_highlighted)
               strcat(result, "45;");
           else
-              strcat(result, "0;45;");
+              strcat(result, "2;45;");
 
           just_highlighted = 0;
       }
@@ -368,7 +370,7 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
           if(just_highlighted)
               strcat(result, "46;");
           else
-              strcat(result, "0;46;");
+              strcat(result, "2;46;");
 
           just_highlighted = 0;
       }
@@ -376,26 +378,26 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
           if(just_highlighted)
               strcat(result, "47;");
           else
-              strcat(result, "0;47;");
+              strcat(result, "2;47;");
 
           just_highlighted = 0;
       }
       else if(is_abbrev(tmp3, "b charcoal") || code == 24)
-          strcat(result, "1;40;");
+          strcat(result, "9;40;");
       else if(is_abbrev(tmp3, "b light red") || code == 25)
-          strcat(result, "1;41;");
+          strcat(result, "9;41;");
       else if(is_abbrev(tmp3, "b light green") || code == 26)
-          strcat(result, "1;42;");
+          strcat(result, "9;42;");
       else if(is_abbrev(tmp3, "b yellow") || code == 27)
-          strcat(result, "1;43;");
+          strcat(result, "9;43;");
       else if(is_abbrev(tmp3, "b light blue") || code == 28)
-          strcat(result, "1;44;");
+          strcat(result, "9;44;");
       else if(is_abbrev(tmp3, "b light magenta") || code == 29)
-          strcat(result, "1;45;");
+          strcat(result, "9;45;");
       else if(is_abbrev(tmp3, "b light cyan") || code == 30)
-          strcat(result, "1;46;");
+          strcat(result, "9;46;");
       else if(is_abbrev(tmp3, "b white") || code == 31)
-          strcat(result, "1;47;");
+          strcat(result, "9;47;");
       else if(is_abbrev(tmp3, "bold")) {
           strcat(result, "1;");
       }
@@ -424,7 +426,106 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
   }
   else
       strcat(result, "m");
-  
+#else
+  while(*tmp2) {
+      extern void set_colors(int, int, int, int, int);
+      
+      set_colors(0,-2,0,-2,0);
+      tmp2++;
+      while(*tmp2 && *tmp2 != ',')
+          tmp2++;
+      while(isspace(*tmp1))
+          tmp1++;
+      memcpy(tmp3, tmp1, tmp2-tmp1);
+      tmp3[tmp2-tmp1] = '\0';
+      code = -1;
+      if(isdigit(*tmp3)) {
+          sscanf(tmp3, "%d", &code);
+          code--;
+      }
+      if(is_abbrev(tmp3, "black") || code == 0) 
+          set_colors(-1, 0, -1, -1, -1);
+      else if(is_abbrev(tmp3, "red") || code == 1) 
+          set_colors(-1, 1, -1, -1, -1);
+      else if(is_abbrev(tmp3, "green") || code == 2) 
+          set_colors(-1, 2, -1, -1, -1);
+      else if(is_abbrev(tmp3, "brown") || code == 3) 
+          set_colors(-1, 3, -1, -1, -1);
+      else if(is_abbrev(tmp3, "blue") || code == 4) 
+          set_colors(-1, 4, -1, -1, -1);
+      else if(is_abbrev(tmp3, "magenta") || code == 5) 
+          set_colors(-1, 5, -1, -1, -1);
+      else if(is_abbrev(tmp3, "cyan") || code == 6) 
+          set_colors(-1, 6, -1, -1, -1);
+      else if(is_abbrev(tmp3, "grey") || code == 7) 
+          set_colors(-1, 7, -1, -1, -1);
+      else if(is_abbrev(tmp3, "charcoal") || code == 8)
+          set_colors(1, 0, -1, -1, -1);
+      else if(is_abbrev(tmp3, "light red") || code == 9)
+          set_colors(1, 1, -1, -1, -1);
+      else if(is_abbrev(tmp3, "light green") || code == 10)
+          set_colors(1, 2, -1, -1, -1);
+      else if(is_abbrev(tmp3, "yellow") || code == 11)
+          set_colors(1, 3, -1, -1, -1);
+      else if(is_abbrev(tmp3, "light blue") || code == 12)
+          set_colors(1, 4, -1, -1, -1);
+      else if(is_abbrev(tmp3, "light magenta") || code == 13)
+          set_colors(1, 5, -1, -1, -1);
+      else if(is_abbrev(tmp3, "light cyan")|| code == 14)
+          set_colors(1, 6, -1, -1, -1);
+      else if(is_abbrev(tmp3, "white") || code == 15)
+          set_colors(1, 7, -1, -1, -1);
+      else if(is_abbrev(tmp3, "b black") || code == 16) 
+          set_colors(-1, -1, -1, 0, -1);
+      else if(is_abbrev(tmp3, "b red") || code == 17) 
+          set_colors(-1, -1, -1, 1, -1);
+      else if(is_abbrev(tmp3, "b green") || code == 18)
+          set_colors(-1, -1, -1, 2, -1);
+      else if(is_abbrev(tmp3, "b brown") || code == 19) 
+          set_colors(-1, -1, -1, 3, -1);
+      else if(is_abbrev(tmp3, "b blue") || code == 20) 
+          set_colors(-1, -1, -1, 4, -1);
+      else if(is_abbrev(tmp3, "b magenta") || code == 21) 
+          set_colors(-1, -1, -1, 5, -1);
+      else if(is_abbrev(tmp3, "b cyan") || code == 22) 
+          set_colors(-1, -1, -1, 6, -1);
+      else if(is_abbrev(tmp3, "b grey") || code == 23) 
+          set_colors(-1, -1, -1, 7, -1);
+      else if(is_abbrev(tmp3, "b charcoal") || code == 24)
+          set_colors(-1, -1, 1, 0, -1);
+      else if(is_abbrev(tmp3, "b light red") || code == 25)
+          set_colors(-1, -1, 1, 1, -1);
+      else if(is_abbrev(tmp3, "b light green") || code == 26)
+          set_colors(-1, -1, 1, 2, -1);
+      else if(is_abbrev(tmp3, "b yellow") || code == 27)
+          set_colors(-1, -1, 1, 3, -1);
+      else if(is_abbrev(tmp3, "b light blue") || code == 28)
+          set_colors(-1, -1, 1, 4, -1);
+      else if(is_abbrev(tmp3, "b light magenta") || code == 29)
+          set_colors(-1, -1, 1, 5, -1);
+      else if(is_abbrev(tmp3, "b light cyan") || code == 30)
+          set_colors(-1, -1, 1, 6, -1);
+      else if(is_abbrev(tmp3, "b white") || code == 31)
+          set_colors(-1, -1, 1, 7, -1);
+      else if(is_abbrev(tmp3, "bold")) 
+          set_colors(1, -1, -1, -1, -1);
+      else if(is_abbrev(tmp3, "faint")) 
+          set_colors(0, -1, -1, -1, -1);
+      else if(is_abbrev(tmp3, "blink")) 
+          set_colors(-1, -1, -1, -1, 1);
+#if 0
+      else if(is_abbrev(tmp3, "italic")) {
+          strcat(result, "3;");
+          just_highlighted = 1;
+      }
+      else if(is_abbrev(tmp3, "reverse")) {
+          strcat(result, "7;");
+          just_highlighted = 1;
+      }
+#endif 
+      tmp1 = tmp2+1;
+  }  
+#endif
   strip_ansi(line, result + strlen(result)); // move the sequence stripped from ANSI colors to the result buffer
   strcat(result, DEFAULT_END_COLOR);
 }
