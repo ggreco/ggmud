@@ -383,21 +383,21 @@ void add_codes(const char *line, char *result, const char *htype, int flag)
           just_highlighted = 0;
       }
       else if(is_abbrev(tmp3, "b charcoal") || code == 24)
-          strcat(result, "9;40;");
+          strcat(result, "66;40;");
       else if(is_abbrev(tmp3, "b light red") || code == 25)
-          strcat(result, "9;41;");
+          strcat(result, "66;41;");
       else if(is_abbrev(tmp3, "b light green") || code == 26)
-          strcat(result, "9;42;");
+          strcat(result, "66;42;");
       else if(is_abbrev(tmp3, "b yellow") || code == 27)
-          strcat(result, "9;43;");
+          strcat(result, "66;43;");
       else if(is_abbrev(tmp3, "b light blue") || code == 28)
-          strcat(result, "9;44;");
+          strcat(result, "66;44;");
       else if(is_abbrev(tmp3, "b light magenta") || code == 29)
-          strcat(result, "9;45;");
+          strcat(result, "66;45;");
       else if(is_abbrev(tmp3, "b light cyan") || code == 30)
-          strcat(result, "9;46;");
+          strcat(result, "66;46;");
       else if(is_abbrev(tmp3, "b white") || code == 31)
-          strcat(result, "9;47;");
+          strcat(result, "66;47;");
       else if(is_abbrev(tmp3, "bold")) {
           strcat(result, "1;");
       }
