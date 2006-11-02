@@ -384,14 +384,21 @@ void test_getcol(const char *code, int n)
           reset_colors();
         else if (attr == 1) /* change to bright */
           set_fg_bright(1);
-        else if (attr == 2) /* change to dim */
+        else if (attr == 2 ||  /* change to dim -- implemented as normal */
+                 attr == 22)   /* change to normal intensity */
           set_fg_bright(0);
-        else if (attr == 5) /* change to blinking */
+        else if (attr == 5 || attr == 6) /* change to blinking */
           set_blink(1);
+        else if (attr == 25) /* stop blinking */
+          set_blink(0);
         else if (attr >= 30 && attr <= 37) /* change foreground hue */
           set_fg_color(attr - 30);
+        else if (attr == 39) /* default foreground color */
+          set_fg_color(-2);
         else if (attr >= 40 && attr <= 47) /* change background hue */
           set_bg_color(attr - 40);
+        else if (attr == 49) /* default background color */
+          set_bg_color(-2);
         else if (attr == 66) /* change bg bright GGMUD EXTENSION */
           set_bg_bright(1);
         break;
