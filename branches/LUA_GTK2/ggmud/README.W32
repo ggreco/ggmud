@@ -1,0 +1,5 @@
+To build the Windows version of GGMud you need the GTK toolkit version 2.
+
+The binary version is provided as self-extracting installer package and
+has a version of the GTK runtime builtin.
+
