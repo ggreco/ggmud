@@ -152,8 +152,6 @@ int main(int argc, char **argv)
     spawn_gui();
     load_wizard();
 
-    init_lua_gtk2();
-
     atexit(save_vars);
     
     hist_add(""); /* Needed to get rid of a blank line in history list */
