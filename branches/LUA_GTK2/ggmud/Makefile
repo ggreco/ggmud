@@ -91,11 +91,20 @@ lua-gtk2.so: lua-gtk2/build-linux/gtk2.so
 lua-gtk2/build-linux/gtk2.a:
 	$(MAKE) -C lua-gtk2
 
-#$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libz.a lua-gtk2/build-linux/gtk2.a
-#	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) lua-gtk2/build-linux/gtk2.a $(LIBS)
+lua-gtk2/libffi/Makefile:
+	(cd lua-gtk2/libffi; ./configure --disable-multilib \
+	                                 --disable-dependency-tracking \
+					 --disable-shared \
+					 --enable-static || true)
 
-$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libz.a lua-gtk2.so
-	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) -Wl,-E,-rpath,`pwd` lua-gtk2.so $(LIBS)
+lua-gtk2/libffi/.libs/libffi.a: lua-gtk2/libffi/Makefile
+	$(MAKE) -C lua-gtk2/libffi
+
+$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libz.a lua-gtk2/build-linux/gtk2.a lua-gtk2/libffi/.libs/libffi.a
+	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) lua-gtk2/build-linux/gtk2.a lua-gtk2/libffi/.libs/libffi.a $(LIBS)
+
+#$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libz.a lua-gtk2.so
+#	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) -Wl,-E,-rpath,`pwd` lua-gtk2.so $(LIBS)
 
 $(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a lua/libluaw32.a zlib/libzw32.a
 	$(CROSSCC) $(CROSSCFLAGS) $(WINOBJS) -o $(PROJECTNAME).exe $(CROSSLIBS)
