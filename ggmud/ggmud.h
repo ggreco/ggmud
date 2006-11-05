@@ -48,6 +48,7 @@
 #include "lua/lualib.h"
 
 extern void init_lua();
+extern void init_lua_gtk2();
 #endif
 
 typedef struct {

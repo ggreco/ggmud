@@ -1,7 +1,7 @@
 CROSSDIR = /usr/local/cross-gcc33/i386-mingw32msvc/
 CROSSCC = $(CROSSDIR)/bin/gcc
 
-GLOBAL_CFLAGS = -g  -DTELNET_SUPPORT -Wall -DWITH_LUA -DENABLE_MCCP -I../zlib
+GLOBAL_CFLAGS = -g -DTELNET_SUPPORT -Wall -DWITH_LUA -DENABLE_MCCP -I../zlib
 OBJDIR = obj/
 CC = gcc
 CXX = g++
@@ -63,7 +63,7 @@ $(OBJDIR)icon.w: icon.rc icon.ico
 
 tt/libtt.a: tt/*.c
 	$(MAKE) -C tt 
-    
+
 tt/libttw32.a: tt/*.c
 	$(MAKE) -C tt win32
 
@@ -75,25 +75,37 @@ zlib/libz.a: zlib/*c
 
 lua/liblua.a:
 	$(MAKE) -C lua linux
- 
+
 lua/libluaw32.a: lua/*c
 	$(MAKE) -C lua clean
 	$(MAKE) -C lua "LUA_A=libluaw32.a" "LUA_T=lua.exe" \
 	"CC=$(CROSSDIR)bin/gcc" "RANLIB=$(CROSSDIR)/bin/ranlib" \
     "AR=$(CROSSDIR)bin/ar rcu" "MYLIBS=" "MYLDFLAGS=-s" lua.exe
 
-$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libz.a
-	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) $(LIBS)
+lua-gtk2/build-linux/gtk2.so:
+	$(MAKE) -C lua-gtk2
+
+lua-gtk2.so: lua-gtk2/build-linux/gtk2.so
+	cp -f lua-gtk2/build-linux/gtk2.so lua-gtk2.so
+
+lua-gtk2/build-linux/gtk2.a:
+	$(MAKE) -C lua-gtk2
+
+#$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libz.a lua-gtk2/build-linux/gtk2.a
+#	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) lua-gtk2/build-linux/gtk2.a $(LIBS)
+
+$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libz.a lua-gtk2.so
+	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) -Wl,-E,-rpath,`pwd` lua-gtk2.so $(LIBS)
 
 $(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a lua/libluaw32.a zlib/libzw32.a
 	$(CROSSCC) $(CROSSCFLAGS) $(WINOBJS) -o $(PROJECTNAME).exe $(CROSSLIBS)
 
 clean: 
-	cd tt && $(MAKE) clean && cd ..
-	rm -f $(WINOBJS) $(OBJS) $(PROJECTNAME) $(PROJECTNAME).exe depend 
+	$(MAKE) -C tt clean
+	rm -f $(WINOBJS) $(OBJS) $(PROJECTNAME) $(PROJECTNAME).exe lua-gtk2.so gtk2.a depend 
 
 dist: dist-osx dist-linux dist-win32
-    
+
 dist-osx: ggmud
 	tar czf ../ggmud-osx-$(VERSION).tgz ggmud gg_help.txt README README.OSX
 
@@ -109,5 +121,5 @@ depend:	$(C_SRCS) *.h
 	done >  deptemp
 	sed -f mkdep.sed deptemp >depend
 	rm deptemp
-        
+
 -include depend
