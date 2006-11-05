@@ -152,7 +152,10 @@ int main(int argc, char **argv)
     spawn_gui();
     load_wizard();
 
-    init_lua_gtk2();
+#ifdef WITH_LUA
+    if (mud->lua != NULL)
+        init_lua_gtk2();
+#endif
 
     atexit(save_vars);
     

@@ -60,6 +60,9 @@ void script_command(char *arg, struct session *ses)
 {
   char left[BUFFER_SIZE], buffer[BUFFER_SIZE];
 
+  if (mud->lua == NULL)
+    return;
+
   get_arg_in_braces(arg, left, 1);
 
   if (!strstr(left, ".lua") && !strchr(left, ".")) {
@@ -86,6 +89,9 @@ void script_command(char *arg, struct session *ses)
 void lua_command(char *arg, struct session *ses)
 {
   char left[BUFFER_SIZE], buffer[BUFFER_SIZE];
+
+  if (mud->lua == NULL)
+    return;
 
   get_arg_all(arg, left);
 
