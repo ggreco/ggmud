@@ -858,7 +858,7 @@ spawn_gui()
   gtk_container_add (GTK_CONTAINER (mud->window), vbox1);
 
   /* menu bar */
-  menubar = gtk_menu_bar_new ();
+  mud->menu = menubar = gtk_menu_bar_new ();
   gtk_widget_show (menubar);
   gtk_box_pack_start (GTK_BOX (vbox1), menubar, FALSE, TRUE, 3);
 
