@@ -3,6 +3,10 @@
 #include "ggmud.h"
 #include "config.h"
 
+/* from lua-gtk2 */
+extern int luaopen_gtk2(lua_State*);
+extern int make_widget(lua_State*, void*, int, const char*);
+
 int do_luashow(lua_State *s)
 {
   const char *msg = luaL_checkstring(s, 1);
@@ -318,6 +322,43 @@ void init_lua()
     lua_register(mud->lua, "timer", do_luatimer);
     lua_register(mud->lua, "idle_function", do_luaidle);
     lua_register(mud->lua, "clear", do_luaclear);
+}
+
+void init_lua_gtk2()
+{
+    /* place the gtk2 loader at package.preload.gtk2 */
+    lua_getglobal(mud->lua, "package");
+    lua_getfield(mud->lua, -1, "preload");
+    lua_pushcfunction(mud->lua, luaopen_gtk2);
+    lua_setfield(mud->lua, -2, "gtk2");
+    lua_pop(mud->lua, 2);
+
+    /* require(gtk2) */
+    lua_getglobal(mud->lua, "require");
+    lua_pushstring(mud->lua, "gtk2");
+    if (lua_pcall(mud->lua, 1, 0, 0)) {
+      lua_pop(mud->lua, 1);
+      return;
+    }
+
+    /* create the ggmud table */
+    lua_newtable(mud->lua);
+
+    /* add some ggmud widget objects */
+    make_widget(mud->lua, mud->window, 0, "GtkWindow");
+    lua_setfield(mud->lua, -2, "window");
+
+    make_widget(mud->lua, mud->text, 0, "GtkTextView");
+    lua_setfield(mud->lua, -2, "text");
+
+    make_widget(mud->lua, mud->ent, 0, "GtkEntry");
+    lua_setfield(mud->lua, -2, "entry");
+
+    make_widget(mud->lua, mud->menu, 0, "GtkMenuBar");
+    lua_setfield(mud->lua, -2, "menubar");
+
+    /* bind table to global key "ggmud" */
+    lua_setglobal(mud->lua, "ggmud");
 }
 
 void add_lua_global(const char *v1, const char **v2)
