@@ -6,10 +6,10 @@ OBJDIR = obj/
 CC = gcc
 CXX = g++
 INCDIR = -Itt -Ilua -Izlib
-COMMONLIBS = -Ltt -ltt -Llua -llua -Lzlib -lz
-CFLAGS = $(INCDIR) `pkg-config gtk+-2.0 --cflags` $(GLOBAL_CFLAGS) -DENABLE_BINRELOC -DBR_PTHREADS=0
+COMMONLIBS = tt/libtt.a lua-gtk2/build-linux/gtk2.a lua-gtk2/libffi/.libs/libffi.a lua/liblua.a zlib/libz.a
+CFLAGS = $(INCDIR) $(shell pkg-config gtk+-2.0 --cflags) $(GLOBAL_CFLAGS) -DENABLE_BINRELOC -DBR_PTHREADS=0
 
-LIBS = $(COMMONLIBS) `pkg-config gtk+-2.0 --libs`
+LIBS = $(COMMONLIBS) $(shell pkg-config gtk+-2.0 --libs)
 
 VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )
 OS:=	$(uname)
@@ -100,8 +100,9 @@ lua-gtk2/libffi/Makefile:
 lua-gtk2/libffi/.libs/libffi.a: lua-gtk2/libffi/Makefile
 	$(MAKE) -C lua-gtk2/libffi
 
-$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libz.a lua-gtk2/build-linux/gtk2.a lua-gtk2/libffi/.libs/libffi.a
-	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) lua-gtk2/build-linux/gtk2.a lua-gtk2/libffi/.libs/libffi.a $(LIBS)
+$(PROJECTNAME): $(OBJS) $(COMMONLIBS)
+	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) $(LIBS)
+	strip --strip-unneeded $(PROJECTNAME)
 
 #$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libz.a lua-gtk2.so
 #	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) -Wl,-E,-rpath,`pwd` lua-gtk2.so $(LIBS)
@@ -111,7 +112,7 @@ $(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a lua/libluaw32.a zlib/libzw32.a
 
 clean: 
 	$(MAKE) -C tt clean
-	rm -f $(WINOBJS) $(OBJS) $(PROJECTNAME) $(PROJECTNAME).exe lua-gtk2.so gtk2.a depend 
+	rm -f $(WINOBJS) $(OBJS) $(PROJECTNAME) $(PROJECTNAME).exe depend 
 
 dist: dist-osx dist-linux dist-win32
 
@@ -123,6 +124,12 @@ dist-linux: ggmud
 
 dist-win32: ggmud.exe
 	zip -9 ../ggmud-win32-$(VERSION).zip ggmud.exe gg_help.txt README README.W32
+
+dist-cygwin:
+	$(MAKE) -f Makefile.cygwin dist-cgywin
+
+cygwin:
+	$(MAKE) -f Makefile.cygwin
 
 depend:	$(C_SRCS) *.h
 	for i in $(C_SRCS); do \
