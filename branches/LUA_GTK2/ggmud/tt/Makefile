@@ -9,7 +9,7 @@ AR = ar
 RANLIB = ranlib
 
 CFLAGS = $(GLOBAL_CFLAGS)
-LIBS = $(COMMONLIBS) `gtk-config --libs`
+LIBS = $(COMMONLIBS) `pkg-config gtk+-2.0 --libs`
 
 PROJECTNAME = libtt
 
@@ -48,7 +48,7 @@ $(OBJDIR)%.w: %.c
 $(PROJECTNAME).a: $(OBJS)
 	$(AR) cru $@ $(OBJS)
 	$(RANLIB) $@
-	
+
 $(PROJECTNAME)w32.a: $(WINOBJS)
 	$(CROSSAR) cru $@ $(WINOBJS)
 	$(CROSSRANLIB) $@
@@ -62,6 +62,5 @@ depend:	$(C_SRCS) *.h
 	done >  deptemp
 	sed -f ../mkdep.sed deptemp >depend
 	rm deptemp
-    
--include depend
 
+-include depend
