@@ -65,7 +65,7 @@ lua-gtk2/libffi/.libs/libffi.a: lua-gtk2/libffi/Makefile
 
 $(PROJECTNAME).exe: $(OBJS) $(COMMONLIBS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) $(LIBS)
-	# strip --strip-unneeded $(PROJECTNAME).exe
+	strip --strip-unneeded $(PROJECTNAME).exe
 
 clean: 
 	$(MAKE) -C tt -f Makefile.cygwin clean
