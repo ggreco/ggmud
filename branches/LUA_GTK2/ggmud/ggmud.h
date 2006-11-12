@@ -1,4 +1,4 @@
-/*  GGMud 
+/*  GGMud
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -49,6 +49,7 @@
 
 extern void init_lua();
 extern void init_lua_gtk2();
+extern void run_lua_script(const char* path);
 #endif
 
 typedef struct {
@@ -207,7 +208,7 @@ extern gint check_macro(gint, gint);
 /* win.c */
 typedef struct {
     char name[32];
-    GtkWidget *listptr;    
+    GtkWidget *listptr;
 } window_entry;
 
 extern void spawn_gui( void );
@@ -238,8 +239,8 @@ extern void read_from_connection (gpointer, gint , GdkInputCondition );
 extern void tintin_puts(const char *, struct session *);
 
 /* window.c */
-extern GtkWidget *menu_File_wiz;	
-extern GtkWidget *menu_Option_Font;	
+extern GtkWidget *menu_File_wiz;
+extern GtkWidget *menu_Option_Font;
 extern GtkWidget *menu_Option_Preference;
 GtkWidget *menu_Option_Colors;
 extern void do_menu(GtkWidget *);

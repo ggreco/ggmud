@@ -51,7 +51,7 @@ gint snoop_keys (GtkWidget *grab_widget,
    extern gint capture_enabled;
 
    if (event->type == GDK_KEY_PRESS && !capture_enabled) {
-       return check_macro(event->state , 
+       return check_macro(event->state ,
                gdk_keyval_to_upper(event->keyval));
    }
    else
@@ -84,21 +84,21 @@ int main(int argc, char **argv)
     char *display;
 
     signal(SIGPIPE, SIG_IGN);
-        
+
     if(!(display = getenv("DISPLAY")) || !*display) {
         putenv("DISPLAY=:0.0");
     }
 #endif
-    
+
     gtk_set_locale ();
     gtk_init (&argc, &argv);
     gdk_init (&argc, &argv);
- 
+
 // this code set the ggmud path in a way you can find the help file
 #ifdef linux
     {
         FILE *f;
-        
+
         if ((f = fopen( DEFAULT_HELP_FILE, "r"))) {
             fclose(f);
         }
@@ -115,14 +115,14 @@ int main(int argc, char **argv)
         }
     }
 
-#elif defined(WIN32) 
+#elif defined(WIN32)
 	{
 		extern void winsock_init();
 
 		winsock_init();
 	}
 #endif
-    
+
     mud = calloc(sizeof(ggmud), 1);
 
     mud->hist=calloc(sizeof(struct ggmud_history),1);
@@ -158,7 +158,7 @@ int main(int argc, char **argv)
 #endif
 
     atexit(save_vars);
-    
+
     hist_add(""); /* Needed to get rid of a blank line in history list */
 
     mud->curr_color=prefs.DefaultColor;
@@ -185,7 +185,7 @@ int main(int argc, char **argv)
 
 #ifdef WITH_LUA
     if (prefs.LuaConfig)
-	    script_command(prefs.LuaConfig);
+        run_lua_script(prefs.LuaConfig);
 #endif
 
     if (prefs.WizAtStartup)
@@ -194,9 +194,9 @@ int main(int argc, char **argv)
     gtk_window_present(GTK_WINDOW(mud->window));
     gtk_key_snooper_install(snoop_keys, mud);
     gtk_main();
-	
+
     return 0;
-}			
+}
 
 #if defined(WIN32) && !defined(__GNUC__)
 
