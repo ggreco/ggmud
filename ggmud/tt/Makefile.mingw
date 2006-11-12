@@ -1,0 +1,32 @@
+OBJDIR = obj/
+CC = gcc
+CXX = g++
+AR = ar
+RANLIB = ranlib
+RM = del /f /q
+
+CFLAGS = $(GLOBAL_CFLAGS)
+
+PROJECTNAME = libtt
+
+C_SRCS = action.c alias.c ansi.c antisub.c files.c glob.c help.c \
+	highlight.c ivars.c llist.c log.c main.c misc.c net.c parse.c \
+	path.c rltab.c function.c walk.c mccpDecompress.c \
+	session.c substitute.c text.c ticks.c utils.c variables.c
+
+OBJS = $(patsubst %.c, $(OBJDIR)%.o, $(C_SRCS))
+
+all: $(PROJECTNAME)w32.a
+
+$(OBJDIR)%.o: %.c
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+$(OBJDIR)%.o: %.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $<
+
+$(PROJECTNAME)w32.a: $(OBJS)
+	$(AR) cru $@ $^
+	$(RANLIB) $@
+
+clean:
+	$(RM) obj\*.o $(PROJECTNAME)w32.a

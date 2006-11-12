@@ -1,0 +1,71 @@
+MINGWDIR = C:\MinGW
+
+GLOBAL_CFLAGS = -g -mms-bitfields -mwindows -mno-cygwin -DTELNET_SUPPORT -Wall -DWITH_LUA -DENABLE_MCCP -I../zlib
+OBJDIR = obj/
+CC = gcc
+CXX = g++
+AR = ar
+RANLIB = ranlib
+RM = del /f /q
+INCDIR = -Itt -Ilua -Izlib -I$(MINGWDIR)\include\gtk-2.0 -I$(MINGWDIR)\lib\gtk-2.0\include -I$(MINGWDIR)\include\atk-1.0 -I$(MINGWDIR)\include\pango-1.0 -I$(MINGWDIR)\include\glib-2.0 -I$(MINGWDIR)\lib\glib-2.0\include
+COMMONLIBS = tt/libttw32.a lua-gtk2/build-win32/gtk2.a lua-gtk2/libffi-mingw/libffi.a lua/libluaw32.a zlib/libzw32.a
+CFLAGS = $(INCDIR) $(GLOBAL_CFLAGS) -DXTHREADS -DXUSE_MTSAFE_API -DENABLE_BINRELOC -DBR_PTHREADS=0
+
+LIBS = -lgtk-win32-2.0 -lgdk-win32-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangowin32-1.0 -lpango-1.0 -lm -lgobject-2.0 -lgmodule-2.0 -lglib-2.0 -lwsock32 $(COMMONLIBS) -lpsapi
+
+VERSION := 0.6.0-mingw
+MAKE=	mingw32-make
+
+export MINGWDIR
+export GLOBAL_CFLAGS
+export MAKE
+export CC
+
+PROJECTNAME = ggmud
+
+C_SRCS = alias.c ansi.c font.c fileopen.c help.c history.c log.c logviewer.c \
+         macro.c net.c preferences.c ggmud.c triggers.c window.c wizard.c \
+         variables.c highlights.c gags.c timers.c complete.c prefix.c \
+         telnet.c lua.c interface.c callbacks.c support.c socks.c
+
+OBJS = $(patsubst %.c, $(OBJDIR)%.o, $(C_SRCS))
+
+#OBJS = $(OBJDIR)icon.o $(patsubst %.c, $(OBJDIR)%.o, $(C_SRCS))
+
+all: $(PROJECTNAME).exe
+
+$(OBJDIR)%.o: %.c
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+$(OBJDIR)%.o: %.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $<
+
+#$(OBJDIR)icon.o: icon.rc icon.ico
+#	$(CROSSDIR)/../bin/i386-mingw32msvc-windres $< $@
+
+tt/libttw32.a: tt/*.c
+	$(MAKE) -C tt -f Makefile.mingw
+
+zlib/libzw32.a: zlib/*c
+	$(MAKE) -C zlib libzw32.a
+
+lua/libluaw32.a: lua/*.c
+	$(MAKE) -C lua "LUA_A=libluaw32.a" "LUA_T=lua.exe" \
+	"AR=$(AR) rcu" "RANLIB=$(RANLIB)" \
+        "MYCFLAGS=$(GLOBAL_CFLAGS)" "MYLIBS=" "MYLDFLAGS=" libluaw32.a
+
+lua-gtk2/build-win32/gtk2.a:
+	$(MAKE) -C lua-gtk2 -f Makefile.mingw
+
+$(PROJECTNAME).exe: $(OBJS) $(COMMONLIBS)
+	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) $(LIBS)
+	strip --strip-unneeded $(PROJECTNAME).exe
+
+clean:
+	$(MAKE) -C tt -f Makefile.mingw clean
+	$(RM) obj\*.o $(PROJECTNAME).exe
+
+dist: dist-win32
+
+dist-win32: $(PROJECTNAME).exe
+	zip -9 ../$(PROJECTNAME)-mingw-$(VERSION).zip $(PROJECTNAME).exe gg_help.txt README README.W32
