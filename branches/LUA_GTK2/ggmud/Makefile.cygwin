@@ -25,9 +25,7 @@ C_SRCS = alias.c ansi.c font.c fileopen.c help.c history.c log.c logviewer.c \
 
 DEP_SRCS = $(CXX_SRCS) $(C_SRCS)
 
-OBJS = $(patsubst %.c, $(OBJDIR)%.o, $(C_SRCS))
-
-#OBJS = $(OBJDIR)icon.o $(patsubst %.c, $(OBJDIR)%.o, $(C_SRCS))
+OBJS = $(OBJDIR)icon.o $(patsubst %.c, $(OBJDIR)%.o, $(C_SRCS))
 
 all: depend $(PROJECTNAME).exe
 
@@ -37,8 +35,8 @@ $(OBJDIR)%.o: %.c
 $(OBJDIR)%.o: %.cpp
 	$(CXX) $(CFLAGS) -o $@ -c $<
 
-#$(OBJDIR)icon.o: icon.rc icon.ico
-#	$(CROSSDIR)/../bin/i386-mingw32msvc-windres $< $@
+$(OBJDIR)icon.o: icon.rc icon.ico
+	windres $< $@
 
 tt/libttw32.a: tt/*.c
 	$(MAKE) -C tt -f Makefile.cygwin
