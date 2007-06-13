@@ -196,7 +196,7 @@ int ttmain(int argc, char **argv)
   sprintf(temp,"#                    G G M U D %12s      #", VERSION);
   tintin_puts2(temp, ses);
   tintin_puts2("#        THIS IS A DEVELOPMENT VERSION!!!        #", ses);
-  tintin_puts2("#  Based on a merge between TinTin++ and SClient #", ses);
+  tintin_puts2("#                 Based on a TinTin++            #", ses);
   tintin_puts2("#                     written by                 #", ses);
   tintin_puts2("#                   Gabriele Greco               #", ses);
   tintin_puts2("##################################################", ses);
