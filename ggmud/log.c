@@ -32,12 +32,9 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-
+#include "support.h"
 #include "ggmud.h"
 /* ToolBar Loggerbutton */
-extern GtkWidget *btn_toolbar_logger;
-
-extern GtkWidget *menu_Tools_Logger;
 
 /*
  * This function will open the file mud->log_filename for
@@ -51,6 +48,9 @@ void on_btnOverwrite_clicked (GtkWidget *btn, gpointer data)
     }
     else
         mud->LOGGING = TRUE;
+
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
+                lookup_widget(mud->window, "menuitem_logger")), mud->LOGGING);
 
     gtk_widget_destroy(gtk_widget_get_toplevel(btn));
 }
@@ -67,6 +67,9 @@ void on_btnAppend_clicked (GtkWidget *btn, gpointer data)
     }
     else
         mud->LOGGING = TRUE;
+
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
+                lookup_widget(mud->window, "menuitem_logger")), mud->LOGGING);
 
     gtk_widget_destroy(gtk_widget_get_toplevel(btn));
 }
@@ -151,7 +154,6 @@ void do_log ()
     gchar path[256];
 
     /* To Toggle the menu item */
-    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_Tools_Logger), GTK_TOGGLE_BUTTON(btn_toolbar_logger)->active);
 
     if (mud->LOGGING) {
         fclose (mud->LOG_FILE);
@@ -200,8 +202,9 @@ void do_log ()
             else mud->LOGGING = TRUE;
         }
     }
-    else
-        gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(btn_toolbar_logger), FALSE);
+
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(
+                lookup_widget(mud->window, "menuitem_logger")), mud->LOGGING);
 
     gtk_widget_destroy(filew);
 }

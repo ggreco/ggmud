@@ -50,11 +50,6 @@ typedef struct {
     GtkWidget *widget;
 } color_struct;
 
-/* Global variables */
-extern GtkWidget *btnLabel[12];
-extern GtkWidget *handlebox;
-extern GtkWidget *statusbar;
-
 /* Global ToolBar stuff */
 extern int use_tickcounter;
 
@@ -650,9 +645,9 @@ void prefs_apply_settings(GtkWidget *prefs_window)
             GTK_WRAP_CHAR : GTK_WRAP_NONE);
 
     if (prefs.Toolbar)
-        gtk_widget_show(handlebox);
+        gtk_widget_show(lookup_widget(mud->window, "handlebox_toolbar"));
     else
-        gtk_widget_hide(handlebox);
+        gtk_widget_hide(lookup_widget(mud->window, "handlebox_toolbar"));
 
     if (prefs.Macrobuttons && mud->macrobuttons)
         gtk_widget_show(mud->macrobuttons);
@@ -660,9 +655,9 @@ void prefs_apply_settings(GtkWidget *prefs_window)
         gtk_widget_hide(mud->macrobuttons);
 
     if (prefs.Statusbar )
-        gtk_widget_show(statusbar);
+        gtk_widget_show(lookup_widget(mud->window, "statusbar_main"));
     else
-        gtk_widget_hide(statusbar);
+        gtk_widget_hide(lookup_widget(mud->window, "statusbar_main"));
 
     tick_size = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(
                 lookup_widget(prefs_window, "spinbutton_ticklength")));

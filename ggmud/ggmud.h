@@ -57,7 +57,7 @@ typedef struct {
 } timerdata;
 
 typedef struct {
-    GtkWidget *menu, *hostentry, *portentry, *vbox, *macrobuttons;
+    GtkWidget *menu, *vbox, *macrobuttons;
     GtkWidget *window;
     GtkTextView *text;
     GtkWidget *review;
@@ -152,10 +152,6 @@ extern void  load_triggers    ( void );
 extern void triggers_window ();
 
 extern ggmud *mud;
-extern GtkWidget *menu_File_Connect;
-extern GtkWidget *menu_File_DisConnect;
-extern GtkWidget *statusbar;
-extern gint statusbar_id;
 
 /* from tintin */
 extern void parse_config(FILE *, struct session *);

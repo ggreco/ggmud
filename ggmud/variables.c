@@ -1,4 +1,5 @@
 #include "ggmud.h"
+#include <ctype.h>
 
 static GtkWidget *textvariable;
 static GtkWidget *textvariablevalue;

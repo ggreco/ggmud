@@ -29,21 +29,6 @@
 ggmud *mud;
 extern void load_win_pos();
 
-/* menu items */
-GtkWidget *menu_File_Connect;
-GtkWidget *menu_File_DisConnect;
-
-/* statusbar */
-GtkWidget *statusbar;
-gint statusbar_id;
-
-/* Global macro list */
-
-/* Initialize the list of keys */
-gchar *keys[] = {"F1", "F2", "F3", "F4", "F5",
-	         "F6", "F7", "F8", "F9", "F10", "F11", "F12", NULL};
-
-
 gint snoop_keys (GtkWidget *grab_widget,
                                              GdkEventKey *event,
                                              ggmud *mud)
