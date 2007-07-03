@@ -124,7 +124,7 @@ uninstall:
 
 mostlyclean: clean
 clean:
-	rm -f *.o *~ example$(EXE) minigzip$(EXE) \
+	rm -f *.o *.a *~ example$(EXE) minigzip$(EXE) \
 	   libz.* foo.gz so_locations \
 	   _match.s maketree contrib/infback9/*.o
 
