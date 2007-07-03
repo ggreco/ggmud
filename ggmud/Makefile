@@ -68,7 +68,8 @@ tt/libttw32.a: tt/*.c
 	$(MAKE) -C tt win32
 
 zlib/libzw32.a: zlib/*c
-	CC=$(CROSSCC) AR=$(CROSSDIR)/bin/ar RANLIB=$(CROSSDIR)/bin/ranlib $(MAKE) -C zlib libzw32.a
+	$(MAKE) -C zlib clean
+	CC="$(CROSSDIR)bin/gcc -mno-cygwin -mms-bitfields" AR=$(CROSSDIR)/bin/ar RANLIB=$(CROSSDIR)/bin/ranlib $(MAKE) -C zlib libzw32.a
 
 zlib/libz.a: zlib/*c
 	$(MAKE) -C zlib libz.a
@@ -79,7 +80,7 @@ lua/liblua.a:
 lua/libluaw32.a: lua/*c
 	$(MAKE) -C lua clean
 	$(MAKE) -C lua "LUA_A=libluaw32.a" "LUA_T=lua.exe" \
-	"CC=$(CROSSDIR)bin/gcc" "RANLIB=$(CROSSDIR)/bin/ranlib" \
+	"CC=\"$(CROSSDIR)bin/gcc -mno-cygwin -mms-bitfields\"" "RANLIB=$(CROSSDIR)/bin/ranlib" \
     "AR=$(CROSSDIR)bin/ar rcu" "MYLIBS=" "MYLDFLAGS=-s" lua.exe
 
 $(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libz.a
