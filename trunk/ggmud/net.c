@@ -33,8 +33,7 @@
 #include <sys/ioctl.h>
 #endif
 
-extern GtkWidget *btn_toolbar_disconnect;
-extern GtkWidget *btn_toolbar_connect;
+#include "support.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -183,10 +182,15 @@ void disconnect ( void )
     textfield_add (mud->text,  "\n*** Connection closed.\n", MESSAGE_NORMAL);
     set_connected(FALSE);
     
-    gtk_widget_set_sensitive (menu_File_Connect, TRUE);
-    gtk_widget_set_sensitive (btn_toolbar_connect, TRUE);
-    gtk_widget_set_sensitive (menu_File_DisConnect, FALSE);
-    gtk_widget_set_sensitive (btn_toolbar_disconnect, FALSE);
+    gtk_widget_set_sensitive (lookup_widget(mud->window,
+                              "menuitem_connect"), TRUE);
+    gtk_widget_set_sensitive (lookup_widget(mud->window,
+                              "toolbutton_connect"), TRUE);
+    gtk_widget_set_sensitive (lookup_widget(mud->window,
+                              "menuitem_disconnect"), FALSE);
+    gtk_widget_set_sensitive (lookup_widget(mud->window,
+                              "toolbutton_disconnect"), FALSE);
+
     gtk_window_set_title (GTK_WINDOW (mud->window), "GGMud "VERSION"");
     cleanup_session(mud->activesession);
 
@@ -258,10 +262,15 @@ connection_part_two(int sockfd, struct tempdata *mystr)
             read_from_connection,
             mud->activesession );
     set_connected(TRUE);
-    gtk_widget_set_sensitive (menu_File_Connect, FALSE);
-    gtk_widget_set_sensitive (btn_toolbar_connect, FALSE);
-    gtk_widget_set_sensitive (menu_File_DisConnect, TRUE);
-    gtk_widget_set_sensitive (btn_toolbar_disconnect, TRUE);
+
+    gtk_widget_set_sensitive (lookup_widget(mud->window,
+                              "menuitem_connect"), FALSE);
+    gtk_widget_set_sensitive (lookup_widget(mud->window,
+                              "toolbutton_connect"), FALSE);
+    gtk_widget_set_sensitive (lookup_widget(mud->window,
+                              "menuitem_disconnect"), TRUE);
+    gtk_widget_set_sensitive (lookup_widget(mud->window,
+                              "toolbutton_disconnect"), TRUE);
 
 }
 

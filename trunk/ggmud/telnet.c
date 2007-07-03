@@ -137,7 +137,7 @@ void telnet_send_naws(struct session *ses)
     PUTBYTE((LINES-1-!!isstatus)%256);
     *np++=IAC;
     *np++=SE;
-    write(ses->socket, nego, np-nego);
+    send(ses->socket, nego, np-nego, 0);
 #ifdef TELNET_DEBUG
     {
         char buf[BUFFER_SIZE],*b=buf;
@@ -178,9 +178,9 @@ void telnet_send_ttype(struct session *ses)
     case 3:
         ttype="ggmud-"VERSION;
     }
-    write(ses->socket, nego,
+    send(ses->socket, nego,
         sprintf(nego, "%c%c%c%c%s%c%c", IAC, SB,
-            TERMINAL_TYPE, IS, ttype, IAC, SE));
+            TERMINAL_TYPE, IS, ttype, IAC, SE), 0);
 #ifdef TELNET_DEBUG
     tintin_printf(ses, "~8~[telnet] sent: IAC SB TERMINAL-TYPE IS \"%s\" IAC SE~-1~", ttype);
 #endif
@@ -289,7 +289,7 @@ int do_telnet_protocol(unsigned char *data,int nb,struct session *ses)
             case DONT:  answer[1]=WONT; break;
             };
         }
-        write(ses->socket, answer, 3);
+        send(ses->socket, answer, 3, 0);
 #ifdef TELNET_DEBUG
         tintin_printf(ses, "~8~[telnet] sent: IAC %s <%u> (%s)~-1~",
                       will_names[answer[1]-251], *cp, option_names[*cp]);
@@ -395,7 +395,7 @@ void telnet_write_line(char *line, struct session *ses)
     *out++='\n';
     *out=0;
 
-    if (write(ses->socket, outtext, out-outtext) == -1)
+    if (send(ses->socket, outtext, out-outtext, 0) == -1)
         syserr("write in telnet_write_line()");
 }
 

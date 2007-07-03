@@ -27,28 +27,8 @@
 #include "interface.h"
 #include "support.h"
 
-extern void log_viewer();
-extern void alt_send_to_connection  (gchar *text);
-
-typedef enum { F1, F2, F3, F4, F5, F6, F7, F8, F9, F10 } BUTTON;
-#define LorC(L)		(strlen(L) < 10 ? 0.5 : 0)
-
 /* External variables used */
-extern gchar *keys[];
 extern int hide_input;
-
-/* Global variables */
-GtkWidget *btnLabel[12];
-GtkWidget *menu_Tools_Logger;
-GtkWidget *handlebox;
-
-/* Global ToolBar stuff */
-GtkWidget *btn_toolbar_logger;
-GtkWidget *btn_toolbar_disconnect;
-GtkWidget *btn_toolbar_connect;
-GtkWidget *menu_File_Connect;
-GtkWidget *menu_File_DisConnect;
-GtkWidget *menu_File_Reconnect;
 
 void reconnect(void)
 {
@@ -570,187 +550,39 @@ void quit (GtkWidget *widget, gpointer data)
     gtk_main_quit();
 }
 
-void do_con()
+void cbox()
+{
+    GtkWidget *w = create_window_connect();
+    gtk_widget_show(w);
+    gtk_window_set_transient_for(GTK_WINDOW(w), GTK_WINDOW(mud->window));
+}
+
+void do_con(GtkWidget *base, void *userdata)
 {
     const char *port;
     const char *host;
+    GtkWidget *root = gtk_widget_get_toplevel(base);
+
     gchar buf[256];
 
-    host = gtk_entry_get_text(GTK_ENTRY(mud->hostentry));
-    port = gtk_entry_get_text(GTK_ENTRY(mud->portentry));
+    host = gtk_entry_get_text(GTK_ENTRY(lookup_widget(base, "entry_host")));
+    port = gtk_entry_get_text(GTK_ENTRY(lookup_widget(base, "entry_port")));
 	
     make_connection("unknown", host,port);
     sprintf (buf, "Connected to %s - GGMud %s", host, VERSION);
     gtk_window_set_title (GTK_WINDOW (mud->window), buf);
-}
 
-void cbox()
-{
-    GtkWidget *con_window;
-    GtkWidget *table_main;
-    GtkWidget *frame;
-    GtkWidget *table_frame;
-    GtkWidget *label_host;
-    GtkWidget *label_port;
-    GtkWidget *table_button;
-    GtkWidget *hbuttonbox;
-    GtkWidget *button_connect;
-    GtkWidget *button_cancel;
-    
-    con_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title (GTK_WINDOW (con_window), "GGMud Connection");
-    gtk_window_set_policy (GTK_WINDOW (con_window), TRUE, TRUE, FALSE);
-
-    table_main = gtk_table_new (2, 1, FALSE);
-    gtk_widget_show (table_main);
-    gtk_container_add (GTK_CONTAINER (con_window), table_main);
-    gtk_container_set_border_width (GTK_CONTAINER (table_main), 3);
-
-    frame = gtk_frame_new ("Connect To");
-    gtk_widget_show (frame);
-    gtk_table_attach (GTK_TABLE (table_main), frame, 0, 1, 0, 1,
-                     (GtkAttachOptions) GTK_EXPAND | GTK_FILL, (GtkAttachOptions) GTK_EXPAND | GTK_FILL, 0, 0);
-    gtk_container_set_border_width (GTK_CONTAINER (frame), 3);
-    gtk_frame_set_label_align (GTK_FRAME (frame), 0.03, 0.5);
-
-    table_frame = gtk_table_new (2, 2, FALSE);
-    gtk_widget_show (table_frame);
-    gtk_container_add (GTK_CONTAINER (frame), table_frame);
-    gtk_container_set_border_width (GTK_CONTAINER (table_frame), 5);
-    gtk_table_set_row_spacings (GTK_TABLE (table_frame), 5);
-    gtk_table_set_col_spacings (GTK_TABLE (table_frame), 4);
-
-    label_host = gtk_label_new ("Host");
-    gtk_widget_show (label_host);
-    gtk_table_attach (GTK_TABLE (table_frame), label_host, 0, 1, 0, 1,
-                     (GtkAttachOptions) GTK_EXPAND | GTK_FILL, (GtkAttachOptions) GTK_EXPAND | GTK_FILL, 0, 0);
-
-    label_port = gtk_label_new ("Port");
-    gtk_widget_show (label_port);
-    gtk_table_attach (GTK_TABLE (table_frame), label_port, 0, 1, 1, 2,
-                     (GtkAttachOptions) GTK_EXPAND | GTK_FILL, (GtkAttachOptions) GTK_EXPAND | GTK_FILL, 0, 0);
-
-    mud->portentry = gtk_entry_new ();
-    gtk_widget_show (mud->portentry);
-    gtk_table_attach (GTK_TABLE (table_frame), mud->portentry, 1, 2, 1, 2,
-                    (GtkAttachOptions) GTK_EXPAND | GTK_FILL, (GtkAttachOptions) GTK_EXPAND | GTK_FILL, 0, 0);
-
-    mud->hostentry = gtk_entry_new ();
-    gtk_widget_show (mud->hostentry);
-    gtk_table_attach (GTK_TABLE (table_frame), mud->hostentry, 1, 2, 0, 1,
-                     (GtkAttachOptions) GTK_EXPAND | GTK_FILL, (GtkAttachOptions) GTK_EXPAND | GTK_FILL, 0, 0);
-
-    table_button = gtk_table_new (1, 1, FALSE);
-    gtk_widget_show (table_button);
-    gtk_table_attach (GTK_TABLE (table_main), table_button, 0, 1, 1, 2,
-                     (GtkAttachOptions) GTK_EXPAND | GTK_FILL, (GtkAttachOptions) GTK_EXPAND | GTK_FILL, 2, 0);
-    gtk_container_set_border_width (GTK_CONTAINER (table_button), 4);
-
-    hbuttonbox = gtk_hbutton_box_new ();
-    gtk_widget_show (hbuttonbox);
-    gtk_table_attach (GTK_TABLE (table_button), hbuttonbox, 0, 1, 0, 1,
-                     (GtkAttachOptions) GTK_EXPAND | GTK_FILL, (GtkAttachOptions) GTK_EXPAND | GTK_FILL, 0, 0);
-    gtk_widget_set_usize (hbuttonbox, 219, -1);
-    gtk_button_box_set_layout (GTK_BUTTON_BOX (hbuttonbox), GTK_BUTTONBOX_SPREAD);
-    gtk_button_box_set_child_size (GTK_BUTTON_BOX (hbuttonbox), 72, 25);
-
-    if (gtk_minor_version > 7)
-        button_connect = gtk_button_new_from_stock ("gtk-connect");
-    else
-        button_connect = gtk_button_new_with_label ("Connect");
-    
-    gtk_signal_connect (GTK_OBJECT (button_connect), "clicked",
-                        GTK_SIGNAL_FUNC (do_con), mud);
-    gtk_signal_connect (GTK_OBJECT (button_connect), "clicked",
-                        GTK_SIGNAL_FUNC (close_window), con_window);
-    gtk_widget_show (button_connect);
-    gtk_container_add (GTK_CONTAINER (hbuttonbox), button_connect);
-    gtk_container_border_width (GTK_CONTAINER (button_connect), 3);
-
-    button_cancel = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
-    gtk_signal_connect (GTK_OBJECT(button_cancel), "clicked", 
-                        GTK_SIGNAL_FUNC (close_window), con_window);
-    gtk_widget_show (button_cancel);
-    gtk_container_add (GTK_CONTAINER (hbuttonbox), button_cancel);
-    gtk_container_border_width (GTK_CONTAINER (button_cancel), 3);
-
-    gtk_widget_show (con_window);
-
-}
-
-
-/*
- * This Function vil toggle the logger
- */
-void toggle_logger (GtkWidget *menuitem, gpointer data)
-{
-    /* Toggle the toolbar logger button and do the stuff */
-    gtk_toggle_button_set_state(GTK_TOGGLE_BUTTON(btn_toolbar_logger), GTK_CHECK_MENU_ITEM(menuitem)->active);
+    gtk_widget_destroy(root);
 }
 
 /*
  * This Function creates the main window
  */
 
-static GtkWidget * add_menu(GtkWidget *father, const char *name)
-{
-  GtkWidget *menuitem = gtk_menu_item_new_with_label (name), *menu = gtk_menu_new();
-  gtk_widget_show (menuitem);
-  gtk_container_add (GTK_CONTAINER (father), menuitem);
-  gtk_menu_item_set_submenu (GTK_MENU_ITEM (menuitem), menu);
-
-  return menu;
-}
-
-static GtkWidget * add_menu_item(GtkWidget *father, GtkAccelGroup *group, 
-        const char *name, GtkSignalFunc cbk, gint acc_key, gint acc_mod)
-{
-    GtkWidget *item;
-    
-    if (name) {
-        if (*name != '*')
-            item = gtk_menu_item_new_with_label (name);
-        else {
-            name++;
-            item = gtk_check_menu_item_new_with_label (name);            
-        }
-            
-        gtk_signal_connect (GTK_OBJECT (item), "activate", cbk, NULL);
-
-        if (group)
-            gtk_widget_add_accelerator (item, "activate", group,
-                    acc_key, acc_mod, GTK_ACCEL_VISIBLE);
-    }
-    else
-        item = gtk_menu_item_new();
-
-    gtk_widget_show (item);
-    gtk_container_add (GTK_CONTAINER (father), item);
-
-    return item;
-}
-
-static GtkWidget * add_stock_item(GtkWidget *father, GtkAccelGroup *group, 
-        const char *icon, GtkSignalFunc cbk)
-{
-    GtkWidget *item;
-    
-    item = gtk_image_menu_item_new_from_stock (icon, group);
-            
-    gtk_signal_connect (GTK_OBJECT (item), "activate", cbk, NULL);
-
-    gtk_widget_show (item);
-    gtk_container_add (GTK_CONTAINER (father), item);
-
-    return item;
-}
-
-#define add_separator(x) add_menu_item(x, NULL, NULL, NULL, 0, 0)
-
-static GtkWidget * review_toggle;
-
 void toggle_review(void)
 {
+    GtkWidget *review_toggle = lookup_widget(mud->window, "togglebutton_review");
+
     if (GTK_WIDGET_VISIBLE(mud->review)) {
         gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (review_toggle), FALSE);
         gtk_widget_hide(mud->review);
@@ -808,432 +640,45 @@ void mccp_status()
 void
 spawn_gui()
 {
-  //gint key = GDK_F1; /* F1 key */
-  GtkWidget *vbox1;
-  GtkWidget *menubar;
-  GtkWidget *menu;
-  GtkWidget *vbox2;
-  GtkWidget *hbox1;
-  GtkAccelGroup *accel_group;
-  GtkWidget *fill_block2;
-  GtkWidget *hbox2;
-  GtkWidget *fill_block;
-  /*** ToolBar ***/
-  GtkWidget *toolbar;
-  GdkPixmap *icon;
-  GdkBitmap *mask;
-  GtkWidget *iconw;
-  GtkWidget *btn_toolbar_connection_wizard,
-            *btn_toolbar_font,
-            *btn_toolbar_prefs,
-            *btn_toolbar_colors,
-            *btn_toolbar_alias,
-            *btn_toolbar_macro,
-            *btn_toolbar_trigger,
-            *btn_toolbar_logview,
-            *btn_toolbar_help;
-  GtkWidget *toggle1;
-
-  /*** ToolBar End ***/
-
-
   /* create the main window */
-  mud->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  mud->window = create_window_main();
 
-  gtk_widget_set_usize (mud->window, 640, 480);
-  gtk_container_border_width (GTK_CONTAINER (mud->window), 3);
   gtk_window_set_title (GTK_WINDOW (mud->window), "GGMud "VERSION"");
-//  gtk_window_set_policy (GTK_WINDOW (mud->window), FALSE, TRUE, FALSE);
   gtk_widget_realize ( mud->window );
 
-  /* handlers so we can quit the close the app */
-  gtk_signal_connect (GTK_OBJECT (mud->window), "delete_event", GTK_SIGNAL_FUNC (quit), NULL);
-  gtk_signal_connect (GTK_OBJECT (mud->window), "destroy", GTK_SIGNAL_FUNC (quit), NULL);
+  gtk_widget_set_sensitive(lookup_widget(mud->window, "menuitem_disconnect"), FALSE); 
 
-  /* create the accel_group for the keyboard bindings */
-  accel_group = gtk_accel_group_new ();
- 
-  vbox1 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox1);
-  gtk_container_add (GTK_CONTAINER (mud->window), vbox1);
-
-  /* menu bar */
-  menubar = gtk_menu_bar_new ();
-  gtk_widget_show (menubar);
-  gtk_box_pack_start (GTK_BOX (vbox1), menubar, FALSE, TRUE, 3);
-
-  /* file menu */
-  menu = add_menu(menubar, "File");
-  
-  add_menu_item(menu, accel_group, "Connection Wizard", GTK_SIGNAL_FUNC(do_wiz),  GDK_W, GDK_MOD1_MASK);
-  add_separator(menu);
-
-
-  if (gtk_minor_version > 7)
-      menu_File_Connect = add_stock_item(menu, accel_group, "gtk-connect", 
-              GTK_SIGNAL_FUNC(cbox));
-  else
-      menu_File_Connect = add_menu_item(menu, accel_group, "Connect", 
-              GTK_SIGNAL_FUNC(cbox),  GDK_C, GDK_MOD1_MASK);
-  
-  if (gtk_minor_version > 7)
-      menu_File_DisConnect = add_stock_item(menu, accel_group, "gtk-disconnect", 
-              GTK_SIGNAL_FUNC(disconnect));
-  else
-      menu_File_DisConnect = add_menu_item(menu, accel_group, "Disconnect", 
-              GTK_SIGNAL_FUNC(disconnect),  GDK_D, GDK_MOD1_MASK);
-
-  gtk_widget_set_sensitive (menu_File_DisConnect, FALSE);
-  menu_File_Reconnect = add_menu_item(menu, accel_group, "Reconnect", GTK_SIGNAL_FUNC(reconnect),  GDK_R, GDK_MOD1_MASK);
-  add_separator(menu);
-//  add_menu_item(menu, accel_group, "Quit", GTK_SIGNAL_FUNC(quit),  GDK_Q, GDK_MOD1_MASK);
-  add_stock_item(menu, accel_group, GTK_STOCK_QUIT, GTK_SIGNAL_FUNC(quit));
-
-  /* options menu */
-  menu = add_menu (menubar, "Options");
-  
-//  add_menu_item(menu, accel_group, "Fonts", GTK_SIGNAL_FUNC(window_font),  GDK_F, GDK_MOD1_MASK);
-//  add_menu_item(menu, accel_group, "Colors", GTK_SIGNAL_FUNC(color_prefs),  GDK_O, GDK_MOD1_MASK);
-//  add_menu_item(menu, accel_group, "Preferences", GTK_SIGNAL_FUNC(window_prefs),  GDK_P, GDK_MOD1_MASK);
-  add_stock_item(menu, accel_group, GTK_STOCK_SELECT_FONT, GTK_SIGNAL_FUNC(window_font));
-  add_stock_item(menu, accel_group, GTK_STOCK_SELECT_COLOR, GTK_SIGNAL_FUNC(color_prefs));
-  add_stock_item(menu, accel_group, GTK_STOCK_PREFERENCES, GTK_SIGNAL_FUNC(window_prefs));
-
-  add_separator(menu);
-  add_menu_item(menu, NULL, "Load TT++/GGMUD file...", GTK_SIGNAL_FUNC(load_tt_prefs), 0, 0);
-  add_menu_item(menu, NULL, "Import ZMud configuration...", GTK_SIGNAL_FUNC(load_zmud_prefs), 0, 0);
-  add_separator(menu);
-  add_menu_item(menu, NULL, "Save window positions", GTK_SIGNAL_FUNC(save_win_pos), 0, 0);
-  add_menu_item(menu, NULL, "Export settings", GTK_SIGNAL_FUNC(save_all_prefs), 0, 0);
-  add_separator(menu);
-  add_menu_item(menu, NULL, "Save review buffer...", GTK_SIGNAL_FUNC(save_review), 0, 0);
-
-  /* tools menu */
-  menu = add_menu (menubar, "Tools");
-  
-  add_menu_item(menu, accel_group, "Macros", GTK_SIGNAL_FUNC(window_macro),  GDK_M, GDK_MOD1_MASK);
-  add_menu_item(menu, accel_group, "Aliases", GTK_SIGNAL_FUNC(window_alias),  GDK_A, GDK_MOD1_MASK);
-  add_menu_item(menu, accel_group, "Triggers", GTK_SIGNAL_FUNC(triggers_window),  GDK_T, GDK_MOD1_MASK);
-  add_menu_item(menu, NULL, "Highlights", GTK_SIGNAL_FUNC(highlights_window),  0, 0);
-  add_menu_item(menu, accel_group, "Gags", GTK_SIGNAL_FUNC(gags_window),  GDK_G, GDK_MOD1_MASK);  
-  add_menu_item(menu, NULL, "Tab complete", GTK_SIGNAL_FUNC(create_complete_window), 0, 0);
-  add_menu_item(menu, accel_group, "Variables", GTK_SIGNAL_FUNC(variables_window),  GDK_V, GDK_MOD1_MASK);  
-  add_separator(menu);
-  menu_Tools_Logger = add_menu_item(menu, accel_group, "*Logger", GTK_SIGNAL_FUNC(toggle_logger),  GDK_L, GDK_MOD1_MASK);  
-  gtk_check_menu_item_set_show_toggle(GTK_CHECK_MENU_ITEM(menu_Tools_Logger), TRUE);
-  add_menu_item(menu, NULL, "Log Viewer", GTK_SIGNAL_FUNC(log_viewer), 0, 0);
-  add_separator(menu);
-  add_menu_item(menu, NULL, "Enable/disable trigger classes", GTK_SIGNAL_FUNC(triggerclass_window), 0, 0);
-#ifdef ENABLE_MCCP
-  add_separator(menu);
-  add_menu_item(menu, NULL, "MCCP status", GTK_SIGNAL_FUNC(mccp_status), 0, 0);
+#ifndef ENABLE_MCCP
+  // disable MCCP menu
+  gtk_widget_set_sensitive(lookup_widget(mud->window, "menuitem_mccp_status"), FALSE);
 #endif
   
-  /* help menu */
-  menu = add_menu (menubar, "Help");
-  gtk_menu_item_right_justify (GTK_MENU_ITEM (gtk_menu_get_attach_widget(GTK_MENU(menu))));
-  add_stock_item(menu, accel_group, GTK_STOCK_HELP, GTK_SIGNAL_FUNC(do_manual));
-  add_separator(menu);
-  add_menu_item(menu, accel_group, "About", GTK_SIGNAL_FUNC(do_about),  GDK_B, GDK_MOD1_MASK);
+  gtk_menu_item_right_justify (GTK_MENU_ITEM(lookup_widget(mud->window, "menu_help")));
 
-/*** ToolBar ***/
-  /* we need to realize the window because we use pixmaps for 
-   * items on the toolbar in the context of it */
- 
-  /* to make it nice we'll put the toolbar into the handle box, 
-   * so that it can be detached from the main window */
-  handlebox = gtk_handle_box_new ();
-  gtk_box_pack_start ( GTK_BOX ( vbox1 ), handlebox, FALSE, FALSE, 2 );
 
-  /* toolbar will be horizontal, with both icons and text, and
-   * with 5pxl spaces between items and finally, 
-   * we'll also put it into our handlebox */
-  toolbar = gtk_toolbar_new ( );
-  gtk_container_set_border_width ( GTK_CONTAINER ( toolbar ) , 5 );
-  //gtk_toolbar_set_space_size ( GTK_TOOLBAR ( toolbar ), 5 );
-  gtk_container_add ( GTK_CONTAINER ( handlebox ) , toolbar );
-
-  /* our first item is <Connection Wizard> button */
-  /* now we create icon with mask: we'll reuse it to create
-   * icon widgets for toolbar items */
-  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_wizard );
-  iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
-  gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
-
-  btn_toolbar_connection_wizard = gtk_toolbar_append_item ( GTK_TOOLBAR (toolbar), /* our toolbar */
-                                           NULL,               			/* button label */
-                                           "Connection Wizard (Alt+W)",     	/* this button's tooltip */
-                                           "Private",             		/* tooltip private info */
-                                           iconw,                 		/* icon widget */
-                                           GTK_SIGNAL_FUNC (do_wiz), 		/* a signal */
-                                           NULL );
-  gtk_toolbar_append_space ( GTK_TOOLBAR ( toolbar ) ); 			/* space after item */
-
-  /* our next item is <Connect> button */
-  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_connect );
-  iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
-  gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
   
-  btn_toolbar_connect = gtk_toolbar_append_item ( GTK_TOOLBAR (toolbar), 	/* our toolbar */
-                                           NULL,               			/* button label */
-                                           "Connect (Alt+C)",     		/* this button's tooltip */
-                                           "Private",             		/* tooltip private info */
-                                           iconw,                 		/* icon widget */
-                                           GTK_SIGNAL_FUNC (cbox), 		/* a signal */
-                                           NULL );
+  gtk_widget_set_sensitive(lookup_widget(mud->window, "toolbutton_disconnect"), FALSE);
 
-  /* our next item is <DisConnect> button */
-  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_disconnect );
-  iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
-  btn_toolbar_disconnect = gtk_toolbar_append_item ( GTK_TOOLBAR (toolbar), 	/* our toolbar */
-                                           NULL,               			/* button label */
-                                           "Disconnect (Alt+D)",     		/* this button's tooltip */
-                                           "Private",             		/* tooltip private info */
-                                           iconw,                		 /* icon widget */
-                                           GTK_SIGNAL_FUNC (disconnect), 	/* a signal */
-                                           NULL );
-  gtk_toolbar_append_space ( GTK_TOOLBAR ( toolbar ) ); 			/* space after item */
-
-  iconw = gtk_image_new_from_stock(GTK_STOCK_SELECT_FONT, GTK_ICON_SIZE_SMALL_TOOLBAR);
-  
-  btn_toolbar_font = gtk_toolbar_append_item ( GTK_TOOLBAR (toolbar), 		/* our toolbar */
-                                           NULL,               			/* button label */
-                                           "Font (Alt+F)",     			/* this button's tooltip */
-                                           "Private",             		/* tooltip private info */
-                                           iconw,                 		/* icon widget */
-                                           GTK_SIGNAL_FUNC (window_font), 	/* a signal */
-                                           NULL );
-
-  iconw = gtk_image_new_from_stock(GTK_STOCK_SELECT_COLOR, GTK_ICON_SIZE_SMALL_TOOLBAR);
-
-  btn_toolbar_colors = gtk_toolbar_append_item ( GTK_TOOLBAR (toolbar),		/* our toolbar */
-                                           NULL,               			/* button label */
-                                           "Colors (Alt+O)",   			/* this button's tooltip */
-                                           "Private",             		/* tooltip private info */
-                                           iconw,                 		/* icon widget */
-                                           GTK_SIGNAL_FUNC (color_prefs), 	/* a signal */
-                                           NULL );
-
-  iconw = gtk_image_new_from_stock(GTK_STOCK_PREFERENCES, GTK_ICON_SIZE_SMALL_TOOLBAR);
-
-  btn_toolbar_prefs = gtk_toolbar_append_item ( GTK_TOOLBAR (toolbar), 		/* our toolbar */
-                                           NULL,               			/* button label */
-                                           "Preferences (Alt+P)",     		/* this button's tooltip */
-                                           "Private",             		/* tooltip private info */
-                                           iconw,                 		/* icon widget */
-                                           GTK_SIGNAL_FUNC (window_prefs), 	/* a signal */
-                                           NULL );
-  gtk_toolbar_append_space ( GTK_TOOLBAR ( toolbar ) ); 			/* space after item */
-
-  /* our next item is <Alias> button */
-  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_alias );
-  iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
-  gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
-
-  btn_toolbar_alias = gtk_toolbar_append_item ( GTK_TOOLBAR (toolbar), 		/* our toolbar */
-                                           NULL,               			/* button label */
-                                           "Alias (Alt+A)",     		/* this button's tooltip */
-                                           "Private",             		/* tooltip private info */
-                                           iconw,                 		/* icon widget */
-                                           GTK_SIGNAL_FUNC (window_alias), 	/* a signal */
-                                           NULL );
-
-  /* our next item is <macros> button */
-  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_macros );
-  iconw = gtk_pixmap_new ( icon, mask );				 	/* icon widget */
-  gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
-
-  btn_toolbar_macro = gtk_toolbar_append_item ( GTK_TOOLBAR (toolbar), 		/* our toolbar */
-                                           NULL,               			/* button label */
-                                           "Macros (Alt+M)",    		/* this button's tooltip */
-                                           "Private",             		/* tooltip private info */
-                                           iconw,                 		/* icon widget */
-                                           GTK_SIGNAL_FUNC (window_macro), 	/* a signal */
-                                           NULL );
-
-  /* our next item is <trigger> button */
-  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_triggers );
-  iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
-  gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
-
-  btn_toolbar_trigger = gtk_toolbar_append_item ( GTK_TOOLBAR (toolbar),  	/* our toolbar */
-                                           NULL,           		    	/* button label */
-                                           "Triggers (Alt+T)",		   	/* this button's tooltip */
-                                           "Private",             	    	/* tooltip private info */
-                                           iconw,                 	    	/* icon widget */
-                                           GTK_SIGNAL_FUNC (triggers_window),  	/* a signal */
-                                           NULL );
-
-  gtk_toolbar_append_space ( GTK_TOOLBAR ( toolbar ) ); 		    	/* space after item */
-
-  /* our next item is <Logger> button */
-  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_logger );
-  iconw = gtk_pixmap_new ( icon, mask ); /* icon widget */
-  gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
-  
-  btn_toolbar_logger = gtk_toolbar_append_element(GTK_TOOLBAR(toolbar),
-                                               GTK_TOOLBAR_CHILD_TOGGLEBUTTON,	/* a type of element */
-                                               NULL,				/* pointer to widget */
-                                               NULL,				/* label */
-                                               "Logger (Alt+L)",		/* tooltip */
-                                               "Private",			/* tooltip private string */
-                                               iconw,				/* icon */
-                                               GTK_SIGNAL_FUNC (do_log),	/* signal */
-                                               toolbar);
-  //gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(tooltips_button), FALSE);
-
-  /* our next item is <LogViewer> button */
-  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_logviewer );
-  iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
-  gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
-
-  btn_toolbar_logview = gtk_toolbar_append_item ( GTK_TOOLBAR (toolbar), 	/* our toolbar */
-                                           NULL,              		 	/* button label */
-                                           "Log Viewer (Alt+V)",     	 	/* this button's tooltip */
-                                           "Private",             	 	/* tooltip private info */
-                                           iconw,                 	 	/* icon widget */
-                                           GTK_SIGNAL_FUNC (log_viewer), 	/* a signal */
-                                           NULL );
-  gtk_toolbar_append_space ( GTK_TOOLBAR ( toolbar ) );			 	/* space after item */
-
-  iconw = gtk_image_new_from_stock(GTK_STOCK_HELP, GTK_ICON_SIZE_SMALL_TOOLBAR);
-
-  btn_toolbar_help = gtk_toolbar_append_item ( GTK_TOOLBAR (toolbar), 		/* our toolbar */
-                                           NULL,               			/* button label */
-                                           "Help (Alt+H)",     			/* this button's tooltip */
-                                           "Private",          			/* tooltip private info */
-                                           iconw,      		        	/* icon widget */
-                                           GTK_SIGNAL_FUNC (do_manual),		/* a signal */
-                                           NULL );
-
-  /* sets the disconnect button unsensitive on startup */
-  gtk_widget_set_sensitive (btn_toolbar_disconnect, FALSE);
-
-  /* that's it ! let's show everything. */
-  gtk_widget_show ( toolbar );
-
-  if (prefs.Toolbar)
-      gtk_widget_show (handlebox);
-  else 
-      gtk_widget_hide (handlebox);
+  if (!prefs.Toolbar)
+      gtk_widget_hide (lookup_widget(mud->window, "handlebox_toolbar"));
 
 /*** ToolBar End ***/
 
-  vbox2 = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox2);
-  gtk_box_pack_start (GTK_BOX (vbox1), vbox2, TRUE, TRUE, 0);
-
-  hbox1 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox1);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox1, TRUE, TRUE, 0);
-
-  mud->macrobuttons = gtk_vbox_new (FALSE, 0);
-  gtk_box_pack_start (GTK_BOX (hbox1), mud->macrobuttons, FALSE, TRUE, 0);
-
-  if (prefs.Macrobuttons)
-      gtk_widget_show (mud->macrobuttons);
-  else 
-      gtk_widget_hide (mud->macrobuttons);
-
-  /* just a empty label we use as a fillblock so it should look nice */
-  fill_block2 = gtk_label_new ("");
-  gtk_widget_show (fill_block2);
-  gtk_box_pack_start (GTK_BOX (mud->macrobuttons), fill_block2, FALSE, TRUE, 0);
-
-#ifdef USE_NOTEBOOK
-  mud->notebook = (GtkNotebook *)gtk_notebook_new();
-  gtk_widget_show(GTK_WIDGET(mud->notebook));
-  gtk_box_pack_start(GTK_BOX(hbox1), GTK_WIDGET(mud->notebook), TRUE, TRUE, 0);
-  mud->text = new_view("not connected", mud->notebook, TRUE);        
-#else
-  mud->text = new_view("not connected", hbox1,  TRUE);
-#endif
+  mud->text = new_view("not connected", lookup_widget(mud->window, "hbox_output"),  TRUE);
   
-  hbox2 = gtk_hbox_new (FALSE, 0);
-  gtk_widget_show (hbox2);
-  gtk_box_pack_start (GTK_BOX (vbox2), hbox2, FALSE, TRUE, 3);
-
-
-  /* the entry box, that we use to type the commands in */
-  mud->ent = (GtkEntry *)gtk_entry_new ();
-  gtk_signal_connect_object (GTK_OBJECT (mud->ent), "activate", GTK_SIGNAL_FUNC (send_to_connection), NULL);
-  gtk_signal_connect(GTK_OBJECT(mud->ent),"key_press_event",GTK_SIGNAL_FUNC(hist_evt), mud);
-  gtk_widget_show (GTK_WIDGET(mud->ent));
-  gtk_box_pack_start (GTK_BOX (hbox2), GTK_WIDGET(mud->ent), TRUE, TRUE, 8);
-  GTK_WIDGET_SET_FLAGS (GTK_WIDGET(mud->ent), GTK_CAN_DEFAULT);
-  gtk_widget_grab_focus (GTK_WIDGET(mud->ent));
-  gtk_widget_grab_default (GTK_WIDGET(mud->ent));
-
-  
-  // toggle triggers & parsing buttons
-  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_triggers );
-  iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
-  gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
-  gtk_widget_show(iconw);
-  
-  toggle1 = gtk_toggle_button_new();
-  gtk_container_add(GTK_CONTAINER(toggle1), iconw);
-  gtk_widget_show(toggle1);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (toggle1), TRUE);
-  GTK_WIDGET_UNSET_FLAGS (toggle1, GTK_CAN_FOCUS|GTK_CAN_DEFAULT);
-
-  gtk_signal_connect (GTK_OBJECT (toggle1), "toggled",
-                       GTK_SIGNAL_FUNC (toggle_triggers), NULL);
-  gtk_box_pack_start (GTK_BOX (hbox2), toggle1, FALSE, FALSE, 4);
-
-  icon = gdk_pixmap_create_from_xpm_d ( mud->window->window, &mask, &mud->window->style->white, SC_parsing );
-  iconw = gtk_pixmap_new ( icon, mask ); 					/* icon widget */
-  gdk_pixmap_unref(icon); gdk_bitmap_unref(mask);
-  gtk_widget_show(iconw);
-
-  toggle1 = gtk_toggle_button_new();
-  gtk_container_add(GTK_CONTAINER(toggle1), iconw);
-  gtk_widget_show(toggle1);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (toggle1), TRUE);
-  GTK_WIDGET_UNSET_FLAGS (toggle1, GTK_CAN_FOCUS|GTK_CAN_DEFAULT);
-
-  gtk_signal_connect (GTK_OBJECT (toggle1), "toggled",
-                       GTK_SIGNAL_FUNC (toggle_parsing), NULL);
-  gtk_box_pack_start (GTK_BOX (hbox2), toggle1, FALSE, FALSE, 4);
-
-  iconw = gtk_image_new_from_stock(GTK_STOCK_JUSTIFY_LEFT, GTK_ICON_SIZE_BUTTON);
-  review_toggle = toggle1 = gtk_toggle_button_new();
-  gtk_container_add(GTK_CONTAINER(toggle1), iconw);
-  gtk_widget_show_all(toggle1);
-  gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (toggle1), FALSE);
-  GTK_WIDGET_UNSET_FLAGS (toggle1, GTK_CAN_FOCUS|GTK_CAN_DEFAULT);
-
-  gtk_signal_connect (GTK_OBJECT (toggle1), "toggled",
-                       GTK_SIGNAL_FUNC (toggle_review), NULL);
-  gtk_box_pack_start (GTK_BOX (hbox2), toggle1, FALSE, FALSE, 4);
-
+/* the entry box, that we use to type the commands in */
+  mud->ent = GTK_ENTRY(lookup_widget(mud->window, "entry_input"));
   // tick counter
-  fill_block = gtk_frame_new ("Tick");
-  mud->tick_counter = (GtkLabel *)gtk_label_new("OFF");
-  gtk_widget_show(GTK_WIDGET(mud->tick_counter));
-  gtk_container_add(GTK_CONTAINER(fill_block), GTK_WIDGET(mud->tick_counter));
-  gtk_widget_show (fill_block);
-  gtk_box_pack_start (GTK_BOX (hbox2), fill_block, FALSE, TRUE, 4);
-
-  
-  /* status bar wich can be used for displaying information */
-  statusbar = gtk_statusbar_new ();
-  gtk_box_pack_start (GTK_BOX (vbox1), statusbar, FALSE, TRUE, 0);
-  gtk_container_border_width (GTK_CONTAINER (statusbar), 3);
-
-  if (prefs.Statusbar)
-      gtk_widget_show (statusbar);
-  else 
-      gtk_widget_hide (statusbar);
-
-  gtk_window_add_accel_group (GTK_WINDOW (mud->window), accel_group);
-  
-  statusbar_id = gtk_statusbar_get_context_id(GTK_STATUSBAR(statusbar), "Statusbar");
-  gtk_statusbar_push (GTK_STATUSBAR(statusbar), statusbar_id, "Ready");
+  mud->tick_counter = GTK_LABEL(lookup_widget(mud->window, "label_tickcounter"));
+ 
+  if (!prefs.Statusbar)
+      gtk_widget_hide (lookup_widget(mud->window, "statusbar_main"));
 
   setup_pixmaps(mud->window);
 
+  gtk_widget_show(mud->window);
 }
+
 /* FOR THE WINDOW BUFFER FUNCTION */
 void clear_backbuffer()
 {

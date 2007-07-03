@@ -25,16 +25,14 @@
 
 #include "ggmud.h"
 #include <string.h>
+#include "interface.h"
+#include "support.h"
 
 #define TRIGGER_FILE "triggers"
 
 static GtkWidget *trig_window = NULL;
 static GtkWidget *class_window = NULL;
-static GtkWidget *textalias;
-static GtkWidget *textreplace;
-static GtkWidget *textpri;
 static gint      trigger_selected_row    = -1;
-static GList *classes_store = NULL;
 
 #define ALIAS_LEN 128
 #define REPL_LEN 512
@@ -43,10 +41,11 @@ static GList *classes_store = NULL;
 /*
  * Save triggers to file
  */
-void save_triggers (GtkWidget *w, GtkCList *data) 
+void save_triggers (GtkWidget *w, void *userdata) 
 {
     FILE *fp;
-    
+    GtkCList *data = GTK_CLIST(lookup_widget(w, "clist_trig"));
+
     if ((fp = fileopen (TRIGGER_FILE, "w"))) {
         int done = FALSE;
         gint  row = 0;
@@ -125,7 +124,7 @@ static void  insert_triggers  (GtkCList *clist)
     gtk_clist_thaw(clist);
 }
 
-static void save_triggerclass_state(void)
+void save_triggerclass_state(void)
 {
 }
 
@@ -156,7 +155,8 @@ static void insert_trigger_classes(GtkCList *clist)
 
     gtk_clist_thaw(clist);
 }
-static void trigger_class_toggle (GtkCList *clist, gint row, gint column,
+
+void trigger_class_toggle (GtkCList *clist, gint row, gint column,
                            GdkEventButton *event, gpointer data)
 {
     GdkPixmap *pixmap;
@@ -178,143 +178,92 @@ static void trigger_class_toggle (GtkCList *clist, gint row, gint column,
 
     if (trig_window)
         insert_triggers(GTK_CLIST(
-                    gtk_object_get_user_data(GTK_OBJECT(trig_window))));
+                    lookup_widget(trig_window, "clist_trig")));
 }
 
-static void trigger_selection_made (GtkCList *clist, gint row, gint column,
+void trigger_selection_made (GtkCList *clist, gint row, gint column,
                            GdkEventButton *event, gpointer data)
 {
     static guint32 old_time = 0L;
     gchar *text;
-   
+
     if (old_time != 0L && (event->time - old_time) < 1000 &&
             trigger_selected_row == row) {
         struct listnode *entry = (struct listnode *)
-                        gtk_clist_get_row_data(clist, row);
+            gtk_clist_get_row_data(clist, row);
 
         entry->enabled ^= 1;
-        
-/*        printf("%s row %d, %s\n", entry->enabled ? "Enabling" : "Disabling",
-                row, entry->left);
- */      
+
         gtk_clist_set_pixmap(clist, row, 3, 
                 entry->enabled ? enabled_pixmap : disabled_pixmap, 
                 entry->enabled ? enabled_mask   : disabled_mask);
-        
+
         old_time = 0L; // to avoid triple click;
     }
     else
         old_time = event->time;
     trigger_selected_row    = row;
 
-    if ( (GtkCList*) data )
-    {
-        gtk_clist_get_text (clist, row, 0, &text);
-        gtk_entry_set_text (GTK_ENTRY (textalias), text);
-        gtk_clist_get_text (clist, row, 1, &text);
-        gtk_entry_set_text (GTK_ENTRY (textreplace), text);
-        gtk_clist_get_text (clist, row, 2, &text);
-        gtk_entry_set_text (GTK_ENTRY (GTK_COMBO(textpri)->entry), text);
-    }
-    
-    return;
+    gtk_clist_get_text (clist, row, 0, &text);
+    gtk_entry_set_text (GTK_ENTRY (
+                lookup_widget((GtkWidget *)clist, "entry_trig")), text);
+    gtk_clist_get_text (clist, row, 1, &text);
+    gtk_entry_set_text (GTK_ENTRY (
+                lookup_widget((GtkWidget *)clist, "entry_cmd")), text);
+    gtk_clist_get_text (clist, row, 2, &text);
+    gtk_entry_set_text (GTK_ENTRY (GTK_BIN (lookup_widget((GtkWidget *)clist,
+                        "comboboxentry_class"))->child), text);
 }
 
 void triggerclass_window(GtkWidget *widget, gpointer data )
 {
-    GtkWidget *vbox;
     GtkWidget *clist;
-    GtkWidget *label;
-//    GtkTooltips *tooltip;
-    GtkWidget *scrolled_window;
-
-    gchar     *titles[2] = { "Trigger class", "State"};
-
-//    tooltip = gtk_tooltips_new ();
-//    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
 
     if (class_window) {
         gtk_window_present(GTK_WINDOW(class_window));
         return;
     }
     
-    class_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title (GTK_WINDOW (class_window), "Trigger Classes");
-    gtk_signal_connect (GTK_OBJECT (class_window), "destroy",
-                               GTK_SIGNAL_FUNC(close_window), class_window );
+    class_window = create_window_classes ();
     gtk_signal_connect (GTK_OBJECT (class_window), "destroy",
                                GTK_SIGNAL_FUNC(kill_window), &class_window );
     
-    gtk_widget_set_usize (class_window, 400, 350);			       
-    vbox = gtk_vbox_new (FALSE, 5);
-    gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
-    gtk_container_add (GTK_CONTAINER (class_window), vbox);
-    gtk_widget_show (vbox);
 
-    /* create a new scrolled window. */
-    scrolled_window = gtk_scrolled_window_new (NULL, NULL);
-    gtk_container_set_border_width (GTK_CONTAINER (scrolled_window), 0);
-    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_window),
-                                    GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-    gtk_box_pack_start (GTK_BOX (vbox), scrolled_window, TRUE, TRUE, 0);
-    gtk_widget_show (scrolled_window);
-
-    clist = gtk_clist_new_with_titles (2, titles);
-    gtk_object_set_user_data(GTK_OBJECT(class_window), clist);
-    gtk_signal_connect_object (GTK_OBJECT (clist), "select_row",
-                               GTK_SIGNAL_FUNC (trigger_class_toggle),
-                               (gpointer) clist);
-    gtk_clist_column_titles_passive (GTK_CLIST (clist));
-    gtk_clist_set_shadow_type (GTK_CLIST (clist), GTK_SHADOW_IN);
+    clist = lookup_widget(class_window, "clist_class");
     gtk_clist_set_column_width (GTK_CLIST (clist), 0, 250);
     gtk_clist_set_column_width (GTK_CLIST (clist), 1, 50);
     gtk_clist_set_column_justification (GTK_CLIST (clist), 0, GTK_JUSTIFY_LEFT);
     gtk_clist_set_column_justification (GTK_CLIST (clist), 1, GTK_JUSTIFY_LEFT);
-
     gtk_clist_set_row_height (GTK_CLIST (clist), 20);
-
-    gtk_clist_column_titles_show (GTK_CLIST (clist));
-
-    gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (scrolled_window), clist);
-
-    gtk_widget_show (clist);
-
-    label = gtk_label_new(" Click on a row to enable/disable a trigger class it lists. ");
-    gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
-    gtk_widget_show (label);
-
-
-    AddSimpleBar(vbox, (gpointer)clist,
-            GTK_SIGNAL_FUNC(save_triggerclass_state),
-            GTK_SIGNAL_FUNC(close_window));
 
     insert_trigger_classes  (GTK_CLIST(clist)  );
     gtk_widget_show (class_window );
 }
 
 void
-update_classes()
+update_classes(GtkWidget *cb)
 {
     trigger_class *cl = trigger_classes;
-    // GtkTreeIter it;
+    GtkTreeModel *m = gtk_combo_box_get_model(GTK_COMBO_BOX(cb));
+    GtkTreeIter it;
+
+    if (!m)
+        m = (GtkTreeModel *) gtk_list_store_new(1, G_TYPE_STRING);
 
     if (class_window)
         insert_trigger_classes(GTK_CLIST(
-                    gtk_object_get_user_data(GTK_OBJECT(class_window))));
+                    lookup_widget(class_window, "clist_class")));
 
-    if (classes_store) {
-        g_list_free(classes_store);
-        classes_store = NULL;
-    }
-    
+    gtk_list_store_clear(GTK_LIST_STORE(m));
+
     while (cl) {
-        if (strcmp(cl->name, "scripting")) // do not add scripting triggers to the list
-            classes_store = g_list_append(classes_store, (void *)cl->name);
-        
+        if (strcmp(cl->name, "scripting")) {
+            gtk_list_store_append(GTK_LIST_STORE(m), &it);
+            gtk_list_store_set(GTK_LIST_STORE(m), &it, 0, (void *)cl->name, -1);
+        }
+
         cl = cl->next;
     }
-
-    gtk_combo_set_popdown_strings (GTK_COMBO (textpri), classes_store);
 }
 
 static void add_trigger(const char *a, const char *b, const char *class)
@@ -325,16 +274,20 @@ static void add_trigger(const char *a, const char *b, const char *class)
 
     parse_input(buffer, NULL);
 
-    update_classes();
+    if (trig_window)
+        update_classes(lookup_widget(trig_window, "comboboxentry_class"));
 }
 
-static void trigger_button_add (GtkWidget *button, GtkCList *data)
+void trigger_button_add (GtkWidget *button, void *data)
 {
     const gchar *text[3];
 
-    text[0]   = gtk_entry_get_text (GTK_ENTRY (textalias  ));
-    text[1]   = gtk_entry_get_text (GTK_ENTRY (textreplace));
-    text[2]   = gtk_entry_get_text (GTK_ENTRY (GTK_COMBO(textpri)->entry));
+    text[0]   = gtk_entry_get_text (GTK_ENTRY (lookup_widget(button,
+                    "entry_trig")));
+    text[1]   = gtk_entry_get_text (GTK_ENTRY (lookup_widget(button,
+                    "entry_cmd")));
+    text[2]   = gtk_entry_get_text (GTK_ENTRY (GTK_BIN (lookup_widget(button,
+                    "comboboxentry_class"))->child));
     
     if ( text[0][0] == '\0' || text[1][0] == '\0' ) {
         popup_window (INFO, "Please complete the trigger first.");
@@ -363,21 +316,22 @@ static void trigger_button_add (GtkWidget *button, GtkCList *data)
 
     add_trigger (text[0], text[1], text[2]);
 
-    insert_triggers(data);
+    insert_triggers(GTK_CLIST(lookup_widget(button, "clist_trig")));
 }
 
-static void trigger_button_delete (GtkWidget *button, gpointer data) {
+void trigger_button_delete (GtkWidget *button, gpointer data) {
     gchar *word;
     
     if ( trigger_selected_row == -1 ) {
         popup_window (WARN, "No selection made.");
     }
     else {
+        GtkCList *l = GTK_CLIST(lookup_widget(button, "clist_trig"));
         char buffer[ALIAS_LEN + 20];
         
-        gtk_clist_get_text ((GtkCList*) data, trigger_selected_row, 0, &word);
+        gtk_clist_get_text (l, trigger_selected_row, 0, &word);
         sprintf(buffer, "#unaction {%s}", word);
-        gtk_clist_remove ((GtkCList*) data, trigger_selected_row);
+        gtk_clist_remove (l, trigger_selected_row);
         trigger_selected_row = -1;
 
         parse_input(buffer, NULL);
@@ -457,49 +411,20 @@ find_in_list(GtkWidget *widget, GtkCList *clist)
 
 void triggers_window(GtkWidget *widget, gpointer data)
 {
-    GtkWidget *vbox; 
-    GtkWidget *hbox3;
     GtkWidget *clist;
-    GtkWidget *label, *but;
-//    GtkTooltips *tooltip;
-    GtkWidget *scrolled_window;
-    
-    gchar     *titles[4] = { "Trigger string", "Commands", "Class", "State" };
-
-//    tooltip = gtk_tooltips_new ();
-//    gtk_tooltips_set_colors (tooltip, &color_lightyellow, &color_black);
 
     if (trig_window) {
         gtk_window_present(GTK_WINDOW(trig_window));
         return;
     }
 
-    trig_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title (GTK_WINDOW (trig_window), "Triggers (actions)");
-    gtk_signal_connect (GTK_OBJECT (trig_window), "destroy",
-                               GTK_SIGNAL_FUNC(close_window), trig_window );
+    trig_window = create_window_triggers();
     gtk_signal_connect (GTK_OBJECT (trig_window), "destroy",
                                GTK_SIGNAL_FUNC(kill_window), &trig_window );
-    gtk_widget_set_usize (trig_window, 720, 450);			       
-    vbox = gtk_vbox_new (FALSE, 5);
-    gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
-    gtk_container_add (GTK_CONTAINER (trig_window), vbox);
 
-    /* create a new scrolled window. */
-    scrolled_window = gtk_scrolled_window_new (NULL, NULL);
-    gtk_container_set_border_width (GTK_CONTAINER (scrolled_window), 0);
-    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_window),
-                                    GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-    gtk_box_pack_start (GTK_BOX (vbox), scrolled_window, TRUE, TRUE, 0);
 
-    clist = gtk_clist_new_with_titles (4, titles);
-    gtk_object_set_user_data(GTK_OBJECT(trig_window), clist); // needed to call insert_triggers from outside
-    
-    gtk_signal_connect_object (GTK_OBJECT (clist), "select_row",
-                               GTK_SIGNAL_FUNC (trigger_selection_made),
-                               (gpointer) clist);
+    clist = lookup_widget(trig_window, "clist_trig");
     gtk_clist_column_titles_passive (GTK_CLIST (clist));
-    gtk_clist_set_shadow_type (GTK_CLIST (clist), GTK_SHADOW_IN);
     gtk_clist_set_column_width (GTK_CLIST (clist), 0, 200);
     gtk_clist_set_column_width (GTK_CLIST (clist), 1, 360);
     gtk_clist_set_column_width (GTK_CLIST (clist), 2, 80);
@@ -507,59 +432,10 @@ void triggers_window(GtkWidget *widget, gpointer data)
     gtk_clist_set_column_justification (GTK_CLIST (clist), 0, GTK_JUSTIFY_LEFT);
     gtk_clist_set_column_justification (GTK_CLIST (clist), 1, GTK_JUSTIFY_LEFT);
 
-    gtk_clist_column_titles_show (GTK_CLIST (clist));
-
-    gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (scrolled_window), clist);
-
-    hbox3 = gtk_table_new(4, 2, FALSE);
-
-    gtk_box_pack_start (GTK_BOX (vbox), hbox3, FALSE, FALSE, 0);
-
+    update_classes(
+            lookup_widget(trig_window, "comboboxentry_class"));
     
-    label = gtk_label_new ("Trigger");
-    gtk_table_attach(GTK_TABLE(hbox3), label, 1, 2, 0, 1,
-                        GTK_EXPAND|GTK_FILL, /*GTK_FILL*/ 0L, 2, 2);
-    
-    label = gtk_label_new ("Commands");
-    gtk_table_attach(GTK_TABLE(hbox3), label, 2, 3, 0, 1,
-                        GTK_FILL | GTK_EXPAND, /*GTK_FILL*/ 0L, 2, 2);
-
-    label = gtk_label_new ("Class");
-    gtk_table_attach(GTK_TABLE(hbox3), label, 3, 4, 0, 1,
-                        0L, /*GTK_FILL*/ 0L, 2, 2);
-
-    but = gtk_button_new();
-    label = gtk_image_new_from_stock(GTK_STOCK_FIND, GTK_ICON_SIZE_SMALL_TOOLBAR);
-    gtk_container_add(GTK_CONTAINER(but), label);
-    gtk_table_attach(GTK_TABLE(hbox3), but, 0, 1, 1, 2,
-                         0L, /*GTK_FILL*/ 0L, 2, 2);
-    gtk_signal_connect (GTK_OBJECT (but), "clicked",
-                       GTK_SIGNAL_FUNC (find_in_list), clist);
-
-    textalias   = gtk_entry_new ();
-    gtk_table_attach(GTK_TABLE(hbox3), textalias, 1, 2, 1, 2,
-                         GTK_EXPAND|GTK_FILL, /*GTK_FILL*/ 0L, 2, 2);
-
-
-    
-    textreplace = gtk_entry_new ();
-    gtk_table_attach(GTK_TABLE(hbox3), textreplace, 2, 3, 1, 2,
-                        GTK_FILL | GTK_EXPAND, /*GTK_FILL*/ 0L, 2, 2);
-   
-
-    textpri = gtk_combo_new();
-
-    update_classes();
-    
-    gtk_table_attach(GTK_TABLE(hbox3), textpri, 3, 4, 1, 2,
-                        0L, /*GTK_FILL*/ 0L, 2, 2);
-
-    AddButtonBar(vbox, (gpointer)clist,
-            GTK_SIGNAL_FUNC(trigger_button_add),
-            GTK_SIGNAL_FUNC(trigger_button_delete),
-            GTK_SIGNAL_FUNC(save_triggers));
-
     insert_triggers  (GTK_CLIST(clist)  );
-    gtk_widget_show_all (trig_window );
+    gtk_widget_show(trig_window );
 
 }
