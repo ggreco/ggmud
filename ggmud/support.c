@@ -15,6 +15,7 @@
 #include <gtk/gtk.h>
 
 #include "support.h"
+#include "pixmaps.h"
 
 GtkWidget*
 lookup_widget                          (GtkWidget       *widget,
@@ -52,6 +53,66 @@ add_pixmap_directory                   (const gchar     *directory)
                                         g_strdup (directory));
 }
 
+static GdkColormap *colormap = NULL;
+extern xpmdata pixdata[];
+
+char **get_image_pointer(const char *filename)
+{
+    int i = 0;
+
+    while(pixdata[i].name) {
+        if(!strcmp(filename, pixdata[i].name)) {
+            return pixdata[i].ptr;
+        }
+        i++;
+    }
+
+    g_warning("get_image_pointer: Image %s not found!\n", filename);
+    return NULL;
+}
+
+GtkWidget *check_included_list(GtkWidget *widget, const gchar *filename)
+{
+    GtkWidget *pixmap;
+    void *found_pointer = NULL; 
+    int i = 0;
+
+    while(pixdata[i].name) {
+        if(!strcmp(filename, pixdata[i].name)) {
+            found_pointer = pixdata[i].ptr;
+            break;
+        }
+        i++;
+    }
+
+    if(!found_pointer) {
+        g_warning("NO builtin xpm for %s\n", filename);
+        return NULL;
+    }
+
+    if(!colormap)
+        colormap = gtk_widget_get_colormap (widget);
+
+    {
+        GdkPixmap *gdkpixmap;
+        GdkBitmap *mask;
+
+        gdkpixmap = gdk_pixmap_colormap_create_from_xpm_d (NULL, colormap, &mask,
+                NULL, found_pointer);
+        if (gdkpixmap == NULL) {
+            g_warning ("Error importing pixmap file: %s", filename);
+            return NULL;
+        }
+
+        pixmap = gtk_image_new_from_pixmap (gdkpixmap, mask);
+
+        gdk_pixmap_unref (gdkpixmap);
+        gdk_bitmap_unref (mask);
+    }
+
+    return pixmap;
+}
+
 /* This is an internally used function to find pixmap files. */
 static gchar*
 find_pixmap_file                       (const gchar     *filename)
@@ -83,6 +144,9 @@ create_pixmap                          (GtkWidget       *widget,
   if (!filename || !filename[0])
       return gtk_image_new ();
 
+  if ((pixmap = check_included_list(widget, filename)))
+      return pixmap;
+
   pathname = find_pixmap_file (filename);
 
   if (!pathname)
@@ -103,9 +167,20 @@ create_pixbuf                          (const gchar     *filename)
   gchar *pathname = NULL;
   GdkPixbuf *pixbuf;
   GError *error = NULL;
+  int i = 0;
 
   if (!filename || !filename[0])
       return NULL;
+
+    while(pixdata[i].name) {
+        if(!strcmp(filename, pixdata[i].name)) {
+            if(( pixbuf = gdk_pixbuf_new_from_xpm_data(pixdata[i].ptr)))
+                return pixbuf;
+            
+            break;
+        }
+        i++;
+    }
 
   pathname = find_pixmap_file (filename);
 

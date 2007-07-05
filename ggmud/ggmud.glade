@@ -3162,7 +3162,7 @@
 		  <property name="tooltip" translatable="yes">Alias (Alt+A)</property>
 		  <property name="label" translatable="yes">Alias</property>
 		  <property name="use_underline">True</property>
-		  <property name="stock_id">gtk-spell-check</property>
+		  <property name="icon">alias.xpm</property>
 		  <property name="visible_horizontal">True</property>
 		  <property name="visible_vertical">True</property>
 		  <property name="is_important">False</property>
@@ -3180,7 +3180,7 @@
 		  <property name="tooltip" translatable="yes">Macros (Alt+M)</property>
 		  <property name="label" translatable="yes">Macro</property>
 		  <property name="use_underline">True</property>
-		  <property name="stock_id">gtk-new</property>
+		  <property name="icon">macro.xpm</property>
 		  <property name="visible_horizontal">True</property>
 		  <property name="visible_vertical">True</property>
 		  <property name="is_important">False</property>
@@ -3198,7 +3198,7 @@
 		  <property name="tooltip" translatable="yes">Triggers (Alt+T)</property>
 		  <property name="label" translatable="yes">Trigger</property>
 		  <property name="use_underline">True</property>
-		  <property name="stock_id">gtk-execute</property>
+		  <property name="icon">trig.xpm</property>
 		  <property name="visible_horizontal">True</property>
 		  <property name="visible_vertical">True</property>
 		  <property name="is_important">False</property>
@@ -3309,8 +3309,7 @@
 	      <child>
 		<widget class="GtkImage" id="image7">
 		  <property name="visible">True</property>
-		  <property name="stock">gtk-execute</property>
-		  <property name="icon_size">4</property>
+		  <property name="pixbuf">trig.xpm</property>
 		  <property name="xalign">0.5</property>
 		  <property name="yalign">0.5</property>
 		  <property name="xpad">0</property>
@@ -3339,8 +3338,7 @@
 	      <child>
 		<widget class="GtkImage" id="image6">
 		  <property name="visible">True</property>
-		  <property name="stock">gtk-convert</property>
-		  <property name="icon_size">4</property>
+		  <property name="pixbuf">parsing.xpm</property>
 		  <property name="xalign">0.5</property>
 		  <property name="yalign">0.5</property>
 		  <property name="xpad">0</property>

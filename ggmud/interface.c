@@ -1621,21 +1621,21 @@ create_window_main (void)
   gtk_widget_show (separatortoolitem1);
   gtk_container_add (GTK_CONTAINER (toolbar1), separatortoolitem1);
 
-  tmp_image = gtk_image_new_from_stock ("gtk-spell-check", tmp_toolbar_icon_size);
+  tmp_image = create_pixmap (window_main, "alias.xpm");
   gtk_widget_show (tmp_image);
   toolbutton_alias = (GtkWidget*) gtk_tool_button_new (tmp_image, "Alias");
   gtk_widget_show (toolbutton_alias);
   gtk_container_add (GTK_CONTAINER (toolbar1), toolbutton_alias);
   gtk_tool_item_set_tooltip (GTK_TOOL_ITEM (toolbutton_alias), tooltips, "Alias (Alt+A)", NULL);
 
-  tmp_image = gtk_image_new_from_stock ("gtk-new", tmp_toolbar_icon_size);
+  tmp_image = create_pixmap (window_main, "macro.xpm");
   gtk_widget_show (tmp_image);
   toolbutton_macro = (GtkWidget*) gtk_tool_button_new (tmp_image, "Macro");
   gtk_widget_show (toolbutton_macro);
   gtk_container_add (GTK_CONTAINER (toolbar1), toolbutton_macro);
   gtk_tool_item_set_tooltip (GTK_TOOL_ITEM (toolbutton_macro), tooltips, "Macros (Alt+M)", NULL);
 
-  tmp_image = gtk_image_new_from_stock ("gtk-execute", tmp_toolbar_icon_size);
+  tmp_image = create_pixmap (window_main, "trig.xpm");
   gtk_widget_show (tmp_image);
   toolbutton10 = (GtkWidget*) gtk_tool_button_new (tmp_image, "Trigger");
   gtk_widget_show (toolbutton10);
@@ -1672,7 +1672,7 @@ create_window_main (void)
   gtk_box_pack_start (GTK_BOX (hbox17), togglebutton_triggers, FALSE, FALSE, 0);
   gtk_tooltips_set_tip (tooltips, togglebutton_triggers, "Enable/disable triggers", NULL);
 
-  image7 = gtk_image_new_from_stock ("gtk-execute", GTK_ICON_SIZE_BUTTON);
+  image7 = create_pixmap (window_main, "trig.xpm");
   gtk_widget_show (image7);
   gtk_container_add (GTK_CONTAINER (togglebutton_triggers), image7);
 
@@ -1681,7 +1681,7 @@ create_window_main (void)
   gtk_box_pack_start (GTK_BOX (hbox17), togglebutton_parse, FALSE, FALSE, 0);
   gtk_tooltips_set_tip (tooltips, togglebutton_parse, "Enable/disable input line parsing for commands/aliases/special characters...", NULL);
 
-  image6 = gtk_image_new_from_stock ("gtk-convert", GTK_ICON_SIZE_BUTTON);
+  image6 = create_pixmap (window_main, "parsing.xpm");
   gtk_widget_show (image6);
   gtk_container_add (GTK_CONTAINER (togglebutton_parse), image6);
 
