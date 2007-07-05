@@ -22,7 +22,6 @@
 #include <string.h>
 #include "ggmud.h"
 #include "config.h"
-#include "pixmaps.h"	// ToolBar Icons
 #include "ansi.h"
 #include "interface.h"
 #include "support.h"
@@ -197,16 +196,10 @@ extern GdkBitmap *enabled_mask, *disabled_mask;
 
 void setup_pixmaps(GtkWidget *w)
 {
-//    GtkWidget *i1 = gtk_image_new_from_stock(GTK_STOCK_YES, GTK_ICON_SIZE_BUTTON);
-//    GtkWidget *i2 = gtk_image_new_from_stock(GTK_STOCK_NO, GTK_ICON_SIZE_BUTTON);
-
     enabled_pixmap = gdk_pixmap_create_from_xpm_d ( w->window,
-            &enabled_mask, &mud->window->style->white, yes_xpm );
+            &enabled_mask, &mud->window->style->white, get_image_pointer("green.xpm") );
     disabled_pixmap = gdk_pixmap_create_from_xpm_d ( w->window,
-            &disabled_mask, &mud->window->style->white, no_xpm );
-
-//    gtk_image_get_pixmap(GTK_IMAGE(i1), &enabled_pixmap, &enabled_mask);
-//    gtk_image_get_pixmap(GTK_IMAGE(i2), &disabled_pixmap, &disabled_mask);
+            &disabled_mask, &mud->window->style->white, get_image_pointer("red.xpm") );
 }
 
 void write_win_pos(char *name, FILE *dest, GtkWidget *widget)
@@ -477,58 +470,44 @@ void toggle_parsing(GtkToggleButton *togglebutton,
                                             gpointer user_data)
 {
     extern int verbatim;
-    GdkPixmap *icon;
-    GdkBitmap *mask;
-    char **image = SC_parsing;
-    //GtkWidget *iconw;
+    GdkPixbuf *icon;
 
-    if(gtk_toggle_button_get_active(togglebutton)) {
+    if(!gtk_toggle_button_get_active(togglebutton)) {
         textfield_add(mud->text, "# PARSING ENABLED\n", MESSAGE_SENT);
         verbatim = 0;
     }
     else {
         textfield_add(mud->text, "# PARSING DISABLED\n", MESSAGE_SENT);
         verbatim = 1;
-        image = SC_parsingoff;
     }
 
-    if ((icon = gdk_pixmap_create_from_xpm_d ( GTK_WIDGET(togglebutton)->window, 
-            &mask, NULL, image ))) {
-        gtk_pixmap_set (GTK_PIXMAP(GTK_BIN(togglebutton)->child), 
-                icon, mask ); 					/* icon widget */
+    icon = create_pixbuf(verbatim ? "parsing-off.xpm" : "parsing.xpm");
 
-        gdk_pixmap_unref(icon);
-        gdk_bitmap_unref(mask);
-    }    
+    gtk_image_set_from_pixbuf(GTK_IMAGE(GTK_BIN(togglebutton)->child), icon);
+
+    g_object_unref(icon);
 }
 
 void toggle_triggers(GtkToggleButton *togglebutton,
                                             gpointer user_data)
 {
     extern int use_triggers;
-    GdkPixmap *icon;
-    GdkBitmap *mask;
-    char **image = SC_triggers;
-    //GtkWidget *iconw;
+    GtkWidget *icon;
 
-    if(gtk_toggle_button_get_active(togglebutton)) {
+    if(!gtk_toggle_button_get_active(togglebutton)) {
         textfield_add(mud->text, "# TRIGGERS ENABLED\n", MESSAGE_SENT);
         use_triggers = 1;
     }
     else {
         textfield_add(mud->text, "# TRIGGERS DISABLED\n", MESSAGE_SENT);
         use_triggers = 0;
-        image = SC_triggersoff;
     }
 
-    if ( (icon = gdk_pixmap_create_from_xpm_d ( GTK_WIDGET(togglebutton)->window, 
-            &mask, NULL, image ))) {
-        gtk_pixmap_set (GTK_PIXMAP(GTK_BIN(togglebutton)->child), 
-                icon, mask ); 					/* icon widget */
+    icon = create_pixbuf(use_triggers ? "trig.xpm" : "trig-off.xpm");
 
-        gdk_pixmap_unref(icon);
-        gdk_bitmap_unref(mask);
-    }    
+    gtk_image_set_from_pixbuf(GTK_IMAGE(GTK_BIN(togglebutton)->child), icon);
+
+    g_object_unref(icon);
 }
 
 void kill_window (GtkWidget *widget, gpointer data)

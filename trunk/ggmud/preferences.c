@@ -649,10 +649,12 @@ void prefs_apply_settings(GtkWidget *prefs_window)
     else
         gtk_widget_hide(lookup_widget(mud->window, "handlebox_toolbar"));
 
-    if (prefs.Macrobuttons && mud->macrobuttons)
-        gtk_widget_show(mud->macrobuttons);
-    else
-        gtk_widget_hide(mud->macrobuttons);
+    if (mud->macrobuttons) {
+        if (prefs.Macrobuttons)
+            gtk_widget_show(mud->macrobuttons);
+        else
+            gtk_widget_hide(mud->macrobuttons);
+    }
 
     if (prefs.Statusbar )
         gtk_widget_show(lookup_widget(mud->window, "statusbar_main"));
