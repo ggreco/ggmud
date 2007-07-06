@@ -11,3 +11,4 @@ GtkWidget* create_window_main (void);
 GtkWidget* create_window_connect (void);
 GtkWidget* create_window_triggers (void);
 GtkWidget* create_window_classes (void);
+GtkWidget* create_window_aliases (void);

@@ -2199,9 +2199,9 @@ create_window_triggers (void)
   g_signal_connect ((gpointer) clist_trig, "select_row",
                     G_CALLBACK (trigger_selection_made),
                     NULL);
-  g_signal_connect ((gpointer) button17, "clicked",
-                    G_CALLBACK (find_in_list),
-                    NULL);
+  g_signal_connect_swapped ((gpointer) button17, "clicked",
+                            G_CALLBACK (find_in_list),
+                            GTK_OBJECT (clist_trig));
   g_signal_connect ((gpointer) button18, "clicked",
                     G_CALLBACK (trigger_button_add),
                     NULL);
@@ -2258,7 +2258,7 @@ create_window_classes (void)
   GtkWidget *button23;
 
   window_classes = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_widget_set_size_request (window_classes, 400, 350);
+  gtk_widget_set_size_request (window_classes, 300, 350);
   gtk_window_set_title (GTK_WINDOW (window_classes), "Trigger Classes");
 
   vbox19 = gtk_vbox_new (FALSE, 5);
@@ -2289,10 +2289,11 @@ create_window_classes (void)
   gtk_clist_set_column_widget (GTK_CLIST (clist_class), 1, label44);
   gtk_label_set_use_markup (GTK_LABEL (label44), TRUE);
 
-  label45 = gtk_label_new ("<b>Click on a row to enable/disable a trigger class.</b>");
+  label45 = gtk_label_new ("<b>Click on a row to enable or\ndisable a trigger class.</b>");
   gtk_widget_show (label45);
   gtk_box_pack_start (GTK_BOX (vbox19), label45, FALSE, FALSE, 0);
   gtk_label_set_use_markup (GTK_LABEL (label45), TRUE);
+  gtk_label_set_justify (GTK_LABEL (label45), GTK_JUSTIFY_CENTER);
 
   hbuttonbox8 = gtk_hbutton_box_new ();
   gtk_widget_show (hbuttonbox8);
@@ -2334,5 +2335,187 @@ create_window_classes (void)
   GLADE_HOOKUP_OBJECT (window_classes, button23, "button23");
 
   return window_classes;
+}
+
+GtkWidget*
+create_window_aliases (void)
+{
+  GtkWidget *window_aliases;
+  GtkWidget *vbox20;
+  GtkWidget *scrolledwindow5;
+  GtkWidget *clist_alias;
+  GtkWidget *label46;
+  GtkWidget *label47;
+  GtkWidget *table6;
+  GtkWidget *button28;
+  GtkWidget *image18;
+  GtkWidget *label48;
+  GtkWidget *label49;
+  GtkWidget *entry_replace;
+  GtkWidget *entry_alias;
+  GtkWidget *hseparator7;
+  GtkWidget *hbuttonbox9;
+  GtkWidget *button24;
+  GtkWidget *button25;
+  GtkWidget *button26;
+  GtkWidget *button27;
+  GtkTooltips *tooltips;
+
+  tooltips = gtk_tooltips_new ();
+
+  window_aliases = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_widget_set_size_request (window_aliases, 480, 320);
+  gtk_container_set_border_width (GTK_CONTAINER (window_aliases), 4);
+  gtk_window_set_title (GTK_WINDOW (window_aliases), "Aliases");
+
+  vbox20 = gtk_vbox_new (FALSE, 5);
+  gtk_widget_show (vbox20);
+  gtk_container_add (GTK_CONTAINER (window_aliases), vbox20);
+
+  scrolledwindow5 = gtk_scrolled_window_new (NULL, NULL);
+  gtk_widget_show (scrolledwindow5);
+  gtk_box_pack_start (GTK_BOX (vbox20), scrolledwindow5, TRUE, TRUE, 0);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow5), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+  gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolledwindow5), GTK_SHADOW_IN);
+
+  clist_alias = gtk_clist_new (2);
+  gtk_widget_show (clist_alias);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow5), clist_alias);
+  gtk_clist_set_column_width (GTK_CLIST (clist_alias), 0, 90);
+  gtk_clist_set_column_width (GTK_CLIST (clist_alias), 1, 80);
+  gtk_clist_column_titles_show (GTK_CLIST (clist_alias));
+
+  label46 = gtk_label_new ("<b>Alias</b>");
+  gtk_widget_show (label46);
+  gtk_clist_set_column_widget (GTK_CLIST (clist_alias), 0, label46);
+  gtk_label_set_use_markup (GTK_LABEL (label46), TRUE);
+
+  label47 = gtk_label_new ("<b>Replacement</b>");
+  gtk_widget_show (label47);
+  gtk_clist_set_column_widget (GTK_CLIST (clist_alias), 1, label47);
+  gtk_label_set_use_markup (GTK_LABEL (label47), TRUE);
+
+  table6 = gtk_table_new (2, 3, FALSE);
+  gtk_widget_show (table6);
+  gtk_box_pack_start (GTK_BOX (vbox20), table6, FALSE, FALSE, 0);
+  gtk_table_set_row_spacings (GTK_TABLE (table6), 4);
+  gtk_table_set_col_spacings (GTK_TABLE (table6), 4);
+
+  button28 = gtk_button_new ();
+  gtk_widget_show (button28);
+  gtk_table_attach (GTK_TABLE (table6), button28, 0, 1, 1, 2,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_tooltips_set_tip (tooltips, button28, "Find a specific word in alias shortcut or replacement.", NULL);
+
+  image18 = gtk_image_new_from_stock ("gtk-find", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_show (image18);
+  gtk_container_add (GTK_CONTAINER (button28), image18);
+
+  label48 = gtk_label_new ("<b>Alias</b>");
+  gtk_widget_show (label48);
+  gtk_table_attach (GTK_TABLE (table6), label48, 1, 2, 0, 1,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_label_set_use_markup (GTK_LABEL (label48), TRUE);
+
+  label49 = gtk_label_new ("<b>Replacement</b>");
+  gtk_widget_show (label49);
+  gtk_table_attach (GTK_TABLE (table6), label49, 2, 3, 0, 1,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_label_set_use_markup (GTK_LABEL (label49), TRUE);
+
+  entry_replace = gtk_entry_new ();
+  gtk_widget_show (entry_replace);
+  gtk_table_attach (GTK_TABLE (table6), entry_replace, 2, 3, 1, 2,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_entry_set_invisible_char (GTK_ENTRY (entry_replace), 9679);
+
+  entry_alias = gtk_entry_new ();
+  gtk_widget_show (entry_alias);
+  gtk_table_attach (GTK_TABLE (table6), entry_alias, 1, 2, 1, 2,
+                    (GtkAttachOptions) (0),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_entry_set_invisible_char (GTK_ENTRY (entry_alias), 9679);
+
+  hseparator7 = gtk_hseparator_new ();
+  gtk_widget_show (hseparator7);
+  gtk_box_pack_start (GTK_BOX (vbox20), hseparator7, FALSE, FALSE, 0);
+
+  hbuttonbox9 = gtk_hbutton_box_new ();
+  gtk_widget_show (hbuttonbox9);
+  gtk_box_pack_start (GTK_BOX (vbox20), hbuttonbox9, FALSE, FALSE, 0);
+
+  button24 = gtk_button_new_from_stock ("gtk-add");
+  gtk_widget_show (button24);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox9), button24);
+  GTK_WIDGET_SET_FLAGS (button24, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button24, "Add a new ALIAS or replace an existing one (only if the alias label already exists)", NULL);
+
+  button25 = gtk_button_new_from_stock ("gtk-delete");
+  gtk_widget_show (button25);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox9), button25);
+  GTK_WIDGET_SET_FLAGS (button25, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button25, "Delete the selected ALIAS.", NULL);
+
+  button26 = gtk_button_new_from_stock ("gtk-save");
+  gtk_widget_show (button26);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox9), button26);
+  GTK_WIDGET_SET_FLAGS (button26, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button26, "Save your aliases to disk.", NULL);
+
+  button27 = gtk_button_new_from_stock ("gtk-close");
+  gtk_widget_show (button27);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox9), button27);
+  GTK_WIDGET_SET_FLAGS (button27, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button27, "Close the aliases window.", NULL);
+
+  g_signal_connect ((gpointer) window_aliases, "destroy_event",
+                    G_CALLBACK (close_window),
+                    NULL);
+  g_signal_connect ((gpointer) clist_alias, "select_row",
+                    G_CALLBACK (alias_selection_made),
+                    NULL);
+  g_signal_connect_swapped ((gpointer) button28, "clicked",
+                            G_CALLBACK (find_in_list),
+                            GTK_OBJECT (clist_alias));
+  g_signal_connect ((gpointer) button24, "clicked",
+                    G_CALLBACK (alias_button_add),
+                    NULL);
+  g_signal_connect ((gpointer) button25, "clicked",
+                    G_CALLBACK (alias_button_delete),
+                    NULL);
+  g_signal_connect ((gpointer) button26, "clicked",
+                    G_CALLBACK (save_aliases),
+                    NULL);
+  g_signal_connect ((gpointer) button27, "clicked",
+                    G_CALLBACK (close_a_gui_window),
+                    NULL);
+
+  /* Store pointers to all widgets, for use by lookup_widget(). */
+  GLADE_HOOKUP_OBJECT_NO_REF (window_aliases, window_aliases, "window_aliases");
+  GLADE_HOOKUP_OBJECT (window_aliases, vbox20, "vbox20");
+  GLADE_HOOKUP_OBJECT (window_aliases, scrolledwindow5, "scrolledwindow5");
+  GLADE_HOOKUP_OBJECT (window_aliases, clist_alias, "clist_alias");
+  GLADE_HOOKUP_OBJECT (window_aliases, label46, "label46");
+  GLADE_HOOKUP_OBJECT (window_aliases, label47, "label47");
+  GLADE_HOOKUP_OBJECT (window_aliases, table6, "table6");
+  GLADE_HOOKUP_OBJECT (window_aliases, button28, "button28");
+  GLADE_HOOKUP_OBJECT (window_aliases, image18, "image18");
+  GLADE_HOOKUP_OBJECT (window_aliases, label48, "label48");
+  GLADE_HOOKUP_OBJECT (window_aliases, label49, "label49");
+  GLADE_HOOKUP_OBJECT (window_aliases, entry_replace, "entry_replace");
+  GLADE_HOOKUP_OBJECT (window_aliases, entry_alias, "entry_alias");
+  GLADE_HOOKUP_OBJECT (window_aliases, hseparator7, "hseparator7");
+  GLADE_HOOKUP_OBJECT (window_aliases, hbuttonbox9, "hbuttonbox9");
+  GLADE_HOOKUP_OBJECT (window_aliases, button24, "button24");
+  GLADE_HOOKUP_OBJECT (window_aliases, button25, "button25");
+  GLADE_HOOKUP_OBJECT (window_aliases, button26, "button26");
+  GLADE_HOOKUP_OBJECT (window_aliases, button27, "button27");
+  GLADE_HOOKUP_OBJECT_NO_REF (window_aliases, tooltips, "tooltips");
+
+  return window_aliases;
 }
 

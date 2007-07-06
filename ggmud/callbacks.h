@@ -357,3 +357,39 @@ gboolean
 close_window                           (GtkWidget       *widget,
                                         GdkEvent        *event,
                                         gpointer         user_data);
+
+gboolean
+close_window                           (GtkWidget       *widget,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);
+
+void
+alias_selection_made                   (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);
+
+void
+find_in_list                           (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+alias_button_delete                    (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+save_aliases                           (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+delete_a_gui_window                    (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+alias_button_add                       (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+close_a_gui_window                     (GtkButton       *button,
+                                        gpointer         user_data);

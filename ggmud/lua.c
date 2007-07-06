@@ -336,7 +336,7 @@ void get_lua_global(const char *key, char **value)
 	
 	lua_getglobal(mud->lua, key);
 
-    if (v = lua_tostring(mud->lua, -1)) {
+    if ((v = lua_tostring(mud->lua, -1))) {
 
         if (strcmp(v, *value)) {
             if (*value)
