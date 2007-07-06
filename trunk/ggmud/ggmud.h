@@ -270,7 +270,7 @@ extern void TextCopy (GtkWidget *widget, gpointer data);
 
 
 /* win.c */
-extern void find_in_list(GtkWidget *widget, GtkCList *clist);
+extern void find_in_list(GtkCList *clist, GtkWidget *widget);
 extern void  close_window ( GtkWidget *widget, gpointer data );
 extern void  kill_window ( GtkWidget *widget, gpointer data );
 extern void init_colors();

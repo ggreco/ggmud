@@ -230,10 +230,10 @@ void triggerclass_window(GtkWidget *widget, gpointer data )
     
 
     clist = lookup_widget(class_window, "clist_class");
-    gtk_clist_set_column_width (GTK_CLIST (clist), 0, 250);
-    gtk_clist_set_column_width (GTK_CLIST (clist), 1, 50);
+    gtk_clist_set_column_width (GTK_CLIST (clist), 0, 180);
+    gtk_clist_set_column_width (GTK_CLIST (clist), 1, 40);
     gtk_clist_set_column_justification (GTK_CLIST (clist), 0, GTK_JUSTIFY_LEFT);
-    gtk_clist_set_column_justification (GTK_CLIST (clist), 1, GTK_JUSTIFY_LEFT);
+    gtk_clist_set_column_justification (GTK_CLIST (clist), 1, GTK_JUSTIFY_CENTER);
     gtk_clist_set_row_height (GTK_CLIST (clist), 20);
 
     insert_trigger_classes  (GTK_CLIST(clist)  );
@@ -368,7 +368,7 @@ emit_response(GtkEntry *entry, GtkDialog *d)
 }
 
 void 
-find_in_list(GtkWidget *widget, GtkCList *clist)
+find_in_list(GtkCList *clist, GtkWidget *widget)
 {
      GtkWidget *dialog = gtk_dialog_new_with_buttons ("Find...",
                                                   GTK_WINDOW(gtk_widget_get_toplevel(widget)),
@@ -381,8 +381,12 @@ find_in_list(GtkWidget *widget, GtkCList *clist)
     GtkWidget *label = gtk_label_new("Insert the string you want to search for:");
     GtkWidget *entry = gtk_entry_new();
     
+    gtk_box_set_spacing(GTK_BOX(GTK_DIALOG(dialog)->vbox), 8);
+    gtk_container_set_border_width(GTK_CONTAINER (GTK_DIALOG(dialog)), 8);
+
     gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox),
                       label);
+
     gtk_container_add (GTK_CONTAINER (GTK_DIALOG(dialog)->vbox),
                       entry);
 
@@ -402,6 +406,7 @@ find_in_list(GtkWidget *widget, GtkCList *clist)
             else {
                 // I hope this will trigger the cbk.
                 gtk_clist_select_row(clist, row, 0);
+                gtk_clist_moveto(clist, row, 0, 0.5, 0.0);
             }
         }
     }

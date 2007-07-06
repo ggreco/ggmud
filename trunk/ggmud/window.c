@@ -492,7 +492,7 @@ void toggle_triggers(GtkToggleButton *togglebutton,
                                             gpointer user_data)
 {
     extern int use_triggers;
-    GtkWidget *icon;
+    GdkPixbuf *icon;
 
     if(!gtk_toggle_button_get_active(togglebutton)) {
         textfield_add(mud->text, "# TRIGGERS ENABLED\n", MESSAGE_SENT);
