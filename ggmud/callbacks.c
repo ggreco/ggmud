@@ -77,3 +77,4 @@ on_checkbutton_autologin_toggled       (GtkToggleButton *togglebutton,
             gtk_toggle_button_get_active(togglebutton));    
 }
 
+

@@ -1670,6 +1670,7 @@ create_window_main (void)
   togglebutton_triggers = gtk_toggle_button_new ();
   gtk_widget_show (togglebutton_triggers);
   gtk_box_pack_start (GTK_BOX (hbox17), togglebutton_triggers, FALSE, FALSE, 0);
+  GTK_WIDGET_UNSET_FLAGS (togglebutton_triggers, GTK_CAN_FOCUS);
   gtk_tooltips_set_tip (tooltips, togglebutton_triggers, "Enable/disable triggers", NULL);
 
   image7 = create_pixmap (window_main, "trig.xpm");
@@ -1679,6 +1680,7 @@ create_window_main (void)
   togglebutton_parse = gtk_toggle_button_new ();
   gtk_widget_show (togglebutton_parse);
   gtk_box_pack_start (GTK_BOX (hbox17), togglebutton_parse, FALSE, FALSE, 0);
+  GTK_WIDGET_UNSET_FLAGS (togglebutton_parse, GTK_CAN_FOCUS);
   gtk_tooltips_set_tip (tooltips, togglebutton_parse, "Enable/disable input line parsing for commands/aliases/special characters...", NULL);
 
   image6 = create_pixmap (window_main, "parsing.xpm");
@@ -1688,6 +1690,7 @@ create_window_main (void)
   togglebutton_review = gtk_toggle_button_new ();
   gtk_widget_show (togglebutton_review);
   gtk_box_pack_start (GTK_BOX (hbox17), togglebutton_review, FALSE, FALSE, 0);
+  GTK_WIDGET_UNSET_FLAGS (togglebutton_review, GTK_CAN_FOCUS);
   gtk_tooltips_set_tip (tooltips, togglebutton_review, "Split output view to see scrollback.", NULL);
 
   image5 = gtk_image_new_from_stock ("gtk-justify-left", GTK_ICON_SIZE_BUTTON);
@@ -2202,15 +2205,15 @@ create_window_triggers (void)
   g_signal_connect_swapped ((gpointer) button17, "clicked",
                             G_CALLBACK (find_in_list),
                             GTK_OBJECT (clist_trig));
-  g_signal_connect ((gpointer) button18, "clicked",
-                    G_CALLBACK (trigger_button_add),
-                    NULL);
-  g_signal_connect ((gpointer) button19, "clicked",
-                    G_CALLBACK (trigger_button_delete),
-                    NULL);
-  g_signal_connect ((gpointer) button20, "clicked",
-                    G_CALLBACK (save_triggers),
-                    NULL);
+  g_signal_connect_swapped ((gpointer) button18, "clicked",
+                            G_CALLBACK (trigger_button_add),
+                            GTK_OBJECT (clist_trig));
+  g_signal_connect_swapped ((gpointer) button19, "clicked",
+                            G_CALLBACK (trigger_button_delete),
+                            GTK_OBJECT (clist_trig));
+  g_signal_connect_swapped ((gpointer) button20, "clicked",
+                            G_CALLBACK (save_triggers),
+                            GTK_OBJECT (clist_trig));
   g_signal_connect ((gpointer) button21, "clicked",
                     G_CALLBACK (close_a_gui_window),
                     NULL);
@@ -2481,15 +2484,15 @@ create_window_aliases (void)
   g_signal_connect_swapped ((gpointer) button28, "clicked",
                             G_CALLBACK (find_in_list),
                             GTK_OBJECT (clist_alias));
-  g_signal_connect ((gpointer) button24, "clicked",
-                    G_CALLBACK (alias_button_add),
-                    NULL);
-  g_signal_connect ((gpointer) button25, "clicked",
-                    G_CALLBACK (alias_button_delete),
-                    NULL);
-  g_signal_connect ((gpointer) button26, "clicked",
-                    G_CALLBACK (save_aliases),
-                    NULL);
+  g_signal_connect_swapped ((gpointer) button24, "clicked",
+                            G_CALLBACK (alias_button_add),
+                            GTK_OBJECT (clist_alias));
+  g_signal_connect_swapped ((gpointer) button25, "clicked",
+                            G_CALLBACK (alias_button_delete),
+                            GTK_OBJECT (clist_alias));
+  g_signal_connect_swapped ((gpointer) button26, "clicked",
+                            G_CALLBACK (save_aliases),
+                            GTK_OBJECT (clist_alias));
   g_signal_connect ((gpointer) button27, "clicked",
                     G_CALLBACK (close_a_gui_window),
                     NULL);
@@ -2517,5 +2520,258 @@ create_window_aliases (void)
   GLADE_HOOKUP_OBJECT_NO_REF (window_aliases, tooltips, "tooltips");
 
   return window_aliases;
+}
+
+GtkWidget*
+create_window_gags (void)
+{
+  GtkWidget *window_gags;
+  GtkWidget *vbox21;
+  GtkWidget *scrolledwindow6;
+  GtkWidget *clist_gag;
+  GtkWidget *label51;
+  GtkWidget *label50;
+  GtkWidget *entry_gag;
+  GtkWidget *hseparator8;
+  GtkWidget *hbuttonbox10;
+  GtkWidget *button29;
+  GtkWidget *button30;
+  GtkWidget *button31;
+  GtkWidget *button32;
+  GtkTooltips *tooltips;
+
+  tooltips = gtk_tooltips_new ();
+
+  window_gags = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_widget_set_size_request (window_gags, 450, 300);
+  gtk_container_set_border_width (GTK_CONTAINER (window_gags), 4);
+  gtk_window_set_title (GTK_WINDOW (window_gags), "Gags");
+
+  vbox21 = gtk_vbox_new (FALSE, 4);
+  gtk_widget_show (vbox21);
+  gtk_container_add (GTK_CONTAINER (window_gags), vbox21);
+
+  scrolledwindow6 = gtk_scrolled_window_new (NULL, NULL);
+  gtk_widget_show (scrolledwindow6);
+  gtk_box_pack_start (GTK_BOX (vbox21), scrolledwindow6, TRUE, TRUE, 0);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow6), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+  gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolledwindow6), GTK_SHADOW_IN);
+
+  clist_gag = gtk_clist_new (1);
+  gtk_widget_show (clist_gag);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow6), clist_gag);
+  gtk_clist_set_column_width (GTK_CLIST (clist_gag), 0, 80);
+  gtk_clist_column_titles_show (GTK_CLIST (clist_gag));
+
+  label51 = gtk_label_new ("<b>Text to gag</b>");
+  gtk_widget_show (label51);
+  gtk_clist_set_column_widget (GTK_CLIST (clist_gag), 0, label51);
+  gtk_label_set_use_markup (GTK_LABEL (label51), TRUE);
+
+  label50 = gtk_label_new ("<b>Insert the text to gag</b>\n(all the line containing the specified text will be gagged)");
+  gtk_widget_show (label50);
+  gtk_box_pack_start (GTK_BOX (vbox21), label50, FALSE, FALSE, 0);
+  gtk_label_set_use_markup (GTK_LABEL (label50), TRUE);
+  gtk_label_set_justify (GTK_LABEL (label50), GTK_JUSTIFY_CENTER);
+
+  entry_gag = gtk_entry_new ();
+  gtk_widget_show (entry_gag);
+  gtk_box_pack_start (GTK_BOX (vbox21), entry_gag, FALSE, FALSE, 0);
+  gtk_entry_set_invisible_char (GTK_ENTRY (entry_gag), 9679);
+
+  hseparator8 = gtk_hseparator_new ();
+  gtk_widget_show (hseparator8);
+  gtk_box_pack_start (GTK_BOX (vbox21), hseparator8, FALSE, FALSE, 0);
+
+  hbuttonbox10 = gtk_hbutton_box_new ();
+  gtk_widget_show (hbuttonbox10);
+  gtk_box_pack_start (GTK_BOX (vbox21), hbuttonbox10, FALSE, FALSE, 0);
+
+  button29 = gtk_button_new_from_stock ("gtk-add");
+  gtk_widget_show (button29);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox10), button29);
+  GTK_WIDGET_SET_FLAGS (button29, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button29, "Add a new sentence to gag (all the line containing the specified text will be gagged).", NULL);
+
+  button30 = gtk_button_new_from_stock ("gtk-delete");
+  gtk_widget_show (button30);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox10), button30);
+  GTK_WIDGET_SET_FLAGS (button30, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button30, "Delete a gag", NULL);
+
+  button31 = gtk_button_new_from_stock ("gtk-save");
+  gtk_widget_show (button31);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox10), button31);
+  GTK_WIDGET_SET_FLAGS (button31, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button31, "Save the defined gags to disk", NULL);
+
+  button32 = gtk_button_new_from_stock ("gtk-close");
+  gtk_widget_show (button32);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox10), button32);
+  GTK_WIDGET_SET_FLAGS (button32, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button32, "Close this window", NULL);
+
+  g_signal_connect ((gpointer) window_gags, "destroy_event",
+                    G_CALLBACK (close_window),
+                    NULL);
+  g_signal_connect ((gpointer) clist_gag, "select_row",
+                    G_CALLBACK (gag_selection_made),
+                    NULL);
+  g_signal_connect_swapped ((gpointer) button29, "clicked",
+                            G_CALLBACK (gag_button_add),
+                            GTK_OBJECT (clist_gag));
+  g_signal_connect_swapped ((gpointer) button30, "clicked",
+                            G_CALLBACK (gag_button_delete),
+                            GTK_OBJECT (clist_gag));
+  g_signal_connect_swapped ((gpointer) button31, "clicked",
+                            G_CALLBACK (save_gags),
+                            GTK_OBJECT (clist_gag));
+  g_signal_connect ((gpointer) button32, "clicked",
+                    G_CALLBACK (close_a_gui_window),
+                    NULL);
+
+  /* Store pointers to all widgets, for use by lookup_widget(). */
+  GLADE_HOOKUP_OBJECT_NO_REF (window_gags, window_gags, "window_gags");
+  GLADE_HOOKUP_OBJECT (window_gags, vbox21, "vbox21");
+  GLADE_HOOKUP_OBJECT (window_gags, scrolledwindow6, "scrolledwindow6");
+  GLADE_HOOKUP_OBJECT (window_gags, clist_gag, "clist_gag");
+  GLADE_HOOKUP_OBJECT (window_gags, label51, "label51");
+  GLADE_HOOKUP_OBJECT (window_gags, label50, "label50");
+  GLADE_HOOKUP_OBJECT (window_gags, entry_gag, "entry_gag");
+  GLADE_HOOKUP_OBJECT (window_gags, hseparator8, "hseparator8");
+  GLADE_HOOKUP_OBJECT (window_gags, hbuttonbox10, "hbuttonbox10");
+  GLADE_HOOKUP_OBJECT (window_gags, button29, "button29");
+  GLADE_HOOKUP_OBJECT (window_gags, button30, "button30");
+  GLADE_HOOKUP_OBJECT (window_gags, button31, "button31");
+  GLADE_HOOKUP_OBJECT (window_gags, button32, "button32");
+  GLADE_HOOKUP_OBJECT_NO_REF (window_gags, tooltips, "tooltips");
+
+  return window_gags;
+}
+
+GtkWidget*
+create_window_complete (void)
+{
+  GtkWidget *window_complete;
+  GtkWidget *vbox22;
+  GtkWidget *scrolledwindow7;
+  GtkWidget *clist_complete;
+  GtkWidget *label53;
+  GtkWidget *label54;
+  GtkWidget *entry_text;
+  GtkWidget *hseparator9;
+  GtkWidget *hbuttonbox11;
+  GtkWidget *button36;
+  GtkWidget *button37;
+  GtkWidget *button38;
+  GtkWidget *button39;
+  GtkTooltips *tooltips;
+
+  tooltips = gtk_tooltips_new ();
+
+  window_complete = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_widget_set_size_request (window_complete, 450, 300);
+  gtk_window_set_title (GTK_WINDOW (window_complete), "Tab completion settings");
+
+  vbox22 = gtk_vbox_new (FALSE, 4);
+  gtk_widget_show (vbox22);
+  gtk_container_add (GTK_CONTAINER (window_complete), vbox22);
+
+  scrolledwindow7 = gtk_scrolled_window_new (NULL, NULL);
+  gtk_widget_show (scrolledwindow7);
+  gtk_box_pack_start (GTK_BOX (vbox22), scrolledwindow7, TRUE, TRUE, 0);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow7), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+  gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrolledwindow7), GTK_SHADOW_IN);
+
+  clist_complete = gtk_clist_new (1);
+  gtk_widget_show (clist_complete);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow7), clist_complete);
+  gtk_clist_set_column_width (GTK_CLIST (clist_complete), 0, 80);
+  gtk_clist_column_titles_show (GTK_CLIST (clist_complete));
+
+  label53 = gtk_label_new ("<b>Word list</b>");
+  gtk_widget_show (label53);
+  gtk_clist_set_column_widget (GTK_CLIST (clist_complete), 0, label53);
+  gtk_label_set_use_markup (GTK_LABEL (label53), TRUE);
+
+  label54 = gtk_label_new ("<b>Insert a word to complete with TAB</b>");
+  gtk_widget_show (label54);
+  gtk_box_pack_start (GTK_BOX (vbox22), label54, FALSE, FALSE, 0);
+  gtk_label_set_use_markup (GTK_LABEL (label54), TRUE);
+  gtk_label_set_justify (GTK_LABEL (label54), GTK_JUSTIFY_CENTER);
+
+  entry_text = gtk_entry_new ();
+  gtk_widget_show (entry_text);
+  gtk_box_pack_start (GTK_BOX (vbox22), entry_text, FALSE, FALSE, 0);
+  gtk_entry_set_invisible_char (GTK_ENTRY (entry_text), 9679);
+
+  hseparator9 = gtk_hseparator_new ();
+  gtk_widget_show (hseparator9);
+  gtk_box_pack_start (GTK_BOX (vbox22), hseparator9, FALSE, FALSE, 0);
+
+  hbuttonbox11 = gtk_hbutton_box_new ();
+  gtk_widget_show (hbuttonbox11);
+  gtk_box_pack_start (GTK_BOX (vbox22), hbuttonbox11, FALSE, FALSE, 0);
+
+  button36 = gtk_button_new_from_stock ("gtk-add");
+  gtk_widget_show (button36);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox11), button36);
+  GTK_WIDGET_SET_FLAGS (button36, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button36, "Add a new sentence to gag (all the line containing the specified text will be gagged).", NULL);
+
+  button37 = gtk_button_new_from_stock ("gtk-delete");
+  gtk_widget_show (button37);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox11), button37);
+  GTK_WIDGET_SET_FLAGS (button37, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button37, "Delete a gag", NULL);
+
+  button38 = gtk_button_new_from_stock ("gtk-save");
+  gtk_widget_show (button38);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox11), button38);
+  GTK_WIDGET_SET_FLAGS (button38, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button38, "Save the defined gags to disk", NULL);
+
+  button39 = gtk_button_new_from_stock ("gtk-close");
+  gtk_widget_show (button39);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox11), button39);
+  GTK_WIDGET_SET_FLAGS (button39, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button39, "Close this window", NULL);
+
+  g_signal_connect ((gpointer) window_complete, "destroy_event",
+                    G_CALLBACK (close_window),
+                    NULL);
+  g_signal_connect ((gpointer) clist_complete, "select_row",
+                    G_CALLBACK (complete_selection_made),
+                    NULL);
+  g_signal_connect_swapped ((gpointer) button36, "clicked",
+                            G_CALLBACK (complete_button_add),
+                            GTK_OBJECT (clist_complete));
+  g_signal_connect_swapped ((gpointer) button37, "clicked",
+                            G_CALLBACK (complete_button_delete),
+                            GTK_OBJECT (clist_complete));
+  g_signal_connect_swapped ((gpointer) button38, "clicked",
+                            G_CALLBACK (save_complete),
+                            GTK_OBJECT (clist_complete));
+  g_signal_connect ((gpointer) button39, "clicked",
+                    G_CALLBACK (close_a_gui_window),
+                    NULL);
+
+  /* Store pointers to all widgets, for use by lookup_widget(). */
+  GLADE_HOOKUP_OBJECT_NO_REF (window_complete, window_complete, "window_complete");
+  GLADE_HOOKUP_OBJECT (window_complete, vbox22, "vbox22");
+  GLADE_HOOKUP_OBJECT (window_complete, scrolledwindow7, "scrolledwindow7");
+  GLADE_HOOKUP_OBJECT (window_complete, clist_complete, "clist_complete");
+  GLADE_HOOKUP_OBJECT (window_complete, label53, "label53");
+  GLADE_HOOKUP_OBJECT (window_complete, label54, "label54");
+  GLADE_HOOKUP_OBJECT (window_complete, entry_text, "entry_text");
+  GLADE_HOOKUP_OBJECT (window_complete, hseparator9, "hseparator9");
+  GLADE_HOOKUP_OBJECT (window_complete, hbuttonbox11, "hbuttonbox11");
+  GLADE_HOOKUP_OBJECT (window_complete, button36, "button36");
+  GLADE_HOOKUP_OBJECT (window_complete, button37, "button37");
+  GLADE_HOOKUP_OBJECT (window_complete, button38, "button38");
+  GLADE_HOOKUP_OBJECT (window_complete, button39, "button39");
+  GLADE_HOOKUP_OBJECT_NO_REF (window_complete, tooltips, "tooltips");
+
+  return window_complete;
 }
 

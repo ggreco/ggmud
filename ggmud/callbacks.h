@@ -393,3 +393,55 @@ alias_button_add                       (GtkButton       *button,
 void
 close_a_gui_window                     (GtkButton       *button,
                                         gpointer         user_data);
+
+gboolean
+close_window                           (GtkWidget       *widget,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);
+
+void
+gag_selection_made                     (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);
+
+void
+gag_button_add                         (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+gag_button_delete                      (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+save_gags                              (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+close_a_gui_window                     (GtkButton       *button,
+                                        gpointer         user_data);
+
+gboolean
+close_window                           (GtkWidget       *widget,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);
+
+void
+complete_selection_made                (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);
+
+void
+complete_button_add                    (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+complete_button_delete                 (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+save_complete                          (GtkButton       *button,
+                                        gpointer         user_data);

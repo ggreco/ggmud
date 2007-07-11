@@ -32,7 +32,6 @@
 
 static GtkWidget *trig_window = NULL;
 static GtkWidget *class_window = NULL;
-static gint      trigger_selected_row    = -1;
 
 #define ALIAS_LEN 128
 #define REPL_LEN 512
@@ -41,10 +40,9 @@ static gint      trigger_selected_row    = -1;
 /*
  * Save triggers to file
  */
-void save_triggers (GtkWidget *w, void *userdata) 
+void save_triggers (GtkCList *data, GtkWidget *w) 
 {
     FILE *fp;
-    GtkCList *data = GTK_CLIST(lookup_widget(w, "clist_trig"));
 
     if ((fp = fileopen (TRIGGER_FILE, "w"))) {
         int done = FALSE;
@@ -99,7 +97,7 @@ static void  insert_triggers  (GtkCList *clist)
     int row;
     
     gtk_clist_clear (clist);
-
+    gtk_object_set_user_data(GTK_OBJECT(clist), (void *)-1);
     gtk_clist_freeze(clist);
     
     while ( (list = list->next) ) {
@@ -186,6 +184,7 @@ void trigger_selection_made (GtkCList *clist, gint row, gint column,
 {
     static guint32 old_time = 0L;
     gchar *text;
+    int trigger_selected_row = (int)gtk_object_get_user_data(GTK_OBJECT(clist));
 
     if (old_time != 0L && (event->time - old_time) < 1000 &&
             trigger_selected_row == row) {
@@ -202,7 +201,8 @@ void trigger_selection_made (GtkCList *clist, gint row, gint column,
     }
     else
         old_time = event->time;
-    trigger_selected_row    = row;
+
+    gtk_object_set_user_data(GTK_OBJECT(clist), (void *)row);
 
     gtk_clist_get_text (clist, row, 0, &text);
     gtk_entry_set_text (GTK_ENTRY (
@@ -278,7 +278,7 @@ static void add_trigger(const char *a, const char *b, const char *class)
         update_classes(lookup_widget(trig_window, "comboboxentry_class"));
 }
 
-void trigger_button_add (GtkWidget *button, void *data)
+void trigger_button_add (GtkCList *clist, GtkWidget *button)
 {
     const gchar *text[3];
 
@@ -316,23 +316,23 @@ void trigger_button_add (GtkWidget *button, void *data)
 
     add_trigger (text[0], text[1], text[2]);
 
-    insert_triggers(GTK_CLIST(lookup_widget(button, "clist_trig")));
+    insert_triggers(clist);
 }
 
-void trigger_button_delete (GtkWidget *button, gpointer data) {
+void trigger_button_delete (GtkCList *clist, GtkWidget *button) {
     gchar *word;
-    
+    int trigger_selected_row = (int) gtk_object_get_user_data(GTK_OBJECT(clist));
+
     if ( trigger_selected_row == -1 ) {
         popup_window (WARN, "No selection made.");
     }
     else {
-        GtkCList *l = GTK_CLIST(lookup_widget(button, "clist_trig"));
         char buffer[ALIAS_LEN + 20];
         
-        gtk_clist_get_text (l, trigger_selected_row, 0, &word);
+        gtk_clist_get_text (clist, trigger_selected_row, 0, &word);
         sprintf(buffer, "#unaction {%s}", word);
-        gtk_clist_remove (l, trigger_selected_row);
-        trigger_selected_row = -1;
+        gtk_clist_remove (clist, trigger_selected_row);
+        gtk_object_set_user_data(GTK_OBJECT(clist), (void *)-1);
 
         parse_input(buffer, NULL);
     }
