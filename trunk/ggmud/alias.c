@@ -35,15 +35,13 @@
 
 /* Global variables for alias */
 static GtkWidget *alias_window = NULL;
-static gint      alias_selected_row    = -1;
 
-void save_aliases (GtkWidget *button, gpointer userdata)
+void save_aliases (GtkCList *data, GtkWidget *button)
 {
     FILE *fp;
     gint done = FALSE;
     gchar *alias, *replace;
     gint  row = 0;
-    GtkCList *data = GTK_CLIST(lookup_widget(button, "clist_alias"));
 
     if ((fp = fileopen (ALIAS_FILE, "w"))) {
     	while ( !done && data) {
@@ -91,6 +89,7 @@ static void  insert_aliases  (GtkCList *clist)
     struct listnode *list = mud->activesession ? mud->activesession->aliases : common_aliases;
 
     gtk_clist_clear(clist);
+    gtk_object_set_user_data(GTK_OBJECT(clist), (void *) -1);
     gtk_clist_freeze(clist);
             
     while ( (list = list->next) ) {
@@ -106,8 +105,7 @@ void alias_selection_made (GtkWidget *clist, gint row, gint column,
 {
     gchar *text;
 
-    alias_selected_row    = row;
-
+    gtk_object_set_user_data(GTK_OBJECT(clist), (void *) row);
     gtk_clist_get_text ((GtkCList*) clist, row, 0, &text);
     gtk_entry_set_text (GTK_ENTRY(
                 lookup_widget(clist, "entry_alias")), text);
@@ -116,7 +114,7 @@ void alias_selection_made (GtkWidget *clist, gint row, gint column,
                 lookup_widget(clist, "entry_replace")), text);
 }
 
-void alias_button_add (GtkWidget *button, gpointer data)
+void alias_button_add (GtkCList *list, GtkWidget *button)
 {
     const gchar *text[2];
     gint   i;
@@ -154,21 +152,20 @@ void alias_button_add (GtkWidget *button, gpointer data)
     }
 
     add_alias (text[0], text[1]);
-    insert_aliases(GTK_CLIST(lookup_widget(button, "clist_alias")));
+    insert_aliases(list);
 }
 
-void alias_button_delete (GtkWidget *button, gpointer userdata) {
+void alias_button_delete (GtkCList *data, GtkWidget *button) {
     gchar *word;
-    
+    int alias_selected_row = (int) gtk_object_get_user_data(GTK_OBJECT(data));
+ 
     if ( alias_selected_row == -1 ) {
         popup_window (WARN, "No selection made.");
     }
     else {
         char buffer[ALIAS_LEN + 20];
-        GtkCList *data =  GTK_CLIST(lookup_widget(button, "clist_alias")); 
         gtk_clist_get_text(data, alias_selected_row, 0, &word);
         sprintf(buffer, "#unalias %s", word);
-        alias_selected_row = -1;
 
         parse_input(buffer, mud->activesession);
 
