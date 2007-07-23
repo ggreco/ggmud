@@ -80,7 +80,7 @@ lua/liblua.a:
 lua/libluaw32.a: lua/*c
 	$(MAKE) -C lua clean
 	$(MAKE) -C lua "LUA_A=libluaw32.a" "LUA_T=lua.exe" \
-	"CC=\"$(CROSSDIR)bin/gcc -mno-cygwin -mms-bitfields\"" "RANLIB=$(CROSSDIR)/bin/ranlib" \
+	"CC=$(CROSSDIR)bin/gcc" "MYCFLAGS=-mno-cygwin -mms-bitfields" "RANLIB=$(CROSSDIR)/bin/ranlib" \
     "AR=$(CROSSDIR)bin/ar rcu" "MYLIBS=" "MYLDFLAGS=-s" lua.exe
 
 $(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libz.a
