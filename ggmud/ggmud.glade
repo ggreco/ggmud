@@ -3578,6 +3578,7 @@
 		      <property name="has_frame">True</property>
 		      <property name="invisible_char">●</property>
 		      <property name="activates_default">False</property>
+		      <signal name="activate" handler="do_con" last_modification_time="Mon, 16 Jul 2007 09:42:08 GMT"/>
 		    </widget>
 		    <packing>
 		      <property name="left_attach">1</property>
@@ -3599,6 +3600,7 @@
 		      <property name="has_frame">True</property>
 		      <property name="invisible_char">●</property>
 		      <property name="activates_default">False</property>
+		      <signal name="activate" handler="do_con" last_modification_time="Mon, 16 Jul 2007 09:41:59 GMT"/>
 		    </widget>
 		    <packing>
 		      <property name="left_attach">1</property>

@@ -619,6 +619,27 @@ void mccp_status()
 void
 spawn_gui()
 {
+  // experimental code for GTK 2.4/2.6 to avoid "gtk-connect"
+  GtkStockItem item;
+
+  if (!gtk_stock_lookup("gtk-connect", &item)) {
+      item.stock_id = "gtk-connect";
+      item.label = "Connect";
+      item.modifier = GDK_MOD1_MASK;
+      item.keyval = GDK_c;
+      item.translation_domain = NULL;
+      gtk_stock_add(&item, 1);
+  }
+
+  if (!gtk_stock_lookup("gtk-disconnect", &item)) {
+      item.stock_id = "gtk-disconnect";
+      item.label = "Disconnect";
+      item.modifier = GDK_MOD1_MASK;
+      item.keyval = GDK_d;
+      item.translation_domain = NULL;
+      gtk_stock_add(&item, 1);
+  }
+
   /* create the main window */
   mud->window = create_window_main();
 

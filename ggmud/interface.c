@@ -2019,6 +2019,12 @@ create_window_connect (void)
   gtk_container_add (GTK_CONTAINER (hbuttonbox6), button16);
   GTK_WIDGET_SET_FLAGS (button16, GTK_CAN_DEFAULT);
 
+  g_signal_connect ((gpointer) entry_host, "activate",
+                    G_CALLBACK (do_con),
+                    NULL);
+  g_signal_connect ((gpointer) entry_port, "activate",
+                    G_CALLBACK (do_con),
+                    NULL);
   g_signal_connect ((gpointer) button15, "clicked",
                     G_CALLBACK (do_con),
                     NULL);
