@@ -1372,6 +1372,7 @@ create_window_main (void)
   accel_group = gtk_accel_group_new ();
 
   window_main = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_widget_set_size_request (window_main, 600, 400);
   gtk_container_set_border_width (GTK_CONTAINER (window_main), 3);
   gtk_window_set_title (GTK_WINDOW (window_main), "GGMud");
 

@@ -40,7 +40,7 @@ CROSSCFLAGS = $(INCDIR) -I$(CROSSDIR)/include/glib-2.0  \
 
 CROSSLIBS = -s -Ltt -Llua -Lzlib -lttw32 -lluaw32 -lzw32 -lgtk-win32-2.0.dll -lgdk-win32-2.0.dll \
             -latk-1.0.dll -lgdk_pixbuf-2.0.dll -lpango-1.0.dll -lpangowin32-1.0.dll \
-            -lgmodule-2.0.dll -lgobject-2.0.dll -lglib-2.0.dll -lws2_32
+            -lgmodule-2.0.dll -lgobject-2.0.dll -lglib-2.0.dll -lws2_32 -lshell32
 
 all: depend $(PROJECTNAME) 
 
@@ -100,6 +100,11 @@ dist-osx: ggmud
 
 dist-linux: ggmud
 	tar czf ../ggmud-linux-$(VERSION).tgz ggmud gg_help.txt README
+
+rpm: ggmud
+	cp ggmud.SPEC ggmud-$(VERSION).SPEC
+	rpmbuild -bb ggmud-$(VERSION).SPEC
+	rm ggmud-$(VERSION).SPEC
 
 dist-win32: ggmud.exe
 	zip -9 ../ggmud-win32-$(VERSION).zip ggmud.exe gg_help.txt README README.W32
