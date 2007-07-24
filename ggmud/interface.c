@@ -2723,19 +2723,19 @@ create_window_complete (void)
   gtk_widget_show (button36);
   gtk_container_add (GTK_CONTAINER (hbuttonbox11), button36);
   GTK_WIDGET_SET_FLAGS (button36, GTK_CAN_DEFAULT);
-  gtk_tooltips_set_tip (tooltips, button36, "Add a new sentence to gag (all the line containing the specified text will be gagged).", NULL);
+  gtk_tooltips_set_tip (tooltips, button36, "Add a new word to complete if you hit TAB while in input line.", NULL);
 
   button37 = gtk_button_new_from_stock ("gtk-delete");
   gtk_widget_show (button37);
   gtk_container_add (GTK_CONTAINER (hbuttonbox11), button37);
   GTK_WIDGET_SET_FLAGS (button37, GTK_CAN_DEFAULT);
-  gtk_tooltips_set_tip (tooltips, button37, "Delete a gag", NULL);
+  gtk_tooltips_set_tip (tooltips, button37, "Delete a tab completion entry", NULL);
 
   button38 = gtk_button_new_from_stock ("gtk-save");
   gtk_widget_show (button38);
   gtk_container_add (GTK_CONTAINER (hbuttonbox11), button38);
   GTK_WIDGET_SET_FLAGS (button38, GTK_CAN_DEFAULT);
-  gtk_tooltips_set_tip (tooltips, button38, "Save the defined gags to disk", NULL);
+  gtk_tooltips_set_tip (tooltips, button38, "Save the defined tab completions to disk", NULL);
 
   button39 = gtk_button_new_from_stock ("gtk-close");
   gtk_widget_show (button39);
