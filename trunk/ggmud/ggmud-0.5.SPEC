@@ -1,6 +1,6 @@
 Summary: Linux MUD Client
 Name: ggmud
-Version: 0.5
+Version: 0.7
 Release: 1
 Copyright: GPL
 Group: Game

@@ -4916,7 +4916,7 @@ disable a trigger class.&lt;/b&gt;</property>
 	  <child>
 	    <widget class="GtkButton" id="button36">
 	      <property name="visible">True</property>
-	      <property name="tooltip" translatable="yes">Add a new sentence to gag (all the line containing the specified text will be gagged).</property>
+	      <property name="tooltip" translatable="yes">Add a new word to complete if you hit TAB while in input line.</property>
 	      <property name="can_default">True</property>
 	      <property name="can_focus">True</property>
 	      <property name="label">gtk-add</property>
@@ -4930,7 +4930,7 @@ disable a trigger class.&lt;/b&gt;</property>
 	  <child>
 	    <widget class="GtkButton" id="button37">
 	      <property name="visible">True</property>
-	      <property name="tooltip" translatable="yes">Delete a gag</property>
+	      <property name="tooltip" translatable="yes">Delete a tab completion entry</property>
 	      <property name="can_default">True</property>
 	      <property name="can_focus">True</property>
 	      <property name="label">gtk-delete</property>
@@ -4944,7 +4944,7 @@ disable a trigger class.&lt;/b&gt;</property>
 	  <child>
 	    <widget class="GtkButton" id="button38">
 	      <property name="visible">True</property>
-	      <property name="tooltip" translatable="yes">Save the defined gags to disk</property>
+	      <property name="tooltip" translatable="yes">Save the defined tab completions to disk</property>
 	      <property name="can_default">True</property>
 	      <property name="can_focus">True</property>
 	      <property name="label">gtk-save</property>
