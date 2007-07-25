@@ -77,7 +77,7 @@ void do_about (GtkWidget *widget, gpointer data)
   GtkWidget *about_window = create_window_about();
 
   gtk_widget_set_usize (about_window, 400, 375);
-  gtk_window_set_title (GTK_WINDOW (about_window), "About GGMud " VERSION " " __DATE__);
+  gtk_window_set_title (GTK_WINDOW (about_window), "About GGMud " VERSION " (" __DATE__ ")");
 
   gtk_widget_show(about_window);
 }
