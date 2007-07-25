@@ -2782,3 +2782,69 @@ create_window_complete (void)
   return window_complete;
 }
 
+GtkWidget*
+create_window_about (void)
+{
+  GtkWidget *window_about;
+  GtkWidget *vbox23;
+  GtkWidget *frame17;
+  GtkWidget *label_main;
+  GtkWidget *label55;
+  GtkWidget *hseparator10;
+  GtkWidget *button40;
+
+  window_about = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_container_set_border_width (GTK_CONTAINER (window_about), 4);
+  gtk_window_set_title (GTK_WINDOW (window_about), "window1");
+  gtk_window_set_position (GTK_WINDOW (window_about), GTK_WIN_POS_CENTER);
+
+  vbox23 = gtk_vbox_new (FALSE, 4);
+  gtk_widget_show (vbox23);
+  gtk_container_add (GTK_CONTAINER (window_about), vbox23);
+
+  frame17 = gtk_frame_new (NULL);
+  gtk_widget_show (frame17);
+  gtk_box_pack_start (GTK_BOX (vbox23), frame17, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (frame17), 4);
+  gtk_frame_set_label_align (GTK_FRAME (frame17), 0.5, 0.5);
+
+  label_main = gtk_label_new ("<i>Author</i>\n<b><big>Gabriele Greco</big></b>\n(gabrielegreco@gmail.com)\n\n<i>ANSI parsing, GTK2 lua bindings and fixes</i>\n<b>Ian Kelly</b>\n\n<i>SClient authors</i>\n<b>P.E. Segolsson, Fredrik Andersson</b>\n\n<i>TnTin++ authors</i>\n<b>Bill Reiss, David A. Wagner, Rob Ellsworth,\nJeremy C. Jack, Davin Chan</b>\n  \n<i>WWW &amp; Online docs</i>\n<span foreground=\"blue\"><big><b>http://ggmud.sourceforge.net</b></big></span>\n\nGGMud uses <b>GTK+ 2.x</b> for the GUI, \n<b>LUA 5.x</b> as scripting language \nand <b>zlib 1.2</b> for MCCP compression.");
+  gtk_widget_show (label_main);
+  gtk_container_add (GTK_CONTAINER (frame17), label_main);
+  gtk_label_set_use_markup (GTK_LABEL (label_main), TRUE);
+  gtk_label_set_justify (GTK_LABEL (label_main), GTK_JUSTIFY_CENTER);
+  gtk_misc_set_padding (GTK_MISC (label_main), 4, 12);
+
+  label55 = gtk_label_new ("<b>The GGMud team</b>");
+  gtk_widget_show (label55);
+  gtk_frame_set_label_widget (GTK_FRAME (frame17), label55);
+  gtk_label_set_use_markup (GTK_LABEL (label55), TRUE);
+  gtk_misc_set_padding (GTK_MISC (label55), 8, 0);
+
+  hseparator10 = gtk_hseparator_new ();
+  gtk_widget_show (hseparator10);
+  gtk_box_pack_start (GTK_BOX (vbox23), hseparator10, FALSE, FALSE, 0);
+
+  button40 = gtk_button_new_from_stock ("gtk-ok");
+  gtk_widget_show (button40);
+  gtk_box_pack_start (GTK_BOX (vbox23), button40, FALSE, FALSE, 0);
+
+  g_signal_connect ((gpointer) window_about, "destroy_event",
+                    G_CALLBACK (close_window),
+                    NULL);
+  g_signal_connect ((gpointer) button40, "clicked",
+                    G_CALLBACK (close_a_gui_window),
+                    NULL);
+
+  /* Store pointers to all widgets, for use by lookup_widget(). */
+  GLADE_HOOKUP_OBJECT_NO_REF (window_about, window_about, "window_about");
+  GLADE_HOOKUP_OBJECT (window_about, vbox23, "vbox23");
+  GLADE_HOOKUP_OBJECT (window_about, frame17, "frame17");
+  GLADE_HOOKUP_OBJECT (window_about, label_main, "label_main");
+  GLADE_HOOKUP_OBJECT (window_about, label55, "label55");
+  GLADE_HOOKUP_OBJECT (window_about, hseparator10, "hseparator10");
+  GLADE_HOOKUP_OBJECT (window_about, button40, "button40");
+
+  return window_about;
+}
+

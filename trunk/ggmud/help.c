@@ -25,24 +25,8 @@
 #include <glib.h>
 
 #include "ggmud.h"
-
-
-/* About txt */
-const char * ABOUT_MESSAGE = "\n\n Author:\n"
-"    Gabriele Greco (gabrielegreco@gmail.com)\n"
-"\n"
-" SClient authors:\n"
-"    P.E. Segolsson, Fredrik Andersson\n"
-"\n"
-" TinTin++ authors:\n"
-"    Bill Reiss, David A. Wagner, Rob Ellsworth,\n"
-"    Jeremy C. Jack, Davin Chan\n"
-"\n"  
-" WWW:\n" 
-"    http://ggmud.sourceforge.net\n" 
-"\n";
-
-
+#include "interface.h"
+#include "support.h"
 
 /* Wizard txt */
 const char * WIZARD_MESSAGE = 
@@ -90,50 +74,12 @@ const char * COLOR_MESSAGE =
 
 void do_about (GtkWidget *widget, gpointer data)
 {
-  GtkWidget *about_window;
-  GtkWidget *vbox;
-  GtkWidget *frame;
-  GtkWidget *text_about;
-  GtkWidget *hbuttonbox;
-  GtkWidget *ok_button;
+  GtkWidget *about_window = create_window_about();
 
-  about_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_set_usize (about_window, 400, 375);
-  gtk_window_set_title (GTK_WINDOW (about_window), "About GGMud");
-  gtk_window_set_policy (GTK_WINDOW (about_window), FALSE, FALSE, FALSE);
+  gtk_window_set_title (GTK_WINDOW (about_window), "About GGMud " VERSION " " __DATE__);
 
-  vbox = gtk_vbox_new (FALSE, 0);
-  gtk_widget_show (vbox);
-  gtk_container_add (GTK_CONTAINER (about_window), vbox);
-
-  frame = gtk_frame_new ("The GGMud Team");
-  gtk_widget_show (frame);
-  gtk_box_pack_start (GTK_BOX (vbox), frame, TRUE, TRUE, 5);
-  gtk_widget_set_usize (frame, -1, 200);
-  gtk_container_set_border_width (GTK_CONTAINER (frame), 5);
-  gtk_frame_set_label_align (GTK_FRAME (frame), 0.03, 0.5);
-
-  text_about = gtk_text_view_new ();
-  gtk_object_set_user_data(GTK_OBJECT(text_about), NULL), 
-  gtk_widget_show (text_about);
-  gtk_container_add (GTK_CONTAINER (frame), text_about);
-
-  hbuttonbox = gtk_hbutton_box_new ();
-  gtk_widget_show (hbuttonbox);
-  gtk_box_pack_start (GTK_BOX (vbox), hbuttonbox, FALSE, TRUE, 5);
-  gtk_container_set_border_width (GTK_CONTAINER (hbuttonbox), 3);
-
-  ok_button = gtk_button_new_from_stock(GTK_STOCK_OK);
-  gtk_signal_connect (GTK_OBJECT (ok_button), "clicked",
-                      GTK_SIGNAL_FUNC (close_window), about_window);
-  gtk_widget_show (ok_button);
-  gtk_container_add (GTK_CONTAINER (hbuttonbox), ok_button);
-  gtk_container_border_width (GTK_CONTAINER (ok_button), 3);
-
-  gtk_widget_show (about_window);
-
-  text_bg(text_about, color_black);
-  text_insert(text_about, ABOUT_MESSAGE);
+  gtk_widget_show(about_window);
 }
 
 void do_manual(GtkWidget *widget, gpointer data)
