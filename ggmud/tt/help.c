@@ -75,6 +75,10 @@ void help_command(const char *arg)
         sprintf(filestring, "./%s", DEFAULT_HELP_FILE);
         myfile = check_file(filestring);
     }
+    if(!myfile ) {
+        sprintf(filestring, "./bin/%s", DEFAULT_HELP_FILE);
+        myfile = check_file(filestring);
+    }
 
     if(!myfile) {
         tintin_puts2("#Help file '" DEFAULT_HELP_FILE "' not found - no help available.", NULL);

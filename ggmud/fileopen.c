@@ -34,7 +34,7 @@
 #define mkdir(x, y) _mkdir(x)
 #endif
 
-int check_ggmud_dir (gchar *dirname) {
+int check_ggmud_dir (gchar *dirname, int silent) {
 /* check if the specified directory exists, try to create it if it doesn't */
     struct stat file_stat;
     int return_val = 0;
@@ -48,9 +48,11 @@ int check_ggmud_dir (gchar *dirname) {
     } else {
         if (!mkdir(dirname, 0777)) {
         /* this isn't dangerous, umask modifies it */
-            popup_window (INFO, "GGMud settings directory <b>%s</b> created.", 
-                    dirname);
-            do_manual();
+            if (!silent) {
+                popup_window (INFO, "GGMud settings directory <b>%s</b> created.", 
+                        dirname);
+                do_manual();
+            }
         } else {
             popup_window (ERR, "%s NOT created: %s", dirname, strerror (errno));
             return_val = errno;
@@ -77,13 +79,14 @@ migrate_config(const char *dest_path, ...)
 
         if ((fp = fopen(file, "rb"))) {
             if (!detected) {
-                popup_window (INFO, "GGMud 0.7+ has changed the directory where settings are stored in Windows,\n"
+                popup_window (INFO, 
+                        "GGMud 0.7+ has changed the directory where settings are stored in Windows, "
                         "the change has been made to handle different configurations for different users on the same machine.\n\n"
                         "Since some existing settings have been found in your program directory,\n"
                         "GGMud will NOW move them in <b>%s</b>.\n"
                         "If you use a LUA startup script you'll have to move it by hand in the new directory.\n\n"
-                        "A copy of the original file are still present in the directory\n"
-                        "<b>disabled</b> in the program directory."
+                        "A copy of the original file are still present in the directory "
+                        "<b>disabled</b> that you can find in the GGMud installation directory."
                         , dest_path);
 
                 mkdir("disabled", 0777);
@@ -115,6 +118,8 @@ FILE *fileopen (gchar *fname, gchar *mode) {
     gchar *dir = "/.ggmud";
 
     home = getenv ("HOME");
+    g_snprintf (path, sizeof(path), "%s%s", home!= NULL ? home : "", dir);
+    if (check_ggmud_dir(path, 0)) return NULL;
 #else
     static int check_migration = 0;
     gchar *dir = "/ggmud";
@@ -131,6 +136,8 @@ FILE *fileopen (gchar *fname, gchar *mode) {
         // this routine perform a migration
         if (!check_migration) {
             g_snprintf(path, sizeof(path), "%s/%s", szPath, dir);
+            if (check_ggmud_dir(path, 1)) return NULL;
+
             migrate_config(path,
                     "triggers", "aliases", "gag", "font", "macro",
                     "connections", "complete", "highlight",  "ggmud.prf",
@@ -139,11 +146,11 @@ FILE *fileopen (gchar *fname, gchar *mode) {
             check_migration = 1;
         }
     }
-    else
+    else {
         home = NULL;
+        strcpy(path, ".");
+    }
 #endif
-    g_snprintf (path, sizeof(path), "%s%s", home!= NULL ? home : "", dir);
-    if (check_ggmud_dir(path)) return NULL;
     g_snprintf (path, sizeof(path), "%s%s/%s", home!= NULL ? home : "", dir, fname);
     fp = fopen (path, mode);
     return fp;
