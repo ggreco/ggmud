@@ -1,0 +1,8 @@
+Actually the OSX version of GGMud uses the X11 version of GTK, it's available as App bundle.
+
+To be able to run it  you need to install the Apple or the Fink X11 server and run it, you
+can find apple X11 on your panther/tiger install DVDs as X11User.pkg.
+
+NOTICE: If you are able to run GIMP or OpenOffice you already HAVE the X11 server installed.
+
+

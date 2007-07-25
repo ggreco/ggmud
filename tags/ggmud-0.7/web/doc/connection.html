@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>GGMud Manual</title>
+</head>
+<body>
+<h1 style="text-align: center;"><span style="color: rgb(255, 0, 0);">G<span
+ style="color: rgb(51, 51, 255);"> G<span style="color: rgb(255, 0, 0);">
+M<span style="color: rgb(51, 51, 255);"> u<span
+ style="color: rgb(255, 0, 0);"> d</span></span></span></span></span></h1>
+<div style="text-align: center;">...a new <span
+ style="font-weight: bold;">powerful</span>, <span
+ style="font-weight: bold;">opensource </span>and <span
+ style="font-weight: bold;">multiplatform </span>MUD client.<br>
+</div><hr><br>
+<h2 style="text-align: left; font-weight: bold;">Connect to a mud</b></h2>
+<span style="font-weight: bold;"><br>
+</span>
+<ul>
+    <li>
+    <h3 style="font-weight: bold;">One time connection</h3>
+<img src="pics/fastconn.png" alt="Connect a mud" align="right">GGMud offers a few way to connect to a MUD, the first one is through the file menu with the <b>Connect</b> menu option (reachable also with the keyboard shortcut <b>Alt+C</b>).<p>
+A simple window will popup asking you the hostname and the port of the MUD you want to connect. The hostname may be both an alphanumeric name or an IP address, the port should be a number ranging from 1 to 65535. If you specify a unreachable host (for instance if the network is down) or a mispelled hostname GGMud will inform you of the problem after a timeout of a few seconds (the number of seconds vary depending the operative system you are using).<p>
+GGMud has also a limited telnet support, so it can be used also the telnet a few unix machines (provided the machines have the telnet service open). The telnet support may be useful if you are behind a firewall that closes the not standard TCP ports.
+<p>
+</li>
+<li><h3 style="font-weight: bold;">Connection wizard</h3>
+<img src="pics/connect.png" alt="Connection wizard" align="right">With the file menu entry <b>Connection Wizard</b> (keyboard shortcut <b>Alt+W</b>) you can store the address/port of your favorite mud(s) and connect to them faster. A connection wizard entry is composed by a title (that will be shown in the list in the left of the wizard window) an hostname and a port number identifying the mud you want to connect to and, optionally, a character name/password. If you want to use autologin you have also to enable the <b>Auto Login?</b> checkmark.<p>
+GGMud autologin feature is very basic, it sends your character name and password just after your connection is established, so it cannot be used in muds that ask other inputs before the user/password pair. You can anyway implement a more complex autologin yourself using <a href="triggers.html">triggers</a>.<p>
+To add an entry to the wizard simply fill the required fields and click <b>Add</b>, to delete an existing entry from the wizard select it in the list in the left side of the window and click on <b>Delete</b>. Changes to the wizard entries are not saved to disk until you click on <b>Save</b>.
+</li>
+<li><h3 style="font-weight: bold;">Command line connection</h3>
+An <b>advanced user</b> may find useful to connect through the command line, this can be done with the <b>#ses</b> command and an alias, here is a simple example that let you connect to the MUD <i>Lumen et Umbra</i> simply typing <i>leu</i> in the command line, add the following alias to your configuration:<p>
+<code>
+Name: leu
+Alias: #ses leu {mclmud.mclink.it 6000}
+</code>
+<p>
+You can do it also through the command line with the single command:<p>
+<code>
+    #alias {leu} {#ses leu {mclmud.mclink.it 6000}}
+</code>
+</li>
+<li><h3 style="font-weight: bold;">Disconnection &amp; reconnection</h3>
+You can easily disconnect from a MUD with the <b>Disconnect</b> file menu option or with the command line command <b>#zap</b>. In lag situations may be also useful to disconnect and connect back to the same address quickly, I implemented the menu option <b>Reconnect</b> for these situations.
+</li>
+</ul><p>
+<hr>
+<div style="text-align: right;"><a href="index.html">Return to index</a></div>
+</body>
+</html>
