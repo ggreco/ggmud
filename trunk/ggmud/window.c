@@ -790,10 +790,10 @@ void popup_window (int type, const gchar *message, ...)
     GtkWidget *d;
 
     va_start(va, message);
-    vsprintf(buf, message, va);
+    vsnprintf(buf, sizeof(buf), message, va);
     va_end(va);
 
-    d = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL,
+    d = gtk_message_dialog_new_with_markup(NULL, GTK_DIALOG_MODAL,
                            type, GTK_BUTTONS_OK,
                            buf);
 
