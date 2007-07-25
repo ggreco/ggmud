@@ -446,3 +446,12 @@ void
 save_complete                          (GtkButton       *button,
                                         gpointer         user_data);
 
+
+gboolean
+close_window                           (GtkWidget       *widget,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);
+
+void
+close_a_gui_window                     (GtkButton       *button,
+                                        gpointer         user_data);
