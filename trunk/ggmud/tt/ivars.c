@@ -49,40 +49,46 @@ int stacks[100][4];
 
 void math_command(const char *line, struct session *ses)
 {
-  char left[BUFFER_SIZE], right[BUFFER_SIZE];
-  char temp[BUFFER_SIZE], result[BUFFER_SIZE];
-  struct listnode *my_vars, *ln;
-  int i;
-  int status = 1;
-  my_vars = (ses ? ses->myvars : common_myvars);
-  line = get_arg_in_braces(line, left, 0);
-  line = get_arg_in_braces(line, right, 1);
-  substitute_vars(right, result);
-  substitute_myvars(result, right, ses);
-  i = eval_expression(right, &status);
-  if (fixed_math == 1) {
-    if (status == 1) {
-      sprintf(temp, "%d", i);
-      if((ln = searchnode_list(my_vars,left)))
-	deletenode_list(my_vars, ln);
-      insertnode_list(my_vars, left, temp, "0", ALPHA); 
-      varnum++;
-      if(mesvar[5]) {
-	sprintf(result, "#Ok. $%s is now set to {%s}.", left, temp);
-	tintin_puts2(result, ses);
-      }
+    char left[BUFFER_SIZE], right[BUFFER_SIZE];
+    char temp[BUFFER_SIZE], result[BUFFER_SIZE];
+    struct listnode *my_vars, *ln;
+    int i;
+    int status = 1;
+    my_vars = (ses ? ses->myvars : common_myvars);
+    line = get_arg_in_braces(line, left, 0);
+    line = get_arg_in_braces(line, right, 1);
+    substitute_vars(right, result);
+    substitute_myvars(result, right, ses);
+    i = eval_expression(right, &status);
+    if (fixed_math == 1) {
+        if (status == 1) {
+            sprintf(temp, "%d", i);
+            if((ln = searchnode_list(my_vars,left)))
+                deletenode_list(my_vars, ln);
+            ln = insertnode_list(my_vars, left, temp, "0", ALPHA); 
+#ifdef WITH_LUA
+            add_lua_global(ln->left, &(ln->right));
+#endif
+            varnum++;
+            if(mesvar[5]) {
+                sprintf(result, "#Ok. $%s is now set to {%s}.", left, temp);
+                tintin_puts2(result, ses);
+            }
+        }
+    } else {
+        sprintf(temp, "%d", i);
+        if((ln = searchnode_list(my_vars,left)))
+            deletenode_list(my_vars, ln);
+        ln = insertnode_list(my_vars, left, temp, "0", ALPHA); 
+#ifdef WITH_LUA
+        add_lua_global(ln->left, &(ln->right));
+#endif
+        varnum++;
+        if(mesvar[5]) {
+            sprintf(result, "#Ok. $%s is now set to {%s}.", left, temp);
+            tintin_puts2(result, ses);
+        }
     }
-  } else {
-      sprintf(temp, "%d", i);
-      if((ln = searchnode_list(my_vars,left)))
-	deletenode_list(my_vars, ln);
-      insertnode_list(my_vars, left, temp, "0", ALPHA); 
-      varnum++;
-      if(mesvar[5]) {
-	sprintf(result, "#Ok. $%s is now set to {%s}.", left, temp);
-	tintin_puts2(result, ses);
-      }
-  }
 }
 
 /*******************/
@@ -175,29 +181,32 @@ void ifexist_command(const char *line, struct session *ses)
 
 void revstring_command(const char *line, struct session *ses)
 {
-  char left[BUFFER_SIZE], result[BUFFER_SIZE];
-  char string[BUFFER_SIZE], temp[BUFFER_SIZE];
-  struct listnode *my_vars, *ln;
-  int i;
+    char left[BUFFER_SIZE], result[BUFFER_SIZE];
+    char string[BUFFER_SIZE], temp[BUFFER_SIZE];
+    struct listnode *my_vars, *ln;
+    int i;
 
-  my_vars = (ses ? ses->myvars : common_myvars);
-  line = get_arg_in_braces(line, left, 0);
-  line = get_arg_in_braces(line, string, 1);
- 
-if ((*left) && (*string)) {
-  for(i=(int)strlen(string)-1; i>=0; i--)
-    temp[strlen(string)-i-1] = string[i];
-  temp[strlen(string)] = '\0';
-  if((ln = searchnode_list(my_vars,left)))
-    deletenode_list(my_vars, ln);
-  insertnode_list(my_vars, left, temp, "0", ALPHA); 
-  varnum++;
-  if(mesvar[5]) {
-    sprintf(result, "#Ok. $%s is now set to {%s}.", left, temp);
-    tintin_puts2(result, ses);
-  } else
-    tintin_puts2("#NOT ENOUGH ARGUMENTS!!!", ses);
- }
+    my_vars = (ses ? ses->myvars : common_myvars);
+    line = get_arg_in_braces(line, left, 0);
+    line = get_arg_in_braces(line, string, 1);
+
+    if ((*left) && (*string)) {
+        for(i=(int)strlen(string)-1; i>=0; i--)
+            temp[strlen(string)-i-1] = string[i];
+        temp[strlen(string)] = '\0';
+        if((ln = searchnode_list(my_vars,left)))
+            deletenode_list(my_vars, ln);
+        ln = insertnode_list(my_vars, left, temp, "0", ALPHA); 
+#ifdef WITH_LUA
+        add_lua_global(ln->left, &(ln->right));
+#endif
+        varnum++;
+        if(mesvar[5]) {
+            sprintf(result, "#Ok. $%s is now set to {%s}.", left, temp);
+            tintin_puts2(result, ses);
+        } else
+            tintin_puts2("#NOT ENOUGH ARGUMENTS!!!", ses);
+    }
 } 
 
 int eval_expression(const char *arg, int *exitstatus)
