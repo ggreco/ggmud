@@ -3,8 +3,8 @@ CROSSCC = $(CROSSDIR)/bin/gcc
 CROSSAR = $(CROSSDIR)/bin/ar
 CROSSRANLIB = $(CROSSDIR)/bin/ranlib
 OBJDIR = obj/
-CC = gcc
-CXX = g++
+CC ?= gcc
+CXX ?= g++
 AR = ar
 RANLIB = ranlib
 

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=GGMud
+GenericName=MUD Client
+Encoding=UTF-8
+Comment=Play Online Text Games
+Exec=ggmud
+Icon=ggmud.png
+Categories=Game;Network;

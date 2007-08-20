@@ -58,7 +58,7 @@ void help_command(const char *arg)
 {
     FILE *myfile = NULL;
     char *cptr, text[80], line[80], filestring[500];
-    int flag = TRUE, counter = 0;
+    int flag = TRUE;
 
     if (getenv("TINTIN_HELP") == NULL)
         sprintf(filestring, "%s/%s", getenv("HOME"), DEFAULT_HELP_FILE);

@@ -41,6 +41,7 @@ This program is protected under the GNU GPL (See COPYING)
 #include "include/main.h"
 #include "include/parse.h"
 #include "include/rl.h"
+#include <ctype.h>
 
 /**********************/
 /* the #alias command */

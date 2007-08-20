@@ -134,7 +134,7 @@ int skip_non_ansi(const char *line, int len)
   int n;
 
   while(line && *line && nonansi < len) {
-    if (n = skip_ansi(line)) {
+    if ((n = skip_ansi(line))) {
       ansi += n;
       line += n;
     } else {

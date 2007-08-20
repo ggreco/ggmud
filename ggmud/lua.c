@@ -2,6 +2,8 @@
 
 #include "ggmud.h"
 #include "config.h"
+#include <string.h>
+#include <ctype.h>
 
 int do_luashow(lua_State *s)
 {
@@ -58,7 +60,7 @@ void script_command(char *arg, struct session *ses)
 
   get_arg_in_braces(arg, left, 1);
 
-  if (!strstr(left, ".lua") && !strchr(left, ".")) {
+  if (!strstr(left, ".lua") && !strchr(left, '.')) {
       strcat(left, ".lua");
   }
   
@@ -259,6 +261,9 @@ const char *call_luafunction(const char *string)
     return string + 1;
 }
 
+#if 0
+
+// actually not used and maybe they'll never will
 
 static int get_string(lua_State* L)
 {
@@ -292,7 +297,7 @@ static int __index(lua_State* L) // object, key
     // return one value from the top of the stack
     return 1;
 }
-
+#endif
 
 
 
@@ -350,6 +355,5 @@ void get_lua_global(const char *key, char **value)
 
     lua_pop(mud->lua, 1);
 }
-
 
 #endif

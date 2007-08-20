@@ -107,6 +107,8 @@ static int enable_class(trigger_class *cl, int enable, struct session *ses)
          if (!strcmp(myactions -> pr, cl->name))
              myactions-> enabled = enable;
      }
+
+     return 0;
 }
 
 
