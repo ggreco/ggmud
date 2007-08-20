@@ -18,17 +18,17 @@
 
 CC?=cc
 
-CFLAGS=-O
+CFLAGS=-O3 -Wall
 #CFLAGS=-O -DMAX_WBITS=14 -DMAX_MEM_LEVEL=7
 #CFLAGS=-g -DDEBUG
 #CFLAGS=-O3 -Wall -Wwrite-strings -Wpointer-arith -Wconversion \
 #           -Wstrict-prototypes -Wmissing-prototypes
 
-LDFLAGS=libz.a
+LDFLAGS=libzlib.a
 LDSHARED=$(CC)
 CPP=$(CC) -E
 
-LIBS=libz.a
+LIBS=libzlib.a
 SHAREDLIB=libz.so
 SHAREDLIBV=libz.so.1.2.3
 SHAREDLIBM=libz.so.1
@@ -71,7 +71,7 @@ libzw32.a: $(OBJS) $(OBJA)
 	$(AR) rc $@ $(OBJS) $(OBJA)
 	$(RANLIB) $@ 
 
-libz.a: $(OBJS) $(OBJA)
+libzlib.a: $(OBJS) $(OBJA)
 	$(AR) rc $@ $(OBJS) $(OBJA)
 	$(RANLIB) $@ 
 
@@ -102,7 +102,7 @@ install: $(LIBS)
 	chmod 644 $(includedir)/zlib.h $(includedir)/zconf.h
 	cp $(LIBS) $(libdir)
 	cd $(libdir); chmod 755 $(LIBS)
-	-@(cd $(libdir); $(RANLIB) libz.a || true) >/dev/null 2>&1
+	-@(cd $(libdir); $(RANLIB) libzlib.a || true) >/dev/null 2>&1
 	cd $(libdir); if test -f $(SHAREDLIBV); then \
 	  rm -f $(SHAREDLIB) $(SHAREDLIBM); \
 	  ln -s $(SHAREDLIBV) $(SHAREDLIB); \
@@ -116,7 +116,7 @@ install: $(LIBS)
 
 uninstall:
 	cd $(includedir); \
-	cd $(libdir); rm -f libz.a; \
+	cd $(libdir); rm -f libzlib.a; \
 	if test -f $(SHAREDLIBV); then \
 	  rm -f $(SHAREDLIBV) $(SHAREDLIB) $(SHAREDLIBM); \
 	fi

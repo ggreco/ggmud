@@ -41,9 +41,6 @@ static int read_socksv5_auth(struct connreq *conn);
 
 enum {MSGERR = 0, MSGDEBUG};
 
-static const char *errtype[] =
-{"ERR -", "DBG -"};
-
 void show_msg(int code, const char *pattern, ...)
 {
     va_list va;

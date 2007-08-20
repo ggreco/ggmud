@@ -41,9 +41,7 @@ This program is protected under the GNU GPL (See COPYING)
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_CTYPE_H
 #include <ctype.h>
-#endif
 #include "include/action.h"
 #include "include/alias.h"
 #include "include/antisub.h"

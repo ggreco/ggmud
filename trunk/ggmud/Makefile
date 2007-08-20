@@ -3,11 +3,11 @@ CROSSCC = $(CROSSDIR)/bin/gcc
 
 GLOBAL_CFLAGS = -O2  -DTELNET_SUPPORT -Wall -DWITH_LUA -DENABLE_MCCP -I../zlib
 OBJDIR = obj/
-CC = gcc
-CXX = g++
+CC ?= gcc
+CXX ?= g++
 INCDIR = -Itt -Ilua -Izlib
-COMMONLIBS = -Ltt -ltt -Llua -llua -Lzlib -lz
-CFLAGS = $(INCDIR) `pkg-config gtk+-2.0 --cflags` $(GLOBAL_CFLAGS) -DENABLE_BINRELOC -DBR_PTHREADS=0
+COMMONLIBS = -Ltt -ltt -Llua -llua -Lzlib -lzlib
+CFLAGS = $(INCDIR) `pkg-config gtk+-2.0 --cflags` $(GLOBAL_CFLAGS) -DENABLE_BINRELOC -DBR_PTHREADS=0 
 
 LIBS = $(COMMONLIBS) `pkg-config gtk+-2.0 --libs`
 
@@ -71,8 +71,8 @@ zlib/libzw32.a: zlib/*c
 	$(MAKE) -C zlib clean
 	CC="$(CROSSDIR)bin/gcc -mno-cygwin -mms-bitfields" AR=$(CROSSDIR)/bin/ar RANLIB=$(CROSSDIR)/bin/ranlib $(MAKE) -C zlib libzw32.a
 
-zlib/libz.a: zlib/*c
-	$(MAKE) -C zlib libz.a
+zlib/libzlib.a: zlib/*c
+	$(MAKE) -C zlib libzlib.a
 
 lua/liblua.a:
 	$(MAKE) -C lua linux
@@ -83,14 +83,16 @@ lua/libluaw32.a: lua/*c
 	"CC=$(CROSSDIR)bin/gcc" "MYCFLAGS=-mno-cygwin -mms-bitfields" "RANLIB=$(CROSSDIR)/bin/ranlib" \
     "AR=$(CROSSDIR)bin/ar rcu" "MYLIBS=" "MYLDFLAGS=-s" lua.exe
 
-$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libz.a
-	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) $(LIBS)
+$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libzlib.a
+	$(CC) $(OBJS) -o $(PROJECTNAME) $(LIBS) --as-needed
 
 $(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a lua/libluaw32.a zlib/libzw32.a
 	$(CROSSCC) $(CROSSCFLAGS) $(WINOBJS) -o $(PROJECTNAME).exe $(CROSSLIBS)
 
 clean: 
-	cd tt && $(MAKE) clean && cd ..
+	$(MAKE) -C tt clean
+	$(MAKE) -C lua clean
+	$(MAKE) -C zlib clean
 	rm -f $(WINOBJS) $(OBJS) $(PROJECTNAME) $(PROJECTNAME).exe depend 
 
 dist: dist-osx dist-linux dist-win32
