@@ -55,6 +55,6 @@ void lowlogit(struct session *s, const char *b, size_t nbytes)
     return;
 
   fwrite(b, 1, nbytes, s->lowlogfile);
-  fprintf(s->lowlogfile, "(%d,%d,%d)\n", s->old_more_coming, s->more_coming, 
-	  nbytes) ;
+  fprintf(s->lowlogfile, "(%d,%d,%lu)\n", s->old_more_coming, s->more_coming, 
+	  (unsigned long)nbytes) ;
 }

@@ -45,8 +45,10 @@ This program is protected under the GNU GPL (See COPYING)
 #include "include/parse.h"
 #include "include/rl.h"
 #include "include/variables.h"
+#include "include/lua.h"
 
 int use_triggers = 1;
+extern int skip_non_ansi(const char *line, int len);
 
 static int var_len[10];
 static const char *var_ptr[10];

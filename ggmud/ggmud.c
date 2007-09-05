@@ -151,6 +151,8 @@ int main(int argc, char **argv)
 
     g_timeout_add(500, (GSourceFunc)checktick, NULL);
 
+    extern int ttmain(int argc, char* argv[]);
+
     ttmain(argc, argv);
 
 // placed here since thos needs the initializations of tt++ underlying structures.
@@ -165,7 +167,7 @@ int main(int argc, char **argv)
 
 #ifdef WITH_LUA
     if (prefs.LuaConfig)
-	    script_command(prefs.LuaConfig);
+	    script_command(prefs.LuaConfig, NULL);
 #endif
 
     if (prefs.WizAtStartup)

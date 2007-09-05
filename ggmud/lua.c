@@ -4,6 +4,7 @@
 #include "config.h"
 #include <string.h>
 #include <ctype.h>
+#include "include/parse.h"
 
 int do_luashow(lua_State *s)
 {
@@ -325,7 +326,7 @@ void init_lua()
     lua_register(mud->lua, "clear", do_luaclear);
 }
 
-void add_lua_global(const char *v1, const char **v2)
+void add_lua_global(const char *v1, char **v2)
 {
     if (!mud->lua)
         return;

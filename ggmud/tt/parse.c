@@ -76,6 +76,7 @@ This program is protected under the GNU GPL (See COPYING)
 #include "include/function.h"
 #include "include/bindkey.h"
 #include "include/walk.h"
+#include "include/lua.h"
 
 /**************************************************************************/
 /* parse input, check for TINTIN commands and aliases and send to session */

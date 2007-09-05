@@ -25,6 +25,8 @@
 #include "ansi.h"
 #include "interface.h"
 #include "support.h"
+#include "include/action.h"
+#include "include/variables.h"
 
 /* External variables used */
 extern int hide_input;
@@ -358,7 +360,7 @@ void mess_command(char *arg, struct session *s)
         return;
    
     substitute_myvars(right, left, s);
-    substitute_vars(left, right, s);
+    substitute_vars(left, right);
 
     popup_window(INFO, right);
 }
@@ -387,7 +389,7 @@ void window_command(char *arg, struct session *s)
     if(right && *right && entry) {
         char *result;
         substitute_myvars(right, left, s);
-        substitute_vars(left, right, s);
+        substitute_vars(left, right);
         result = ParseAnsiColors(right);
         strcat(result, "\n");
         textfield_add((GtkTextView *)entry->listptr, result , MESSAGE_LOCAL);

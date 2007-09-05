@@ -29,6 +29,7 @@ This program is protected under the GNU GPL (See COPYING)
 
 #include "config.h"
 #include "tintin.h"
+#include "include/ansi.h"
 
 #if defined(HAVE_STRING_H)
 #include <string.h>

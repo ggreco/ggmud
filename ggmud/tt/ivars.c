@@ -40,6 +40,7 @@ This program is protected under the GNU GPL (See COPYING)
 #include "include/rl.h"
 #include "include/variables.h"
 #include "include/glob.h"
+#include "include/lua.h"
 
 int stacks[100][4];
 

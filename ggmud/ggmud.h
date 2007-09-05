@@ -233,15 +233,10 @@ extern void read_from_connection (gpointer, gint , GdkInputCondition );
 extern void tintin_puts(const char *, struct session *);
 
 /* window.c */
-extern GtkWidget *menu_File_wiz;	
-extern GtkWidget *menu_Option_Font;	
-extern GtkWidget *menu_Option_Preference;
-GtkWidget *menu_Option_Colors;
 extern void do_menu(GtkWidget *);
 extern void input_line_visible(int);
 extern void popup_window (int type, const gchar *message, ... );
-
-extern GdkFont  *font_bold;
+extern void clear_text_widget(GtkTextView *);
 
 /* prefs.c */
 void  load_prefs ( void );
@@ -259,6 +254,8 @@ extern void do_manual();
 extern void do_wiz( GtkWidget *widget, gpointer data );
 extern void connection_send ( gchar *message );
 
+/* lua.c */
+#include "include/lua.h"
 
 /* log.c */
 extern void do_log ();
