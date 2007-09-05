@@ -23,6 +23,7 @@
 #include "include/ticks.h"
 #include <stdlib.h>
 #include <time.h>
+#include "include/llist.h"
 
 // #alias {celepath} {e;#wait 500;e;#wait 500;s;#wait 500;s;#wait 500;e;#wait 500;n;#wait 500;e;#wait 500;e;#wait 500;e;#wait 500;w;#wait 500;w;#wait 500;s;#wait 500;e;#wait 500}
 

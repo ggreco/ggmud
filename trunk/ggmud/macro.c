@@ -254,7 +254,7 @@ on_me_button_mod_clicked               (GtkButton       *button,
     }
 
     ggmud_macro *m = 
-        (ggmud_macro *)gtk_clist_get_row_data(list, (gint)list->selection->data);
+        (ggmud_macro *)gtk_clist_get_row_data(list, GPOINTER_TO_INT(list->selection->data));
 
     free(m->key); free(m->value);
 
@@ -280,7 +280,7 @@ on_me_button_del_clicked               (GtkButton       *button,
     }
 
     ggmud_macro *m = 
-        (ggmud_macro *)gtk_clist_get_row_data(list, (gint)list->selection->data);
+        (ggmud_macro *)gtk_clist_get_row_data(list, GPOINTER_TO_INT(list->selection->data));
 
     del_macro(m);
 

@@ -181,7 +181,6 @@ struct session *new_session(const char *name, const char *address,
   int i, sock, counter;
   char *host, *port;
   struct session *newsession;
-  char buf[100];
   sock = 0;
   counter = 0;
   port = host = mystrdup(space_out(address));
@@ -206,7 +205,9 @@ struct session *new_session(const char *name, const char *address,
      and a set number of time between retries. values are adjustable in
      tintin.h */
 #if 0
-  while (!sock)
+   char buf[100];
+
+ while (!sock)
     {
       if (counter == retries)
 	break;

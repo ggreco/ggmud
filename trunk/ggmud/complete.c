@@ -90,7 +90,8 @@ complete_button_add (GtkCList * data, GtkWidget *button)
 
 void complete_button_delete (GtkCList * data, GtkWidget *button) {
     gchar *word;
-    int selected_row = (int) gtk_object_get_user_data(GTK_OBJECT(data));
+    int selected_row = GPOINTER_TO_INT(
+            gtk_object_get_user_data(GTK_OBJECT(data)));
 
     if (selected_row == -1 ) {
         popup_window (WARN, "No selection made.");
@@ -109,7 +110,7 @@ void complete_selection_made (GtkCList *clist, gint row, gint column,
 {
     gchar *text;
 
-    gtk_object_set_user_data(GTK_OBJECT(clist), (void *)row);
+    gtk_object_set_user_data(GTK_OBJECT(clist), GINT_TO_POINTER(row));
     gtk_clist_get_text (clist, row, 0, &text);
 
     gtk_entry_set_text (GTK_ENTRY (lookup_widget(GTK_WIDGET(clist), "entry_text")), 

@@ -139,7 +139,7 @@ static void high_selection_made (GtkWidget *clist, gint row, gint column,
     
     if ( (GtkCList*) data )
     {
-        gtk_object_set_user_data(GTK_OBJECT(data), (void *) row);
+        gtk_object_set_user_data(GTK_OBJECT(data), GINT_TO_POINTER( row) );
          
         gtk_clist_get_text ((GtkCList*) data, row, 0, &text);
         gtk_entry_set_text (GTK_ENTRY (textalias), text);
@@ -261,7 +261,8 @@ static void high_button_add (GtkWidget *button, GtkCList * data)
 
 static void high_button_delete (GtkWidget *button, GtkCList * data) {
     gchar *word;
-    int selected_row = (int) gtk_object_get_user_data(GTK_OBJECT(data));
+    int selected_row = GPOINTER_TO_INT(
+            gtk_object_get_user_data(GTK_OBJECT(data)));
  
     if ( selected_row == -1 ) {
         popup_window (WARN, "No selection made.");

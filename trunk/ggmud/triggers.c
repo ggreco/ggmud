@@ -184,7 +184,7 @@ void trigger_selection_made (GtkCList *clist, gint row, gint column,
 {
     static guint32 old_time = 0L;
     gchar *text;
-    int trigger_selected_row = (int)gtk_object_get_user_data(GTK_OBJECT(clist));
+    int trigger_selected_row = GPOINTER_TO_INT(gtk_object_get_user_data(GTK_OBJECT(clist)));
 
     if (old_time != 0L && (event->time - old_time) < 1000 &&
             trigger_selected_row == row) {
@@ -202,7 +202,7 @@ void trigger_selection_made (GtkCList *clist, gint row, gint column,
     else
         old_time = event->time;
 
-    gtk_object_set_user_data(GTK_OBJECT(clist), (void *)row);
+    gtk_object_set_user_data(GTK_OBJECT(clist), GINT_TO_POINTER(row));
 
     gtk_clist_get_text (clist, row, 0, &text);
     gtk_entry_set_text (GTK_ENTRY (
@@ -321,7 +321,7 @@ void trigger_button_add (GtkCList *clist, GtkWidget *button)
 
 void trigger_button_delete (GtkCList *clist, GtkWidget *button) {
     gchar *word;
-    int trigger_selected_row = (int) gtk_object_get_user_data(GTK_OBJECT(clist));
+    int trigger_selected_row = GPOINTER_TO_INT( gtk_object_get_user_data(GTK_OBJECT(clist)));
 
     if ( trigger_selected_row == -1 ) {
         popup_window (WARN, "No selection made.");

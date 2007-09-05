@@ -126,6 +126,7 @@ int text_came;
 
 int ttmain(int argc, char **argv)
 {
+  extern struct listnode *init_functions();
   struct session *ses;
   char *strptr, temp[BUFFER_SIZE];
   int arg_num;
