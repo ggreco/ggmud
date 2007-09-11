@@ -13,7 +13,7 @@ Packager: Gabriele Greco <gabrielegreco@gmail.com>
 Summary: A Powerful Multiplatform MUD Client
 URL: http://ggmud.sourceforge.net
 License: GNU General Public License, Version 2
-SoftwareVersion: 0.7.1
+SoftwareVersion: 0.7.2
 # SoftwareVersion: @VERSION@
 #Repository: http://www.mysite.org/downloads/myproject.xml
 
@@ -27,7 +27,7 @@ SoftwareVersion: 0.7.1
 # "Migrating to 1.X" document and understand the impact it will have
 # on your package. Some APIs may change their behaviour and new
 # features will be enabled depending on what this is set to.
-AutopackageTarget: 1.2
+AutopackageTarget: 1.2.5
 
 # Only uncomment InterfaceVersion if your package exposes interfaces
 # to other software, for instance if it includes DSOs or python/perl
