@@ -139,18 +139,20 @@ void do_oneword(char *result, char *string, char *word_num)
     strcpy(result, buffer);
 }
 
+typedef void (*PredFuncPtr)(char *result, char * arg1, char * arg2, char * arg3, char * arg4);
+
 struct predefined_function
 {
-    char *name;
-    void (*func)(char *result, char * arg1, char * arg2, char * arg3, char * arg4);
+    const char *name;
+    PredFuncPtr func;
     int args;
 };
 
 struct predefined_function predefineds[] = 
 {
-    {"trim", do_trim, 1},
-    {"lower", do_lower, 1},
-    {"oneword", do_oneword, 2},
+    {"trim"   , (PredFuncPtr)do_trim   , 1},
+    {"lower"  , (PredFuncPtr)do_lower  , 1},
+    {"oneword", (PredFuncPtr)do_oneword, 2},
     {NULL, NULL, 0}
 };
 

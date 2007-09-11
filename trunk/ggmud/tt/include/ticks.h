@@ -30,5 +30,10 @@ extern void tickoff_command(struct session *ses);
 extern void tickon_command(struct session *ses);
 extern void tickset_command(struct session *ses);
 extern void ticksize_command(const char *arg, struct session *ses);
+// defined in timers.c
+extern void do_timer(char *arg, struct session *ses);
+extern void do_gettimer(char *arg, struct session *ses);
+extern void do_stoptimer(char *arg, struct session *ses);
+extern int timetilltick(void);
 #endif
 
