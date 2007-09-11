@@ -66,9 +66,9 @@ int main(int argc, char **argv)
     extern void save_vars(void);
 
 #ifdef __APPLE__
-    extern void fix_bundle_enviroment();
+    extern void fix_bundle_environment();
 
-    fix_bundle_enviroment();
+    fix_bundle_environment();
 #endif
 
 #ifndef WIN32
@@ -200,19 +200,19 @@ WinMain (int hInstance, int hPrevInstance, char *lpszCmdLine, int nCmdShow)
 #include <mach-o/dyld.h>
 #include <sys/param.h>
 void
-fixup_bundle_environment ()
+fix_bundle_environment ()
 {
 	char execpath[MAXPATHLEN+1];
 	char path[MAXPATHLEN * 4];
     FILE *f;
     uint32_t pathsz = sizeof (execpath);
 	_NSGetExecutablePath (execpath, &pathsz);
-	gchar * dir_path = g_path_get_dirname (exec_path);
+	gchar * dir_path = g_path_get_dirname (execpath);
 	strcpy(path, dir_path);
 	strcat(path, "/../Frameworks/clearlooks");
 	setenv ("GTK_PATH", path, 1);
 	strcat(path + strlen(dir_path), "/../Resources/locale");
-	localedir = strdup (path);
+//	localedir = strdup (path);
 	/* write a pango.rc file and tell pango to use it */
 	strcpy(path + strlen(dir_path), "/../Resources/pango.rc");
 
