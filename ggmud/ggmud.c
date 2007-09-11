@@ -65,6 +65,12 @@ int main(int argc, char **argv)
     extern int checktick(void);
     extern void save_vars(void);
 
+#ifdef __APPLE__
+    extern void fix_bundle_enviroment();
+
+    fix_bundle_enviroment();
+#endif
+
 #ifndef WIN32
     char *display;
 
@@ -188,4 +194,43 @@ WinMain (int hInstance, int hPrevInstance, char *lpszCmdLine, int nCmdShow)
   return main (__argc, __argv);
 }
 
+#endif
+
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#include <sys/param.h>
+void
+fixup_bundle_environment ()
+{
+	char execpath[MAXPATHLEN+1];
+	char path[MAXPATHLEN * 4];
+    FILE *f;
+    uint32_t pathsz = sizeof (execpath);
+	_NSGetExecutablePath (execpath, &pathsz);
+	gchar * dir_path = g_path_get_dirname (exec_path);
+	strcpy(path, dir_path);
+	strcat(path, "/../Frameworks/clearlooks");
+	setenv ("GTK_PATH", path, 1);
+	strcat(path + strlen(dir_path), "/../Resources/locale");
+	localedir = strdup (path);
+	/* write a pango.rc file and tell pango to use it */
+	strcpy(path + strlen(dir_path), "/../Resources/pango.rc");
+
+	if ((f = fopen(path, "w"))) {
+        fprintf(f, "[Pango]\nModuleFiles=%s/../Resources/pango.modules\n",
+                dir_path);
+        fclose(f);
+		setenv ("PANGO_RC_FILE", path, 1);
+    }
+	// gettext charset aliases
+	setenv ("CHARSETALIASDIR", path, 1);
+
+	// font config
+	strcpy(path + strlen(dir_path), "/../Resources/fonts.conf");
+	setenv ("FONTCONFIG_FILE", path, 1);
+	// GDK Pixbuf loader module file
+	strcpy(path + strlen(dir_path), "/../Resources/gdk-pixbuf.loaders");
+	setenv ("GDK_PIXBUF_MODULE_FILE", path, 1);
+    g_free(dir_path);
+}
 #endif
