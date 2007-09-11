@@ -285,6 +285,7 @@ void translate_telnet_protocol(unsigned char *dst, unsigned char *src,
 
 int read_buffer_mud(char *buffer, struct session *ses)
 {
+    extern int do_telnet_protocol(unsigned char *data,int nb,struct session *ses);
     int i, didget, b;
     char *cpsource, *cpdest;
     char tmpbuf[INPUT_CHUNK + 1];
@@ -341,7 +342,7 @@ int read_buffer_mud(char *buffer, struct session *ses)
             cpsource++;
             break;
         case 255:
-            b=do_telnet_protocol(cpsource, i, ses);
+            b=do_telnet_protocol((unsigned char *)cpsource, i, ses);
             switch(b)
             {
             case -1:

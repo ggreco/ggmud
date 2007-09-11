@@ -30,8 +30,8 @@ ggmud *mud;
 extern void load_win_pos();
 
 gint snoop_keys (GtkWidget *grab_widget,
-                                             GdkEventKey *event,
-                                             ggmud *mud)
+                 GdkEventKey *event,
+                 gpointer mud)
 {
    extern gint capture_enabled;
 

@@ -56,5 +56,11 @@ extern void broken_telnet_command(struct session *ses);
 extern void save_history_command(struct session *ses);
 extern void show_pretick_command(struct session *ses);
 extern void append_log_command(struct session *ses);
+
+// window handling commands in window.c
+extern void clr_command(char *, struct session *);
+extern void mess_command(char *, struct session *);
+extern void window_command(char *, struct session *);
+
 #endif
 

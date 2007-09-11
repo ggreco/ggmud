@@ -156,7 +156,7 @@ typedef struct list_s {
 /* change the codes set up in highlight.c                                 */
 /**************************************************************************/
 #define DEFAULT_BEGIN_COLOR "["
-#define DEFAULT_END_COLOR "[m"
+#define DEFAULT_END_COLOR "[0m"
 
 /*************************************************************************/
 /* The text below is checked for. If it trickers then echo is turned off */
@@ -323,4 +323,6 @@ struct chat_data {
   
 };
 
+extern void tintin_puts(const char *cptr, struct session *ses);
+extern void tintin_puts2(const char *cptr, struct session *ses);
 #endif

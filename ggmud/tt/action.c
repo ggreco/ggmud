@@ -336,7 +336,7 @@ void check_all_actions(const char *line, struct session *ses)
 
 #ifdef WITH_LUA
       if (*ln->right == lua_char) {
-          execute_luatrigger(ln->right + 1, var_ptr, var_len);
+          execute_luatrigger(ln->right + 1, (char **)var_ptr, var_len);
       }
       else
 #endif
@@ -393,7 +393,7 @@ int check_a_action(const char *line, const char *action, struct session *ses)
   char line_noansi[BUFFER_SIZE];
   char result[BUFFER_SIZE];
   char *temp2, *tptr = result, *naptr = line_noansi;
-  const char *naptr2;
+  char *naptr2;
   int  i, len, flag;
 
   strip_ansi(line, line_noansi);

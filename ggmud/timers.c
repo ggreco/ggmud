@@ -28,7 +28,6 @@
 // #alias {celepath} {e;#wait 500;e;#wait 500;s;#wait 500;s;#wait 500;e;#wait 500;n;#wait 500;e;#wait 500;e;#wait 500;e;#wait 500;w;#wait 500;w;#wait 500;s;#wait 500;e;#wait 500}
 
 extern char *get_arg_in_braces(char *s, char *arg, int flag);
-extern void tintin_puts(const char *cptr, struct session *ses);
 
 int use_tickcounter = 0;
 
@@ -137,7 +136,7 @@ wait_command(struct session *ses, const char *arg, const char *line)
     char temp[BUFFER_SIZE];
     int msec;
     
-    arg = get_arg_in_braces(arg, temp, 0);
+    arg = get_arg_in_braces((char *)arg, temp, 0);
 
     if (!*temp) {
         tintin_puts("#WAIT NEEDS AT LEAST A PARAMETER, LINE SKIPPED\n", ses);

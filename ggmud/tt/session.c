@@ -66,6 +66,7 @@ This program is protected under the GNU GPL (See COPYING)
 
 struct session *session_command(const char *arg, struct session *ses)
 {
+  extern void make_connection (const char *name, const char *host, const char *port);
   char left[BUFFER_SIZE], right[BUFFER_SIZE];
   struct session *sesptr;
 

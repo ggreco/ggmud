@@ -154,6 +154,8 @@ void redraw_command(void)
 
 void bell_command(struct session *ses)
 {
+  extern void gdk_beep();
+
   char temp[2];
 
   temp[0] = 7;
@@ -574,6 +576,8 @@ void system_command(const char *arg, struct session *ses)
 
 struct session *zap_command(struct session *ses)
 {
+  extern void disconnect();
+
   tintin_puts("#ZZZZZZZAAAAAAAAPPPP!!!!!!!!! LET'S GET OUTTA HERE!!!!!!!!", ses);
   if(!ses)
     return NULL;

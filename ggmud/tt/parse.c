@@ -325,7 +325,7 @@ struct session *parse_tintin_command(const char *command, char *arg,
     cr_command(ses); 
 
   else if (is_abbrev(command, "clr")) 
-    clr_command(arg);
+    clr_command(arg, ses);
   
   else if(is_abbrev(command, "echo"))
     echo_command(ses);
