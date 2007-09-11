@@ -1,0 +1,60 @@
+GGMud
+-----
+
+GGMud is a graphical mud client, it uses GTK 2.x for its graphic
+interface and support most of the tt++ command set. The goal of GGMud is
+to be as complete as ZMud is, so it borrowed a few features from it
+and has also a partial command compatibility with zmud.
+
+GGMud is born from a MERGE of the command line client tintin++ and 
+the graphical client SClient. This was about 4 years ago, since that
+I've made a lot of changes and now there is really very few code from his
+predecessors :)
+
+The GGMUD configuration may be done through gui (there is a separate panel
+and file for every kind of configuration object: triggers, aliases...)
+or through command line, the full set of tintin++ commands is supported, 
+as said before also a few zmud commands are supported.
+
+Requirements
+------------
+Linux:
+ glibc 2.x
+ gtk 2.x
+Win32:
+ gtk 2.x (builtin in the installer)
+MacOSX:
+ Apple or Fink X11 server
+ GTK 2.x (builtin in the app bundle)
+
+Features
+--------
+- ANSI output window with scrollbar and split window for the review buffer
+- Fully scriptable through a simple but powerful LUA interface  (see test.lua to view the potentials)
+- Input window with history and automatic selection (zmud like behaviour) and tab completion
+- Aliases
+- Triggers (with classes)
+- Highlights
+- Gags
+- Tick counter
+- Numeric keypad walking
+- Speedwalks (.eeewwwnnn or also dotless... eeewwwnnn)
+- Variables and if conditions (look at tintin++ guide for more info)
+- GUI panels to configure colors, aliases and other stuff.
+- Connection wizard with autoconnect.
+- Telnet support
+- (new) Socks 4/5 proxy support
+- (new) Macro editor
+- (new) MCCP mud compression support
+
+Documentation
+-------------
+You can find GGMud documentation at the following URL:
+
+http://ggmud.sourceforge.net/doc
+
+You can find answers to the most common questions in the GGMud forums in the sourceforge project page:
+http://sourceforge.net/projects/ggmud
+
+----
+Gabriele Greco (gabrielegreco@gmail.com)
