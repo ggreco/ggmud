@@ -29,11 +29,6 @@
 #include <string.h>
 #include "ggmud.h"
 
-#ifdef WIN32
-#include <shlobj.h>
-#define mkdir(x, y) _mkdir(x)
-#endif
-
 int check_ggmud_dir (gchar *dirname, int silent) {
 /* check if the specified directory exists, try to create it if it doesn't */
     struct stat file_stat;
@@ -46,7 +41,7 @@ int check_ggmud_dir (gchar *dirname, int silent) {
             popup_window (ERR, "%s already exists and is not a directory!", dirname);
         }
     } else {
-        if (!mkdir(dirname, 0777)) {
+        if (!g_mkdir(dirname, 0777)) {
         /* this isn't dangerous, umask modifies it */
             if (!silent) {
                 popup_window (INFO, "GGMud settings directory <b>%s</b> created.", 
