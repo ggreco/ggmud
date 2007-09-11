@@ -36,13 +36,13 @@ sed -e "s?@ENV@?$env?g" -e "s?@VERSION@?$version?g" < Info.plist.in > Info.plist
 # copy static files
 
 cp Info.plist $APPROOT
-cp -R Resources $APPROOT
+cp GGMud.icns  $APPROOT/Resources
 
 
 
 
 # copy executable
-echo "Copying Ardour executable ..."
+echo "Copying GGMud executable ..."
 cp ggmud $APPROOT/MacOS/
 cp gg_help.txt $APPROOT/MacOS/
 cp gg_help.txt $APPROOT/Resources/bin/
