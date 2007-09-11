@@ -77,3 +77,58 @@ on_checkbutton_autologin_toggled       (GtkToggleButton *togglebutton,
             gtk_toggle_button_get_active(togglebutton));    
 }
 
+#include <stdlib.h>
+
+#ifdef WIN32
+#include <windows.h>
+#include <shellapi.h>
+#endif
+
+// open an URL, different for each operating system
+void
+openurl(const char *url)
+{
+#ifdef WIN32
+    ShellExecute(GetActiveWindow(),
+         "open", url, NULL, NULL, SW_SHOWNORMAL);
+#elif defined(__APPLE__)
+    char buffer[256];
+    snprintf(buffer, sizeof(buffer), "open %s", url);
+#else
+    char *apps[] = {"x-www-browser",
+                    "firefox",
+                    "opera",
+                    "mozilla",
+                    "konqueror", NULL};
+
+    char buffer[256];
+    int i = 0;
+
+    while (apps[i]) {
+        snprintf(buffer, sizeof(buffer), "which %s >/dev/null", apps[i]);
+        if (system(buffer) == 0) {
+            snprintf(buffer, sizeof(buffer), "%s %s", apps[i], url);
+            system(buffer);
+            return;
+        }
+        i++;
+    }
+#endif
+
+}
+
+void
+on_documentation_activate              (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+    openurl("http://www.ggsoft.org/ggmud/doc");
+}
+
+
+void
+on_homepage_activate                   (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+    openurl("http://www.ggsoft.org/ggmud");
+}
+

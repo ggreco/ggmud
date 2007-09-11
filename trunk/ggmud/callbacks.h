@@ -455,3 +455,11 @@ close_window                           (GtkWidget       *widget,
 void
 close_a_gui_window                     (GtkButton       *button,
                                         gpointer         user_data);
+
+void
+on_documentation_activate              (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_homepage_activate                   (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);

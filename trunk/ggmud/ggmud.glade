@@ -2669,7 +2669,7 @@
 		      <signal name="activate" handler="do_wiz" last_modification_time="Mon, 02 Jul 2007 09:30:56 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image14">
+			<widget class="GtkImage" id="image19">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-dialog-info</property>
 			  <property name="icon_size">1</property>
@@ -2832,7 +2832,7 @@
 		      <signal name="activate" handler="save_review" last_modification_time="Mon, 02 Jul 2007 09:30:56 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image15">
+			<widget class="GtkImage" id="image20">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-save-as</property>
 			  <property name="icon_size">1</property>
@@ -2949,7 +2949,7 @@
 		      <signal name="activate" handler="log_viewer" last_modification_time="Mon, 02 Jul 2007 09:30:56 GMT"/>
 
 		      <child internal-child="image">
-			<widget class="GtkImage" id="image16">
+			<widget class="GtkImage" id="image21">
 			  <property name="visible">True</property>
 			  <property name="stock">gtk-justify-left</property>
 			  <property name="icon_size">1</property>
@@ -3005,6 +3005,50 @@
 		      <property name="label">gtk-help</property>
 		      <property name="use_stock">True</property>
 		      <signal name="activate" handler="do_manual" last_modification_time="Mon, 02 Jul 2007 09:30:56 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkImageMenuItem" id="documentation">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">View GGMud online documentation in your default browser...</property>
+		      <property name="label" translatable="yes">Online Documentation...</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_documentation_activate" last_modification_time="Tue, 11 Sep 2007 15:15:15 GMT"/>
+
+		      <child internal-child="image">
+			<widget class="GtkImage" id="image22">
+			  <property name="visible">True</property>
+			  <property name="stock">gtk-justify-fill</property>
+			  <property name="icon_size">1</property>
+			  <property name="xalign">0.5</property>
+			  <property name="yalign">0.5</property>
+			  <property name="xpad">0</property>
+			  <property name="ypad">0</property>
+			</widget>
+		      </child>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkImageMenuItem" id="homepage">
+		      <property name="visible">True</property>
+		      <property name="tooltip" translatable="yes">Open the GGMud homepage in your default web browser.</property>
+		      <property name="label" translatable="yes">Homepage</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_homepage_activate" last_modification_time="Tue, 11 Sep 2007 15:15:15 GMT"/>
+
+		      <child internal-child="image">
+			<widget class="GtkImage" id="image23">
+			  <property name="visible">True</property>
+			  <property name="stock">gtk-home</property>
+			  <property name="icon_size">1</property>
+			  <property name="xalign">0.5</property>
+			  <property name="yalign">0.5</property>
+			  <property name="xpad">0</property>
+			  <property name="ypad">0</property>
+			</widget>
+		      </child>
 		    </widget>
 		  </child>
 
