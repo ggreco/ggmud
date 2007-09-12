@@ -205,8 +205,13 @@ fix_bundle_environment ()
 	char execpath[MAXPATHLEN+1];
 	char path[MAXPATHLEN * 4];
     FILE *f;
+
     uint32_t pathsz = sizeof (execpath);
 	_NSGetExecutablePath (execpath, &pathsz);
+
+    if (!strstr(execpath, ".app"))
+        return;
+
 	gchar * dir_path = g_path_get_dirname (execpath);
 	strcpy(path, dir_path);
 	strcat(path, "/../Frameworks/clearlooks");

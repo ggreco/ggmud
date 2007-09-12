@@ -4,7 +4,7 @@
 
 GTKQUARTZ_ROOT=/Users/gabry/projects/gtk
 
-version=`grep VERSION config.h | cut -d' ' -f 3 | sed "s/'//g"`
+version=`grep VERSION config.h | cut -d' ' -f 3 | sed "s/\"//g"`
 echo "Version is $version"
 
 # setup directory structure
@@ -66,7 +66,9 @@ env PANGO_RC_FILE=pangorc $GTKQUARTZ_ROOT/bin/pango-querymodules | sed "s?$GTKQU
 rm pangorc
 
 # generate a new GDK pixbufs loaders file
-sed "s?$GTKQUARTZ_ROOT/lib/gtk-2.0/2.10.0/loaders/?@executable_path/../Frameworks/modules/?" < $GTKQUARTZ_ROOT/etc/gtk-2.0/gdk-pixbuf.loaders > $Resources/gdk-pixbuf.loaders
+sed "s?$GTKQUARTZ_ROOT/lib/gtk-2.0/2.10.0/loaders/?@executable_path/../Frameworks/modules/?" < $GTKQUARTZ_ROOT/etc/gtk-2.0/gdk-pixbuf.loaders >loaders.temp
+sed "s?$GTKQUARTZ_ROOT//lib/gtk-2.0/2.10.0/loaders/?@executable_path/../Frameworks/modules/?" < loaders.temp > $Resources/gdk-pixbuf.loaders
+rm loaders.temp
 
 
 # this one is special - we will set GTK_PATH to $Frameworks/clearlooks
