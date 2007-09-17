@@ -157,6 +157,9 @@ gint hist_evt (GtkWidget* w, GdkEventKey* event, gpointer data)
     char keypress = 0;
     
     switch (event->keyval) {
+        case GDK_Escape:
+            gtk_entry_set_text(GTK_ENTRY(w), "");
+            break;
         case GDK_Tab:
             {
                 char word[32], *result, *buf;
