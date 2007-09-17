@@ -220,7 +220,7 @@ extern void window_font ( GtkWidget *widget, gpointer data   );
 extern void load_font ();
 extern void save_font ();
 extern FILE *fileopen (gchar *filename, gchar *mode);
-
+extern void openurl(const char *);
 //extern GtkWidget *window;
 
 /* net.c */

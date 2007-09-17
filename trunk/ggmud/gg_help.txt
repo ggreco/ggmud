@@ -31,7 +31,7 @@ textin          tick             tickoff
 tickon          tickset          ticksize                
 timer           timetry          tolower
 toupper         tries            unaction                
-unalias         unantisubstitute            
+unalias         unantisubstitute url           
 unfunction      ungag            unhighlight        
 unpath          unpurist         unsplit                 
 unsubstitute    unvariable       variable                
@@ -43,7 +43,8 @@ writesession    zap              zombion
 zombioff        helpversion      window
 verbosity       beep             help            
 togglesubs      substitute       wait  
-
+window          clr              script
+lua
 
 ~ALIAS
 
@@ -1399,5 +1400,52 @@ Example:
 $c0015BACK TO START POSITION$c0007}
 
 This alias explore a 2x2 square section staying 500msec in every room.
+
+~SCRIPT
+
+format: #script <filename>
+
+Load and execute a LUA script appending .lua extension to the file if not present.
+
+This command loads a LUA script from the filesystem, the path must be
+slash separated on linux and mac, and slash or double backslash separated
+on win32. Path must be absolute, if path cointains spaces use brackets 
+to mark it.
+
+Example:
+#script /home/gabry/test.lua
+#script C:/mydir/script.lua
+#script C:\\mydir\script.lua
+#script {C:/Program Files/GGMud/my script with spaces.lua}
+
+See also: LUA
+
+~LUA
+
+format: #lua <filename>
+
+Load and execute a LUA script.
+
+This command works mostly like #script, but it doesn't append .lua to the file and
+you don't need to use brackets around the filename if the path contains white
+spaces.
+
+#lua /home/gabry/testlua.ggmud
+#lua C:/Program Files/GGMud/my script with spaces.lua
+
+See also: SCRIPT
+
+~URL
+
+format: #url <URL>
+
+Opens an URL in the default browser.
+
+This command tries to open an URL on the default internet web browser, it use
+specific OS apis to do so on linux, mac & windows. The URL must not contain
+white spaces.
+
+Example:
+#url http://www.ggsoft.org/
 
 ~*EOF* 

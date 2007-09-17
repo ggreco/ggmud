@@ -116,6 +116,17 @@ void verbatim_command(void)
 /* the #all command */
 /********************/
 
+void url_command(const char *arg, struct session *ses)
+{
+    char left[BUFFER_SIZE];
+    extern void openurl(const char *);
+
+    get_arg_in_braces(arg, left, 1);
+
+    if (*left)
+        openurl(left);
+}
+
 struct session *all_command(const char *arg, struct session *ses)
 {
   struct session *sesptr, *next_ses;

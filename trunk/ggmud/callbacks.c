@@ -94,6 +94,7 @@ openurl(const char *url)
 #elif defined(__APPLE__)
     char buffer[256];
     snprintf(buffer, sizeof(buffer), "open %s", url);
+    system(buffer);
 #else
     char *apps[] = {"x-www-browser",
                     "firefox",
