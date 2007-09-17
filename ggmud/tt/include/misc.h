@@ -31,6 +31,7 @@ extern void redraw_command(void);
 extern void bell_command(struct session *ses);
 extern void boss_command(struct session *ses);
 extern void char_command(const char *arg, struct session *ses);
+extern void url_command(const char *arg, struct session *ses);
 extern void echo_command(struct session *ses);
 extern void end_command(const char *command, struct session *ses);
 extern void ignore_command(struct session *ses);

@@ -637,6 +637,8 @@ struct session *parse_tintin_command(const char *command, char *arg,
 
   else if(is_abbrev(command, "zombion"))
     zombion_command(ses);
+  else if(is_abbrev(command, "url"))
+    url_command(arg, ses);
   /* added by ycjhi ------------- end   */
 
 
