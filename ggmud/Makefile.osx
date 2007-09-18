@@ -3,7 +3,7 @@ CROSSCC = $(CROSSDIR)/bin/gcc
 GLOBAL_CFLAGS = -O2 -DTELNET_SUPPORT -Wall -DWITH_LUA -DENABLE_MCCP
 OBJDIR = obj/
 GTKBASE = /Users/gabry/projects/gtk
-PATH = $(GTKBASE)/bin:$(PATH)
+PKGCONFIG=$(GTKBASE)/bin/pkg-config
 export PATH
 PKG_CONFIG_PATH = $(GTKBASE)/lib/pkgconfig
 export PKG_CONFIG_PATH
@@ -12,9 +12,9 @@ CC ?= gcc
 CXX ?= g++
 INCDIR = -Itt -Ilua
 COMMONLIBS = -Ltt -ltt -Llua -llua
-CFLAGS = $(INCDIR) `pkg-config gtk+-2.0 --cflags` $(GLOBAL_CFLAGS) -DGTKQUARTZ
+CFLAGS = $(INCDIR) `$(PKGCONFIG) gtk+-2.0 --cflags` $(GLOBAL_CFLAGS) -DGTKQUARTZ
 
-LIBS = $(COMMONLIBS) `pkg-config gtk+-2.0 --libs` -lz
+LIBS = $(COMMONLIBS) `$(PKGCONFIG) gtk+-2.0 --libs` -lz -framework Carbon
 
 VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )
 OS:=	$(uname)

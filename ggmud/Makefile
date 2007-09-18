@@ -102,6 +102,16 @@ dist-osx: ggmud
 dist-linux: ggmud
 	tar czf ../ggmud-linux-$(VERSION).tgz ggmud gg_help.txt README
 
+dmg: ggmud
+	sh makeapp.sh
+	-rm -rf dest TMP.dmg
+	mkdir dest
+	mv GGMud.app dest
+	cp README dest/README.txt
+	hdiutil makehybrid -hfs -hfs-volume-name GGMud -hfs-openfolder dest dest -o TMP.dmg
+	hdiutil convert -format UDZO TMP.dmg -o GGMud-OSX-$(VERSION).dmg
+	rm -rf TMP.dmg dest
+    
 rpm: ggmud
 	cp ggmud.SPEC ggmud-$(VERSION).SPEC
 	rpmbuild -bb ggmud-$(VERSION).SPEC
@@ -117,4 +127,4 @@ depend:	$(C_SRCS) *.h
 	sed -f mkdep.sed deptemp >depend
 	rm deptemp
         
--include depend
+
