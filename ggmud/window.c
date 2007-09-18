@@ -645,6 +645,15 @@ spawn_gui()
   /* create the main window */
   mud->window = create_window_main();
 
+#if defined(__APPLE__) && defined(GTKQUARTZ)
+  {
+      extern void sync_menu_takeover_menu(GtkMenuShell *);
+
+      GtkWidget *menu = lookup_widget(mud->window, "menubar_main");
+      sync_menu_takeover_menu (GTK_MENU_SHELL(menu));
+  }
+#endif
+
   gtk_window_set_title (GTK_WINDOW (mud->window), "GGMud "VERSION"");
   gtk_widget_realize ( mud->window );
 

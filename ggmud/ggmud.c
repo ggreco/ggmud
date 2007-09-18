@@ -65,7 +65,7 @@ int main(int argc, char **argv)
     extern int checktick(void);
     extern void save_vars(void);
 
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(GTKQUARTZ)
     extern void fix_bundle_environment();
 
     fix_bundle_environment();
@@ -196,7 +196,7 @@ WinMain (int hInstance, int hPrevInstance, char *lpszCmdLine, int nCmdShow)
 
 #endif
 
-#ifdef __APPLE__
+#if defined(__APPLE__) && defined(GTKQUARTZ)
 #include <mach-o/dyld.h>
 #include <sys/param.h>
 void
