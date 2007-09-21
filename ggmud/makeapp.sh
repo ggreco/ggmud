@@ -28,6 +28,7 @@ mkdir -p $APPROOT/Resources
 mkdir -p $APPROOT/Resources/bin
 mkdir -p $Frameworks/modules
 mkdir -p $Shared/templates
+mkdir -p $Shared/themes
 mkdir -p $Etc
 
 # edit plist
@@ -56,7 +57,7 @@ echo "Copying all GDK Pixbuf loaders ..."
 cp -R $GTKQUARTZ_ROOT/lib/gtk-2.0/2.10.0/loaders/*.so $Frameworks/modules
 # charset alias file
 cp -R $GTKQUARTZ_ROOT/lib/charset.alias $Resources
-
+cp -r $GTKQUARTZ_ROOT/share/themes/Default $Shared/themes/
 # generate new Pango module file
 cat > pangorc <<EOF 
 [Pango]
