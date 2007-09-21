@@ -209,6 +209,7 @@ fix_bundle_environment ()
     uint32_t pathsz = sizeof (execpath);
 	_NSGetExecutablePath (execpath, &pathsz);
 
+// if we are not in a bundle let's use the system GTK enviroment...
     if (!strstr(execpath, ".app"))
         return;
 
@@ -230,6 +231,9 @@ fix_bundle_environment ()
 	// gettext charset aliases
 	setenv ("CHARSETALIASDIR", path, 1);
 
+	// data prefix
+	strcpy(path + strlen(dir_path), "/../Resources/share/themes");
+	setenv ("GTK_DATA_PREFIX", path, 1);
 	// font config
 	strcpy(path + strlen(dir_path), "/../Resources/fonts.conf");
 	setenv ("FONTCONFIG_FILE", path, 1);
