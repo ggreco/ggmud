@@ -5,7 +5,7 @@
 #
 
 [Meta]
-RootName: @ggmud.sourceforge.net/ggmud:0.7.1
+RootName: @ggmud.sourceforge.net/ggmud:0.7.2
 DisplayName: GGMud
 ShortName: ggmud
 Maintainer: Gabriele Greco <gabrielegreco@gmail.com>
