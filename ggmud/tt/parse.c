@@ -475,6 +475,10 @@ struct session *parse_tintin_command(const char *command, char *arg,
     do_stoptimer(arg, ses);
   else if(is_abbrev(command, "timetry"))
     time_between_tries(arg, ses);
+  else if(is_abbrev(command, "vbutton"))
+    vbutton_command(arg, ses);
+  else if(is_abbrev(command, "hbutton"))
+    hbutton_command(arg, ses);
 
   else if(is_abbrev(command, "tries"))
     number_of_tries(arg, ses);

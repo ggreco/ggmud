@@ -1355,7 +1355,13 @@ create_window_main (void)
   GtkWidget *toolbutton10;
   GtkWidget *separatortoolitem2;
   GtkWidget *toolbutton7;
+  GtkWidget *vbox24;
+  GtkWidget *hbox18;
   GtkWidget *hbox_output;
+  GtkWidget *handlebox_vert;
+  GtkWidget *vbox_button;
+  GtkWidget *handlebox_oriz;
+  GtkWidget *hbox_button;
   GtkWidget *hbox17;
   GtkWidget *entry_input;
   GtkWidget *togglebutton_triggers;
@@ -1675,9 +1681,34 @@ create_window_main (void)
   gtk_widget_show (toolbutton7);
   gtk_container_add (GTK_CONTAINER (toolbar1), toolbutton7);
 
+  vbox24 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox24);
+  gtk_box_pack_start (GTK_BOX (vbox17), vbox24, TRUE, TRUE, 0);
+
+  hbox18 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox18);
+  gtk_box_pack_start (GTK_BOX (vbox24), hbox18, TRUE, TRUE, 0);
+
   hbox_output = gtk_hbox_new (FALSE, 0);
   gtk_widget_show (hbox_output);
-  gtk_box_pack_start (GTK_BOX (vbox17), hbox_output, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (hbox18), hbox_output, TRUE, TRUE, 0);
+
+  handlebox_vert = gtk_handle_box_new ();
+  gtk_widget_show (handlebox_vert);
+  gtk_box_pack_start (GTK_BOX (hbox18), handlebox_vert, FALSE, FALSE, 0);
+  gtk_handle_box_set_handle_position (GTK_HANDLE_BOX (handlebox_vert), GTK_POS_TOP);
+
+  vbox_button = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox_button);
+  gtk_container_add (GTK_CONTAINER (handlebox_vert), vbox_button);
+
+  handlebox_oriz = gtk_handle_box_new ();
+  gtk_widget_show (handlebox_oriz);
+  gtk_box_pack_start (GTK_BOX (vbox24), handlebox_oriz, FALSE, FALSE, 0);
+
+  hbox_button = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox_button);
+  gtk_container_add (GTK_CONTAINER (handlebox_oriz), hbox_button);
 
   hbox17 = gtk_hbox_new (FALSE, 4);
   gtk_widget_show (hbox17);
@@ -1938,7 +1969,13 @@ create_window_main (void)
   GLADE_HOOKUP_OBJECT (window_main, toolbutton10, "toolbutton10");
   GLADE_HOOKUP_OBJECT (window_main, separatortoolitem2, "separatortoolitem2");
   GLADE_HOOKUP_OBJECT (window_main, toolbutton7, "toolbutton7");
+  GLADE_HOOKUP_OBJECT (window_main, vbox24, "vbox24");
+  GLADE_HOOKUP_OBJECT (window_main, hbox18, "hbox18");
   GLADE_HOOKUP_OBJECT (window_main, hbox_output, "hbox_output");
+  GLADE_HOOKUP_OBJECT (window_main, handlebox_vert, "handlebox_vert");
+  GLADE_HOOKUP_OBJECT (window_main, vbox_button, "vbox_button");
+  GLADE_HOOKUP_OBJECT (window_main, handlebox_oriz, "handlebox_oriz");
+  GLADE_HOOKUP_OBJECT (window_main, hbox_button, "hbox_button");
   GLADE_HOOKUP_OBJECT (window_main, hbox17, "hbox17");
   GLADE_HOOKUP_OBJECT (window_main, entry_input, "entry_input");
   GLADE_HOOKUP_OBJECT (window_main, togglebutton_triggers, "togglebutton_triggers");
