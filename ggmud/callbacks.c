@@ -133,3 +133,4 @@ on_homepage_activate                   (GtkMenuItem     *menuitem,
     openurl("http://www.ggsoft.org/ggmud");
 }
 
+

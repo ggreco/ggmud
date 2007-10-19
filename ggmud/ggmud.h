@@ -175,6 +175,7 @@ extern void  load_gags    ( void );
 extern void  load_aliases    ( void );
 extern void  load_variables    ( void );
 extern void  load_highlights    ( void );
+extern void  load_buttons (void);
 /* wiz.c */
 extern void  load_wizard        ( void );
 

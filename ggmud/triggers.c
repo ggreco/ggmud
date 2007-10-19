@@ -97,7 +97,7 @@ static void  insert_triggers  (GtkCList *clist)
     int row;
     
     gtk_clist_clear (clist);
-    gtk_object_set_user_data(GTK_OBJECT(clist), (void *)-1);
+    gtk_object_set_user_data(GTK_OBJECT(clist), GINT_TO_POINTER(-1));
     gtk_clist_freeze(clist);
     
     while ( (list = list->next) ) {
@@ -332,7 +332,7 @@ void trigger_button_delete (GtkCList *clist, GtkWidget *button) {
         gtk_clist_get_text (clist, trigger_selected_row, 0, &word);
         sprintf(buffer, "#unaction {%s}", word);
         gtk_clist_remove (clist, trigger_selected_row);
-        gtk_object_set_user_data(GTK_OBJECT(clist), (void *)-1);
+        gtk_object_set_user_data(GTK_OBJECT(clist), GINT_TO_POINTER(-1));
 
         parse_input(buffer, NULL);
     }

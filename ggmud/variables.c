@@ -160,7 +160,7 @@ static void variable_button_delete (GtkWidget *button, gpointer data) {
         
         gtk_clist_get_text ((GtkCList*) data, selected_row, 0, &word);
         gtk_clist_remove ((GtkCList*) data, selected_row);
-        gtk_object_set_user_data(GTK_OBJECT(data), (void *) -1);
+        gtk_object_set_user_data(GTK_OBJECT(data), GINT_TO_POINTER(-1));
 
         sprintf(buffer, "#unvar %s", word);
 
@@ -225,7 +225,7 @@ variables_window(GtkWidget *w, gpointer data)
     gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (scrolled_window), clist);
 
     gtk_widget_show (clist);
-    gtk_object_set_user_data(GTK_OBJECT(clist), (void *) -1);
+    gtk_object_set_user_data(GTK_OBJECT(clist), GINT_TO_POINTER(-1));
 
     hbox3 = gtk_table_new(2, 2, FALSE);
 
