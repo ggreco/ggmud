@@ -273,7 +273,7 @@ static void high_button_delete (GtkWidget *button, GtkCList * data) {
         gtk_clist_get_text (data, selected_row, 0, &word);
         sprintf(buffer, "#unhigh {%s}", word);
         parse_input(buffer, mud->activesession);
-        gtk_object_set_user_data(GTK_OBJECT(data), (void *) -1);
+        gtk_object_set_user_data(GTK_OBJECT(data), GINT_TO_POINTER(-1));
 
         insert_highlights(data);
     }
@@ -354,7 +354,7 @@ void highlights_window (GtkWidget *widget, gpointer data)
 
     gtk_widget_show (clist);
 
-    gtk_object_set_user_data(GTK_OBJECT(clist), (void *) -1);
+    gtk_object_set_user_data(GTK_OBJECT(clist), GINT_TO_POINTER(-1));
     
     hbox3 = gtk_table_new(3, 2, FALSE);
 

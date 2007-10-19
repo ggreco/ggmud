@@ -463,3 +463,33 @@ on_documentation_activate              (GtkMenuItem     *menuitem,
 void
 on_homepage_activate                   (GtkMenuItem     *menuitem,
                                         gpointer         user_data);
+
+void
+on_buttons_activate                    (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_clist_button_select_row             (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);
+
+void
+on_button_buttadd_clicked              (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_button_buttdel_clicked              (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+save_buttons                           (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_clist_button_select_row             (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);

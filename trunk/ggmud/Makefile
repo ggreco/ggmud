@@ -21,7 +21,8 @@ PROJECTNAME = ggmud
 C_SRCS = alias.c ansi.c font.c fileopen.c help.c history.c log.c logviewer.c \
          macro.c net.c preferences.c ggmud.c triggers.c window.c wizard.c \
          variables.c highlights.c gags.c timers.c complete.c prefix.c \
-         telnet.c lua.c interface.c callbacks.c support.c socks.c pixmaps.c
+         telnet.c lua.c interface.c callbacks.c support.c socks.c pixmaps.c \
+		 buttons.c
 
 DEP_SRCS = $(CXX_SRCS) $(C_SRCS)
 

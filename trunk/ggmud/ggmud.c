@@ -169,8 +169,6 @@ int main(int argc, char **argv)
     load_triggers();
     load_tabs();
 
-//    chdir("GGMud.app/Contents/Resources/bin"); it was needed to find the help file
-
 #ifdef WITH_LUA
     if (prefs.LuaConfig)
 	    script_command(prefs.LuaConfig, NULL);
@@ -178,6 +176,8 @@ int main(int argc, char **argv)
 
     if (prefs.WizAtStartup)
         do_wiz(NULL, NULL);
+
+    load_buttons();
 
     gtk_window_present(GTK_WINDOW(mud->window));
     gtk_key_snooper_install(snoop_keys, mud);

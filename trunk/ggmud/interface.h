@@ -15,3 +15,4 @@ GtkWidget* create_window_aliases (void);
 GtkWidget* create_window_gags (void);
 GtkWidget* create_window_complete (void);
 GtkWidget* create_window_about (void);
+GtkWidget* create_window_buttons (void);

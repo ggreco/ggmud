@@ -80,7 +80,7 @@ insert_gags  (GtkCList *clist)
     struct listnode *list = mud->activesession ? mud->activesession->subs : common_subs;
 
     gtk_clist_clear(clist);
-    gtk_object_set_user_data(GTK_OBJECT(clist), (void *) -1);
+    gtk_object_set_user_data(GTK_OBJECT(clist), GINT_TO_POINTER(-1));
     gtk_clist_freeze(clist);
  
     while ( (list = list->next) ) {
