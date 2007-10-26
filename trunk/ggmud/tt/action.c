@@ -357,11 +357,20 @@ int match_a_string(const char *line, const char *mask)
 {
   const char *lptr = line;
 
-  while(*lptr && *mask && (*mask != '%' || !isdigit(mask[1])))
+  while(*lptr && *mask && (*mask != '%' || !isdigit(mask[1])) && (*mask != '$' || mask[1]) ) {
     if(*lptr++ != *mask++)
       return(-1);
+    else if (*mask == '$' && !mask[1]) {
+      if (!*lptr)
+          return ((int)(lptr-line));
+      else
+          return -1;
+    }
+  }
+  // added support for $ as line terminator
 
-  if(!*mask || (*mask == '%' && isdigit(mask[1])))
+  if(!*mask || (*mask == '%' && isdigit(mask[1])) ||
+     (*mask == '$' && !mask[1]) )
     return((int)(lptr-line));
 
   return(-1);
@@ -427,7 +436,8 @@ int check_a_action(const char *line, const char *action, struct session *ses)
       return(FALSE);
   }
 
-  while(*naptr && *tptr) {
+  // added $ line termination token
+  while(*naptr && *tptr && (*tptr !='$' || tptr[1])) {
     temp2 = tptr+2;
     if(!*temp2) {
       var_len[tptr[1]-'0'] = strlen(line);
@@ -455,6 +465,9 @@ int check_a_action(const char *line, const char *action, struct session *ses)
     else
       return(FALSE);
   }
+
+  if (*tptr == '$' && !tptr[1])
+      tptr++;
 
   return(*tptr ? FALSE : TRUE);
 }       

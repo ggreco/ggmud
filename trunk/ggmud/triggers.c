@@ -184,7 +184,12 @@ void trigger_selection_made (GtkCList *clist, gint row, gint column,
 {
     static guint32 old_time = 0L;
     gchar *text;
-    int trigger_selected_row = GPOINTER_TO_INT(gtk_object_get_user_data(GTK_OBJECT(clist)));
+    int trigger_selected_row;
+
+    if (!event)
+        return;
+
+    trigger_selected_row = GPOINTER_TO_INT(gtk_object_get_user_data(GTK_OBJECT(clist)));
 
     if (old_time != 0L && (event->time - old_time) < 1000 &&
             trigger_selected_row == row) {
