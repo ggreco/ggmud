@@ -24,6 +24,25 @@ void on_button_clicked(GtkWidget *button, button_def *def)
     parse_input(def->command, mud->activesession);
 }
 
+void insert_buttons(GtkCList *clist, GList *source)
+{
+    GList *l = source;
+    gchar *text[2];
+
+    gtk_clist_clear(clist);
+    gtk_object_set_user_data(GTK_OBJECT(clist), GINT_TO_POINTER(-1));
+    gtk_clist_freeze(clist);   
+
+    while(l) {
+        button_def *b = (button_def *)l->data;
+        text[0] = b->label;
+        text[1] = b->command;
+        gtk_clist_append (GTK_CLIST (clist), text);
+        l = l -> next;
+    }
+    gtk_clist_thaw(clist);
+}
+
 GList *new_button(GList *list, GtkWidget *dest, char *label, char *command)
 {
     button_def *button;
@@ -179,25 +198,6 @@ load_buttons()
         parse_config(fp, NULL);
         fclose(fp);
     }
-}
-
-void insert_buttons(GtkCList *clist, GList *source)
-{
-    GList *l = source;
-    gchar *text[2];
-
-    gtk_clist_clear(clist);
-    gtk_object_set_user_data(GTK_OBJECT(clist), GINT_TO_POINTER(-1));
-    gtk_clist_freeze(clist);   
-
-    while(l) {
-        button_def *b = (button_def *)l->data;
-        text[0] = b->label;
-        text[1] = b->command;
-        gtk_clist_append (GTK_CLIST (clist), text);
-        l = l -> next;
-    }
-    gtk_clist_thaw(clist);
 }
 
 void

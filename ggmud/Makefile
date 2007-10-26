@@ -1,13 +1,13 @@
 CROSSDIR = /usr/local/cross-gcc33/i386-mingw32msvc/
 CROSSCC = $(CROSSDIR)/bin/gcc
-GLOBAL_CFLAGS = -g -DTELNET_SUPPORT -Wall -DWITH_LUA -DENABLE_MCCP -I../zlib 
+DEBUGFLAG ?= -g
+GLOBAL_CFLAGS = $(DEBUGFLAG) -DTELNET_SUPPORT -Wall -DWITH_LUA -DENABLE_MCCP -I../zlib 
 OBJDIR = obj/
 CC ?= gcc
 CXX ?= g++
 INCDIR = -Itt -Ilua -Izlib
 COMMONLIBS = -Ltt -ltt -Llua -llua -Lzlib -lzlib
 CFLAGS = $(INCDIR) `pkg-config gtk+-2.0 --cflags` $(GLOBAL_CFLAGS) -DENABLE_BINRELOC -DBR_PTHREADS=0  
-
 LIBS = $(COMMONLIBS) `pkg-config gtk+-2.0 --libs`
 
 VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )

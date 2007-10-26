@@ -62,6 +62,8 @@ extern void append_log_command(struct session *ses);
 extern void clr_command(char *, struct session *);
 extern void mess_command(char *, struct session *);
 extern void window_command(char *, struct session *);
+extern void hbutton_command(char *, struct session *);
+extern void vbutton_command(char *, struct session *);
 
 #endif
 

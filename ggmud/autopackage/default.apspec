@@ -5,7 +5,7 @@
 #
 
 [Meta]
-RootName: @ggmud.sourceforge.net/ggmud:0.7.2
+RootName: @ggmud.sourceforge.net/ggmud:0.8.0
 DisplayName: GGMud
 ShortName: ggmud
 Maintainer: Gabriele Greco <gabrielegreco@gmail.com>
@@ -13,7 +13,7 @@ Packager: Gabriele Greco <gabrielegreco@gmail.com>
 Summary: A Powerful Multiplatform MUD Client
 URL: http://ggmud.sourceforge.net
 License: GNU General Public License, Version 2
-SoftwareVersion: 0.7.2
+SoftwareVersion: 0.8.0
 # SoftwareVersion: @VERSION@
 #Repository: http://www.mysite.org/downloads/myproject.xml
 
@@ -39,7 +39,7 @@ AutopackageTarget: 1.2.5
 [BuildPrepare]
 # For ./configure based systems this is a good default
 #prepareBuild --with-some-feature
-make CC=apgcc APBUILD_NO_STATIC_X=1
+make DEBUGFLAG=-O2 CC=apgcc APBUILD_NO_STATIC_X=1
 cp ggmud gg_help.txt ggmud.desktop $build_root
 mkdir -p $build_root/share/icons/hicolor/48x48/apps
 cp ggmud.png $build_root/share/icons/hicolor/48x48/apps 
