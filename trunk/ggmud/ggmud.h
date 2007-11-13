@@ -115,6 +115,7 @@ struct prefs_data {
     char socks_addr[64];
     unsigned short socks_port;
     gint WizAtStartup;
+    gint SkipTaskbar;
 };
 
 #define WARN GTK_MESSAGE_WARNING

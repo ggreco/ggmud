@@ -271,6 +271,7 @@ create_window_preferences (void)
   GtkWidget *checkbutton_toolbar;
   GtkWidget *checkbutton_statusbar;
   GtkWidget *checkbutton_macro;
+  GtkWidget *checkbutton_taskbar;
   GtkWidget *label10;
   GtkWidget *vbox5;
   GtkWidget *frame4;
@@ -388,6 +389,11 @@ create_window_preferences (void)
   gtk_widget_show (checkbutton_macro);
   gtk_box_pack_start (GTK_BOX (vbox7), checkbutton_macro, FALSE, FALSE, 0);
   gtk_tooltips_set_tip (tooltips, checkbutton_macro, "View the statusbar on the main GGMud window", NULL);
+
+  checkbutton_taskbar = gtk_check_button_new_with_mnemonic ("Skip Taskbar");
+  gtk_widget_show (checkbutton_taskbar);
+  gtk_box_pack_start (GTK_BOX (vbox7), checkbutton_taskbar, FALSE, FALSE, 0);
+  gtk_tooltips_set_tip (tooltips, checkbutton_taskbar, "This option tell GGMud to not display its windows on your Operating System taskbar, this is useful for mud players in office.", NULL);
 
   label10 = gtk_label_new ("<b>Interface</b>");
   gtk_widget_show (label10);
@@ -576,6 +582,7 @@ create_window_preferences (void)
   GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_toolbar, "checkbutton_toolbar");
   GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_statusbar, "checkbutton_statusbar");
   GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_macro, "checkbutton_macro");
+  GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_taskbar, "checkbutton_taskbar");
   GLADE_HOOKUP_OBJECT (window_preferences, label10, "label10");
   GLADE_HOOKUP_OBJECT (window_preferences, vbox5, "vbox5");
   GLADE_HOOKUP_OBJECT (window_preferences, frame4, "frame4");

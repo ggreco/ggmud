@@ -163,6 +163,7 @@ static const char *boolean_keys[] = {
     "KeepText", "EchoText", "WordWrap", "Blinking",
     "DoBeep", "Toolbar", "Macrobuttons", "Statusbar",
     "SaveVars", "UseSocks", "TickCounter", "WizAtStartup",
+    "SkipTaskbar",
     NULL
 };
 
@@ -170,6 +171,7 @@ static gint *boolean_values[] = {
     &prefs.KeepText, &prefs.EchoText, &prefs.WordWrap, &prefs.Blinking,
     &prefs.DoBeep, &prefs.Toolbar, &prefs.Macrobuttons, &prefs.Statusbar,
     &prefs.SaveVars, &prefs.UseSocks, &use_tickcounter, &prefs.WizAtStartup,
+    &prefs.SkipTaskbar,
     NULL
 };
 
@@ -205,7 +207,7 @@ void load_prefs ()
 
     if ((fp = fileopen(PREFS_FILE, "r"))) {
         prefs.SaveVars = prefs.Blinking = prefs.KeepText = prefs.EchoText  = prefs.WordWrap = prefs.DoBeep = TRUE;
-        prefs.UseSocks = prefs.WizAtStartup = FALSE;
+        prefs.UseSocks = prefs.WizAtStartup = prefs.SkipTaskbar = FALSE;
         prefs.LuaConfig = NULL;
 
         while (fgets (line, sizeof(line) - 1, fp)) {
@@ -611,6 +613,7 @@ checkbutton prefs_buttons[] = {
     {"checkbutton_save_vars", &prefs.SaveVars},
     {"checkbutton_use_proxy", &prefs.UseSocks},
     {"checkbutton_wizard", &prefs.WizAtStartup},
+    {"checkbutton_taskbar", &prefs.SkipTaskbar},
     {NULL, NULL}
 };
 
@@ -663,6 +666,8 @@ void prefs_apply_settings(GtkWidget *prefs_window)
 
     tick_size = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(
                 lookup_widget(prefs_window, "spinbutton_ticklength")));
+
+    gtk_window_set_skip_taskbar_hint (GTK_WINDOW(mud->window), prefs.SkipTaskbar);
 
     if (use_tickcounter  )
         tickon_command( mud->activesession);

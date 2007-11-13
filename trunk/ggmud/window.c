@@ -102,6 +102,7 @@ GtkWidget *create_new_window(const char *title, int width, int height)
     GtkWidget *list;
 
     win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_skip_taskbar_hint (GTK_WINDOW(win), prefs.SkipTaskbar);
     gtk_widget_set_usize(win, width, height);
     gtk_window_set_title(GTK_WINDOW(win), title);
     gtk_container_border_width(GTK_CONTAINER(win), 4);
@@ -534,6 +535,7 @@ void quit (GtkWidget *widget, gpointer data)
 void cbox()
 {
     GtkWidget *w = create_window_connect();
+    gtk_window_set_skip_taskbar_hint (GTK_WINDOW(w), prefs.SkipTaskbar);
     gtk_widget_show(w);
     gtk_window_set_transient_for(GTK_WINDOW(w), GTK_WINDOW(mud->window));
 }
@@ -586,7 +588,8 @@ void mccp_status()
     }
 
     GtkWidget *w = create_window_mccp_status();
-    
+    gtk_window_set_skip_taskbar_hint (GTK_WINDOW(w), prefs.SkipTaskbar);
+ 
     if (mudcompress_compressing(mud->activesession->mccp)) {
         gtk_image_set_from_pixmap(GTK_IMAGE(
                     lookup_widget(w, "image_mccp_status")), enabled_pixmap, enabled_mask);
@@ -644,6 +647,7 @@ spawn_gui()
 
   /* create the main window */
   mud->window = create_window_main();
+  gtk_window_set_skip_taskbar_hint (GTK_WINDOW(mud->window), prefs.SkipTaskbar);
 
 #if defined(__APPLE__) && defined(GTKQUARTZ)
   {
