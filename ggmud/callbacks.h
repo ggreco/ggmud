@@ -493,3 +493,20 @@ on_clist_button_select_row             (GtkCList        *clist,
                                         gint             column,
                                         GdkEvent        *event,
                                         gpointer         user_data);
+
+gboolean
+close_window                           (GtkWidget       *widget,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);
+
+void
+on_font_selection_clicked              (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_button_fonts_ok_clicked             (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_button_fonts_save_clicked           (GtkButton       *button,
+                                        gpointer         user_data);

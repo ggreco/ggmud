@@ -25,16 +25,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "ggmud.h"
+#include "interface.h"
 
 /* Global variables */
 SYSTEM_DATA font;
-GtkWidget   *font_window;
-GtkWidget   *font_button_save;
-GtkWidget   *entry_fontname;
-GtkWidget *menu_Option_font;
 PangoFontDescription *font_normal = NULL;
+PangoFontDescription *font_interface = NULL;
+PangoFontDescription *font_input = NULL;
 
 extern void set_style();
 
@@ -84,11 +82,17 @@ void save_font () {
 }
 
 
-void font_font_selected (GtkWidget *button, GtkFontSelectionDialog *fs) {
+void font_font_selected (GtkWidget *button, GtkFontSelectionDialog **fs) {
     gchar *temp;
 
-    temp = gtk_font_selection_get_font_name (GTK_FONT_SELECTION (fs->fontsel));
+    if (!*fs)
+        return;
 
+    temp = gtk_font_selection_get_font_name (GTK_FONT_SELECTION ((*fs)->fontsel));
+
+    gtk_entry_set_text(GTK_ENTRY(gtk_object_get_user_data(GTK_OBJECT(*fs))), temp);
+
+#if 0
     if (temp) {
         if ((font_normal = pango_font_description_from_string (temp))) {
             if (font.FontName)
@@ -103,24 +107,74 @@ void font_font_selected (GtkWidget *button, GtkFontSelectionDialog *fs) {
     }
 
     popup_window (ERR, "The selected Font isn't valid, be sure to select a font that does exist.");
+#endif
+    gtk_widget_destroy(GTK_WIDGET(*fs));
+}
+
+void close_font_window(GtkWidget *button, GtkFontSelectionDialog **fs)
+{
+    if (!*fs)
+        return;
+
+    gtk_widget_destroy(GTK_WIDGET(*fs));
+}
+
+void  on_font_selection_clicked(GtkWidget *entry, GtkWidget *button)
+{
+    static GtkWidget *font_selection = NULL;
+
+    if (font_selection)
+        return;
+
+    font_selection = gtk_font_selection_dialog_new ("Font Selection...");
+    gtk_object_set_user_data(GTK_OBJECT(font_selection), entry);
+    gtk_font_selection_dialog_set_preview_text (GTK_FONT_SELECTION_DIALOG (font_selection),
+            "This is a sample text?");
+
+    gtk_font_selection_dialog_set_font_name (GTK_FONT_SELECTION_DIALOG (font_selection), font.FontName);
+
+    gtk_signal_connect (GTK_OBJECT (GTK_FONT_SELECTION_DIALOG (font_selection)->ok_button), "clicked",
+            GTK_SIGNAL_FUNC (font_font_selected), &font_selection);
+
+    gtk_signal_connect (GTK_OBJECT (GTK_FONT_SELECTION_DIALOG (font_selection)->cancel_button), "clicked",
+            GTK_SIGNAL_FUNC (close_font_window), &font_selection);
+
+    gtk_signal_connect (GTK_OBJECT(font_selection), "destroy",
+            GTK_SIGNAL_FUNC (kill_window), &font_selection);
+
+    gtk_widget_show (font_selection);
+}
+
+
+void
+on_button_fonts_ok_clicked             (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_button_fonts_save_clicked           (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
 }
 
 void window_font (GtkWidget *button, gpointer data) {
-    GtkWidget *fontw;
+    static GtkWidget *fontw = NULL;
+    
+    if (fontw) {
+        gtk_window_present(fontw);
+        return;
+    }
 
-    fontw = gtk_font_selection_dialog_new ("Font Selection...");
-    gtk_font_selection_dialog_set_preview_text (GTK_FONT_SELECTION_DIALOG (fontw),
-                                                "This is a sample text?");
+    fontw = create_window_fonts();
 
-    gtk_font_selection_dialog_set_font_name (GTK_FONT_SELECTION_DIALOG (fontw), font.FontName);
+    gtk_widget_show(fontw);
 
-    gtk_signal_connect (GTK_OBJECT (GTK_FONT_SELECTION_DIALOG (fontw)->ok_button), "clicked",
-                        GTK_SIGNAL_FUNC (font_font_selected), fontw);
-
-    gtk_signal_connect (GTK_OBJECT (GTK_FONT_SELECTION_DIALOG (fontw)->cancel_button), "clicked",
-                        GTK_SIGNAL_FUNC (close_window), fontw);
-
-    gtk_widget_show (fontw);
+    gtk_signal_connect (GTK_OBJECT(fontw), "destroy",
+            GTK_SIGNAL_FUNC (kill_window), &fontw);
 }
 
 

@@ -3346,3 +3346,209 @@ create_window_buttons (void)
   return window_buttons;
 }
 
+GtkWidget*
+create_window_fonts (void)
+{
+  GtkWidget *window_fonts;
+  GtkWidget *vbox28;
+  GtkWidget *table9;
+  GtkWidget *label70;
+  GtkWidget *label71;
+  GtkWidget *label72;
+  GtkWidget *hbox20;
+  GtkWidget *entry_output;
+  GtkWidget *button48;
+  GtkWidget *image66;
+  GtkWidget *hbox21;
+  GtkWidget *entry_input;
+  GtkWidget *button49;
+  GtkWidget *image67;
+  GtkWidget *hbox22;
+  GtkWidget *entry_interface;
+  GtkWidget *button50;
+  GtkWidget *image68;
+  GtkWidget *hseparator12;
+  GtkWidget *hbuttonbox15;
+  GtkWidget *button45;
+  GtkWidget *button46;
+  GtkWidget *button47;
+  GtkTooltips *tooltips;
+
+  tooltips = gtk_tooltips_new ();
+
+  window_fonts = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_title (GTK_WINDOW (window_fonts), "Font configuration");
+
+  vbox28 = gtk_vbox_new (FALSE, 2);
+  gtk_widget_show (vbox28);
+  gtk_container_add (GTK_CONTAINER (window_fonts), vbox28);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox28), 8);
+
+  table9 = gtk_table_new (3, 2, FALSE);
+  gtk_widget_show (table9);
+  gtk_box_pack_start (GTK_BOX (vbox28), table9, TRUE, TRUE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (table9), 4);
+  gtk_table_set_row_spacings (GTK_TABLE (table9), 16);
+  gtk_table_set_col_spacings (GTK_TABLE (table9), 16);
+
+  label70 = gtk_label_new ("<b><big>Output Window</big></b>");
+  gtk_widget_show (label70);
+  gtk_table_attach (GTK_TABLE (table9), label70, 0, 1, 0, 1,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_label_set_use_markup (GTK_LABEL (label70), TRUE);
+  gtk_misc_set_alignment (GTK_MISC (label70), 1, 0.5);
+
+  label71 = gtk_label_new ("<big>Input Line</big>");
+  gtk_widget_show (label71);
+  gtk_table_attach (GTK_TABLE (table9), label71, 0, 1, 1, 2,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_label_set_use_markup (GTK_LABEL (label71), TRUE);
+  gtk_misc_set_alignment (GTK_MISC (label71), 1, 0.5);
+
+  label72 = gtk_label_new ("<big>Interface</big>");
+  gtk_widget_show (label72);
+  gtk_table_attach (GTK_TABLE (table9), label72, 0, 1, 2, 3,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (0), 0, 0);
+  gtk_label_set_use_markup (GTK_LABEL (label72), TRUE);
+  gtk_misc_set_alignment (GTK_MISC (label72), 1, 0.5);
+
+  hbox20 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox20);
+  gtk_table_attach (GTK_TABLE (table9), hbox20, 1, 2, 0, 1,
+                    (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
+                    (GtkAttachOptions) (GTK_FILL), 0, 0);
+
+  entry_output = gtk_entry_new ();
+  gtk_widget_show (entry_output);
+  gtk_box_pack_start (GTK_BOX (hbox20), entry_output, TRUE, TRUE, 0);
+  gtk_editable_set_editable (GTK_EDITABLE (entry_output), FALSE);
+  gtk_entry_set_invisible_char (GTK_ENTRY (entry_output), 9679);
+
+  button48 = gtk_button_new ();
+  gtk_widget_show (button48);
+  gtk_box_pack_start (GTK_BOX (hbox20), button48, FALSE, FALSE, 0);
+
+  image66 = gtk_image_new_from_stock ("gtk-select-font", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_show (image66);
+  gtk_container_add (GTK_CONTAINER (button48), image66);
+
+  hbox21 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox21);
+  gtk_table_attach (GTK_TABLE (table9), hbox21, 1, 2, 1, 2,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (GTK_FILL), 0, 0);
+
+  entry_input = gtk_entry_new ();
+  gtk_widget_show (entry_input);
+  gtk_box_pack_start (GTK_BOX (hbox21), entry_input, TRUE, TRUE, 0);
+  gtk_editable_set_editable (GTK_EDITABLE (entry_input), FALSE);
+  gtk_entry_set_invisible_char (GTK_ENTRY (entry_input), 9679);
+
+  button49 = gtk_button_new ();
+  gtk_widget_show (button49);
+  gtk_box_pack_start (GTK_BOX (hbox21), button49, FALSE, FALSE, 0);
+
+  image67 = gtk_image_new_from_stock ("gtk-select-font", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_show (image67);
+  gtk_container_add (GTK_CONTAINER (button49), image67);
+
+  hbox22 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox22);
+  gtk_table_attach (GTK_TABLE (table9), hbox22, 1, 2, 2, 3,
+                    (GtkAttachOptions) (GTK_FILL),
+                    (GtkAttachOptions) (GTK_FILL), 0, 0);
+
+  entry_interface = gtk_entry_new ();
+  gtk_widget_show (entry_interface);
+  gtk_box_pack_start (GTK_BOX (hbox22), entry_interface, TRUE, TRUE, 0);
+  gtk_editable_set_editable (GTK_EDITABLE (entry_interface), FALSE);
+  gtk_entry_set_invisible_char (GTK_ENTRY (entry_interface), 9679);
+
+  button50 = gtk_button_new ();
+  gtk_widget_show (button50);
+  gtk_box_pack_start (GTK_BOX (hbox22), button50, FALSE, FALSE, 0);
+
+  image68 = gtk_image_new_from_stock ("gtk-select-font", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_show (image68);
+  gtk_container_add (GTK_CONTAINER (button50), image68);
+
+  hseparator12 = gtk_hseparator_new ();
+  gtk_widget_show (hseparator12);
+  gtk_box_pack_start (GTK_BOX (vbox28), hseparator12, FALSE, FALSE, 4);
+
+  hbuttonbox15 = gtk_hbutton_box_new ();
+  gtk_widget_show (hbuttonbox15);
+  gtk_box_pack_start (GTK_BOX (vbox28), hbuttonbox15, FALSE, FALSE, 0);
+
+  button45 = gtk_button_new_from_stock ("gtk-ok");
+  gtk_widget_show (button45);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox15), button45);
+  GTK_WIDGET_SET_FLAGS (button45, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button45, "Use settings", NULL);
+
+  button46 = gtk_button_new_from_stock ("gtk-save");
+  gtk_widget_show (button46);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox15), button46);
+  GTK_WIDGET_SET_FLAGS (button46, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button46, "Save and use settings", NULL);
+
+  button47 = gtk_button_new_from_stock ("gtk-cancel");
+  gtk_widget_show (button47);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox15), button47);
+  GTK_WIDGET_SET_FLAGS (button47, GTK_CAN_DEFAULT);
+  gtk_tooltips_set_tip (tooltips, button47, "Restore original settings.", NULL);
+
+  g_signal_connect ((gpointer) window_fonts, "destroy_event",
+                    G_CALLBACK (close_window),
+                    NULL);
+  g_signal_connect_swapped ((gpointer) button48, "clicked",
+                            G_CALLBACK (on_font_selection_clicked),
+                            GTK_OBJECT (entry_output));
+  g_signal_connect_swapped ((gpointer) button49, "clicked",
+                            G_CALLBACK (on_font_selection_clicked),
+                            GTK_OBJECT (entry_input));
+  g_signal_connect_swapped ((gpointer) button50, "clicked",
+                            G_CALLBACK (on_font_selection_clicked),
+                            GTK_OBJECT (entry_interface));
+  g_signal_connect ((gpointer) button45, "clicked",
+                    G_CALLBACK (on_button_fonts_ok_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button46, "clicked",
+                    G_CALLBACK (on_button_fonts_save_clicked),
+                    NULL);
+  g_signal_connect ((gpointer) button47, "clicked",
+                    G_CALLBACK (close_a_gui_window),
+                    NULL);
+
+  /* Store pointers to all widgets, for use by lookup_widget(). */
+  GLADE_HOOKUP_OBJECT_NO_REF (window_fonts, window_fonts, "window_fonts");
+  GLADE_HOOKUP_OBJECT (window_fonts, vbox28, "vbox28");
+  GLADE_HOOKUP_OBJECT (window_fonts, table9, "table9");
+  GLADE_HOOKUP_OBJECT (window_fonts, label70, "label70");
+  GLADE_HOOKUP_OBJECT (window_fonts, label71, "label71");
+  GLADE_HOOKUP_OBJECT (window_fonts, label72, "label72");
+  GLADE_HOOKUP_OBJECT (window_fonts, hbox20, "hbox20");
+  GLADE_HOOKUP_OBJECT (window_fonts, entry_output, "entry_output");
+  GLADE_HOOKUP_OBJECT (window_fonts, button48, "button48");
+  GLADE_HOOKUP_OBJECT (window_fonts, image66, "image66");
+  GLADE_HOOKUP_OBJECT (window_fonts, hbox21, "hbox21");
+  GLADE_HOOKUP_OBJECT (window_fonts, entry_input, "entry_input");
+  GLADE_HOOKUP_OBJECT (window_fonts, button49, "button49");
+  GLADE_HOOKUP_OBJECT (window_fonts, image67, "image67");
+  GLADE_HOOKUP_OBJECT (window_fonts, hbox22, "hbox22");
+  GLADE_HOOKUP_OBJECT (window_fonts, entry_interface, "entry_interface");
+  GLADE_HOOKUP_OBJECT (window_fonts, button50, "button50");
+  GLADE_HOOKUP_OBJECT (window_fonts, image68, "image68");
+  GLADE_HOOKUP_OBJECT (window_fonts, hseparator12, "hseparator12");
+  GLADE_HOOKUP_OBJECT (window_fonts, hbuttonbox15, "hbuttonbox15");
+  GLADE_HOOKUP_OBJECT (window_fonts, button45, "button45");
+  GLADE_HOOKUP_OBJECT (window_fonts, button46, "button46");
+  GLADE_HOOKUP_OBJECT (window_fonts, button47, "button47");
+  GLADE_HOOKUP_OBJECT_NO_REF (window_fonts, tooltips, "tooltips");
+
+  return window_fonts;
+}
+
