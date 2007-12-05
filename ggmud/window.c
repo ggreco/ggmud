@@ -57,22 +57,57 @@ GList *windows_list = NULL;
 
 extern char *get_arg_in_braces(char *s, char *arg, int flag);
 
+static void
+send_refresh_signal(void)
+{
+	GdkEventClient event;
+    	event.type = GDK_CLIENT_EVENT;
+	event.send_event = TRUE;
+	event.window = NULL;
+	event.message_type = gdk_atom_intern("_GTK_READ_RCFILES", FALSE);
+	event.data_format = 8;
+	gdk_event_send_clientmessage_toall((GdkEvent *)&event);
+}
 
 void set_style() 
 {
+    static char *previous_font = NULL;
     GList *l = windows_list;
-    extern PangoFontDescription *font_normal;
+
+    if (fonts[INTERFACE_FONT].name) {
+        char buff[256];
+
+        sprintf(buff,  "style \"user-font\"\n{\n  font_name=\"%s\"\n}\nwidget_class \"*\" style \"user-font\"\n\n", fonts[INTERFACE_FONT].name);
+        gtk_rc_parse_string(buff);
+        sprintf(buff, "gtk-font-name=\"%s\"\n", fonts[INTERFACE_FONT].name);
+        gtk_rc_parse_string(buff);
+
+        if (previous_font) {
+            if (strcmp(previous_font, fonts[INTERFACE_FONT].name))
+                popup_window(INFO, "You'll need to save and restart the client to correctly\n"
+                             "update the <b>interface</b> font to \"%s\" in every window.",
+                             fonts[INTERFACE_FONT].name);
+
+            free(previous_font);
+        }
+        previous_font = strdup(fonts[INTERFACE_FONT].name);
+
+    }
+
+    if (fonts[INPUT_FONT].desc && mud && mud->ent) {
+        gtk_widget_modify_font(GTK_WIDGET(mud->ent), fonts[INPUT_FONT].desc);
+    }
     
-    if (!font_normal)
+    // set the output font
+    if (!fonts[OUTPUT_FONT].desc)
         return;
     
-    if (mud && mud->text) {
-        gtk_widget_modify_font(GTK_WIDGET(mud->text), font_normal);
-    }
+    if (mud && mud->text)
+        gtk_widget_modify_font(GTK_WIDGET(mud->text), fonts[OUTPUT_FONT].desc);
 
     while (l) {
         gtk_widget_modify_font(
-                GTK_WIDGET(((window_entry *)l->data)->listptr), font_normal);
+                GTK_WIDGET(((window_entry *)l->data)->listptr), fonts[OUTPUT_FONT].desc);
                 
         l = l->next;
     }
@@ -683,6 +718,10 @@ spawn_gui()
   
 /* the entry box, that we use to type the commands in */
   mud->ent = GTK_ENTRY(lookup_widget(mud->window, "entry_input"));
+
+  if (fonts[INPUT_FONT].desc)
+      gtk_widget_modify_font(GTK_WIDGET(mud->ent), fonts[INPUT_FONT].desc);
+
   // tick counter
   mud->tick_counter = GTK_LABEL(lookup_widget(mud->window, "label_tickcounter"));
  
@@ -820,7 +859,6 @@ void popup_window (int type, const gchar *message, ...)
 static 
 GtkWidget *create_tv(GtkTextBuffer *buffer, GtkTextView **view)
 {
-    extern PangoFontDescription *font_normal; 
     GtkTextView *text;
     GtkTextIter it;
     GtkTextMark *mark;
@@ -850,8 +888,8 @@ GtkWidget *create_tv(GtkTextBuffer *buffer, GtkTextView **view)
     mark = gtk_text_buffer_create_mark(buffer, NULL, &it, FALSE);
     gtk_object_set_user_data(GTK_OBJECT(text), mark);
    
-    if (font_normal)
-        gtk_widget_modify_font((GtkWidget *)text, font_normal);
+    if (fonts[OUTPUT_FONT].desc)
+        gtk_widget_modify_font((GtkWidget *)text, fonts[OUTPUT_FONT].desc);
 
     gtk_signal_connect(GTK_OBJECT(text),"key_press_event",GTK_SIGNAL_FUNC(change_focus), mud);
 

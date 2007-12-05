@@ -124,7 +124,7 @@ int main(int argc, char **argv)
     mud->hist->cyclic=1;
     mud->hist->list=calloc(sizeof(gpointer), (mud->hist->max+1));
     mud->lines=0;
-    mud->maxlines = 300 * 70;	// This will be an option
+    mud->maxlines = 300 * 70;
 
 #ifdef WITH_LUA
     if ((mud->lua = lua_open()))

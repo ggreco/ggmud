@@ -83,13 +83,8 @@ typedef struct {
 } ggmud;
 
 typedef struct alias_data  ALIAS_DATA;
-typedef struct system_data SYSTEM_DATA;
 typedef struct prefs_data PREFS_DATA;
 typedef struct wizard_data WIZARD_DATA;
-
-struct system_data {
-        gchar     *FontName;
-};
 
 struct prefs_data {
     gint       KeepText;
@@ -300,14 +295,28 @@ extern GdkColor color_black;		/* LOW black (same as background, hmm gotta fix it
 extern GdkColor *foreground;		/* foreground color */
 
 
-extern SYSTEM_DATA font;
-
 extern PREFS_DATA prefs;
 
 extern ALIAS_DATA *alias_list;
 
 extern WIZARD_DATA *wizard_connection_list;
 
+struct GGFont
+{
+    char *config;
+    char *widget;
+    char *label;
+    char *name;
+    PangoFontDescription *desc;
+};
+
+typedef struct GGFont GGFont;
+enum {OUTPUT_FONT, INPUT_FONT, INTERFACE_FONT, FONTS_NUM};
+
+extern GGFont fonts[FONTS_NUM];
+
+
+extern void set_style();
 
 extern void AddButtonBar(GtkWidget *vbox, gpointer *data,
         GtkSignalFunc add_func,
