@@ -68,8 +68,7 @@ tt/libttw32.a: tt/*.c
 	$(MAKE) -C tt win32
 
 zlib/libzw32.a: zlib/*c
-	$(MAKE) -C zlib clean
-	CC="$(CROSSDIR)bin/gcc -mno-cygwin -mms-bitfields" AR=$(CROSSDIR)/bin/ar RANLIB=$(CROSSDIR)/bin/ranlib $(MAKE) -C zlib libzw32.a
+	OBJEXT=".obj" CC="$(CROSSDIR)bin/gcc -mno-cygwin -mms-bitfields" AR=$(CROSSDIR)/bin/ar RANLIB=$(CROSSDIR)/bin/ranlib $(MAKE) -C zlib libzw32.a
 
 zlib/libzlib.a: zlib/*c
 	$(MAKE) -C zlib libzlib.a

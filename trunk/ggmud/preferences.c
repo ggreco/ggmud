@@ -93,7 +93,7 @@ void update_widget_color(color_struct *col)
 
 void load_zmud_prefs(void)
 {
-    popup_window(WARN, "At the moment trigger params (%%d), (%%w)...\nand other custom zmud settings are not imported!");
+    popup_window(WARN, "At the moment trigger params (%%%%d), (%%%%w)...\nand other custom zmud settings are not imported!");
 
     load_tt_prefs();
 }
@@ -111,9 +111,12 @@ void load_tt_prefs(void)
     gtk_widget_show(filew);
 
     if (gtk_dialog_run(GTK_DIALOG(filew)) == GTK_RESPONSE_ACCEPT) {
+        char buffer[512];
         gchar *file = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(filew));
-        read_command(file, NULL);
+        sprintf(buffer, "{%s}", file);
         g_free(file);
+
+        read_command(buffer, NULL);
     }
 
     gtk_widget_destroy(filew);
