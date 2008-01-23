@@ -196,7 +196,7 @@ WinMain (int hInstance, int hPrevInstance, char *lpszCmdLine, int nCmdShow)
 
 #endif
 
-#if defined(__APPLE__) && defined(GTKQUARTZ)
+#ifdef GDK_WINDOWING_QUARTZ
 #include <mach-o/dyld.h>
 #include <sys/param.h>
 void

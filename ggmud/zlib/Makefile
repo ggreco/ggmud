@@ -9,7 +9,7 @@
 
 # To use the asm code, type:
 #    cp contrib/asm?86/match.S ./match.S
-#    make LOC=-DASMV OBJA=match.o
+#    make LOC=-DASMV OBJA=match$(OBJEXT)
 
 # To install /usr/local/lib/libz.* and /usr/local/include/zlib.h, type:
 #    make install
@@ -17,7 +17,7 @@
 #    make install prefix=$HOME
 
 CC?=cc
-
+OBJEXT?=.o
 CFLAGS=-O3 -Wall
 #CFLAGS=-O -DMAX_WBITS=14 -DMAX_MEM_LEVEL=7
 #CFLAGS=-g -DDEBUG
@@ -46,13 +46,15 @@ includedir = ${prefix}/include
 mandir = ${prefix}/share/man
 man3dir = ${mandir}/man3
 
-OBJS = adler32.o compress.o crc32.o gzio.o uncompr.o deflate.o trees.o \
-       zutil.o inflate.o infback.o inftrees.o inffast.o
+OBJS = adler32$(OBJEXT) compress$(OBJEXT) crc32$(OBJEXT) \
+	   gzio$(OBJEXT) uncompr$(OBJEXT) deflate$(OBJEXT) trees$(OBJEXT) \
+       zutil$(OBJEXT) inflate$(OBJEXT) infback$(OBJEXT) \
+	   inftrees$(OBJEXT) inffast$(OBJEXT)
 
 OBJA =
-# to use the asm code: make OBJA=match.o
+# to use the asm code: make OBJA=match$(OBJEXT)
 
-TEST_OBJS = example.o minigzip.o
+TEST_OBJS = example$(OBJEXT) minigzip$(OBJEXT)
 
 all: example$(EXE) minigzip$(EXE)
 
@@ -67,6 +69,9 @@ test: all
 	  echo '		*** zlib test FAILED ***'; \
 	fi
 
+%.obj: %.c
+	$(CC) $(CFLAGS) -o $@ -c $<
+
 libzw32.a: $(OBJS) $(OBJA)
 	$(AR) rc $@ $(OBJS) $(OBJA)
 	$(RANLIB) $@ 
@@ -75,10 +80,10 @@ libzlib.a: $(OBJS) $(OBJA)
 	$(AR) rc $@ $(OBJS) $(OBJA)
 	$(RANLIB) $@ 
 
-match.o: match.S
+match$(OBJEXT): match.S
 	$(CPP) match.S > _match.s
 	$(CC) -c _match.s
-	mv _match.o match.o
+	mv _match$(OBJEXT) match$(OBJEXT)
 	rm -f _match.s
 
 $(SHAREDLIBV): $(OBJS)
@@ -87,11 +92,11 @@ $(SHAREDLIBV): $(OBJS)
 	ln -s $@ $(SHAREDLIB)
 	ln -s $@ $(SHAREDLIBM)
 
-example$(EXE): example.o $(LIBS)
-	$(CC) $(CFLAGS) -o $@ example.o $(LDFLAGS)
+example$(EXE): example$(OBJEXT) $(LIBS)
+	$(CC) $(CFLAGS) -o $@ example$(OBJEXT) $(LDFLAGS)
 
-minigzip$(EXE): minigzip.o $(LIBS)
-	$(CC) $(CFLAGS) -o $@ minigzip.o $(LDFLAGS)
+minigzip$(EXE): minigzip$(OBJEXT) $(LIBS)
+	$(CC) $(CFLAGS) -o $@ minigzip$(OBJEXT) $(LDFLAGS)
 
 install: $(LIBS)
 	-@if [ ! -d $(exec_prefix) ]; then mkdir -p $(exec_prefix); fi
@@ -124,9 +129,9 @@ uninstall:
 
 mostlyclean: clean
 clean:
-	rm -f *.o *.a *~ example$(EXE) minigzip$(EXE) \
+	rm -f *$(OBJEXT) *.a *~ example$(EXE) minigzip$(EXE) \
 	   libz.* foo.gz so_locations \
-	   _match.s maketree contrib/infback9/*.o
+	   _match.s maketree contrib/infback9/*$(OBJEXT)
 
 maintainer-clean: distclean
 distclean: clean
@@ -142,17 +147,17 @@ depend:
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
-adler32.o: zlib.h zconf.h
-compress.o: zlib.h zconf.h
-crc32.o: crc32.h zlib.h zconf.h
-deflate.o: deflate.h zutil.h zlib.h zconf.h
-example.o: zlib.h zconf.h
-gzio.o: zutil.h zlib.h zconf.h
-inffast.o: zutil.h zlib.h zconf.h inftrees.h inflate.h inffast.h
-inflate.o: zutil.h zlib.h zconf.h inftrees.h inflate.h inffast.h
-infback.o: zutil.h zlib.h zconf.h inftrees.h inflate.h inffast.h
-inftrees.o: zutil.h zlib.h zconf.h inftrees.h
-minigzip.o: zlib.h zconf.h
-trees.o: deflate.h zutil.h zlib.h zconf.h trees.h
-uncompr.o: zlib.h zconf.h
-zutil.o: zutil.h zlib.h zconf.h
+adler32$(OBJEXT): zlib.h zconf.h
+compress$(OBJEXT): zlib.h zconf.h
+crc32$(OBJEXT): crc32.h zlib.h zconf.h
+deflate$(OBJEXT): deflate.h zutil.h zlib.h zconf.h
+example$(OBJEXT): zlib.h zconf.h
+gzio$(OBJEXT): zutil.h zlib.h zconf.h
+inffast$(OBJEXT): zutil.h zlib.h zconf.h inftrees.h inflate.h inffast.h
+inflate$(OBJEXT): zutil.h zlib.h zconf.h inftrees.h inflate.h inffast.h
+infback$(OBJEXT): zutil.h zlib.h zconf.h inftrees.h inflate.h inffast.h
+inftrees$(OBJEXT): zutil.h zlib.h zconf.h inftrees.h
+minigzip$(OBJEXT): zlib.h zconf.h
+trees$(OBJEXT): deflate.h zutil.h zlib.h zconf.h trees.h
+uncompr$(OBJEXT): zlib.h zconf.h
+zutil$(OBJEXT): zutil.h zlib.h zconf.h
