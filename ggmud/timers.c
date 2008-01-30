@@ -194,6 +194,9 @@ void do_timer(char *arg, struct session *ses)
 
 }
 
+static int already_asked = FALSE;
+extern int need_update;
+
 int checktick(void)
 {
     extern int use_tickcounter;
@@ -204,6 +207,11 @@ int checktick(void)
     GList *l = mud->timers;
 
     now = time(0);
+
+    if (need_update && !already_asked) {
+        already_asked = TRUE; // do this before otherwise we'll do the popup every second!
+        ask_for_update();
+    }
 
 #ifdef WITH_LUA
     if (mud->lua_idle_function) {

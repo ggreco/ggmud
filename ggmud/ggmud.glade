@@ -1188,6 +1188,27 @@
       </child>
 
       <child>
+	<widget class="GtkCheckButton" id="checkbutton_autoupdate">
+	  <property name="border_width">4</property>
+	  <property name="visible">True</property>
+	  <property name="tooltip" translatable="yes">If this option is enabled GGMud will search for updates asynchronously every time you launch it.</property>
+	  <property name="can_focus">True</property>
+	  <property name="label" translatable="yes">Check for GGMud updates at startup</property>
+	  <property name="use_underline">True</property>
+	  <property name="relief">GTK_RELIEF_NORMAL</property>
+	  <property name="focus_on_click">True</property>
+	  <property name="active">False</property>
+	  <property name="inconsistent">False</property>
+	  <property name="draw_indicator">True</property>
+	</widget>
+	<packing>
+	  <property name="padding">0</property>
+	  <property name="expand">False</property>
+	  <property name="fill">False</property>
+	</packing>
+      </child>
+
+      <child>
 	<widget class="GtkHSeparator" id="hseparator2">
 	  <property name="visible">True</property>
 	</widget>

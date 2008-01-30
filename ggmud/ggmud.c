@@ -179,6 +179,12 @@ int main(int argc, char **argv)
 
     load_buttons();
 
+    if (prefs.AutoUpdate) {
+        g_thread_init(NULL);
+
+        g_thread_create(check_for_updates, NULL, FALSE, NULL);
+    }
+
     gtk_window_present(GTK_WINDOW(mud->window));
     gtk_key_snooper_install(snoop_keys, mud);
     gtk_main();
