@@ -111,6 +111,7 @@ struct prefs_data {
     unsigned short socks_port;
     gint WizAtStartup;
     gint SkipTaskbar;
+    gint AutoUpdate;
 };
 
 #define WARN GTK_MESSAGE_WARNING
@@ -262,6 +263,12 @@ extern void log_viewer ();
 extern void TextPaste (GtkWidget *widget, gpointer data);
 extern void TextCopy (GtkWidget *widget, gpointer data);
 
+/* callbacks.c */
+extern void openurl(const char *);
+
+/* autoupdate.c */
+void check_for_updates();
+void ask_for_update();
 
 /* win.c */
 extern void find_in_list(GtkCList *clist, GtkWidget *widget);

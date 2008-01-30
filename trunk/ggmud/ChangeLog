@@ -1,0 +1,26 @@
+0.8.1:
+	- New autoupdate function, will ask for the latest version from
+	  a support site, this one will open the download page in your
+	  browser if you choose to update.
+	- Fixed dependencies in makefile.
+
+0.8.0:
+	- Added button support:
+	  New commands hbutton, vbutton
+	  New gui to create/remove buttons
+	  New config file <dir>/buttons
+	- Added trigger special character '$' that match the end of a line:
+	  example:
+	  #action {says '%1'$} { do_something }
+	  ... will match the whole line also if it contains quotes.
+	- Corrected a bug in the trigger GUI that could crash the client.
+	- Add new config toggle SkipTaskbar and relative option in the 
+	  preferences panel to tell ggmud to skip taskbar for his windows
+	  (useful to "hide" ggmud fast if you are playing in office).
+	- Added new font configuration dialog, now you can have different
+	  fonts for input/output window and GUI.
+
+0.7.2:
+	- Corrected a bug in variables math, worked correctly only from
+	  lua, now the #math command works again.
+	  

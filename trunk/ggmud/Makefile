@@ -5,10 +5,10 @@ GLOBAL_CFLAGS = $(DEBUGFLAG) -DTELNET_SUPPORT -Wall -DWITH_LUA -DENABLE_MCCP -I.
 OBJDIR = obj/
 CC ?= gcc
 CXX ?= g++
-INCDIR = -Itt -Ilua -Izlib
-COMMONLIBS = -Ltt -ltt -Llua -llua -Lzlib -lzlib
+INCDIR = -Itt -Ilua -Izlib -Ihttpfetch
+COMMONLIBS = -Ltt -ltt -Llua -llua -Lzlib -lzlib -Lhttpfetch -lfetch
 CFLAGS = $(INCDIR) `pkg-config gtk+-2.0 --cflags` $(GLOBAL_CFLAGS) -DENABLE_BINRELOC -DBR_PTHREADS=0  
-LIBS = $(COMMONLIBS) `pkg-config gtk+-2.0 --libs`
+LIBS = $(COMMONLIBS) `pkg-config gtk+-2.0 gthread-2.0 --libs`
 
 VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )
 OS:=	$(uname)
@@ -22,7 +22,7 @@ C_SRCS = alias.c ansi.c font.c fileopen.c help.c history.c log.c logviewer.c \
          macro.c net.c preferences.c ggmud.c triggers.c window.c wizard.c \
          variables.c highlights.c gags.c timers.c complete.c prefix.c \
          telnet.c lua.c interface.c callbacks.c support.c socks.c pixmaps.c \
-		 buttons.c
+		 buttons.c autoupdate.c
 
 DEP_SRCS = $(CXX_SRCS) $(C_SRCS)
 
@@ -38,7 +38,8 @@ CROSSCFLAGS = $(INCDIR) -I$(CROSSDIR)/include/glib-2.0  \
 
 # -fnative-struct corrispondente di -mms-bifields nel vecchio mingw32 -s
 
-CROSSLIBS = -s -Ltt -Llua -Lzlib -lttw32 -lluaw32 -lzw32 -lgtk-win32-2.0.dll -lgdk-win32-2.0.dll \
+CROSSLIBS = -s -Ltt -Llua -Lzlib -Lhttpfetch -lttw32 -lluaw32 -lzw32 -lfetchw32 \
+			-lgtk-win32-2.0.dll -lgdk-win32-2.0.dll \
             -latk-1.0.dll -lgdk_pixbuf-2.0.dll -lpango-1.0.dll -lpangowin32-1.0.dll \
             -lgmodule-2.0.dll -lgobject-2.0.dll -lglib-2.0.dll -lws2_32 -lshell32
 
@@ -63,9 +64,15 @@ $(OBJDIR)icon.w: icon.rc icon.ico
 
 tt/libtt.a: tt/*.c
 	$(MAKE) -C tt 
-    
+
+httpfetch/libfetch.a: httpfetch/*.c
+	$(MAKE) -C httpfetch
+
 tt/libttw32.a: tt/*.c
 	$(MAKE) -C tt win32
+
+httpfetch/libfetchw32.a: httpfetch/*.c
+	$(MAKE) -C httpfetch win32
 
 zlib/libzw32.a: zlib/*c
 	OBJEXT=".obj" CC="$(CROSSDIR)bin/gcc -mno-cygwin -mms-bitfields" AR=$(CROSSDIR)/bin/ar RANLIB=$(CROSSDIR)/bin/ranlib $(MAKE) -C zlib libzw32.a
@@ -82,10 +89,11 @@ lua/libluaw32.a: lua/*c
 	"CC=$(CROSSDIR)bin/gcc" "MYCFLAGS=-mno-cygwin -mms-bitfields" "RANLIB=$(CROSSDIR)/bin/ranlib" \
     "AR=$(CROSSDIR)bin/ar rcu" "MYLIBS=" "MYLDFLAGS=-s" lua.exe
 
-$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libzlib.a
+$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libzlib.a httpfetch/libfetch.a
 	$(CC) $(OBJS) -o $(PROJECTNAME) $(LIBS) --as-needed
+	echo -n >ggmud.version "$(VERSION)"
 
-$(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a lua/libluaw32.a zlib/libzw32.a
+$(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a lua/libluaw32.a zlib/libzw32.a httpfetch/libfetchw32.a
 	$(CROSSCC) $(CROSSCFLAGS) $(WINOBJS) -o $(PROJECTNAME).exe $(CROSSLIBS)
 
 clean: 
@@ -127,4 +135,4 @@ depend:	$(C_SRCS) *.h
 	sed -f mkdep.sed deptemp >depend
 	rm deptemp
         
-
+-include depend

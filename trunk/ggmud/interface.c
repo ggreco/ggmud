@@ -300,6 +300,7 @@ create_window_preferences (void)
   GtkWidget *button_socks_settings;
   GtkWidget *checkbutton_wizard;
   GtkWidget *label9;
+  GtkWidget *checkbutton_autoupdate;
   GtkWidget *hseparator2;
   GtkWidget *hbuttonbox2;
   GtkWidget *button3;
@@ -516,6 +517,12 @@ create_window_preferences (void)
   gtk_frame_set_label_widget (GTK_FRAME (frame5), label9);
   gtk_label_set_use_markup (GTK_LABEL (label9), TRUE);
 
+  checkbutton_autoupdate = gtk_check_button_new_with_mnemonic ("Check for GGMud updates at startup");
+  gtk_widget_show (checkbutton_autoupdate);
+  gtk_box_pack_start (GTK_BOX (vbox3), checkbutton_autoupdate, FALSE, FALSE, 0);
+  gtk_container_set_border_width (GTK_CONTAINER (checkbutton_autoupdate), 4);
+  gtk_tooltips_set_tip (tooltips, checkbutton_autoupdate, "If this option is enabled GGMud will search for updates asynchronously every time you launch it.", NULL);
+
   hseparator2 = gtk_hseparator_new ();
   gtk_widget_show (hseparator2);
   gtk_box_pack_start (GTK_BOX (vbox3), hseparator2, FALSE, FALSE, 4);
@@ -609,6 +616,7 @@ create_window_preferences (void)
   GLADE_HOOKUP_OBJECT (window_preferences, button_socks_settings, "button_socks_settings");
   GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_wizard, "checkbutton_wizard");
   GLADE_HOOKUP_OBJECT (window_preferences, label9, "label9");
+  GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_autoupdate, "checkbutton_autoupdate");
   GLADE_HOOKUP_OBJECT (window_preferences, hseparator2, "hseparator2");
   GLADE_HOOKUP_OBJECT (window_preferences, hbuttonbox2, "hbuttonbox2");
   GLADE_HOOKUP_OBJECT (window_preferences, button3, "button3");
