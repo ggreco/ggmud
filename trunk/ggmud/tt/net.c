@@ -48,6 +48,7 @@ This program is protected under the GNU GPL (See COPYING)
 #define sockclose(x) closesocket(x)
 #define ECONNREFUSED WSAECONNREFUSED
 #define ENETUNREACH WSAENETUNREACH
+#define EWOULDBLOCK WSAEWOULDBLOCK
 #else
 #define sockclose(x) close(x)
 #include <sys/socket.h>
@@ -184,7 +185,8 @@ int read_buffer_mud(char *buffer, struct session *ses)
   if(didget < 0) 
     return(-1); /*syserr("read from socket");  we do this here instead - dunno quite
                 why, but i got some mysterious connection read by peer on some hps */
-  
+  else if (didget == 0 && errno == EWOULDBLOCK)
+    return 0;
   else if(!didget)
     return(-666);
   else {
@@ -299,7 +301,8 @@ int read_buffer_mud(char *buffer, struct session *ses)
 
     if (didget < 0)
         return -1;
-
+    else if (didget == 0 && errno == EWOULDBLOCK)
+        return 0;
     else if (didget == 0)
         return -666;
 
