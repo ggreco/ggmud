@@ -217,7 +217,6 @@ typedef struct list_s {
 * Size of a file transfer block in bytes *
 *****************************************/
 #define BLOCK_SIZE 500
-
 extern void load_tabs(void);
 
 int timeofday;
@@ -243,6 +242,9 @@ struct completenode {
 };
 #ifdef ENABLE_MCCP
 #include "mccpDecompress.h"
+#define SESSION_BUFFER_SIZE 0xffff
+#else
+#define SESSION_BUFFER_SIZE (BUFFER_SIZE * 3)
 #endif
 
 struct session {
@@ -293,6 +295,7 @@ struct session {
 #ifdef ENABLE_MCCP
   mc_state *mccp;
 #endif
+  char session_buffer[SESSION_BUFFER_SIZE];
 };
 
 #ifdef TELNET_SUPPORT

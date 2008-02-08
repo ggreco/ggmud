@@ -162,32 +162,41 @@ gdouble *gdk_color_to_gdouble (GdkColor *gdkcolor)
 
 extern int tick_size;
 
-static const char *boolean_keys[] = {
-    "KeepText", "EchoText", "WordWrap", "Blinking",
-    "DoBeep", "Toolbar", "Macrobuttons", "Statusbar",
-    "SaveVars", "UseSocks", "TickCounter", "WizAtStartup",
-    "SkipTaskbar", "AutoUpdate",
-    NULL
-};
+typedef struct {
+    char *label;
+    char *config;
+    int *value;
+} checkbutton;
 
-static gint *boolean_values[] = {
-    &prefs.KeepText, &prefs.EchoText, &prefs.WordWrap, &prefs.Blinking,
-    &prefs.DoBeep, &prefs.Toolbar, &prefs.Macrobuttons, &prefs.Statusbar,
-    &prefs.SaveVars, &prefs.UseSocks, &use_tickcounter, &prefs.WizAtStartup,
-    &prefs.SkipTaskbar, &prefs.AutoUpdate,
-    NULL
+checkbutton prefs_buttons[] = {
+    {"checkbutton_keep", "KeepText", &prefs.KeepText},
+    {"checkbutton_echo", "EchoText",  &prefs.EchoText},
+    {"checkbutton_ww", "WordWrap", &prefs.WordWrap},
+    {"checkbutton_blink", "Blinking", &prefs.Blinking},
+    {"checkbutton_toolbar", "Toolbar", &prefs.Toolbar},
+    {"checkbutton_macro", "Macrobuttons", &prefs.Macrobuttons},
+    {"checkbutton_statusbar", "Statusbar", &prefs.Statusbar},
+    {"checkbutton_tickcounter", "TickCounter", &use_tickcounter},
+    {"checkbutton_beep", "DoBeep", &prefs.DoBeep},
+    {"checkbutton_save_vars", "SaveVars", &prefs.SaveVars},
+    {"checkbutton_use_proxy", "UseSocks", &prefs.UseSocks},
+    {"checkbutton_wizard", "WizAtStartup", &prefs.WizAtStartup},
+    {"checkbutton_taskbar", "SkipTaskbar", &prefs.SkipTaskbar},
+    {"checkbutton_autoupdate", "AutoUpdate", &prefs.AutoUpdate},
+    {"checkbutton_msp", "UseMSP", &prefs.UseMSP},
+    {NULL, NULL, NULL}
 };
 
 int check_boolean_keys(const char *pref, const char *value)
 {
     int i = 0;
 
-    while (boolean_keys[i]) {
-        if (!strcmp(pref, boolean_keys[i])) {
+    while (prefs_buttons[i].config) {
+        if (!strcmp(pref, prefs_buttons[i].config)) {
             if (!strcmp(value, "Off"))
-                *(boolean_values[i]) = FALSE;
+                *(prefs_buttons[i].value) = FALSE;
             else
-                *(boolean_values[i]) = TRUE;
+                *(prefs_buttons[i].value) = TRUE;
 
             return 1;
         }
@@ -211,7 +220,8 @@ void load_prefs ()
     if ((fp = fileopen(PREFS_FILE, "r"))) {
         prefs.SaveVars = prefs.Blinking = prefs.KeepText = prefs.EchoText  = prefs.WordWrap = prefs.DoBeep = TRUE;
         prefs.UseSocks = prefs.WizAtStartup = prefs.SkipTaskbar = FALSE;
-        prefs.AutoUpdate = TRUE;
+        prefs.AutoUpdate = TRUE; prefs.UseMSP = TRUE;
+        prefs.SoundPath[0] = 0;
         prefs.LuaConfig = NULL;
 
         while (fgets (line, sizeof(line) - 1, fp)) {
@@ -322,8 +332,8 @@ static void save_prefs (GtkWidget *button, gpointer data)
         extern int tick_size;
        
 
-        while(boolean_keys[i]) {
-            CFGW(boolean_keys[i], *boolean_values[i]);
+        while(prefs_buttons[i].config) {
+            CFGW(prefs_buttons[i].config, *prefs_buttons[i].value);
             i++;
         }
 
@@ -598,28 +608,6 @@ on_button_proxy_settings_clicked       (GtkButton       *button,
     change_socks_settings();
 }
 
-
-typedef struct {
-    char *label;
-    int *value;
-} checkbutton;
-
-checkbutton prefs_buttons[] = {
-    {"checkbutton_keep", &prefs.KeepText},
-    {"checkbutton_echo", &prefs.EchoText},
-    {"checkbutton_ww", &prefs.WordWrap},
-    {"checkbutton_blink", &prefs.Blinking},
-    {"checkbutton_toolbar", &prefs.Toolbar},
-    {"checkbutton_macro", &prefs.Macrobuttons},
-    {"checkbutton_statusbar", &prefs.Statusbar},
-    {"checkbutton_tickcounter", &use_tickcounter},
-    {"checkbutton_beep", &prefs.DoBeep},
-    {"checkbutton_save_vars", &prefs.SaveVars},
-    {"checkbutton_use_proxy", &prefs.UseSocks},
-    {"checkbutton_wizard", &prefs.WizAtStartup},
-    {"checkbutton_taskbar", &prefs.SkipTaskbar},
-    {NULL, NULL}
-};
 
 void
 set_checkbutton(GtkWidget *w, const char *name, int var)

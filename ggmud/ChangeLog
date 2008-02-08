@@ -3,6 +3,8 @@
 	  a support site, this one will open the download page in your
 	  browser if you choose to update.
 	- Fixed dependencies in makefile.
+	- Initial MSP support.
+	- Fixed crash with MCCP in certain situations.
 
 0.8.0:
 	- Added button support:

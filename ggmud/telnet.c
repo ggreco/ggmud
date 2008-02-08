@@ -67,6 +67,7 @@ static FILE *debugfile = NULL;
 #define TERMINAL_TYPE       24
 #define END_OF_RECORD       25
 #define NAWS                31
+#define MSP                 90
 
 #define IS      0
 #define SEND    1
@@ -242,52 +243,76 @@ int do_telnet_protocol(unsigned char *data,int nb,struct session *ses)
 
         switch(*cp)
         {
-        case ECHO:
-            switch(wt)
-            {
-            case DO:    answer[1]=WONT; break;
-            case WILL:  answer[1]=DO; mud->ent->visible=0; input_line_visible(FALSE); break;
-            case WONT:  answer[1]=DONT; if (!mud->ent->visible) { mud->ent->visible=1; input_line_visible(TRUE); } break;
-            case DONT:  answer[1]=WONT; break;
-            };
-            break;
-        case TERMINAL_TYPE:
-            switch(wt)
-            {
-            case WILL:  answer[1]=DONT; break;
-            case DO:    answer[1]=WILL; break;
-            case WONT:  answer[1]=DONT; break;
-            case DONT:  answer[1]=WONT; break;
-            };
-            break;
+            case MSP:
+                fprintf(stderr, "MSP negotiation: %d\n", wt);
+                switch(wt)
+                {
+                    case DO:    answer[1]=WONT; break;
+                    case WILL:  
+                                if (prefs.UseMSP) {
+                                    answer[1]=DO; 
+                                    if (!mud->msp)
+                                        mud->msp = init_msp(); 
+                                }
+                                else 
+                                    answer[1]=DONT;
+                                break;
+                    case WONT:  
+                                answer[1]=DONT; 
+                                if (mud->msp) {
+                                        free(mud->msp);
+                                        mud->msp = NULL;
+                                }
+                                break;
+                    case DONT:  answer[1]=WONT; break;
+                };
+                break;
+            case ECHO:
+                switch(wt)
+                {
+                    case DO:    answer[1]=WONT; break;
+                    case WILL:  answer[1]=DO; mud->ent->visible=0; input_line_visible(FALSE); break;
+                    case WONT:  answer[1]=DONT; if (!mud->ent->visible) { mud->ent->visible=1; input_line_visible(TRUE); } break;
+                    case DONT:  answer[1]=WONT; break;
+                };
+                break;
+            case TERMINAL_TYPE:
+                switch(wt)
+                {
+                    case WILL:  answer[1]=DONT; break;
+                    case DO:    answer[1]=WILL; break;
+                    case WONT:  answer[1]=DONT; break;
+                    case DONT:  answer[1]=WONT; break;
+                };
+                break;
 #ifdef UI_FULLSCREEN    
-        case NAWS:
-            switch(wt)
-            {
-            case WILL:  answer[1]=DO;   ses->naws=1; break;
-            case DO:    answer[1]=WILL; ses->naws=1; break;
-            case WONT:  answer[1]=DONT; ses->naws=0; break;
-            case DONT:  answer[1]=WONT; ses->naws=0; break;
-            };
-            break;
+            case NAWS:
+                switch(wt)
+                {
+                    case WILL:  answer[1]=DO;   ses->naws=1; break;
+                    case DO:    answer[1]=WILL; ses->naws=1; break;
+                    case WONT:  answer[1]=DONT; ses->naws=0; break;
+                    case DONT:  answer[1]=WONT; ses->naws=0; break;
+                };
+                break;
 #endif
-        case END_OF_RECORD:
-            switch(wt)
-            {
-            case WILL:  answer[1]=DO;   break;
-            case DO:    answer[1]=WONT; break;
-            case WONT:  answer[1]=DONT; break;
-            case DONT:  answer[1]=WONT; break;
-            };
-            break;
-        default:
-            switch(wt)
-            {
-            case WILL:  answer[1]=DONT; break;
-            case DO:    answer[1]=WONT; break;
-            case WONT:  answer[1]=DONT; break;
-            case DONT:  answer[1]=WONT; break;
-            };
+            case END_OF_RECORD:
+                switch(wt)
+                {
+                    case WILL:  answer[1]=DO;   break;
+                    case DO:    answer[1]=WONT; break;
+                    case WONT:  answer[1]=DONT; break;
+                    case DONT:  answer[1]=WONT; break;
+                };
+                break;
+            default:
+                switch(wt)
+                {
+                    case WILL:  answer[1]=DONT; break;
+                    case DO:    answer[1]=WONT; break;
+                    case WONT:  answer[1]=DONT; break;
+                    case DONT:  answer[1]=WONT; break;
+                };
         }
         send(ses->socket, answer, 3, 0);
 #ifdef TELNET_DEBUG

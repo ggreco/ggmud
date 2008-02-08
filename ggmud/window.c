@@ -618,7 +618,7 @@ void mccp_status()
     unsigned long comp, uncomp;
 
     if (!connected) {
-        popup_window(INFO, "MCCP status can be determined only if connected.");
+        popup_window(INFO, "MCCP/MSP status can be determined only if connected.");
         return;
     }
 
@@ -630,14 +630,39 @@ void mccp_status()
                     lookup_widget(w, "image_mccp_status")), enabled_pixmap, enabled_mask);
 
         gtk_label_set_markup(GTK_LABEL(
-                    lookup_widget(w, "label_mccp_status")), "<b>MCCP protocol is active</b>");
+                    lookup_widget(w, "label_mccp_status")), "<b>MCCP is active</b>");
     }
     else {
         gtk_image_set_from_pixmap(GTK_IMAGE(
                     lookup_widget(w, "image_mccp_status")), disabled_pixmap, disabled_mask);
 
         gtk_label_set_markup(GTK_LABEL(
-                    lookup_widget(w, "label_mccp_status")), "<b>MCCP protocol is inactive</b>");
+                    lookup_widget(w, "label_mccp_status")), "<b>MCCP is inactive</b>");
+    }
+
+    if (mud->msp) {
+        gtk_image_set_from_pixmap(GTK_IMAGE(
+                    lookup_widget(w, "image_msp_status")), enabled_pixmap, enabled_mask);
+
+        gtk_label_set_markup(GTK_LABEL(
+                    lookup_widget(w, "label_msp_status")), "<b>MSP is active</b>");
+
+        sprintf(buffer, "<big>%ld</big>", mud->msp->sounds_played);
+
+        gtk_label_set_markup(GTK_LABEL(
+                    lookup_widget(w, "label_sounds")), buffer);
+
+        sprintf(buffer, "<big>%ld</big>", mud->msp->musics_played);
+
+        gtk_label_set_markup(GTK_LABEL(
+                    lookup_widget(w, "label_musics")), buffer);
+    }
+    else {
+        gtk_image_set_from_pixmap(GTK_IMAGE(
+                    lookup_widget(w, "image_msp_status")), disabled_pixmap, disabled_mask);
+
+        gtk_label_set_markup(GTK_LABEL(
+                    lookup_widget(w, "label_msp_status")), "<b>MSP is inactive</b>");
     }
 
     mudcompress_stats(mud->activesession->mccp, &comp, &uncomp);
@@ -651,6 +676,7 @@ void mccp_status()
 
     gtk_label_set_markup(GTK_LABEL(
                 lookup_widget(w, "label_uncomp")), buffer);
+
 
     gtk_widget_show(w);
 }

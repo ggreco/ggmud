@@ -33,6 +33,7 @@
 #include <winsock2.h>
 #endif
 #include "socks.h"
+#include "msp.h"
 
 #define MESSAGE_ERR     0
 #define MESSAGE_NORMAL  1
@@ -80,6 +81,7 @@ typedef struct {
     char *lua_idle_function;
 #endif
     struct connreq *conn;
+    msp_control *msp;
 } ggmud;
 
 typedef struct alias_data  ALIAS_DATA;
@@ -112,6 +114,8 @@ struct prefs_data {
     gint WizAtStartup;
     gint SkipTaskbar;
     gint AutoUpdate;
+    gint UseMSP;
+    char SoundPath[256];
 };
 
 #define WARN GTK_MESSAGE_WARNING
