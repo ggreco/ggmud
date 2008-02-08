@@ -292,8 +292,8 @@ int read_buffer_mud(char *buffer, struct session *ses)
     char *cpsource, *cpdest;
     char tmpbuf[INPUT_CHUNK + 1];
 #ifdef ENABLE_MCCP
-	const char  *string;
-	int   mccp_i;
+    const char  *string;
+    int   mccp_i;
     char *mccp_buffer;
 #endif
 
@@ -307,7 +307,7 @@ int read_buffer_mud(char *buffer, struct session *ses)
         return -666;
 
     ses->old_more_coming = ses->more_coming;
- 
+
     if (didget == INPUT_CHUNK)
         ses->more_coming = 1;
     else
@@ -319,10 +319,10 @@ int read_buffer_mud(char *buffer, struct session *ses)
 #ifdef ENABLE_MCCP
     mudcompress_receive(ses->mccp, tmpbuf, didget);
 
-	while((mccp_i = mudcompress_pending(ses->mccp)) > 0)
-	{
-		mccp_buffer = calloc(1, mccp_i + 1 + ses->telnet_buflen);
-		mudcompress_get(ses->mccp, mccp_buffer + ses->telnet_buflen, mccp_i);
+    while((mccp_i = mudcompress_pending(ses->mccp)) > 0)
+    {
+        mccp_buffer = calloc(1, mccp_i + 1 + ses->telnet_buflen);
+        mudcompress_get(ses->mccp, mccp_buffer + ses->telnet_buflen, mccp_i);
 
         if (ses->telnet_buflen) {
             memcpy(mccp_buffer, ses->telnet_buf, ses->telnet_buflen);
@@ -332,60 +332,60 @@ int read_buffer_mud(char *buffer, struct session *ses)
         i = mccp_i;
         cpsource = mccp_buffer;
 #else
-    cpsource = tmpbuf;
-    i = didget;
+        cpsource = tmpbuf;
+        i = didget;
 #endif
-   
-    while (i > 0) {
-        switch(*(unsigned char *)cpsource)
-        {
-        case 0:
-            i--;
-            didget--;
-            cpsource++;
-            break;
-        case 255:
-            b=do_telnet_protocol((unsigned char *)cpsource, i, ses);
-            switch(b)
+
+        while (i > 0) {
+            switch(*(unsigned char *)cpsource)
             {
-            case -1:
-                memmove(ses->telnet_buf + ses->telnet_buflen, cpsource, i);
-                ses->telnet_buflen+=i;
-                i = 0;
-                break;
-            case -2:
-            	i-=2;
-            	didget-=2;
-            	cpsource+=2;
-//            	if (!i)
-//            		ses->ga=1;
-            	break;
-            case -3:
-                i -= 2;
-                didget-=1;
-                *cpdest++=255;
-                cpsource+=2;
-                break;
-            default:
-                i -= b;
-                didget-=b;
-                cpsource += b;
+                case 0:
+                    i--;
+                    didget--;
+                    cpsource++;
+                    break;
+                case 255:
+                    b=do_telnet_protocol((unsigned char *)cpsource, i, ses);
+                    switch(b)
+                    {
+                        case -1:
+                            memmove(ses->telnet_buf + ses->telnet_buflen, cpsource, i);
+                            ses->telnet_buflen+=i;
+                            i = 0;
+                            break;
+                        case -2:
+                            i-=2;
+                            didget-=2;
+                            cpsource+=2;
+                            //            	if (!i)
+                            //            		ses->ga=1;
+                            break;
+                        case -3:
+                            i -= 2;
+                            didget-=1;
+                            *cpdest++=255;
+                            cpsource+=2;
+                            break;
+                        default:
+                            i -= b;
+                            didget-=b;
+                            cpsource += b;
+                    }
+                    break;
+                default:
+                    *cpdest++ = *cpsource++;
+                    i--;
             }
-            break;
-        default:
-            *cpdest++ = *cpsource++;
-            i--;
         }
-    }
 
 #ifdef ENABLE_MCCP
         free(mccp_buffer);
-	}
-   
-	if ((string = mudcompress_response(ses->mccp)) 
+    }
+
+    if ((string = mudcompress_response(ses->mccp)) 
             != NULL) {
-		send (ses->socket, string, strlen(string), 0);
- 	}
+        send (ses->socket, string, strlen(string), 0);
+    }
 #endif  
     *cpdest = '\0';
 

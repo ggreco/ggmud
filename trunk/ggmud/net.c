@@ -198,6 +198,11 @@ void disconnect ( void )
         kill_socks_request(mud->conn);
         mud->conn = NULL;
     }
+
+    if (mud->msp) {
+        free(mud->msp);
+        mud->msp = NULL;
+    }
     newactive_session();
     mud->activesession = activesession;
 }
@@ -495,7 +500,7 @@ int check_status(const char *buf, struct session *ses)
 /* btw: i don't tested my fix very much, so it's up to you.               */
 static void readmud(struct session *s)
 {
-    char thebuffer[3*BUFFER_SIZE + 1], *buf, *line, *next_line; // made bigger to support MCCP
+    char *buf, *line, *next_line; 
     /* char mybuf[512]; */
     char linebuf[BUFFER_SIZE], header[BUFFER_SIZE];
     int rv, headerlen;
@@ -503,21 +508,19 @@ static void readmud(struct session *s)
     if(!ZOMBI_IS_ALIVE(s))
         return ;
 
-    buf = thebuffer + BUFFER_SIZE;
+    buf = s->session_buffer;
     rv = read_buffer_mud(buf, s);
+    
+    if(rv >= SESSION_BUFFER_SIZE) {
+        popup_window(ERR, "Received too long buffer, skipping datas to avoid crash!\n\n(please signal this to the developer)");
+        return;
+    }
 
     if (!rv)
         return;
 
-    /* sprintf(mybuf, "rv: %d", rv);
-       tintin_puts(mybuf, NULL); */ 
-#ifdef TELNET_SUPPORT
     if(rv <0) 
-#else
-    if (!rv)
-#endif
     {
-#ifdef TELNET_SUPPORT
         if (rv != -666) {
             char *e = strerror(errno);
 
@@ -526,18 +529,10 @@ static void readmud(struct session *s)
 
             popup_window(INFO, "Connection aborted\nError: %s (%d)", e, errno);
         }
-#endif
         disconnect();
         
         return;
     }
-#ifndef TELNET_SUPPORT
-    else if(rv < 0) {
-        syserr("readmud: read"); // this call ends the program
-    }
-#endif
-
-//    buf[rv] = '\0'; not needed we add it in read_data_mud.
 
     /* changed by DasI */
     if( s->snoopstatus && (s != mud->activesession))
@@ -548,17 +543,14 @@ static void readmud(struct session *s)
     headerlen = strlen(header);
 
     if(s->old_more_coming) {
-        line = s->last_line;
-        buf -= strlen(line);
-        while(*line)
-            *buf++ = *line++;
-        buf -= strlen(s->last_line);
-        s->last_line[0] = '\0';
-    }
+        int len = strlen(s->last_line);
 
-    if(strlen(buf)> (BUFFER_SIZE * 2)) {
-        popup_window(ERR, "readmud: read one line longer than BUFFERSIZE");
-        return;
+        if (len > 0 && (rv + len  < SESSION_BUFFER_SIZE) ) {
+            memmove(buf + len, buf, rv);
+            buf[len + rv] = 0;
+            memcpy(buf, s->last_line, len);
+            s->last_line[0] = '\0';
+        }
     }
     
     logit(s, buf);

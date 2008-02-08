@@ -56,16 +56,13 @@ on_checkbutton_tickcounter_toggled     (GtkToggleButton *togglebutton,
             gtk_toggle_button_get_active(togglebutton));
 }
 
-
 void
-on_checkbutton_use_proxy_toggled       (GtkToggleButton *togglebutton,
-                                        gpointer         user_data)
+on_checkbutton_button_toggled          (GtkWidget *target,
+                                        GtkToggleButton *togglebutton)
 {
-    gtk_widget_set_sensitive( lookup_widget((GtkWidget *)togglebutton,
-                "button_socks_settings"),
+    gtk_widget_set_sensitive(target, 
             gtk_toggle_button_get_active(togglebutton));
 }
-
 
 
 void
@@ -131,5 +128,13 @@ on_homepage_activate                   (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
     openurl("http://www.ggsoft.org/ggmud");
+}
+
+
+void
+on_button_msp_clicked                  (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
 }
 

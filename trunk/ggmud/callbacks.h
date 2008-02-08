@@ -510,3 +510,11 @@ on_button_fonts_ok_clicked             (GtkButton       *button,
 void
 on_button_fonts_save_clicked           (GtkButton       *button,
                                         gpointer         user_data);
+
+void
+on_checkbutton_button_toggled          (GtkWidget *, 
+                                        GtkToggleButton *togglebutton);
+
+void
+on_button_msp_clicked                  (GtkButton       *button,
+                                        gpointer         user_data);

@@ -900,6 +900,9 @@ void prompt(struct session *ses)
 
 void do_one_line(char *line, struct session *ses)
 {
+  if (check_msp(line))
+      return;
+
   if(!presub && !ses->ignore)
     check_all_actions(line, ses);
   if(!togglesubs && !do_one_antisub(line, ses))
