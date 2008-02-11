@@ -138,3 +138,19 @@ on_button_msp_clicked                  (GtkButton       *button,
 
 }
 
+
+void
+on_mcp_ok_clicked                      (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_mcp_ko_clicked                      (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
+}
+
