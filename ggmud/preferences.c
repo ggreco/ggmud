@@ -184,6 +184,7 @@ checkbutton prefs_buttons[] = {
     {"checkbutton_taskbar", "SkipTaskbar", &prefs.SkipTaskbar},
     {"checkbutton_autoupdate", "AutoUpdate", &prefs.AutoUpdate},
     {"checkbutton_msp", "UseMSP", &prefs.UseMSP},
+    {"checkbutton_url", "ShowURL", &prefs.ShowURL},
     {NULL, NULL, NULL}
 };
 
@@ -218,7 +219,7 @@ void load_prefs ()
 
 
     if ((fp = fileopen(PREFS_FILE, "r"))) {
-        prefs.SaveVars = prefs.Blinking = prefs.KeepText = prefs.EchoText  = prefs.WordWrap = prefs.DoBeep = TRUE;
+        prefs.SaveVars = prefs.Blinking = prefs.KeepText = prefs.EchoText  = prefs.WordWrap = prefs.DoBeep = prefs.ShowURL = TRUE;
         prefs.UseSocks = prefs.WizAtStartup = prefs.SkipTaskbar = FALSE;
         prefs.AutoUpdate = TRUE; prefs.UseMSP = TRUE;
         prefs.SoundPath[0] = 0;

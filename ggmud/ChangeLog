@@ -5,6 +5,8 @@
 	- Fixed dependencies in makefile.
 	- Initial MSP support.
 	- Fixed crash with MCCP in certain situations.
+	- Added URL detection in output window, URLs will be underlined
+	  and clickable if you enable this.
 
 0.8.0:
 	- Added button support:

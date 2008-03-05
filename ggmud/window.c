@@ -150,7 +150,7 @@ GtkWidget *create_new_window(const char *title, int width, int height)
     gtk_container_add(GTK_CONTAINER(win), vbox);
     
     list = (GtkWidget *) new_view(NULL, vbox, FALSE);
-    gtk_signal_connect (GTK_OBJECT (list), "destroy", GTK_SIGNAL_FUNC (destroy_a_window), NULL);
+    g_signal_connect (G_OBJECT (list), "destroy", (GCallback)destroy_a_window, NULL);
 
     gtk_widget_show(win);
 
@@ -436,8 +436,8 @@ GtkWidget *
 MakeButton(const char *image, GtkSignalFunc func, gpointer data)
 {
     GtkWidget *button = gtk_button_new_from_stock(image);
-    gtk_signal_connect (GTK_OBJECT (button), "clicked",
-                               func,
+    g_signal_connect (G_OBJECT (button), "clicked",
+                               (GCallback)func,
                                data );
 
     gtk_widget_show(button);
@@ -882,6 +882,8 @@ void popup_window (int type, const gchar *message, ...)
     gtk_widget_destroy(d);
 }
 
+extern gboolean textview_motion_notify_cb(GtkWidget *textview, GdkEventMotion *event, __attribute__((unused))gpointer d);
+
 static 
 GtkWidget *create_tv(GtkTextBuffer *buffer, GtkTextView **view)
 {
@@ -917,48 +919,52 @@ GtkWidget *create_tv(GtkTextBuffer *buffer, GtkTextView **view)
     if (fonts[OUTPUT_FONT].desc)
         gtk_widget_modify_font((GtkWidget *)text, fonts[OUTPUT_FONT].desc);
 
-    gtk_signal_connect(GTK_OBJECT(text),"key_press_event",GTK_SIGNAL_FUNC(change_focus), mud);
+    g_signal_connect(G_OBJECT(text),"key_press_event",(GCallback)change_focus, mud);
+    g_signal_connect(G_OBJECT(text), "motion-notify-event", (GCallback)textview_motion_notify_cb, NULL);
 
     return sw;
 }
 
+
 GtkTextView *new_view(char *name, GtkWidget *parent, int ismain)
 {
-  GtkWidget *paned, *sw;
-  GtkTextView *t1, *t2;
-  GtkTextBuffer *buf;
-  int w, h;
-  extern GtkTextTagTable *tag_table;
+    GtkWidget *paned, *sw;
+    GtkTextView *t1, *t2;
+    GtkTextBuffer *buf;
+    int w, h;
+    extern GtkTextTagTable *tag_table;
 
-  paned = gtk_vpaned_new();
-  gtk_widget_show (paned);
-  
+    paned = gtk_vpaned_new();
+    gtk_widget_show (paned);
+
 #ifdef USE_NOTEBOOK
-      gtk_container_add(GTK_CONTAINER(parent), paned);
+    gtk_container_add(GTK_CONTAINER(parent), paned);
 
-      templabel = gtk_label_new(name);
-      gtk_widget_show(templabel);
-      
-      gtk_notebook_set_tab_label (mud->notebook, 
-              gtk_notebook_get_nth_page(mud->notebook, 0), templabel);
+    templabel = gtk_label_new(name);
+    gtk_widget_show(templabel);
+
+    gtk_notebook_set_tab_label (mud->notebook, 
+            gtk_notebook_get_nth_page(mud->notebook, 0), templabel);
 #else
-      gtk_box_pack_start(GTK_BOX(parent), paned, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(parent), paned, TRUE, TRUE, 0);
 #endif
-     
-  buf = gtk_text_buffer_new(tag_table);
 
-  sw = create_tv(buf, &t1);
-  gtk_widget_hide(sw);
-  gtk_paned_add1(GTK_PANED(paned), sw);
-  
-  gtk_paned_add2(GTK_PANED(paned), create_tv(buf, &t2));
+    buf = gtk_text_buffer_new(tag_table);
 
-  gtk_window_get_size(GTK_WINDOW(gtk_widget_get_toplevel(parent)), &w, &h);
-  gtk_paned_set_position(GTK_PANED(paned), h * 2 / 3);
-      
-  if (ismain) 
-    mud->review = sw;
-  
-  return (GtkTextView *)t2;
+
+    sw = create_tv(buf, &t1);
+
+    gtk_widget_hide(sw);
+    gtk_paned_add1(GTK_PANED(paned), sw);
+
+    gtk_paned_add2(GTK_PANED(paned), create_tv(buf, &t2));
+
+    gtk_window_get_size(GTK_WINDOW(gtk_widget_get_toplevel(parent)), &w, &h);
+    gtk_paned_set_position(GTK_PANED(paned), h * 2 / 3);
+
+    if (ismain) 
+        mud->review = sw;
+
+    return (GtkTextView *)t2;
 }
 

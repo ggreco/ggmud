@@ -118,6 +118,98 @@ GtkTextTag *fg_colors[2][8];
 GtkTextTag *bg_colors[2][8];
 GtkTextTag *blink_colors[2][8];
 GtkTextTagTable *tag_table = NULL;
+GtkTextTag *url_tag = NULL;
+
+gboolean textview_motion_notify_cb(GtkWidget *textview, GdkEventMotion *event, __attribute__((unused))gpointer d){
+	gint x=0, y=0;
+	GtkTextIter iter;
+	GtkTextBuffer *buff;
+
+    if (!prefs.ShowURL)
+        return FALSE;
+
+	if (!(buff=gtk_text_view_get_buffer(GTK_TEXT_VIEW(textview))))
+		return FALSE;
+
+	gtk_text_view_window_to_buffer_coords(GTK_TEXT_VIEW(textview), GTK_TEXT_WINDOW_WIDGET,
+						event->x, event->y, &x, &y);
+	
+	gtk_text_view_get_iter_at_location(GTK_TEXT_VIEW(textview), &iter, x, y);
+
+	gdk_window_get_pointer(event->window, 0, 0, 0);
+	if (gtk_text_iter_has_tag(&iter, url_tag)){
+		GdkCursor *cur=gdk_cursor_new(GDK_HAND2);
+		gdk_window_set_cursor(event->window, cur);
+	}
+	else {
+		GdkCursor *cur=gdk_cursor_new(GDK_XTERM);
+		gdk_window_set_cursor(event->window, cur);
+	}
+	return FALSE;
+}
+
+gboolean textview_url_activate(GtkTextTag *tag,
+                            __attribute__((unused))GObject *arg1, GdkEvent *event, 
+                            GtkTextIter *arg2, __attribute__((unused))gpointer d){
+       GdkEventButton *event_btn=(GdkEventButton*)event;
+       if (event->type == GDK_BUTTON_RELEASE && event_btn->button == 1){
+           GtkTextIter start, end;
+           gchar *link;
+
+           if (gtk_text_iter_toggles_tag(arg2, tag)) return FALSE;
+
+           /* Go backward until this tag begins */
+           start=*arg2;
+           while (gtk_text_iter_begins_tag(&start, tag) == FALSE) gtk_text_iter_backward_char(&start);
+
+           /* Go backward until this tag ends */
+           end=*arg2;
+           while (gtk_text_iter_ends_tag(&end, tag) == FALSE) gtk_text_iter_forward_char(&end);
+           link=gtk_text_iter_get_text(&start, &end);
+
+           if (link)
+               openurl(link);
+       }
+       return FALSE;
+}
+
+const char httptag[] = "http:/";
+
+void check_for_url(GtkTextBuffer *b, int offset)
+{
+    GtkTextIter it, start;
+    int signature = 0;
+
+    gtk_text_buffer_get_iter_at_offset(b, &it, offset);
+
+    if (gtk_text_iter_is_end(&it))
+        return;
+
+    do {
+        if (signature == 6) { // URL found, applying TAG
+            do 
+            {
+                int ch = gtk_text_iter_get_char(&it);
+
+                if (ch == ' ' || ch == 0 ||
+                    ch < 32)
+                    break;
+            }
+            while (gtk_text_iter_forward_char(&it));
+
+            gtk_text_buffer_apply_tag(b,
+                        url_tag, &start, &it);
+
+            signature = 0;
+        } else if (gtk_text_iter_get_char(&it) == httptag[signature]) {
+            if (signature == 0)
+                start = it;
+            signature++;
+        } else
+            signature = 0;
+
+    } while(gtk_text_iter_forward_char(&it));
+}
 
 /* from bezerk */
 void init_colors ()
@@ -241,6 +333,14 @@ void init_colors ()
         gtk_text_tag_table_add(tag_table, prefs.BackgroundColor);
         gtk_text_tag_table_add(tag_table, prefs.DefaultColor);
         gtk_text_tag_table_add(tag_table, prefs.BrightColor);
+
+        url_tag = gtk_text_tag_new(NULL);
+        g_object_set(url_tag, "foreground-gdk", &color_lightblue,
+                              "underline", PANGO_UNDERLINE_SINGLE,
+                              "underline-set", TRUE, NULL);
+        g_signal_connect(G_OBJECT(url_tag), "event",
+                                G_CALLBACK(textview_url_activate), NULL);
+        gtk_text_tag_table_add(tag_table, url_tag);
     }
 }
 
@@ -430,6 +530,7 @@ void dump_buffer(const char *b, int len)
     fputc('\n', stderr);
 }
 
+
 void local_disp_ansi(int size, const char *in, GtkTextView *target)
 {
     char buffer[256];
@@ -437,10 +538,12 @@ void local_disp_ansi(int size, const char *in, GtkTextView *target)
     char ansibuffer[32];
     GtkTextBuffer *tbuff = gtk_text_view_get_buffer(target);
     GtkTextIter iter;
-    int n = 0;
+    int n = 0, start;
 
     gtk_text_buffer_get_end_iter(tbuff, &iter);
 
+    if (prefs.ShowURL)
+        start = gtk_text_iter_get_offset(&iter);
     /*
     fg_col=prefs.DefaultColor;
     bg_col=prefs.BackgroundColor;
@@ -479,6 +582,9 @@ void local_disp_ansi(int size, const char *in, GtkTextView *target)
     }	
     
     flush_text_buffer(buffer, &bufferpos, &iter, tbuff);
+
+    if (prefs.ShowURL)
+        check_for_url(tbuff, start);
 }
 
 void disp_ansi(int size, const char *in, GtkTextView *target)
@@ -489,10 +595,14 @@ void disp_ansi(int size, const char *in, GtkTextView *target)
     static char ansibuffer[32];
     GtkTextBuffer *tbuff = gtk_text_view_get_buffer(target);
     GtkTextIter iter;
+    int start;
     int n = 0;
 
 
     gtk_text_buffer_get_end_iter(tbuff, &iter);
+
+    if (prefs.ShowURL)
+        start = gtk_text_iter_get_offset(&iter);
 
     while(n < size) {
 
@@ -562,6 +672,9 @@ void disp_ansi(int size, const char *in, GtkTextView *target)
     }	
 
     flush_text_buffer(buffer, &bufferpos, &iter, tbuff);
+
+    if (prefs.ShowURL)
+        check_for_url(tbuff, start);
 }
 
 #define MOD_NORMAL	"0"
