@@ -116,6 +116,7 @@ struct prefs_data {
     gint AutoUpdate;
     gint UseMSP;
     char SoundPath[256];
+    gint ShowURL;
 };
 
 #define WARN GTK_MESSAGE_WARNING

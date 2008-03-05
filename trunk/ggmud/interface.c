@@ -272,6 +272,7 @@ create_window_preferences (void)
   GtkWidget *checkbutton_statusbar;
   GtkWidget *checkbutton_macro;
   GtkWidget *checkbutton_taskbar;
+  GtkWidget *checkbutton_url;
   GtkWidget *label10;
   GtkWidget *vbox5;
   GtkWidget *frame4;
@@ -398,6 +399,12 @@ create_window_preferences (void)
   gtk_widget_show (checkbutton_taskbar);
   gtk_box_pack_start (GTK_BOX (vbox7), checkbutton_taskbar, FALSE, FALSE, 0);
   gtk_tooltips_set_tip (tooltips, checkbutton_taskbar, "This option tell GGMud to not display its windows on your Operating System taskbar, this is useful for mud players in office.", NULL);
+
+  checkbutton_url = gtk_check_button_new_with_mnemonic ("Show clickable URLs");
+  gtk_widget_show (checkbutton_url);
+  gtk_box_pack_start (GTK_BOX (vbox7), checkbutton_url, FALSE, FALSE, 0);
+  gtk_tooltips_set_tip (tooltips, checkbutton_url, "This option tell GGMud to display URLs as underlined clickable references in your output window.", NULL);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (checkbutton_url), TRUE);
 
   label10 = gtk_label_new ("<b>Interface</b>");
   gtk_widget_show (label10);
@@ -616,6 +623,7 @@ create_window_preferences (void)
   GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_statusbar, "checkbutton_statusbar");
   GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_macro, "checkbutton_macro");
   GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_taskbar, "checkbutton_taskbar");
+  GLADE_HOOKUP_OBJECT (window_preferences, checkbutton_url, "checkbutton_url");
   GLADE_HOOKUP_OBJECT (window_preferences, label10, "label10");
   GLADE_HOOKUP_OBJECT (window_preferences, vbox5, "vbox5");
   GLADE_HOOKUP_OBJECT (window_preferences, frame4, "frame4");
