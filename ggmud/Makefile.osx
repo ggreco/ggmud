@@ -10,11 +10,11 @@ export PKG_CONFIG_PATH
 
 CC ?= gcc
 CXX ?= g++
-INCDIR = -Itt -Ilua
-COMMONLIBS = -Ltt -ltt -Llua -llua
-CFLAGS = $(INCDIR) `$(PKGCONFIG) gtk+-2.0 --cflags` $(GLOBAL_CFLAGS) -DGTKQUARTZ
+INCDIR = -Itt -Ilua -Ihttpfetch
+COMMONLIBS = -Ltt -ltt -Llua -llua -Lhttpfetch -lfetch
+CFLAGS = $(INCDIR) `$(PKGCONFIG) gtk+-2.0 gthread-2.0 --cflags` $(GLOBAL_CFLAGS) -DGTKQUARTZ
 
-LIBS = $(COMMONLIBS) `$(PKGCONFIG) gtk+-2.0 --libs` -lz -framework Carbon
+LIBS = $(COMMONLIBS) `$(PKGCONFIG) gtk+-2.0 gthread-2.0 --libs` -lz -framework Carbon
 
 VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )
 OS:=	$(uname)
@@ -28,7 +28,7 @@ C_SRCS = alias.c ansi.c font.c fileopen.c help.c history.c log.c logviewer.c \
          macro.c net.c preferences.c ggmud.c triggers.c window.c wizard.c \
          variables.c highlights.c gags.c timers.c complete.c prefix.c \
          telnet.c lua.c interface.c callbacks.c support.c socks.c pixmaps.c \
-		 sync-menu.c
+		 sync-menu.c buttons.c autoupdate.c msp.c
 
 DEP_SRCS = $(CXX_SRCS) $(C_SRCS)
 
@@ -86,7 +86,13 @@ lua/libluaw32.a: lua/*c
 	"CC=$(CROSSDIR)bin/gcc" "MYCFLAGS=-mno-cygwin -mms-bitfields" "RANLIB=$(CROSSDIR)/bin/ranlib" \
     "AR=$(CROSSDIR)bin/ar rcu" "MYLIBS=" "MYLDFLAGS=-s" lua.exe
 
-$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a
+httpfetch/libfetch.a: httpfetch/*.c
+	$(MAKE) -C httpfetch
+    
+httpfetch/libfetchw32.a: httpfetch/*.c
+	$(MAKE) -C httpfetch win32
+    
+$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a httpfetch/libfetch.a
 	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) $(LIBS)
 
 $(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a lua/libluaw32.a
