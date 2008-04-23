@@ -519,10 +519,13 @@ void
 on_button_msp_clicked                  (GtkButton       *button,
                                         gpointer         user_data);
 
-void
-on_mcp_ok_clicked                      (GtkButton       *button,
+gboolean
+on_msp_ko_clicked                      (GtkWidget       *widget,
+                                        GdkEvent        *event,
                                         gpointer         user_data);
 
 void
-on_mcp_ko_clicked                      (GtkButton       *button,
+on_msp_ok_clicked                      (GtkButton       *button,
                                         gpointer         user_data);
+
+

@@ -3720,13 +3720,13 @@ create_window_fonts (void)
 }
 
 GtkWidget*
-create_window_mcp (void)
+create_window_msp (void)
 {
-  GtkWidget *window_mcp;
+  GtkWidget *window_msp;
   GtkWidget *vbox31;
   GtkWidget *vbox32;
   GtkWidget *checkbutton_inline;
-  GtkWidget *checkbutton_allow_download;
+  GtkWidget *checkbutton_download;
   GtkWidget *frame26;
   GtkWidget *alignment8;
   GtkWidget *table12;
@@ -3759,15 +3759,15 @@ create_window_mcp (void)
 
   tooltips = gtk_tooltips_new ();
 
-  window_mcp = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_container_set_border_width (GTK_CONTAINER (window_mcp), 8);
-  gtk_window_set_title (GTK_WINDOW (window_mcp), "MSP protocol settings");
-  gtk_window_set_position (GTK_WINDOW (window_mcp), GTK_WIN_POS_MOUSE);
-  gtk_window_set_modal (GTK_WINDOW (window_mcp), TRUE);
+  window_msp = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_container_set_border_width (GTK_CONTAINER (window_msp), 8);
+  gtk_window_set_title (GTK_WINDOW (window_msp), "MSP protocol settings");
+  gtk_window_set_position (GTK_WINDOW (window_msp), GTK_WIN_POS_MOUSE);
+  gtk_window_set_modal (GTK_WINDOW (window_msp), TRUE);
 
   vbox31 = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (vbox31);
-  gtk_container_add (GTK_CONTAINER (window_mcp), vbox31);
+  gtk_container_add (GTK_CONTAINER (window_msp), vbox31);
 
   vbox32 = gtk_vbox_new (FALSE, 0);
   gtk_widget_show (vbox32);
@@ -3778,10 +3778,10 @@ create_window_mcp (void)
   gtk_box_pack_start (GTK_BOX (vbox32), checkbutton_inline, FALSE, FALSE, 0);
   gtk_tooltips_set_tip (tooltips, checkbutton_inline, "Allow audio activation commands to be not in the beginning of a line.", NULL);
 
-  checkbutton_allow_download = gtk_check_button_new_with_mnemonic ("Allow download");
-  gtk_widget_show (checkbutton_allow_download);
-  gtk_box_pack_start (GTK_BOX (vbox32), checkbutton_allow_download, FALSE, FALSE, 0);
-  gtk_tooltips_set_tip (tooltips, checkbutton_allow_download, "Allow GGMud to download missing sounds from remote if not available locally", NULL);
+  checkbutton_download = gtk_check_button_new_with_mnemonic ("Allow download");
+  gtk_widget_show (checkbutton_download);
+  gtk_box_pack_start (GTK_BOX (vbox32), checkbutton_download, FALSE, FALSE, 0);
+  gtk_tooltips_set_tip (tooltips, checkbutton_download, "Allow GGMud to download missing sounds from remote if not available locally", NULL);
 
   frame26 = gtk_frame_new (NULL);
   gtk_widget_show (frame26);
@@ -3831,6 +3831,7 @@ create_window_mcp (void)
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   gtk_tooltips_set_tip (tooltips, entry_sound_path, "Path where to search for sound samples and where to download samples if you enable remote download and the mud support it.", NULL);
+  gtk_entry_set_max_length (GTK_ENTRY (entry_sound_path), 255);
   gtk_entry_set_invisible_char (GTK_ENTRY (entry_sound_path), 9679);
 
   entry_sound_player = gtk_entry_new ();
@@ -3839,6 +3840,7 @@ create_window_mcp (void)
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   gtk_tooltips_set_tip (tooltips, entry_sound_player, "The program you want to use to play sound samples, the file name of the sample will be appended to the string you'll write here, should support at least WAV.", NULL);
+  gtk_entry_set_max_length (GTK_ENTRY (entry_sound_player), 127);
   gtk_entry_set_invisible_char (GTK_ENTRY (entry_sound_player), 9679);
 
   label87 = gtk_label_new ("Default path");
@@ -3911,6 +3913,7 @@ create_window_mcp (void)
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   gtk_tooltips_set_tip (tooltips, entry_music_path, "Path where to search for midi music and where to download them if you enable remote download and the mud support it.", NULL);
+  gtk_entry_set_max_length (GTK_ENTRY (entry_music_path), 255);
   gtk_entry_set_invisible_char (GTK_ENTRY (entry_music_path), 9679);
 
   entry_music_player = gtk_entry_new ();
@@ -3919,6 +3922,7 @@ create_window_mcp (void)
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   gtk_tooltips_set_tip (tooltips, entry_music_player, "The program you want to use to play music, the file name of the music will be appended to the string you'll write here, should support at least MIDI music.", NULL);
+  gtk_entry_set_max_length (GTK_ENTRY (entry_music_player), 127);
   gtk_entry_set_invisible_char (GTK_ENTRY (entry_music_player), 9679);
 
   label86 = gtk_label_new ("<b>Music</b>");
@@ -3947,52 +3951,52 @@ create_window_mcp (void)
   GTK_WIDGET_SET_FLAGS (button53, GTK_CAN_DEFAULT);
   gtk_tooltips_set_tip (tooltips, button53, "Discard changes of this form...", NULL);
 
-  g_signal_connect ((gpointer) window_mcp, "delete_event",
-                    G_CALLBACK (on_socks_ko_clicked),
+  g_signal_connect ((gpointer) window_msp, "delete_event",
+                    G_CALLBACK (on_msp_ko_clicked),
                     NULL);
   g_signal_connect ((gpointer) button52, "clicked",
-                    G_CALLBACK (on_mcp_ok_clicked),
+                    G_CALLBACK (on_msp_ok_clicked),
                     NULL);
   g_signal_connect ((gpointer) button53, "clicked",
-                    G_CALLBACK (on_mcp_ko_clicked),
+                    G_CALLBACK (on_msp_ko_clicked),
                     NULL);
 
   /* Store pointers to all widgets, for use by lookup_widget(). */
-  GLADE_HOOKUP_OBJECT_NO_REF (window_mcp, window_mcp, "window_mcp");
-  GLADE_HOOKUP_OBJECT (window_mcp, vbox31, "vbox31");
-  GLADE_HOOKUP_OBJECT (window_mcp, vbox32, "vbox32");
-  GLADE_HOOKUP_OBJECT (window_mcp, checkbutton_inline, "checkbutton_inline");
-  GLADE_HOOKUP_OBJECT (window_mcp, checkbutton_allow_download, "checkbutton_allow_download");
-  GLADE_HOOKUP_OBJECT (window_mcp, frame26, "frame26");
-  GLADE_HOOKUP_OBJECT (window_mcp, alignment8, "alignment8");
-  GLADE_HOOKUP_OBJECT (window_mcp, table12, "table12");
-  GLADE_HOOKUP_OBJECT (window_mcp, button54, "button54");
-  GLADE_HOOKUP_OBJECT (window_mcp, image87, "image87");
-  GLADE_HOOKUP_OBJECT (window_mcp, button55, "button55");
-  GLADE_HOOKUP_OBJECT (window_mcp, image88, "image88");
-  GLADE_HOOKUP_OBJECT (window_mcp, label88, "label88");
-  GLADE_HOOKUP_OBJECT (window_mcp, entry_sound_path, "entry_sound_path");
-  GLADE_HOOKUP_OBJECT (window_mcp, entry_sound_player, "entry_sound_player");
-  GLADE_HOOKUP_OBJECT (window_mcp, label87, "label87");
-  GLADE_HOOKUP_OBJECT (window_mcp, label85, "label85");
-  GLADE_HOOKUP_OBJECT (window_mcp, frame27, "frame27");
-  GLADE_HOOKUP_OBJECT (window_mcp, alignment9, "alignment9");
-  GLADE_HOOKUP_OBJECT (window_mcp, table13, "table13");
-  GLADE_HOOKUP_OBJECT (window_mcp, button56, "button56");
-  GLADE_HOOKUP_OBJECT (window_mcp, image89, "image89");
-  GLADE_HOOKUP_OBJECT (window_mcp, button57, "button57");
-  GLADE_HOOKUP_OBJECT (window_mcp, image90, "image90");
-  GLADE_HOOKUP_OBJECT (window_mcp, label89, "label89");
-  GLADE_HOOKUP_OBJECT (window_mcp, label90, "label90");
-  GLADE_HOOKUP_OBJECT (window_mcp, entry_music_path, "entry_music_path");
-  GLADE_HOOKUP_OBJECT (window_mcp, entry_music_player, "entry_music_player");
-  GLADE_HOOKUP_OBJECT (window_mcp, label86, "label86");
-  GLADE_HOOKUP_OBJECT (window_mcp, hseparator13, "hseparator13");
-  GLADE_HOOKUP_OBJECT (window_mcp, hbuttonbox16, "hbuttonbox16");
-  GLADE_HOOKUP_OBJECT (window_mcp, button52, "button52");
-  GLADE_HOOKUP_OBJECT (window_mcp, button53, "button53");
-  GLADE_HOOKUP_OBJECT_NO_REF (window_mcp, tooltips, "tooltips");
+  GLADE_HOOKUP_OBJECT_NO_REF (window_msp, window_msp, "window_msp");
+  GLADE_HOOKUP_OBJECT (window_msp, vbox31, "vbox31");
+  GLADE_HOOKUP_OBJECT (window_msp, vbox32, "vbox32");
+  GLADE_HOOKUP_OBJECT (window_msp, checkbutton_inline, "checkbutton_inline");
+  GLADE_HOOKUP_OBJECT (window_msp, checkbutton_download, "checkbutton_download");
+  GLADE_HOOKUP_OBJECT (window_msp, frame26, "frame26");
+  GLADE_HOOKUP_OBJECT (window_msp, alignment8, "alignment8");
+  GLADE_HOOKUP_OBJECT (window_msp, table12, "table12");
+  GLADE_HOOKUP_OBJECT (window_msp, button54, "button54");
+  GLADE_HOOKUP_OBJECT (window_msp, image87, "image87");
+  GLADE_HOOKUP_OBJECT (window_msp, button55, "button55");
+  GLADE_HOOKUP_OBJECT (window_msp, image88, "image88");
+  GLADE_HOOKUP_OBJECT (window_msp, label88, "label88");
+  GLADE_HOOKUP_OBJECT (window_msp, entry_sound_path, "entry_sound_path");
+  GLADE_HOOKUP_OBJECT (window_msp, entry_sound_player, "entry_sound_player");
+  GLADE_HOOKUP_OBJECT (window_msp, label87, "label87");
+  GLADE_HOOKUP_OBJECT (window_msp, label85, "label85");
+  GLADE_HOOKUP_OBJECT (window_msp, frame27, "frame27");
+  GLADE_HOOKUP_OBJECT (window_msp, alignment9, "alignment9");
+  GLADE_HOOKUP_OBJECT (window_msp, table13, "table13");
+  GLADE_HOOKUP_OBJECT (window_msp, button56, "button56");
+  GLADE_HOOKUP_OBJECT (window_msp, image89, "image89");
+  GLADE_HOOKUP_OBJECT (window_msp, button57, "button57");
+  GLADE_HOOKUP_OBJECT (window_msp, image90, "image90");
+  GLADE_HOOKUP_OBJECT (window_msp, label89, "label89");
+  GLADE_HOOKUP_OBJECT (window_msp, label90, "label90");
+  GLADE_HOOKUP_OBJECT (window_msp, entry_music_path, "entry_music_path");
+  GLADE_HOOKUP_OBJECT (window_msp, entry_music_player, "entry_music_player");
+  GLADE_HOOKUP_OBJECT (window_msp, label86, "label86");
+  GLADE_HOOKUP_OBJECT (window_msp, hseparator13, "hseparator13");
+  GLADE_HOOKUP_OBJECT (window_msp, hbuttonbox16, "hbuttonbox16");
+  GLADE_HOOKUP_OBJECT (window_msp, button52, "button52");
+  GLADE_HOOKUP_OBJECT (window_msp, button53, "button53");
+  GLADE_HOOKUP_OBJECT_NO_REF (window_msp, tooltips, "tooltips");
 
-  return window_mcp;
+  return window_msp;
 }
 

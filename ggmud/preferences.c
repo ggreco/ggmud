@@ -185,6 +185,8 @@ checkbutton prefs_buttons[] = {
     {"checkbutton_autoupdate", "AutoUpdate", &prefs.AutoUpdate},
     {"checkbutton_msp", "UseMSP", &prefs.UseMSP},
     {"checkbutton_url", "ShowURL", &prefs.ShowURL},
+    {NULL, "MSPInline", &prefs.MSPInline},
+    {NULL, "MSPDownload", &prefs.MSPDownload},
     {NULL, NULL, NULL}
 };
 
@@ -355,6 +357,14 @@ static void save_prefs (GtkWidget *button, gpointer data)
 		    color_arr[i].color->blue);
     	    i++;
     	}
+
+        /* writing MSP config (booleans are in prefs_buttons[] ) */
+
+        CFGS("SoundPath", prefs.SoundPath);
+        CFGS("MusicPath", prefs.MusicPath);
+        CFGS("SoundPlayer", prefs.SoundPlayer);
+        CFGS("MusicPlayer", prefs.MusicPlayer);
+
     	fclose (fp);
     }
 
@@ -629,10 +639,11 @@ void prefs_apply_settings(GtkWidget *prefs_window)
     const char *t;
     int i = 0;
 
-    while (prefs_buttons[i].label) {
-        get_checkbutton(prefs_window, 
-                prefs_buttons[i].label, 
-                prefs_buttons[i].value);
+    while (prefs_buttons[i].config) {
+        if (prefs_buttons[i].label) // we can have prefs buttons without labels
+            get_checkbutton(prefs_window, 
+                    prefs_buttons[i].label, 
+                    prefs_buttons[i].value);
 
         i++;
     }
@@ -688,10 +699,11 @@ void window_prefs (GtkWidget *widget, gpointer data)
   GtkWidget *prefs_window = create_window_preferences();
   int i = 0;
 
-  while (prefs_buttons[i].label) {
-      set_checkbutton(prefs_window, 
-                      prefs_buttons[i].label, 
-                      *prefs_buttons[i].value);
+  while (prefs_buttons[i].config) {
+      if (prefs_buttons[i].label) // we can have prefs button without label (they are located in subwindows)
+          set_checkbutton(prefs_window, 
+                          prefs_buttons[i].label, 
+                          *prefs_buttons[i].value);
 
       i++;
   }
@@ -726,4 +738,78 @@ on_button_preferences_save_clicked     (GtkButton       *button,
     save_prefs((GtkWidget *)button, user_data);
 }
 
+static GtkWidget *msp_win = NULL;
+
+void
+on_button_msp_clicked                  (GtkButton       *button,
+                                        gpointer         user_data)
+{
+    
+    if (!msp_win)
+        if (!(msp_win = create_window_msp()))
+            return;
+
+    gtk_entry_set_text(GTK_ENTRY(
+                lookup_widget(msp_win, "entry_sound_path")),
+                prefs.SoundPath);
+
+    gtk_entry_set_text(GTK_ENTRY(
+                lookup_widget(msp_win, "entry_music_path")),
+                prefs.MusicPath);
+
+    gtk_entry_set_text(GTK_ENTRY(
+                lookup_widget(msp_win, "entry_sound_player")),
+                prefs.SoundPlayer);
+
+    gtk_entry_set_text(GTK_ENTRY(
+                lookup_widget(msp_win, "entry_music_player")),
+                prefs.MusicPlayer);
+
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+                lookup_widget(msp_win, "checkbutton_download")), prefs.MSPDownload); 
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(
+                lookup_widget(msp_win, "checkbutton_inline")), prefs.MSPInline); 
+
+    gtk_widget_show(msp_win);
+}
+
+
+void
+on_msp_ok_clicked                      (GtkButton       *button,
+                                        gpointer         user_data)
+{
+    const gchar *t;
+
+    if ((t = gtk_entry_get_text(GTK_ENTRY(
+                lookup_widget(msp_win, "entry_sound_path")))))
+        strcpy(prefs.SoundPath, t);
+
+    if ((t = gtk_entry_get_text(GTK_ENTRY(
+                lookup_widget(msp_win, "entry_music_path")))))
+        strcpy(prefs.MusicPath, t);
+
+    if ((t = gtk_entry_get_text(GTK_ENTRY(
+                lookup_widget(msp_win, "entry_sound_player")))))
+        strcpy(prefs.SoundPlayer, t);
+
+    if ((t = gtk_entry_get_text(GTK_ENTRY(
+                lookup_widget(msp_win, "entry_music_player")))))
+        strcpy(prefs.MusicPlayer, t);
+
+    prefs.MSPDownload = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+                lookup_widget(msp_win, "checkbutton_download"))); 
+    prefs.MSPInline = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(
+                lookup_widget(msp_win, "checkbutton_inline"))); 
+
+    gtk_widget_hide(msp_win);
+}
+
+gboolean
+on_msp_ko_clicked                      (GtkWidget       *widget,
+                                        GdkEvent        *event,
+                                        gpointer         user_data)
+{
+  gtk_widget_hide(msp_win);
+  return TRUE; // never destroy the window
+}
 
