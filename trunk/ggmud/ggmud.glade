@@ -6850,7 +6850,7 @@ and &lt;b&gt;zlib 1.2&lt;/b&gt; for MCCP compression.</property>
   </child>
 </widget>
 
-<widget class="GtkWindow" id="window_mcp">
+<widget class="GtkWindow" id="window_msp">
   <property name="border_width">8</property>
   <property name="visible">True</property>
   <property name="title" translatable="yes">MSP protocol settings</property>
@@ -6866,7 +6866,7 @@ and &lt;b&gt;zlib 1.2&lt;/b&gt; for MCCP compression.</property>
   <property name="gravity">GDK_GRAVITY_NORTH_WEST</property>
   <property name="focus_on_map">True</property>
   <property name="urgency_hint">False</property>
-  <signal name="delete_event" handler="on_socks_ko_clicked" last_modification_time="Wed, 18 Oct 2006 09:06:34 GMT"/>
+  <signal name="delete_event" handler="on_msp_ko_clicked" last_modification_time="Wed, 23 Apr 2008 16:25:51 GMT"/>
 
   <child>
     <widget class="GtkVBox" id="vbox31">
@@ -6901,7 +6901,7 @@ and &lt;b&gt;zlib 1.2&lt;/b&gt; for MCCP compression.</property>
 	  </child>
 
 	  <child>
-	    <widget class="GtkCheckButton" id="checkbutton_allow_download">
+	    <widget class="GtkCheckButton" id="checkbutton_download">
 	      <property name="visible">True</property>
 	      <property name="tooltip" translatable="yes">Allow GGMud to download missing sounds from remote if not available locally</property>
 	      <property name="can_focus">True</property>
@@ -7043,7 +7043,7 @@ and &lt;b&gt;zlib 1.2&lt;/b&gt; for MCCP compression.</property>
 			  <property name="can_focus">True</property>
 			  <property name="editable">True</property>
 			  <property name="visibility">True</property>
-			  <property name="max_length">0</property>
+			  <property name="max_length">255</property>
 			  <property name="text" translatable="yes"></property>
 			  <property name="has_frame">True</property>
 			  <property name="invisible_char">●</property>
@@ -7065,7 +7065,7 @@ and &lt;b&gt;zlib 1.2&lt;/b&gt; for MCCP compression.</property>
 			  <property name="can_focus">True</property>
 			  <property name="editable">True</property>
 			  <property name="visibility">True</property>
-			  <property name="max_length">0</property>
+			  <property name="max_length">127</property>
 			  <property name="text" translatable="yes"></property>
 			  <property name="has_frame">True</property>
 			  <property name="invisible_char">●</property>
@@ -7293,7 +7293,7 @@ and &lt;b&gt;zlib 1.2&lt;/b&gt; for MCCP compression.</property>
 			  <property name="can_focus">True</property>
 			  <property name="editable">True</property>
 			  <property name="visibility">True</property>
-			  <property name="max_length">0</property>
+			  <property name="max_length">255</property>
 			  <property name="text" translatable="yes"></property>
 			  <property name="has_frame">True</property>
 			  <property name="invisible_char">●</property>
@@ -7315,7 +7315,7 @@ and &lt;b&gt;zlib 1.2&lt;/b&gt; for MCCP compression.</property>
 			  <property name="can_focus">True</property>
 			  <property name="editable">True</property>
 			  <property name="visibility">True</property>
-			  <property name="max_length">0</property>
+			  <property name="max_length">127</property>
 			  <property name="text" translatable="yes"></property>
 			  <property name="has_frame">True</property>
 			  <property name="invisible_char">●</property>
@@ -7398,7 +7398,7 @@ and &lt;b&gt;zlib 1.2&lt;/b&gt; for MCCP compression.</property>
 	      <property name="use_stock">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
 	      <property name="focus_on_click">True</property>
-	      <signal name="clicked" handler="on_mcp_ok_clicked" last_modification_time="Fri, 08 Feb 2008 13:56:53 GMT"/>
+	      <signal name="clicked" handler="on_msp_ok_clicked" last_modification_time="Wed, 23 Apr 2008 16:51:58 GMT"/>
 	    </widget>
 	  </child>
 
@@ -7412,7 +7412,7 @@ and &lt;b&gt;zlib 1.2&lt;/b&gt; for MCCP compression.</property>
 	      <property name="use_stock">True</property>
 	      <property name="relief">GTK_RELIEF_NORMAL</property>
 	      <property name="focus_on_click">True</property>
-	      <signal name="clicked" handler="on_mcp_ko_clicked" last_modification_time="Fri, 08 Feb 2008 13:56:45 GMT"/>
+	      <signal name="clicked" handler="on_msp_ko_clicked" last_modification_time="Wed, 23 Apr 2008 16:52:04 GMT"/>
 	    </widget>
 	  </child>
 	</widget>

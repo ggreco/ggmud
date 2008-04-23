@@ -130,27 +130,3 @@ on_homepage_activate                   (GtkMenuItem     *menuitem,
     openurl("http://www.ggsoft.org/ggmud");
 }
 
-
-void
-on_button_msp_clicked                  (GtkButton       *button,
-                                        gpointer         user_data)
-{
-
-}
-
-
-void
-on_mcp_ok_clicked                      (GtkButton       *button,
-                                        gpointer         user_data)
-{
-
-}
-
-
-void
-on_mcp_ko_clicked                      (GtkButton       *button,
-                                        gpointer         user_data)
-{
-
-}
-

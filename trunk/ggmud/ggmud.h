@@ -116,6 +116,11 @@ struct prefs_data {
     gint AutoUpdate;
     gint UseMSP;
     char SoundPath[256];
+    char MusicPath[256];
+    char SoundPlayer[128];
+    char MusicPlayer[128];
+    gint MSPDownload;
+    gint MSPInline;
     gint ShowURL;
 };
 

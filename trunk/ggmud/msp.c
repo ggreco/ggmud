@@ -26,8 +26,10 @@ void msp_find_file (const char *file, char *dest, int sound)
   char buf[256];
   char *p = &buf[0];
   
-  strcpy (dest, prefs.SoundPath);
-  strcat (dest, sound ? "/samples/" : "/modules/");
+  strcpy (dest, sound ? prefs.SoundPath : prefs.MusicPath);
+  if (dest[strlen(dest) - 1] != '/')
+      strcat (dest, "/");
+
   strcpy (buf, file);
 
   while (*p && *p != '*') {

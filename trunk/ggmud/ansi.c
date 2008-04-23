@@ -173,42 +173,30 @@ gboolean textview_url_activate(GtkTextTag *tag,
        return FALSE;
 }
 
-const char httptag[] = "http:/";
-
 void check_for_url(GtkTextBuffer *b, int offset)
 {
-    GtkTextIter it, start;
-    int signature = 0;
+    GtkTextIter it, start, end;
 
     gtk_text_buffer_get_iter_at_offset(b, &it, offset);
 
     if (gtk_text_iter_is_end(&it))
         return;
 
-    do {
-        if (signature == 6) { // URL found, applying TAG
-            do 
-            {
-                int ch = gtk_text_iter_get_char(&it);
+    while (gtk_text_iter_forward_search(&it, "http:/", 0, &start, &end, NULL)) {
+        it = end;
+        do 
+        {
+            int ch = gtk_text_iter_get_char(&it);
 
-                if (ch == ' ' || ch == 0 ||
+            if (ch == ' ' || ch == 0 ||
                     ch < 32)
-                    break;
-            }
-            while (gtk_text_iter_forward_char(&it));
+                break;
+        }
+        while (gtk_text_iter_forward_char(&it));
 
-            gtk_text_buffer_apply_tag(b,
-                        url_tag, &start, &it);
-
-            signature = 0;
-        } else if (gtk_text_iter_get_char(&it) == httptag[signature]) {
-            if (signature == 0)
-                start = it;
-            signature++;
-        } else
-            signature = 0;
-
-    } while(gtk_text_iter_forward_char(&it));
+        gtk_text_buffer_apply_tag(b,
+                url_tag, &start, &it);
+    } 
 }
 
 /* from bezerk */
@@ -336,7 +324,7 @@ void init_colors ()
 
         url_tag = gtk_text_tag_new(NULL);
         g_object_set(url_tag, "foreground-gdk", &color_lightblue,
-                              "underline", PANGO_UNDERLINE_SINGLE,
+                              "underline", PANGO_UNDERLINE_LOW, // was UNDERLINE_SINGLE, but low is better for an URL.
                               "underline-set", TRUE, NULL);
         g_signal_connect(G_OBJECT(url_tag), "event",
                                 G_CALLBACK(textview_url_activate), NULL);
