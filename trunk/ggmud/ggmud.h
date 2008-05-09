@@ -42,6 +42,7 @@
 #define MESSAGE_SENT	4
 #define MESSAGE_TICK    5
 #define MESSAGE_LOCAL   6
+#define MESSAGE_SCROLLING_ANSI  7
 
 #ifdef WITH_LUA
 #include "lua/lua.h"
@@ -82,6 +83,12 @@ typedef struct {
 #endif
     struct connreq *conn;
     msp_control *msp;
+    // chat support
+    int chat_input;
+    int chat_socket;
+    int chat_size;
+    int chat_offset;
+    char *chat_buffer;
 } ggmud;
 
 typedef struct alias_data  ALIAS_DATA;

@@ -83,6 +83,10 @@ This program is protected under the GNU GPL (See COPYING)
 /**************************************************************************/
 
 extern void wait_command(struct session *ses, const char *arg, const char *line);
+extern void chat_command(const char *arg, struct session *ses);
+extern void chconnect_command(const char *arg,struct session *ses);
+extern void chdisconnect_command(struct session *ses);
+
 extern char lua_char;
 
 struct session *parse_input(const char *input, struct session *ses)
@@ -316,9 +320,6 @@ struct session *parse_tintin_command(const char *command, char *arg,
 
   else if(is_abbrev(command, "brokentelnet"))
     broken_telnet_command(ses);
-  
-  else if(is_abbrev(command, "char"))
-    char_command(arg, ses);
   
 
   else if(is_abbrev(command, "cr"))
@@ -611,7 +612,14 @@ struct session *parse_tintin_command(const char *command, char *arg,
 
   else if(is_abbrev(command, "walk"))
     walk_command(ses);
-
+  else if(is_abbrev(command, "chat"))
+    chat_command(arg, ses);
+  else if(is_abbrev(command, "chconnect"))
+    chconnect_command(arg, ses);
+  else if(is_abbrev(command, "chdisconnect"))
+    chdisconnect_command(ses);
+  else if(is_abbrev(command, "char"))
+    char_command(arg, ses);
   else if(is_abbrev(command, "walkback"))
     walkback_command(ses);
 

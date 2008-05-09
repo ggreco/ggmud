@@ -103,7 +103,7 @@ void set_connected(int value)
 #endif
 }
 
-static void printline(const char *str, int isaprompt)
+void printline(const char *str, int isaprompt)
 {    
     if (!isaprompt) {
         char buffer[2048];

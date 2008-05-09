@@ -807,6 +807,14 @@ void textfield_add(GtkTextView *txt, const char *message, int colortype)
         return;
     
     switch (colortype) {
+        case MESSAGE_SCROLLING_ANSI:
+            numbytes = strlen(message);
+            
+            local_disp_ansi(numbytes, message, txt);
+
+            if ((mark = gtk_object_get_user_data(GTK_OBJECT(txt))))
+                   gtk_text_view_scroll_mark_onscreen(txt, mark);
+            return;
         case MESSAGE_LOCAL:
             numbytes = strlen(message);
             
