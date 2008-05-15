@@ -98,6 +98,7 @@ $(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a lua/libluaw32.a zlib/libzw32.a http
 	$(CROSSCC) $(CROSSCFLAGS) $(WINOBJS) -o $(PROJECTNAME).exe $(CROSSLIBS)
 
 clean: 
+	$(MAKE) -C httpfetch clean
 	$(MAKE) -C tt clean
 	$(MAKE) -C lua clean
 	$(MAKE) -C zlib clean
