@@ -50,6 +50,7 @@ player *playerlist=NULL;
 #define MSG_USERNAME 'U'
 #define MSG_PASSWORD 'P'
 #define MSG_CHAT 'W'
+#define MSG_WHO 'Z'
 #define LINE_MARKER "*-*"
 
 int serversocket;
@@ -90,7 +91,7 @@ void broadcast(player *p, const char *fmt, ...)
     va_list va;
 
     va_start(va, fmt);
-    vsprintf(buffer, fmt, va);
+    vsnprintf(buffer, sizeof(buffer) - strlen(LINE_MARKER), fmt, va);
     va_end(va);
     strcat(buffer, LINE_MARKER);
     bufferlen = strlen(buffer);
@@ -138,6 +139,22 @@ void process_player(player *p)
                 if (*msg == MSG_CHAT)
                     broadcast(p, "$c0007--$c0014%s$c0007--$c0015%s" , p->playername,
                               msg + 1);
+                else if (*msg == MSG_WHO) {
+                    char buffer[4096];
+                    player *point;
+                    int idx = 0;
+
+                    strcpy(buffer, "\n$c0009Online CHAT players:\n");
+
+                    for (point = playerlist; point; point = point->next) {
+                        idx ++;
+                        sprintf(buffer + strlen(buffer),  "$c0015%s $c0007[$c0011%s$c0007]\n", 
+                                point->playername, point->hostname);
+                    }
+
+                    sprintf(buffer + strlen(buffer), "Total players: %d\n" LINE_MARKER, idx);
+                    SockWrite(p->socket, buffer, strlen(buffer));
+                }
             }
 			break;
         default:
@@ -185,6 +202,7 @@ void close_socket(player *p)
 
 	printf("Losing player %s...\n",p->playername);
 
+    shutdown(p->socket, SHUT_RD);
 	SockClose(p->socket);
 	total_players--;
 

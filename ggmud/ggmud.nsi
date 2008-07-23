@@ -73,12 +73,14 @@ SectionEnd
 Section "Start Menu Shortcuts"
 
   CreateDirectory "$SMPROGRAMS\GGMud"
+  SetOutPath "$INSTDIR\bin"
   CreateShortCut "$SMPROGRAMS\GGMud\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\bin\uninstall.exe" 0
   CreateShortCut "$SMPROGRAMS\GGMud\Launch GGMud.lnk" "$INSTDIR\bin\ggmud.exe"
   
 SectionEnd
 
 Section "Desktop Shortcut"
+  SetOutPath "$INSTDIR\bin"
   CreateShortCut "$DESKTOP\GGMud.lnk" "$INSTDIR\bin\ggmud.exe"   
 SectionEnd
 
