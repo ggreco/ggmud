@@ -37,7 +37,8 @@ read_from_chat(gpointer data, gint source, GdkInputCondition condition)
     int size = recv(mud->chat_socket, mud->chat_buffer + mud->chat_offset, mud->chat_size - mud->chat_offset - 1, 0L);
     char *line;
 
-    if (size == 0 && errno != EWOULDBLOCK) {
+    if ((size < 0 && errno != EWOULDBLOCK) ||
+         size == 0) {
         textfield_add(mud->text, "\n*** chat server closes connection...\n", MESSAGE_SENT);
         chdisconnect_command(NULL);
         return;
@@ -77,6 +78,19 @@ void chat_command(const char *arg, struct session *ses)
 }
 
 extern char *get_arg_stop_spaces(char *, char *);
+
+void chatwho_command(char *arg, struct session *ses)
+{
+    char buffer[BUFFER_SIZE];
+
+    if (!mud->chat_input) {
+        textfield_add(mud->text, "You are not connected to a chat server!\n", MESSAGE_SENT);
+        return;
+    }
+    textfield_add(mud->text, "Asking WHO command to chat server...\n", MESSAGE_SENT);
+    sprintf(buffer, "Z" LINE_MARKER, arg); 
+    send(mud->chat_socket, buffer, strlen(buffer), 0L);
+}
 
 void chconnect_command(char *arg, struct session *ses)
 {
@@ -152,18 +166,22 @@ void chconnect_command(char *arg, struct session *ses)
             return;
     }
 
-    mud->chat_input = gdk_input_add(sockfd, GDK_INPUT_READ,
-                                    read_from_chat,
-                                    ses );
+    sprintf(buffer, "U%s" LINE_MARKER "P%s" LINE_MARKER, user, pwd);
+    send(sockfd, buffer, strlen(buffer), 0L);
+
+    textfield_add(mud->text, "** Connected to chat server **\n\n", MESSAGE_SENT);
+
+    while(gtk_events_pending())
+        gtk_main_iteration();
+
     mud->chat_socket = sockfd;
     mud->chat_buffer = malloc(BUFFER_SIZE);
     mud->chat_offset = 0;
     mud->chat_size = BUFFER_SIZE;
-    textfield_add(mud->text, "** Connected to chat server **\n\n", MESSAGE_SENT);
-
+    mud->chat_input = gdk_input_add(sockfd, GDK_INPUT_READ,
+                                    read_from_chat,
+                                    ses );
     // sending initialization...
-    sprintf(buffer, "U%s" LINE_MARKER "P%s" LINE_MARKER, user, pwd);
-    send(sockfd, buffer, strlen(buffer), 0L);
 }
 
 

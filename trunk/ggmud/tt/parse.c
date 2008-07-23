@@ -84,6 +84,7 @@ This program is protected under the GNU GPL (See COPYING)
 
 extern void wait_command(struct session *ses, const char *arg, const char *line);
 extern void chat_command(const char *arg, struct session *ses);
+extern void chatwho_command(const char *arg, struct session *ses);
 extern void chconnect_command(const char *arg,struct session *ses);
 extern void chdisconnect_command(struct session *ses);
 
@@ -614,6 +615,8 @@ struct session *parse_tintin_command(const char *command, char *arg,
     walk_command(ses);
   else if(is_abbrev(command, "chat"))
     chat_command(arg, ses);
+  else if(is_abbrev(command, "chatwho"))
+    chatwho_command(arg, ses);
   else if(is_abbrev(command, "chconnect"))
     chconnect_command(arg, ses);
   else if(is_abbrev(command, "chdisconnect"))
