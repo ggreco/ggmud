@@ -202,7 +202,6 @@ void close_socket(player *p)
 
 	printf("Losing player %s...\n",p->playername);
 
-    shutdown(p->socket, SHUT_RD);
 	SockClose(p->socket);
 	total_players--;
 

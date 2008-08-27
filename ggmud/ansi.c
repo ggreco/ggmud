@@ -188,8 +188,8 @@ void check_for_url(GtkTextBuffer *b, int offset)
         {
             int ch = gtk_text_iter_get_char(&it);
 
-            if (ch == ' ' || ch == 0 ||
-                    ch < 32)
+            if (ch == ' '  || ch == 0 || 
+                ch == '\'' || ch < 32)
                 break;
         }
         while (gtk_text_iter_forward_char(&it));
