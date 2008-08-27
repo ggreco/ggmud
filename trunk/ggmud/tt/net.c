@@ -137,6 +137,8 @@ int connect_mud(const char *host, const char *port, struct session *ses)
 #endif
   alarm(30);         /* We'll allow connect to hang in 15seconds! NO MORE! */
 
+  errno = 0;
+
   connectresult = connect(sock, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
 
   alarm(0);
@@ -178,6 +180,8 @@ int read_buffer_mud(char *buffer, struct session *ses)
   int i, didget;
   char tmpbuf[BUFFER_SIZE], *cpsource, *cpdest;
   tmpbuf[0] = '\0';
+  errno = 0;
+
   didget = recv(ses->socket, tmpbuf, 512, 0);
   ses->old_more_coming = ses->more_coming;
   ses->more_coming = (didget == 512 ? 1 : 0);
@@ -297,12 +301,15 @@ int read_buffer_mud(char *buffer, struct session *ses)
     char *mccp_buffer;
 #endif
 
+    errno = 0;
+
     didget = recv(ses->socket, tmpbuf, INPUT_CHUNK, 0);
 
     if (didget < 0)
         return -1;
-    else if (didget == 0 && errno == EWOULDBLOCK)
+    else if (didget == 0 && errno == EWOULDBLOCK) {
         return 0;
+    }
     else if (didget == 0)
         return -666;
 
