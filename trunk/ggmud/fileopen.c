@@ -35,6 +35,8 @@
 #define mkdir(a,b) _mkdir(a)
 #endif
 
+extern int home_is_program_dir;
+
 int check_ggmud_dir (gchar *dirname, int silent) {
 /* check if the specified directory exists, try to create it if it doesn't */
     struct stat file_stat;
@@ -112,14 +114,19 @@ migrate_config(const char *dest_path, ...)
 
 FILE *fileopen (gchar *fname, gchar *mode) {
 /* Does all necessary checks and tries to open the specified file */
-    FILE *fp;
     gchar path[256] = "";
-    gchar *home;
+    const gchar *home = NULL;
+
 #ifndef WIN32
     gchar *dir = "/.ggmud";
 
     home = getenv ("HOME");
-    g_snprintf (path, sizeof(path), "%s%s", home!= NULL ? home : "", dir);
+
+    if (!home_is_program_dir)
+        g_snprintf (path, sizeof(path), "%s%s", home!= NULL ? home : "", dir);
+    else
+        strcpy(path, ".");
+
     if (check_ggmud_dir(path, 0)) return NULL;
 #else
     static int check_migration = 0;
@@ -152,7 +159,10 @@ FILE *fileopen (gchar *fname, gchar *mode) {
         strcpy(path, ".");
     }
 #endif
-    g_snprintf (path, sizeof(path), "%s%s/%s", home!= NULL ? home : "", dir, fname);
-    fp = fopen (path, mode);
-    return fp;
+    if (home_is_program_dir)
+        g_snprintf (path, sizeof(path), "./%s", fname);
+    else
+        g_snprintf (path, sizeof(path), "%s%s/%s", home!= NULL ? home : "", dir, fname);
+
+    return fopen (path, mode);
 }

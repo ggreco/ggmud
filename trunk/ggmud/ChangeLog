@@ -7,6 +7,9 @@
 	- Fixed crash with MCCP in certain situations.
 	- Added URL detection in output window, URLs will be underlined
 	  and clickable if you enable this.
+	- Implemented command line switch "-nohome" to tell GGMud to use
+	  the program directory to save his config files, this is useful
+	  to be able to have a "portable" GGMud on a USB stick.
 
 0.8.0:
 	- Added button support:

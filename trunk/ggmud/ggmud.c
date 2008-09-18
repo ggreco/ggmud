@@ -29,6 +29,8 @@
 ggmud *mud;
 extern void load_win_pos();
 
+int home_is_program_dir = 0;
+
 gint snoop_keys (GtkWidget *grab_widget,
                  GdkEventKey *event,
                  gpointer mud)
@@ -84,7 +86,10 @@ int main(int argc, char **argv)
     gtk_set_locale ();
     gtk_init (&argc, &argv);
     gdk_init (&argc, &argv);
- 
+
+    if (argc >= 2 && !strcmp(argv[1], "-nohome"))
+        home_is_program_dir = 1;
+
 // this code set the ggmud path in a way you can find the help file
 #ifdef linux
     {
@@ -182,7 +187,7 @@ int main(int argc, char **argv)
     if (prefs.AutoUpdate) {
         g_thread_init(NULL);
 
-        g_thread_create(check_for_updates, NULL, FALSE, NULL);
+        g_thread_create((GThreadFunc)check_for_updates, NULL, FALSE, NULL);
     }
 
     gtk_window_present(GTK_WINDOW(mud->window));
