@@ -1,4 +1,4 @@
-CROSSDIR = /usr/local/cross-gcc33/i386-mingw32msvc/
+CROSSDIR ?= /usr/i586-mingw32msvc/
 CROSSCC = $(CROSSDIR)/bin/gcc
 CROSSAR = $(CROSSDIR)/bin/ar
 CROSSRANLIB = $(CROSSDIR)/bin/ranlib

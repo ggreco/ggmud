@@ -1,4 +1,6 @@
-CROSSDIR = /usr/local/cross-gcc33/i386-mingw32msvc/
+CROSSDIR = /usr/i586-mingw32msvc/
+export CROSSDIR
+
 CROSSCC = $(CROSSDIR)/bin/gcc
 DEBUGFLAG ?= -g
 GLOBAL_CFLAGS = $(DEBUGFLAG) -DTELNET_SUPPORT -Wall -DWITH_LUA -DENABLE_MCCP -I../zlib 
@@ -30,15 +32,15 @@ OBJS = $(patsubst %.c, $(OBJDIR)%.o, $(C_SRCS))
 
 WINOBJS = $(OBJDIR)icon.w $(patsubst %.c, $(OBJDIR)%.w, $(C_SRCS))
 
-CROSSCFLAGS = $(INCDIR) -I$(CROSSDIR)/include/glib-2.0  \
-            -I$(CROSSDIR)/lib/glib-2.0/include/ \
+CROSSCFLAGS = $(INCDIR) -I$(CROSSDIR)/include/gtk-2.0/glib-2.0  \
+            -I$(CROSSDIR)/lib/gtk2/glib-2.0/include/  -I$(CROSSDIR)/include/cairo\
 			-I$(CROSSDIR)/include/gtk-2.0 -I$(CROSSDIR)/include/atk-1.0 \
             -I$(CROSSDIR)/include/pango-1.0 -I$(CROSSDIR)/lib/gtk-2.0/include \
             -mwindows -mno-cygwin -mms-bitfields $(GLOBAL_CFLAGS)
 
 # -fnative-struct corrispondente di -mms-bifields nel vecchio mingw32 -s
 
-CROSSLIBS = -s -Ltt -Llua -Lzlib -Lhttpfetch -lttw32 -lluaw32 -lzw32 -lfetchw32 \
+CROSSLIBS = -s -L$(CROSSDIR)/lib/gtk-2.0 -Ltt -Llua -Lzlib -Lhttpfetch -lttw32 -lluaw32 -lzw32 -lfetchw32 \
 			-lgtk-win32-2.0.dll -lgdk-win32-2.0.dll \
             -latk-1.0.dll -lgdk_pixbuf-2.0.dll -lpango-1.0.dll -lpangowin32-1.0.dll \
             -lgmodule-2.0.dll -lgobject-2.0.dll -lgthread-2.0.dll -lglib-2.0.dll \
@@ -61,7 +63,7 @@ $(OBJDIR)%.w: %.c
 	$(CROSSCC) $(CROSSCFLAGS) -o $@ -c $<
 
 $(OBJDIR)icon.w: icon.rc icon.ico
-	$(CROSSDIR)/../bin/i386-mingw32msvc-windres $< $@
+	$(CROSSDIR)/bin/windres $< $@
 
 tt/libtt.a: tt/*.c
 	$(MAKE) -C tt 
