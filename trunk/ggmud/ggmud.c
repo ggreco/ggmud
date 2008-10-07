@@ -25,24 +25,90 @@
 #include <time.h>
 #include <string.h>
 #include <signal.h>
+#include <gdk/gdkkeysyms.h>
+#include "support.h"
 
 ggmud *mud;
 extern void load_win_pos();
 
 int home_is_program_dir = 0;
 
+static GdkEvent* synthesize_gdk_event(GdkEventType evtType, GtkWidget *widget, guint 
+keyVal)
+{
+        static GdkEventKey evt;
+        GdkKeymapKey *keys;
+        gint n_keys;
+
+        if (gdk_keymap_get_entries_for_keyval (gdk_keymap_get_default (),
+                                keyVal, &keys, &n_keys))
+        {
+                evt.window = widget->parent->window;
+                evt.type = evtType;
+                evt.hardware_keycode = keys[0].keycode;
+                evt.state = 16;
+                evt.group = keys[0].group;
+                evt.keyval = keyVal;
+                evt.string = "";
+                evt.length = 0;
+                /* the rest are no-ops */
+                evt.send_event = FALSE;   /* seems unused except for dnd */
+                evt.time = GDK_CURRENT_TIME;
+
+                g_free (keys);
+        }
+
+        return (GdkEvent *) &evt;
+}
+
 gint snoop_keys (GtkWidget *grab_widget,
                  GdkEventKey *event,
-                 gpointer mud)
+                 ggmud *mud)
 {
    extern gint capture_enabled;
 
-   if (event->type == GDK_KEY_PRESS && !capture_enabled) {
+   if (capture_enabled)
+       return FALSE;
+
+   if (event->type == GDK_KEY_RELEASE) {
+
+       if (event->keyval == GDK_Page_Up || event->keyval == GDK_Page_Down) {
+           if (mud && mud->review && GTK_WIDGET_VISIBLE(mud->review)) {
+               GdkRectangle rect;
+               GtkTextIter iter;
+               GtkTextView *tv = GTK_TEXT_VIEW(GTK_BIN(mud->review)->child);
+
+               if (!tv)
+                   return FALSE;
+
+               gtk_text_view_get_visible_rect(tv, &rect);
+
+               if (event->keyval == GDK_Page_Up) {
+                   int pos = rect.y - rect.height;
+                   if (pos < 0) pos = 0;
+
+                   gtk_text_view_get_line_at_y(tv, &iter, pos, NULL);
+               }
+               else
+                   gtk_text_view_get_line_at_y(tv, &iter, rect.y + rect.height, NULL);
+               
+               gtk_text_view_scroll_to_iter(tv, &iter, 0.0, TRUE, 0.0, 0.0);
+           }
+           else  {
+               GtkWidget *review_toggle = lookup_widget(mud->window, "togglebutton_review");
+
+               gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (review_toggle), TRUE);
+               gtk_widget_show(mud->review);
+           }
+
+           return TRUE;
+       }
+   }
+   else if (event->type == GDK_KEY_PRESS) 
        return check_macro(event->state , 
                gdk_keyval_to_upper(event->keyval));
-   }
-   else
-       return FALSE;
+
+   return FALSE;
 }
 
 #ifdef linux
@@ -191,7 +257,7 @@ int main(int argc, char **argv)
     }
 
     gtk_window_present(GTK_WINDOW(mud->window));
-    gtk_key_snooper_install(snoop_keys, mud);
+    gtk_key_snooper_install((GtkKeySnoopFunc)snoop_keys, mud);
     gtk_main();
 	
     return 0;
