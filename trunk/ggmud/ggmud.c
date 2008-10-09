@@ -33,47 +33,19 @@ extern void load_win_pos();
 
 int home_is_program_dir = 0;
 
-static GdkEvent* synthesize_gdk_event(GdkEventType evtType, GtkWidget *widget, guint 
-keyVal)
-{
-        static GdkEventKey evt;
-        GdkKeymapKey *keys;
-        gint n_keys;
-
-        if (gdk_keymap_get_entries_for_keyval (gdk_keymap_get_default (),
-                                keyVal, &keys, &n_keys))
-        {
-                evt.window = widget->parent->window;
-                evt.type = evtType;
-                evt.hardware_keycode = keys[0].keycode;
-                evt.state = 16;
-                evt.group = keys[0].group;
-                evt.keyval = keyVal;
-                evt.string = "";
-                evt.length = 0;
-                /* the rest are no-ops */
-                evt.send_event = FALSE;   /* seems unused except for dnd */
-                evt.time = GDK_CURRENT_TIME;
-
-                g_free (keys);
-        }
-
-        return (GdkEvent *) &evt;
-}
-
 gint snoop_keys (GtkWidget *grab_widget,
                  GdkEventKey *event,
                  ggmud *mud)
 {
    extern gint capture_enabled;
 
-   if (capture_enabled)
+   if (capture_enabled || !mud)
        return FALSE;
 
-   if (event->type == GDK_KEY_RELEASE) {
-
+   if (event->type == GDK_KEY_PRESS) {
+       // handle pageup/down to show/move review buffer, thanks to  Ingo Gambin for the idea & debug
        if (event->keyval == GDK_Page_Up || event->keyval == GDK_Page_Down) {
-           if (mud && mud->review && GTK_WIDGET_VISIBLE(mud->review)) {
+           if (mud->review && GTK_WIDGET_VISIBLE(mud->review)) {
                GdkRectangle rect;
                GtkTextIter iter;
                GtkTextView *tv = GTK_TEXT_VIEW(GTK_BIN(mud->review)->child);
@@ -102,11 +74,11 @@ gint snoop_keys (GtkWidget *grab_widget,
            }
 
            return TRUE;
-       }
+       } // handle ordinary macro keys
+       else if (event->type == GDK_KEY_PRESS) 
+           return check_macro(event->state , 
+                   gdk_keyval_to_upper(event->keyval));
    }
-   else if (event->type == GDK_KEY_PRESS) 
-       return check_macro(event->state , 
-               gdk_keyval_to_upper(event->keyval));
 
    return FALSE;
 }

@@ -232,6 +232,7 @@ void
 connection_part_two(int sockfd, struct tempdata *mystr)
 {
     int onoff = 0;
+    int sz = 0x10000;
 
     ioctl(sockfd, FIONBIO, (char *)&onoff);
 
@@ -262,6 +263,11 @@ connection_part_two(int sockfd, struct tempdata *mystr)
 
     if ((mud->activesession = new_session(mystr->name, mystr->hostport, mud->activesession)))
         mud->activesession->socket = sockfd;
+
+    onoff = 1;
+
+    ioctl(sockfd, FIONBIO, (char *)&onoff);
+    setsockopt(sockfd, SOL_SOCKET, SO_SNDBUF, (char *)&sz, sizeof(sz));
 
     mud->input_monitor = gdk_input_add (sockfd, GDK_INPUT_READ,
             read_from_connection,
@@ -621,24 +627,40 @@ void read_from_connection (gpointer data, gint source, GdkInputCondition conditi
 
 void send_to_connection (GtkWidget *widget, gpointer data)
 {
-    char buffer[2048];
     const gchar *entry_text;
+    char *buffer, *b, *bnext;
     // GtkAdjustment *adj = mud->text->vadjustment;
 
     entry_text = gtk_entry_get_text (mud->ent);
 
 
+    int len = strlen(entry_text);
+    len *= 2; // to be sure
+    if (len < 4096)
+        len = 4096;
+
+    buffer = malloc(len);
     strcpy(buffer, entry_text);
-    
-    mud->activesession = parse_input(buffer, mud->activesession); // can change active session
+
+    b = buffer;
+
+    do {
+        if ((bnext = strchr(b, '\n'))) {
+            *bnext = 0;
+            bnext++;
+        }
+
+        if (!*b && !bnext)
+            break;
+
+        mud->activesession = parse_input(b, mud->activesession); // can change active session
+
+        b = bnext;
+    } while (b != NULL);
+
+    free(buffer);
     hist_add(entry_text);
 
-#if 0 
-    if(adj->value < (adj->upper - adj->page_size))
-        gtk_adjustment_set_value(adj, (adj->upper - adj->page_size));
-#endif
-
-    //textfield_add ( "\n", MESSAGE_NONE);
     if ( prefs.KeepText && !hide_input)
         gtk_entry_select_region (mud->ent, 0,
                 mud->ent->text_length);
@@ -661,38 +683,51 @@ void connection_send (gchar *message)
 
 void write_line_mud(const char *line, struct session *ses)
 {
-  char outtext[BUFFER_SIZE+2];
   extern int broken_telnet;
+  const char *tosend = line;
 
   if (!ZOMBI_IS_ALIVE(ses))  /* Fixed. Connection test -- ycjhi */
     return ;
+   
+  int len = strlen(line);
 
-  sprintf(outtext, "%s", line);
+  while (len > 0) {
+      int l = send(ses->socket, tosend, len, 0);
+
+      if(l == -1) {
+          if (errno != EAGAIN && errno != EWOULDBLOCK) {
+              char *e = strerror(errno);
+
+              if (!e)
+                  e = "<UNKNOWN>";
+
+              popup_window(INFO, "Connection aborted\nError: %s (%d)", e, errno);
+              disconnect();
+
+              return;
+          }
+          else 
+              g_usleep(20000);
+      }
+      else {
+          len -= l;
+          tosend += l;
+
+          if (len > 0) 
+              g_usleep(20000);         
+      }
+  }
   /* lost this fix somehow.  It appears that I lost it during
      1.81 Might have lost it when I intergrated the zombie
      code -- DSC */
   if (broken_telnet)
-    strcat(outtext, "\n");
+    send(ses->socket, "\n", 1, 0);
   else
-    strcat(outtext, "\r\n");
-    
-  if(send(ses->socket, outtext, strlen(outtext), 0) == -1) {
-      char *e = strerror(errno);
+    send(ses->socket, "\r\n", 2, 0);
 
-      if (!e)
-          e = "<UNKNOWN>";
-
-      popup_window(INFO, "Connection aborted\nError: %s (%d)", e, errno);
-      disconnect();
-
-      return;
-  }
-
-  if(prefs.EchoText && !hide_input) {
-      if(!broken_telnet) // remove the "\r"
-          strcpy(outtext + strlen(outtext) - 2, "\n");
-
-      textfield_add(mud->text, outtext, MESSAGE_SENT);
+  if(prefs.EchoText && !hide_input) { 
+      textfield_add(mud->text, line, MESSAGE_SENT);
+      textfield_add(mud->text, "\n", MESSAGE_SENT);
   }
 }
 

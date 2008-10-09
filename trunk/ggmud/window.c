@@ -933,14 +933,6 @@ GtkWidget *create_tv(GtkTextBuffer *buffer, GtkTextView **view)
     return sw;
 }
 
-gboolean eat_pageupdown(GtkWidget   *widget,
-                        GdkEventKey *event,
-                        gpointer     user_data) 
-{
-    // remove usual pageup/down handling
-    return (event->keyval == GDK_Page_Up || event->keyval == GDK_Page_Down);
-}
-
 GtkTextView *new_view(char *name, GtkWidget *parent, int ismain)
 {
     GtkWidget *paned, *sw, *sw2;
@@ -980,11 +972,6 @@ GtkTextView *new_view(char *name, GtkWidget *parent, int ismain)
 
     if (ismain) 
         mud->review = sw;
-
-    g_signal_connect(sw2, "key-press-event", (GCallback)eat_pageupdown, NULL);
-    g_signal_connect(t2, "key-press-event", (GCallback)eat_pageupdown, NULL);
-    g_signal_connect(sw2, "key-release-event", (GCallback)eat_pageupdown, NULL);
-    g_signal_connect(t2, "key-release-event", (GCallback)eat_pageupdown, NULL);
 
     return (GtkTextView *)t2;
 }
