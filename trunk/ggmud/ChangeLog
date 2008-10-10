@@ -1,4 +1,8 @@
 0.8.1:
+	- Implemented ZMud like review buffer activation and navigation
+	  with PGUP/DOWN.
+	- Now it's possible to send LARGE quantities of text to the 
+	  mud through cut&paste without crashing it.
 	- New autoupdate function, will ask for the latest version from
 	  a support site, this one will open the download page in your
 	  browser if you choose to update.

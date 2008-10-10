@@ -67,15 +67,17 @@ gint snoop_keys (GtkWidget *grab_widget,
                gtk_text_view_scroll_to_iter(tv, &iter, 0.0, TRUE, 0.0, 0.0);
            }
            else  {
+               GtkTextMark *mark = gtk_object_get_user_data(GTK_OBJECT(mud->text));               
                GtkWidget *review_toggle = lookup_widget(mud->window, "togglebutton_review");
 
                gtk_toggle_button_set_state (GTK_TOGGLE_BUTTON (review_toggle), TRUE);
                gtk_widget_show(mud->review);
+               gtk_text_view_scroll_mark_onscreen(GTK_TEXT_VIEW(GTK_BIN(mud->review)->child), mark);
            }
 
            return TRUE;
        } // handle ordinary macro keys
-       else if (event->type == GDK_KEY_PRESS) 
+       else 
            return check_macro(event->state , 
                    gdk_keyval_to_upper(event->keyval));
    }
