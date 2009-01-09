@@ -227,6 +227,8 @@ const char *call_luafunction(const char *string)
             string++;
 
         while (*string && *string != ')') {
+            int quoted = 0;
+
             if (*string == ',')
                 string++;
 
@@ -234,9 +236,27 @@ const char *call_luafunction(const char *string)
 
             while (*string == ' ')
                 string++;
-            
-            while (*string != ',' && *string != ')')
-                arg[i++] = *string++;
+           
+            if (*string == '\"' || *string == '{')
+                quoted = *string++;
+
+            while (quoted || (*string != ',' && *string != ')')) {
+                if (!*string) {
+                    char buffer[1024];
+                    sprintf(buffer, "Error in lua function %s args formatting!\n", name);
+                    textfield_add(mud->text, buffer, MESSAGE_ERR);
+                    return string;
+                }
+                if (quoted &&
+                    ( (quoted == '\"' && *string == '\"') ||
+                      (quoted == '{' && *string == '}')) ) {
+                    string++;
+                    quoted = 0;
+                }
+                else
+                    arg[i++] = *string++;
+
+            }
 
             arg[i] = 0;
 
