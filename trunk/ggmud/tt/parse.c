@@ -484,7 +484,8 @@ struct session *parse_tintin_command(const char *command, char *arg,
 
   else if(is_abbrev(command, "tries"))
     number_of_tries(arg, ses);
-
+  else if(is_abbrev(command, "grep")) 
+      do_grep(arg, ses);
   else if(is_abbrev(command, "gag")) {
     if(*arg != '{') {
       sprintf(buf, "%s", arg);

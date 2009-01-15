@@ -401,6 +401,38 @@ void mess_command(char *arg, struct session *s)
     popup_window(INFO, right);
 }
 
+void do_grep(char *arg, struct session *s)
+{
+    GtkTextIter start, end;
+    GtkTextBuffer *b = gtk_text_view_get_buffer(mud->text);
+    int i, lines = gtk_text_buffer_get_line_count(b), allocation = 1024;
+    gchar *text;
+    char *result = malloc(allocation);
+
+    snprintf(result, allocation, "\nSearching for <%s>...\n", arg);
+    textfield_add(mud->text, result, MESSAGE_SENT);
+    *result = 0;
+
+    for (i = 0; i < lines; ++i) {
+        gtk_text_buffer_get_iter_at_line(b, &start, i);
+        gtk_text_buffer_get_iter_at_line(b, &end, i + 1);
+        if ((text = gtk_text_buffer_get_text(b, &start, &end, FALSE))) {
+            if (strstr(text, arg)) {
+                int len = strlen(result);
+                snprintf(result + len, allocation - len, "Line %d: %s", i + 1, text);
+
+                if (strlen(result) > (allocation * 2 / 3)) {
+                    allocation *= 2;
+                    result = realloc(result, allocation);
+                }
+            }
+            g_free(text);
+        }
+    }
+    strcat(result, "\n");
+    textfield_add(mud->text, result , MESSAGE_SENT);
+}
+
 void window_command(char *arg, struct session *s)
 {
     extern char *get_arg_in_braces(char *s, char *arg, int flag);
