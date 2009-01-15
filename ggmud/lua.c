@@ -237,7 +237,7 @@ const char *call_luafunction(const char *string)
             while (*string == ' ')
                 string++;
            
-            if (*string == '\"' || *string == '{')
+            if (*string == '\"' || *string == '[')
                 quoted = *string++;
 
             while (quoted || (*string != ',' && *string != ')')) {
@@ -249,7 +249,7 @@ const char *call_luafunction(const char *string)
                 }
                 if (quoted &&
                     ( (quoted == '\"' && *string == '\"') ||
-                      (quoted == '{' && *string == '}')) ) {
+                      (quoted == '[' && *string == ']')) ) {
                     string++;
                     quoted = 0;
                 }

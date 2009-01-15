@@ -64,6 +64,6 @@ extern void mess_command(char *, struct session *);
 extern void window_command(char *, struct session *);
 extern void hbutton_command(char *, struct session *);
 extern void vbutton_command(char *, struct session *);
-
+extern void do_grep(char *, struct session *);
 #endif
 

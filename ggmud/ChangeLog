@@ -1,5 +1,7 @@
 0.8.1:
-	- Now you can specify double quotes or brackets ( "" or {} ) 
+	- Added #grep command to search for strings in your review
+	  buffer.
+	- Now you can specify double quotes or brackets ( "" or [] ) 
 	  around arguments for lua funcions, this allows you to pass
 	  strings containing the , and ) character.
 	- Implemented ZMud like review buffer activation and navigation
