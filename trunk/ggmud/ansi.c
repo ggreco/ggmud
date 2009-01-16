@@ -526,7 +526,7 @@ void local_disp_ansi(int size, const char *in, GtkTextView *target)
     char ansibuffer[32];
     GtkTextBuffer *tbuff = gtk_text_view_get_buffer(target);
     GtkTextIter iter;
-    int n = 0, start;
+    int n = 0, start = 0;
 
     gtk_text_buffer_get_end_iter(tbuff, &iter);
 
@@ -583,7 +583,7 @@ void disp_ansi(int size, const char *in, GtkTextView *target)
     static char ansibuffer[32];
     GtkTextBuffer *tbuff = gtk_text_view_get_buffer(target);
     GtkTextIter iter;
-    int start;
+    int start = 0;
     int n = 0;
 
 
