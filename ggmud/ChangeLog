@@ -1,3 +1,8 @@
+0.9.0:
+	- sqlite3 integrated.
+	- LUA now supports SQL through SQLite3 and the official luasql
+	  interface (http://www.keplerproject.org/luasql/)
+
 0.8.1:
 	- Added #grep command to search for strings in your review
 	  buffer.

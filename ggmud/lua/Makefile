@@ -8,7 +8,7 @@
 PLAT= none
 
 CC ?= gcc
-CFLAGS= -O2 -Wall $(MYCFLAGS)
+CFLAGS= -O2 -Wall $(MYCFLAGS) -I../sq3
 AR= ar rcu
 RANLIB= ranlib
 RM= rm -f
@@ -27,7 +27,7 @@ CORE_O=	lapi.o lcode.o ldebug.o ldo.o ldump.o lfunc.o lgc.o llex.o lmem.o \
 	lobject.o lopcodes.o lparser.o lstate.o lstring.o ltable.o ltm.o  \
 	lundump.o lvm.o lzio.o
 LIB_O=	lauxlib.o lbaselib.o ldblib.o liolib.o lmathlib.o loslib.o ltablib.o \
-	lstrlib.o loadlib.o linit.o
+	lstrlib.o loadlib.o linit.o luasql.o ls_sqlite3.o
 
 LUA_T=	lua
 LUA_O=	lua.o
@@ -96,7 +96,7 @@ linux:
 	$(MAKE) all MYCFLAGS=-DLUA_USE_LINUX MYLIBS="-Wl,-E -ldl -lncurses"
 
 linux-lua:
-	$(MAKE) lua MYCFLAGS=-DLUA_USE_LINUX MYLIBS="-Wl,-E -ldl -lncurses"
+	$(MAKE) lua MYCFLAGS=-DLUA_USE_LINUX MYLIBS="-L../sq3 -lsq3 -Wl,-E -ldl -lncurses"
 
 macosx:
 	$(MAKE) all MYCFLAGS=-DLUA_USE_MACOSX
