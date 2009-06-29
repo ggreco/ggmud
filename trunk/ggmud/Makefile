@@ -7,8 +7,8 @@ GLOBAL_CFLAGS = $(DEBUGFLAG) -DTELNET_SUPPORT -Wall -DWITH_LUA -DENABLE_MCCP -I.
 OBJDIR = obj/
 CC ?= gcc
 CXX ?= g++
-INCDIR = -Itt -Ilua -Izlib -Ihttpfetch
-COMMONLIBS = -Ltt -ltt -Llua -llua -Lzlib -lzlib -Lhttpfetch -lfetch
+INCDIR = -Itt -Ilua -Izlib -Ihttpfetch -Isq3
+COMMONLIBS = -Ltt -ltt -Llua -llua -Lzlib -lzlib -Lhttpfetch -lfetch -Lsq3 -lsq3
 CFLAGS = $(INCDIR) `pkg-config gtk+-2.0 --cflags` $(GLOBAL_CFLAGS) -DENABLE_BINRELOC -DBR_PTHREADS=0  
 LIBS = $(COMMONLIBS) `pkg-config gtk+-2.0 gthread-2.0 --libs`
 
@@ -40,7 +40,7 @@ CROSSCFLAGS = $(INCDIR) -I$(CROSSDIR)/include/gtk-2.0/glib-2.0  \
 
 # -fnative-struct corrispondente di -mms-bifields nel vecchio mingw32 -s
 
-CROSSLIBS = -s -L$(CROSSDIR)/lib/gtk-2.0 -Ltt -Llua -Lzlib -Lhttpfetch -lttw32 -lluaw32 -lzw32 -lfetchw32 \
+CROSSLIBS = -s -L$(CROSSDIR)/lib/gtk-2.0 -Ltt -Llua -Lzlib -Lhttpfetch -lttw32 -lluaw32 -lzw32 -lfetchw32 -Lsq3 -lsq3 \
 			-lgtk-win32-2.0.dll -lgdk-win32-2.0.dll \
             -latk-1.0.dll -lgdk_pixbuf-2.0.dll -lpango-1.0.dll -lpangowin32-1.0.dll \
             -lgmodule-2.0.dll -lgobject-2.0.dll -lgthread-2.0.dll -lglib-2.0.dll \
@@ -64,6 +64,12 @@ $(OBJDIR)%.w: %.c
 
 $(OBJDIR)icon.w: icon.rc icon.ico
 	$(CROSSDIR)/bin/windres $< $@
+
+sq3/libsq3.a: sq3/*c
+	$(MAKE) -C sq3
+
+sq3/libsq3w32.a: sq3/*c
+	$(MAKE) -C sq3 win32
 
 tt/libtt.a: tt/*.c
 	$(MAKE) -C tt 
@@ -89,14 +95,14 @@ lua/liblua.a:
 lua/libluaw32.a: lua/*c
 	$(MAKE) -C lua clean
 	$(MAKE) -C lua "LUA_A=libluaw32.a" "LUA_T=lua.exe" \
-	"CC=$(CROSSDIR)bin/gcc" "MYCFLAGS=-mno-cygwin -mms-bitfields" "RANLIB=$(CROSSDIR)/bin/ranlib" \
+	"CC=$(CROSSDIR)bin/gcc" "MYCFLAGS=-I../sq3 -mno-cygwin -mms-bitfields" "RANLIB=$(CROSSDIR)/bin/ranlib" \
     "AR=$(CROSSDIR)bin/ar rcu" "MYLIBS=" "MYLDFLAGS=-s" lua.exe
 
-$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libzlib.a httpfetch/libfetch.a
+$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libzlib.a httpfetch/libfetch.a sq3/libsq3.a
 	$(CC) $(OBJS) -o $(PROJECTNAME) $(LIBS) --as-needed
 	echo -n >ggmud.version "$(VERSION)"
 
-$(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a lua/libluaw32.a zlib/libzw32.a httpfetch/libfetchw32.a
+$(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a lua/libluaw32.a zlib/libzw32.a httpfetch/libfetchw32.a sq3/libsq3w32.a
 	$(CROSSCC) $(CROSSCFLAGS) $(WINOBJS) -o $(PROJECTNAME).exe $(CROSSLIBS)
 
 clean: 
