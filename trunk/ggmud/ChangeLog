@@ -2,6 +2,16 @@
 	- sqlite3 integrated.
 	- LUA now supports SQL through SQLite3 and the official luasql
 	  interface (http://www.keplerproject.org/luasql/)
+	- Added new panel for adding/editing/removing substitutions.
+	- Variables can now be removed from gui.
+	- Now after you click a button the focus will be moved on 
+	  the input line (and not on the button) and the input line
+	  if not empty will be selected.
+	- Improved #grep behaviour to avoid results relative to previous
+	  searches.
+	- Improved #message command, now the first parameter must be
+	  one of info, warning, error (case insensitive) and it determines
+	  the icon to use for the (not modal) popup.
 
 0.8.1:
 	- Added #grep command to search for strings in your review

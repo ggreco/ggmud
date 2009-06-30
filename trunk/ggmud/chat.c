@@ -88,7 +88,7 @@ void chatwho_command(char *arg, struct session *ses)
         return;
     }
     textfield_add(mud->text, "Asking WHO command to chat server...\n", MESSAGE_SENT);
-    sprintf(buffer, "Z" LINE_MARKER, arg); 
+    sprintf(buffer, "Z" LINE_MARKER); 
     send(mud->chat_socket, buffer, strlen(buffer), 0L);
 }
 

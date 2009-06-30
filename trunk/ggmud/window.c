@@ -387,7 +387,8 @@ save_review(void)
 
 void mess_command(char *arg, struct session *s)
 {
-    char left[BUFFER_SIZE], right[BUFFER_SIZE];
+    char left[BUFFER_SIZE], right[BUFFER_SIZE],
+         temp[BUFFER_SIZE];
 
     arg = get_arg_in_braces(arg, left, 0);
     arg = get_arg_in_braces(arg, right, 1);
@@ -395,10 +396,15 @@ void mess_command(char *arg, struct session *s)
     if(!*left || !*right)
         return;
    
-    substitute_myvars(right, left, s);
-    substitute_vars(left, right);
+    substitute_myvars(right, temp, s);
+    substitute_vars(temp, right);
 
-    popup_window(INFO, right);
+    if (!strcasecmp(left, "error"))
+        popup_window(ERR, right);
+    else if (!strcasecmp(left, "warning"))
+        popup_window(WARN, right);
+    else
+        popup_window(INFO, right);
 }
 
 void do_grep(char *arg, struct session *s)
@@ -417,7 +423,11 @@ void do_grep(char *arg, struct session *s)
         gtk_text_buffer_get_iter_at_line(b, &start, i);
         gtk_text_buffer_get_iter_at_line(b, &end, i + 1);
         if ((text = gtk_text_buffer_get_text(b, &start, &end, FALSE))) {
-            if (strstr(text, arg)) {
+            if (strlen(text) > 1 && 
+                strncasecmp(text + 1, "grep", 4) &&  // remove previous grep calls
+                strncmp(text, "Searching for", 13) && // remove previous grep headers
+                strncmp(text, "Line ", 5) && // remove previous grep results
+                strstr(text, arg)) {
                 int len = strlen(result);
                 snprintf(result + len, allocation - len, "Line %d: %s", i + 1, text);
 
@@ -869,12 +879,12 @@ void textfield_add(GtkTextView *txt, const char *message, int colortype)
             return;
         case MESSAGE_SENT:
             if (mud->LOGGING) /* Loging */
-                fprintf(mud->LOG_FILE, message);
+                fprintf(mud->LOG_FILE, "%s", message);
             tag = fg_colors[1][3];// light yellow 
             break;
         case MESSAGE_ERR:
             if (mud->LOGGING) /* Loging */
-                fprintf(mud->LOG_FILE, message);
+                fprintf(mud->LOG_FILE, "%s", message);
             tag = fg_colors[0][1]; // red
             break;
         case MESSAGE_TICK:
@@ -882,7 +892,7 @@ void textfield_add(GtkTextView *txt, const char *message, int colortype)
             break;
         default:
             if (mud->LOGGING) /* Loging */
-                fprintf(mud->LOG_FILE, message);
+                fprintf(mud->LOG_FILE, "%s", message);
             tag = prefs.DefaultColor;
     }
     
@@ -915,7 +925,7 @@ void popup_window (int type, const gchar *message, ...)
 
     d = gtk_message_dialog_new_with_markup(NULL, GTK_DIALOG_MODAL,
                            type, GTK_BUTTONS_OK,
-                           buf);
+                           "%s", buf);
 
     gtk_dialog_run(GTK_DIALOG(d));
    

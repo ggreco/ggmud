@@ -28,7 +28,8 @@ char last_version[32];
 
 void ask_for_update()
 {
-    GtkMessageDialog *d = gtk_message_dialog_new_with_markup(NULL, GTK_DIALOG_DESTROY_WITH_PARENT,
+    GtkMessageDialog *d = (GtkMessageDialog *)
+                gtk_message_dialog_new_with_markup(NULL, GTK_DIALOG_DESTROY_WITH_PARENT,
                            GTK_MESSAGE_INFO, GTK_BUTTONS_OK_CANCEL,
                            "<b>There is a new version of GGMud available!</b>\n\n"
                            "The latest version of GGMud is <b>%s</b> and you are using <b>%s</b>,\n"

@@ -529,3 +529,30 @@ on_msp_ok_clicked                      (GtkButton       *button,
                                         gpointer         user_data);
 
 
+
+void
+sub_selection_made                     (GtkCList        *clist,
+                                        gint             row,
+                                        gint             column,
+                                        GdkEvent        *event,
+                                        gpointer         user_data);
+
+void
+sub_button_add                         (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+sub_button_delete                      (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+save_subs                              (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+sub_window                             (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+window_subs                            (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);

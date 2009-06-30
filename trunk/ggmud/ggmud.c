@@ -211,6 +211,7 @@ int main(int argc, char **argv)
     load_variables();
     load_highlights();
     load_gags();
+    load_subs();
     load_triggers();
     load_tabs();
 

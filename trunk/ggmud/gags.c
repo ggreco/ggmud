@@ -85,7 +85,10 @@ insert_gags  (GtkCList *clist)
  
     while ( (list = list->next) ) {
         text[0] = list->left;
-        gtk_clist_prepend (GTK_CLIST (clist), text);
+        // non e' un gag, lo skippo
+        if (list->right[0] == '.' &&
+            list->right[1] == 0)
+            gtk_clist_prepend (GTK_CLIST (clist), text);
     }
     gtk_clist_thaw(clist);
 }

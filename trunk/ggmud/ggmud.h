@@ -157,6 +157,10 @@ struct wizard_data {
     gint       autologin;
 };
 
+/* sub.c */
+extern void  load_subs    ( void );
+extern void  window_subs    (GtkWidget *widget, gpointer data);
+
 /* alias.c */
 extern void  load_aliases    ( void );
 extern void  window_alias    (GtkWidget *widget, gpointer data);
@@ -186,7 +190,6 @@ extern void  gags_window    (GtkWidget *widget, gpointer data);
 extern void  highlights_window    (GtkWidget *widget, gpointer data);
 extern void  variables_window    (GtkWidget *widget, gpointer data);
 extern void  load_gags    ( void );
-extern void  load_aliases    ( void );
 extern void  load_variables    ( void );
 extern void  load_highlights    ( void );
 extern void  load_buttons (void);
