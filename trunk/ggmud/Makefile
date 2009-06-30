@@ -32,7 +32,7 @@ OBJS = $(patsubst %.c, $(OBJDIR)%.o, $(C_SRCS))
 
 WINOBJS = $(OBJDIR)icon.w $(patsubst %.c, $(OBJDIR)%.w, $(C_SRCS))
 
-CROSSCFLAGS = $(INCDIR) -I$(CROSSDIR)/include/gtk-2.0/glib-2.0  \
+CROSSCFLAGS = $(INCDIR) -I$(CROSSDIR)/include/glib-2.0  \
             -I$(CROSSDIR)/lib/gtk2/glib-2.0/include/  -I$(CROSSDIR)/include/cairo\
 			-I$(CROSSDIR)/include/gtk-2.0 -I$(CROSSDIR)/include/atk-1.0 \
             -I$(CROSSDIR)/include/pango-1.0 -I$(CROSSDIR)/lib/gtk-2.0/include \
@@ -40,7 +40,8 @@ CROSSCFLAGS = $(INCDIR) -I$(CROSSDIR)/include/gtk-2.0/glib-2.0  \
 
 # -fnative-struct corrispondente di -mms-bifields nel vecchio mingw32 -s
 
-CROSSLIBS = -s -L$(CROSSDIR)/lib/gtk-2.0 -Ltt -Llua -Lzlib -Lhttpfetch -lttw32 -lluaw32 -lzw32 -lfetchw32 -Lsq3 -lsq3 \
+CROSSLIBS = -s -L$(CROSSDIR)/lib/gtk-2.0 -Ltt -Llua -Lzlib -Lhttpfetch -lttw32 \
+            -lluaw32 -lzw32 -lfetchw32 -Lsq3 -lsq3w32 \
 			-lgtk-win32-2.0.dll -lgdk-win32-2.0.dll \
             -latk-1.0.dll -lgdk_pixbuf-2.0.dll -lpango-1.0.dll -lpangowin32-1.0.dll \
             -lgmodule-2.0.dll -lgobject-2.0.dll -lgthread-2.0.dll -lglib-2.0.dll \
@@ -96,7 +97,7 @@ lua/libluaw32.a: lua/*c
 	$(MAKE) -C lua clean
 	$(MAKE) -C lua "LUA_A=libluaw32.a" "LUA_T=lua.exe" \
 	"CC=$(CROSSDIR)bin/gcc" "MYCFLAGS=-I../sq3 -mno-cygwin -mms-bitfields" "RANLIB=$(CROSSDIR)/bin/ranlib" \
-    "AR=$(CROSSDIR)bin/ar rcu" "MYLIBS=" "MYLDFLAGS=-s" lua.exe
+    "AR=$(CROSSDIR)bin/ar rcu" "MYLIBS=-L../sq3 -lsq3w32" "MYLDFLAGS=-s" lua.exe
 
 $(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libzlib.a httpfetch/libfetch.a sq3/libsq3.a
 	$(CC) $(OBJS) -o $(PROJECTNAME) $(LIBS) --as-needed
