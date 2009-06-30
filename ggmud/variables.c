@@ -159,14 +159,13 @@ static void variable_button_delete (GtkWidget *button, gpointer data) {
         char buffer[VAR_LEN + 20];
         
         gtk_clist_get_text ((GtkCList*) data, selected_row, 0, &word);
-        gtk_clist_remove ((GtkCList*) data, selected_row);
-        gtk_object_set_user_data(GTK_OBJECT(data), GINT_TO_POINTER(-1));
 
-        sprintf(buffer, "#unvar %s", word);
+        sprintf(buffer, "#unvar {%s}", word);
 
         parse_input(buffer, mud->activesession);
-    }
 
+        insert_variables(data);
+    }
 }
 
 void

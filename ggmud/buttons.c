@@ -22,6 +22,10 @@ typedef struct button_def_
 void on_button_clicked(GtkWidget *button, button_def *def)
 {
     parse_input(def->command, mud->activesession);
+
+    // move back focus to the input line.
+    gtk_widget_grab_default (GTK_WIDGET(mud->ent));
+    gtk_widget_grab_focus (GTK_WIDGET(mud->ent));
 }
 
 void insert_buttons(GtkCList *clist, GList *source)

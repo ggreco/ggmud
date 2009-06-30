@@ -384,7 +384,15 @@ the amount still needed.
 
 format:        #message {type} {contents}
 
-Shows a popup window with "contents".
+Shows a not modal popup window with "contents".
+
+The {type} field can assume the following values: 
+
+error
+warning
+info (default)
+
+these values are case sensitive and are used only to select the icon that is shown in the window. If the field type is anything else than those values the message will get the default value ('info').
 
 ~VERBOSITY
 
