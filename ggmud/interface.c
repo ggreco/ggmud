@@ -4024,6 +4024,7 @@ create_window_sub (void)
   GtkWidget *clist_sub;
   GtkWidget *label91;
   GtkWidget *label92;
+  GtkWidget *label95;
   GtkWidget *table14;
   GtkWidget *button58;
   GtkWidget *image91;
@@ -4059,6 +4060,7 @@ create_window_sub (void)
   clist_sub = gtk_clist_new (2);
   gtk_widget_show (clist_sub);
   gtk_container_add (GTK_CONTAINER (scrolledwindow10), clist_sub);
+  gtk_widget_set_size_request (clist_sub, -1, 250);
   gtk_clist_set_column_width (GTK_CLIST (clist_sub), 0, 90);
   gtk_clist_set_column_width (GTK_CLIST (clist_sub), 1, 80);
   gtk_clist_column_titles_show (GTK_CLIST (clist_sub));
@@ -4072,6 +4074,14 @@ create_window_sub (void)
   gtk_widget_show (label92);
   gtk_clist_set_column_widget (GTK_CLIST (clist_sub), 1, label92);
   gtk_label_set_use_markup (GTK_LABEL (label92), TRUE);
+
+  label95 = gtk_label_new ("<b>Insert the text to be replaced</b>\nIf you insert simple words on the <b>Original</b> field all the line containing the specified text will be replaced with the text in <b>Replacement</b>. To replace a single word you can use something like this (replace cat with dog everywhere):\n<b>Original</b>: %0cat%1 <b>Replacement</b>: %0dog%1");
+  gtk_widget_show (label95);
+  gtk_box_pack_start (GTK_BOX (vbox33), label95, FALSE, FALSE, 0);
+  gtk_label_set_use_markup (GTK_LABEL (label95), TRUE);
+  gtk_label_set_justify (GTK_LABEL (label95), GTK_JUSTIFY_CENTER);
+  gtk_label_set_line_wrap (GTK_LABEL (label95), TRUE);
+  gtk_misc_set_alignment (GTK_MISC (label95), 0.5, 0.51);
 
   table14 = gtk_table_new (2, 3, FALSE);
   gtk_widget_show (table14);
@@ -4181,6 +4191,7 @@ create_window_sub (void)
   GLADE_HOOKUP_OBJECT (window_sub, clist_sub, "clist_sub");
   GLADE_HOOKUP_OBJECT (window_sub, label91, "label91");
   GLADE_HOOKUP_OBJECT (window_sub, label92, "label92");
+  GLADE_HOOKUP_OBJECT (window_sub, label95, "label95");
   GLADE_HOOKUP_OBJECT (window_sub, table14, "table14");
   GLADE_HOOKUP_OBJECT (window_sub, button58, "button58");
   GLADE_HOOKUP_OBJECT (window_sub, image91, "image91");
