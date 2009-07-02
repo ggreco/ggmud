@@ -46,7 +46,7 @@ void ask_for_update()
 
 void check_for_updates()
 {
-    char *fileBuf;
+    char *fileBuf = NULL;
     char buffer[256];
     sprintf(buffer, "www.ggsoft.org/GGMudVersion.php?version=%s&arch=%s&cpu=%s",
             VERSION, ARCH, CPUTYPE);
@@ -58,6 +58,7 @@ void check_for_updates()
         }
     }
 
-    free(fileBuf);
+    if (fileBuf)
+        free(fileBuf);
 }
 

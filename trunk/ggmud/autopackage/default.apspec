@@ -5,7 +5,7 @@
 #
 
 [Meta]
-RootName: @ggmud.sourceforge.net/ggmud:0.8.1
+RootName: @ggmud.sourceforge.net/ggmud:0.9.0
 DisplayName: GGMud
 ShortName: ggmud
 Maintainer: Gabriele Greco <gabrielegreco@gmail.com>
@@ -13,7 +13,7 @@ Packager: Gabriele Greco <gabrielegreco@gmail.com>
 Summary: A Powerful Multiplatform MUD Client
 URL: http://ggmud.sourceforge.net
 License: GNU General Public License, Version 2
-SoftwareVersion: 0.8.1
+SoftwareVersion: 0.9.0
 # SoftwareVersion: @VERSION@
 #Repository: http://www.mysite.org/downloads/myproject.xml
 

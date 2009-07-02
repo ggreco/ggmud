@@ -1,10 +1,10 @@
 Summary: Linux MUD Client
 Name: ggmud
-Version: 0.7
+Version: 0.9
 Release: 1
 Copyright: GPL
 Group: Game
-Source: http://ggmud.sourceforge.net/
+Source: http://www.ggsoft.org/ggmud
 %description
 powerful, opensource and multiplatform MUD client.
 %files
