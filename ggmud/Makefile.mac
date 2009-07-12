@@ -2,19 +2,19 @@ CROSSDIR = /usr/local/cross-gcc33/i386-mingw32msvc/
 CROSSCC = $(CROSSDIR)/bin/gcc
 GLOBAL_CFLAGS = -O2 -DTELNET_SUPPORT -Wall -DWITH_LUA -DENABLE_MCCP
 OBJDIR = obj/
-GTKBASE = /Users/gabry/projects/gtk
-PKGCONFIG=$(GTKBASE)/bin/pkg-config
 export PATH
-PKG_CONFIG_PATH = $(GTKBASE)/lib/pkgconfig
-export PKG_CONFIG_PATH
-
+FWPATH=/Users/gabry/projects/reloc
+GTKINCLUDE = -I$(FWPATH)/Glib.framework/Headers \
+             -I$(FWPATH)/Cairo.framework/Headers \
+             -I$(FWPATH)/Gtk.framework/Headers
+GTKLIB = -F$(FWPATH) -Wl,-executable_path -Wl,$(FWPATH) -framework Gtk -framework Cairo -framework Glib
 CC ?= gcc
 CXX ?= g++
 INCDIR = -Itt -Ilua -Ihttpfetch
 COMMONLIBS = -Ltt -ltt -Llua -llua -Lhttpfetch -lfetch
-CFLAGS = $(INCDIR) `$(PKGCONFIG) gtk+-2.0 gthread-2.0 --cflags` $(GLOBAL_CFLAGS) -DGTKQUARTZ
+CFLAGS = $(INCDIR) $(GTKINCLUDE) $(GLOBAL_CFLAGS) -DGTKQUARTZ
 
-LIBS = $(COMMONLIBS) `$(PKGCONFIG) gtk+-2.0 gthread-2.0 --libs` -lz -framework Carbon
+LIBS = $(COMMONLIBS) $(GTKLIB) -lz -framework Carbon
 
 VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )
 OS:=	$(uname)
