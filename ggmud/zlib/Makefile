@@ -18,7 +18,7 @@
 
 CC?=cc
 OBJEXT?=.o
-CFLAGS=-O3 -Wall
+CFLAGS=$(DEBUGFLAG) -Wall
 #CFLAGS=-O -DMAX_WBITS=14 -DMAX_MEM_LEVEL=7
 #CFLAGS=-g -DDEBUG
 #CFLAGS=-O3 -Wall -Wwrite-strings -Wpointer-arith -Wconversion \

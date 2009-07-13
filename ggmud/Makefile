@@ -16,6 +16,7 @@ VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )
 OS:=	$(uname)
 MAKE=	make
 
+export DEBUGFLAG
 export GLOBAL_CFLAGS
 
 PROJECTNAME = ggmud
