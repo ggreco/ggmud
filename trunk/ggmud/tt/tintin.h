@@ -83,7 +83,7 @@ This program is protected under the GNU GPL (See COPYING)
 
 #ifndef DEFAULT_HELP_FILE
 #ifdef __APPLE__
-#define DEFAULT_HELP_FILE "GGMud.app/Contents/Resources/bin/gg_help.txt"
+#define DEFAULT_HELP_FILE "./gg_help.txt"
 #else    
 #define DEFAULT_HELP_FILE "gg_help.txt" /* Default name for the help file */
 #endif

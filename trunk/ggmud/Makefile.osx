@@ -2,7 +2,7 @@ CROSSDIR = /usr/local/cross-gcc33/i386-mingw32msvc/
 CROSSCC = $(CROSSDIR)/bin/gcc
 GLOBAL_CFLAGS = -O2 -DTELNET_SUPPORT -Wall -DWITH_LUA -DENABLE_MCCP
 OBJDIR = obj/
-GTKBASE = /Users/gabry/projects/gtk
+GTKBASE = /Users/gabry/gtk/inst
 PKGCONFIG=$(GTKBASE)/bin/pkg-config
 export PATH
 PKG_CONFIG_PATH = $(GTKBASE)/lib/pkgconfig

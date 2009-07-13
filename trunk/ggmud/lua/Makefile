@@ -8,7 +8,7 @@
 PLAT= none
 
 CC ?= gcc
-CFLAGS= -O2 -Wall $(MYCFLAGS) -I../sq3
+CFLAGS= $(DEBUGFLAG) -Wall $(MYCFLAGS) -I../sq3
 AR= ar rcu
 RANLIB= ranlib
 RM= rm -f

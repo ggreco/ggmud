@@ -107,11 +107,6 @@ int main(int argc, char **argv)
     extern int checktick(void);
     extern void save_vars(void);
 
-#if defined(__APPLE__) && defined(GTKQUARTZ)
-    extern void fix_bundle_environment();
-
-    fix_bundle_environment();
-#endif
 
 #ifndef WIN32
     char *display;
@@ -157,6 +152,11 @@ int main(int argc, char **argv)
 
 		winsock_init();
 	}
+
+#elif defined(__APPLE__) && defined(GTKQUARTZ)
+    extern void fix_bundle_environment();
+
+    fix_bundle_environment();
 #endif
     
     mud = calloc(sizeof(ggmud), 1);
@@ -255,7 +255,7 @@ void
 fix_bundle_environment ()
 {
 	char execpath[MAXPATHLEN+1];
-	char path[MAXPATHLEN * 4];
+	char path[MAXPATHLEN * 4], *c;
     FILE *f;
 
     uint32_t pathsz = sizeof (execpath);
@@ -265,13 +265,20 @@ fix_bundle_environment ()
     if (!strstr(execpath, ".app"))
         return;
 
+    fprintf(stderr, "EXECPATH: %s", execpath);
+    c = strrchr(execpath, '/');
+    *c = 0;
+    chdir(execpath);
+    getcwd(path, sizeof(path));
+    fprintf(stderr, "CWD: %s", path);
+/* 
 	gchar * dir_path = g_path_get_dirname (execpath);
 	strcpy(path, dir_path);
 	strcat(path, "/../Frameworks/clearlooks");
 	setenv ("GTK_PATH", path, 1);
 	strcat(path + strlen(dir_path), "/../Resources/locale");
 //	localedir = strdup (path);
-	/* write a pango.rc file and tell pango to use it */
+	// write a pango.rc file and tell pango to use it
 	strcpy(path + strlen(dir_path), "/../Resources/pango.rc");
 
 	if ((f = fopen(path, "w"))) {
@@ -293,5 +300,6 @@ fix_bundle_environment ()
 	strcpy(path + strlen(dir_path), "/../Resources/gdk-pixbuf.loaders");
 	setenv ("GDK_PIXBUF_MODULE_FILE", path, 1);
     g_free(dir_path);
+    */
 }
 #endif
