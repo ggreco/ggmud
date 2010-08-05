@@ -76,8 +76,8 @@ gint snoop_keys (GtkWidget *grab_widget,
            }
 
            return TRUE;
-       } // handle ordinary macro keys
-       else 
+       } // handle ordinary macro keys, only if the key is not a dead key
+       else if(event->keyval < GDK_dead_grave || event->keyval > GDK_dead_capital_schwa)
            return check_macro(event->state , 
                    gdk_keyval_to_upper(event->keyval));
    }

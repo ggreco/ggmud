@@ -36,22 +36,29 @@ ggmud_macro;
 
 // macro editor
 
-gchar *internal_key_to_string(gint state, gint key)
+static gchar *internal_key_to_string(gint state, gint key)
 {
-  gchar *buff = g_malloc(125);
+  gchar *buff = g_malloc(125), *c;
   *buff = 0;
 
   if (state & GDK_CONTROL_MASK)
     strcat(buff, "Ctrl+");
   if (state & GDK_MOD1_MASK)
     strcat(buff, "Alt+");
-  strcat(buff, gdk_keyval_name(key));
+  if ((c = gdk_keyval_name(key)))
+      strcat(buff, c);
+  else
+      return NULL;
+
   return buff;
 }
 
 gint check_macro(gint state, gint key)
 {
     gchar *test = internal_key_to_string(state, key);
+    if (!test)
+        return FALSE;;
+
     GList *l = macro_list;
     gint rc = FALSE;
 
@@ -303,9 +310,11 @@ on_entry_shortcut_key_press_event      (GtkWidget       *widget,
   if ((state & (GDK_CONTROL_MASK | GDK_MOD1_MASK)) != 0) {
     if (key < 65500) {
       gchar *buff = internal_key_to_string(state, key);
-      gtk_entry_set_text(GTK_ENTRY(widget), buff);
-      g_free(buff);
-      done = TRUE;
+      if (buff) {
+          gtk_entry_set_text(GTK_ENTRY(widget), buff);
+          g_free(buff);
+          done = TRUE;
+      }
     }
   } else {
     if ((key > 255) && (key < 65500)) {
