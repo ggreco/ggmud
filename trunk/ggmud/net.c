@@ -105,14 +105,10 @@ void set_connected(int value)
 
 void printline(const char *str, int isaprompt)
 {    
-    if (!isaprompt) {
-        char buffer[2048];
-        strcpy(buffer, str);
-        strcat(buffer, "\n");
-        textfield_add(mud->text, buffer, MESSAGE_ANSI);
-    }
-    else
-        textfield_add(mud->text, str, MESSAGE_ANSI);
+    textfield_add(mud->text, str, MESSAGE_ANSI);
+
+    if (!isaprompt)
+        textfield_add(mud->text, "\n", MESSAGE_ANSI);
 }
 
 void tintin_puts2(const char *cptr, struct session *ses)
@@ -540,6 +536,17 @@ static void readmud(struct session *s)
         return;
     }
 
+#if 0
+    // this code is only for test, to see exactly what come
+    // from the mud
+    static FILE *f = NULL;
+
+    if (!f) f = fopen("/tmp/txt.log", "w"); 
+
+    fprintf(f, "\nBlock of %d bytes (%d more):\n", rv, s->more_coming);
+
+    fwrite(buf, 1, rv, f);
+#endif
     /* changed by DasI */
     if( s->snoopstatus && (s != mud->activesession))
         sprintf(header, "%s%% ", s->name);
