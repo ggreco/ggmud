@@ -1,4 +1,5 @@
 0.9.0:
+	- Added menu option to clear the review buffer.
 	- sqlite3 integrated.
 	- LUA now supports SQL through SQLite3 and the official luasql
 	  interface (http://www.keplerproject.org/luasql/)

@@ -341,6 +341,18 @@ void clr_command(char *arg, struct session *s)
 }
 
 void
+on_clear_review_buffer_activate(GtkMenuItem *u1, gpointer u2)
+{
+    GtkTextBuffer *b;
+
+    if (!mud || !mud->text ||
+        !(b = gtk_text_view_get_buffer(mud->text)))
+        return;
+
+    gtk_text_buffer_set_text(b, "<clear>\n", -1);
+}
+
+void
 save_review(void)
 {
     GtkWidget *filew = gtk_file_chooser_dialog_new ("Save Review buffer as...",
