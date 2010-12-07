@@ -1,5 +1,9 @@
-0.9.0:
+0.9.1:
 	- Added menu option to clear the review buffer.
+    - Some optimizations in network input handling (removed a data
+      copy).
+
+0.9.0:
 	- sqlite3 integrated.
 	- LUA now supports SQL through SQLite3 and the official luasql
 	  interface (http://www.keplerproject.org/luasql/)
