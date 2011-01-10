@@ -1,6 +1,6 @@
 CROSSDIR = /usr/local/cross-gcc33/i386-mingw32msvc/
 CROSSCC = $(CROSSDIR)/bin/gcc
-DEBUGFLAG ?= -O2 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -mmacosx-version-min=10.4 
+DEBUGFLAG ?= -arch i386 -O2 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -mmacosx-version-min=10.4 
 GLOBAL_CFLAGS = $(DEBUGFLAG) -DTELNET_SUPPORT -Wall -DWITH_LUA -DENABLE_MCCP
 OBJDIR = obj/
 export PATH
@@ -15,7 +15,7 @@ INCDIR = -Itt -Ilua -Izlib -Ihttpfetch -Isq3
 COMMONLIBS = -Ltt -ltt -Llua -llua -Lhttpfetch -lfetch -Lsq3 -lsq3
 CFLAGS = $(INCDIR) $(GTKINCLUDE) $(GLOBAL_CFLAGS) -DGTKQUARTZ
 
-LIBS = -isysroot /Developer/SDKs/MacOSX10.4u.sdk -mmacosx-version-min=10.4 \
+LIBS = -arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -mmacosx-version-min=10.4 \
        $(COMMONLIBS) $(GTKLIB) -lz -framework Carbon
 
 VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )
