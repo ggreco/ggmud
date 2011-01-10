@@ -1,0 +1,29 @@
+<?xml version="1.0"?> <!--*- mode: xml -*-->
+<app-bundle>
+  <meta>
+    <prefix>/Users/gabry/gtk/inst</prefix>
+    <run-install-name-tool/>
+    <image>ggmud.dmg</image>
+    <destination overwrite="yes">${env:HOME}/Desktop</destination>
+  </meta>
+
+  <plist>${project}/Info.plist</plist>
+
+  <!-- The executable for the application -->
+  <main-binary>${prefix}/../../projects/ggmud/ggmud/ggmud</main-binary>
+
+  <!-- Modules for GTK+ (image loaders, etc) -->
+  <binary>${prefix}/lib/gtk-2.0</binary>
+  <binary>${prefix}/lib/gdk-pixbuf-2.0</binary>
+
+
+  <!-- Any additional data, like images, or Glade files -->
+  <data dest="${bundle}/Contents/Resources">
+    ${project}/gg_help.txt
+  </data>
+  <data dest="${bundle}/Contents/Resources">
+    ${project}/GGMud.icns
+  </data>
+
+</app-bundle>
+

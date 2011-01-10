@@ -122,6 +122,17 @@ dist-osx: ggmud
 dist-linux: ggmud
 	tar czf ../ggmud-linux-$(VERSION).tgz ggmud gg_help.txt README
 
+
+dmg-ige:
+		mkdir -p dest
+	    ige-mac-bundler app.bundle
+	    mv ~/Desktop/ggmud.app dest/GGMud.app
+	    cp README dest/README.txt
+	    hdiutil makehybrid -hfs -hfs-volume-name GGMud -hfs-openfolder dest dest -o TMP.dmg
+	    hdiutil convert -format UDZO TMP.dmg -o GGMud-OSX-$(VERSION).dmg
+	    rm -rf TMP.dmg dest
+
+
 dmg: ggmud
 	sh makeapp.sh
 	-rm -rf dest TMP.dmg
