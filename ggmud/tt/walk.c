@@ -598,6 +598,10 @@ void step_command(const char *arg, struct session *ses)
 		ses->walk_standstill = FALSE;
 		slow_command(left, ses);
 	}
+    else if (!ses->walk_standstill) {
+		tintin_puts2("#NO SLOW WALK ACTIVE....", ses);
+		return;
+    }
 	else if (ses->walk_path[ses->walk_now]) {
         char sc[2];
         sc[1] = 0;
@@ -661,7 +665,7 @@ void slow_command(const char *arg, struct session *ses)
 
     expand_path(l, dest, BUFFER_SIZE);
 	ses->walk_standstill = TRUE;
-	strcpy(ses->walk_path, left); 
+	strcpy(ses->walk_path, dest); 
 	ses->walk_now = 0;
 
 	step_command("", ses);
