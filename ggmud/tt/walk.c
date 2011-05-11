@@ -545,6 +545,128 @@ void walkon_command(struct session * ses)
     else    tintin_puts2("#NO SESSION ACTIVE....", ses) ;
 }
 
+void stop_command(const char *arg, struct session *ses)
+{
+	if (!ses) {
+		tintin_puts2("#NO SESSION ACTIVE....", ses);
+		return;
+	}
+
+	ses->walk_standstill = FALSE;
+	ses->walk_path[0] = 0;
+	ses->walk_now = 0;
+}
+
+void step_command(const char *arg, struct session *ses);
+void slow_command(const char *arg, struct session *ses);
+
+void ok_command(const char *arg, struct session *ses)
+{
+    char left[BUFFER_SIZE];
+
+    if (!ses) {
+		tintin_puts2("#NO SESSION ACTIVE....", ses);
+		return;
+	}
+
+    if (!ses->walk_standstill) {
+		tintin_puts2("#NO SLOW WALK ACTIVE....", ses);
+		return;
+    }
+
+    ses->walk_now++;
+
+    get_arg_in_braces(arg, left, 1);
+
+    if (*left == '1') 
+        step_command("", ses);
+    
+}
+
+void step_command(const char *arg, struct session *ses)
+{
+    char left[BUFFER_SIZE];
+
+	if (!ses) {
+		tintin_puts2("#NO SESSION ACTIVE....", ses);
+		return;
+	}
+
+    get_arg_in_braces(arg, left, 1);
+
+	if (*left) {
+		ses->walk_standstill = FALSE;
+		slow_command(left, ses);
+	}
+	else if (ses->walk_path[ses->walk_now]) {
+        char sc[2];
+        sc[1] = 0;
+        sc[0] = ses->walk_path[ses->walk_now];
+        write_com_arg_mud(sc, "", ses);
+	}
+    else {
+        // path completed
+        ses->walk_standstill = FALSE;
+    }
+}
+
+void expand_path(const char *cp, char *dest, int maxlen)
+{
+  const char *loc; 
+  int multflag, loopcnt, i, pos = 0;
+
+  while(*cp && pos < maxlen ) {
+    loc = cp;
+    multflag = FALSE;
+    while(isdigit(*cp)) {
+      cp++;
+      multflag = TRUE;
+    }
+    if(multflag && *cp) {
+      char sc;
+      sscanf(loc, "%d%c", &loopcnt, &sc);
+      for(i = 0; i++ < loopcnt; )
+	    dest[pos++] = sc;
+    }
+    else if(*cp) {
+      dest[pos++] = *cp;
+    }
+
+    if(*cp)
+      cp++;
+  }
+  dest[pos] = 0;
+}
+
+void slow_command(const char *arg, struct session *ses)
+{
+    char left[BUFFER_SIZE], *l, dest[BUFFER_SIZE];
+
+	if (!ses) {
+		tintin_puts2("#NO SESSION ACTIVE....", ses);
+		return;
+	}
+
+    get_arg_in_braces(arg, left, 1);
+
+	if (!*left)
+        tintin_puts2("#NO SLOW PATH GIVEN!", ses);
+
+	l = left;
+    if (ses->walk_standstill) 
+	    tintin_puts2("#OVERWRITTEN PREVIOUS SLOW WALK SEQUENCE", ses);
+
+	if (*l == '.')
+		++l;
+
+    expand_path(l, dest, BUFFER_SIZE);
+	ses->walk_standstill = TRUE;
+	strcpy(ses->walk_path, left); 
+	ses->walk_now = 0;
+
+	step_command("", ses);
+}
+
 
 /* walkoff_command function turns on a session's standstill flag.
    When a session's standstill flag is on, tintin will advance

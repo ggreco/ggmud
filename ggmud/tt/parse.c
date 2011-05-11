@@ -340,6 +340,14 @@ struct session *parse_tintin_command(const char *command, char *arg,
 
   else if(is_abbrev(command, "help")) 
     help_command(arg);
+  else if(is_abbrev(command, "slow")) 
+    slow_command(arg, ses);
+  else if(is_abbrev(command, "stop")) 
+    stop_command(arg, ses);
+  else if(is_abbrev(command, "step")) 
+    step_command(arg, ses);
+  else if(is_abbrev(command, "ok")) 
+    ok_command(arg, ses);
 
   else if(is_abbrev(command, "highlight"))
     parse_high(arg, ses);

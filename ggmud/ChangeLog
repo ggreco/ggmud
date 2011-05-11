@@ -1,7 +1,10 @@
 0.9.1:
 	- Added menu option to clear the review buffer.
-    - Some optimizations in network input handling (removed a data
-      copy).
+	- Some optimizations in network input handling (removed a data
+	  copy).
+	- Implemented #SLOW, #STEP, #STOP, #OK commands with semantics
+	  similar to ZMUD ones:
+	  http://www.zuggsoft.com/modules/mx_kb/kb.php?page=3&mode=doc&k=384
 
 0.9.0:
 	- sqlite3 integrated.
