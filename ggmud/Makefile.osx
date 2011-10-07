@@ -1,6 +1,6 @@
 CROSSDIR = /usr/local/cross-gcc33/i386-mingw32msvc/
 CROSSCC = $(CROSSDIR)/bin/gcc
-GLOBAL_CFLAGS = -O2 -DTELNET_SUPPORT -Wall -DWITH_LUA -DENABLE_MCCP -arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk 
+GLOBAL_CFLAGS = -O2 -DTELNET_SUPPORT -Wall -DWITH_LUA -DENABLE_MCCP -arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk  -mmacosx-version-min=10.4
 OBJDIR = obj/
 GTKBASE = /Users/gabry/gtk/inst
 PKGCONFIG=$(GTKBASE)/bin/pkg-config
@@ -17,8 +17,7 @@ COMMONLIBS = -Ltt -ltt -Llua -llua -Lhttpfetch -lfetch -Lsq3 -lsq3
 CFLAGS = $(INCDIR) `$(PKGCONFIG) gtk+-2.0 gthread-2.0 --cflags` $(GLOBAL_CFLAGS) \
          -DGTKQUARTZ 
 
-LIBS = $(COMMONLIBS) `$(PKGCONFIG) gtk+-2.0 gthread-2.0 --libs` -lz -framework Carbon \
-       -arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk	
+LIBS = $(COMMONLIBS) `$(PKGCONFIG) gtk+-2.0 gthread-2.0 --libs` -lz -framework Carbon 
 
 VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )
 OS:=	$(uname)
@@ -99,7 +98,7 @@ httpfetch/libfetchw32.a: httpfetch/*.c
 sq3/libsq3.a: sq3/*c
 	$(MAKE) -C sq3
     
-$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a httpfetch/libfetch.a
+$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a httpfetch/libfetch.a sq3/libsq3.a
 	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) $(LIBS)
 
 $(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a lua/libluaw32.a
