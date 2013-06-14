@@ -34,7 +34,7 @@ OBJS = $(patsubst %.c, $(OBJDIR)%.o, $(C_SRCS))
 WINOBJS = $(OBJDIR)icon.w $(patsubst %.c, $(OBJDIR)%.w, $(C_SRCS))
 
 CROSSCFLAGS = $(INCDIR) -I$(CROSSDIR)/include/glib-2.0  \
-            -I$(CROSSDIR)/lib/gtk2/glib-2.0/include/  -I$(CROSSDIR)/include/cairo\
+            -I$(CROSSDIR)/lib/glib-2.0/include/  -I$(CROSSDIR)/include/cairo\
 			-I$(CROSSDIR)/include/gtk-2.0 -I$(CROSSDIR)/include/atk-1.0 \
             -I$(CROSSDIR)/include/pango-1.0 -I$(CROSSDIR)/lib/gtk-2.0/include \
             -mwindows -mno-cygwin -mms-bitfields $(GLOBAL_CFLAGS)
