@@ -45,6 +45,7 @@ Section "GGMud (required)"
   ; Put file there
   File "ggmud.exe"
   File "gg_help.txt"
+  File "leu\*"
   
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\GGMud "Install_Dir" "$INSTDIR"

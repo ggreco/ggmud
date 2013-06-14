@@ -37,6 +37,25 @@
 
 extern int home_is_program_dir;
 
+static void copy_file(const char *src, const char *dest_path)
+{
+    FILE *in, *out;
+    int len;
+    char destname[512];
+    snprintf(destname, sizeof(destname), "%s/%s", dest_path, src);
+    char buffer[1024];
+
+    if ((in = fopen(src, "rb"))) {
+        if ((out = fopen(destname, "wb"))) {
+            while ( (len = fread(buffer, 1, sizeof(buffer), in)) > 0)
+                fwrite(buffer, 1,  len, out);
+
+            fclose(out);
+        }
+        fclose(in);
+    }
+}
+
 int check_ggmud_dir (gchar *dirname, int silent) {
 /* check if the specified directory exists, try to create it if it doesn't */
     struct stat file_stat;
@@ -50,11 +69,23 @@ int check_ggmud_dir (gchar *dirname, int silent) {
         }
     } else {
         if (mkdir(dirname, 0777)) {
+            FILE *f;
         /* this isn't dangerous, umask modifies it */
             if (!silent) {
                 popup_window (INFO, "GGMud settings directory <b>%s</b> created.", 
                         dirname);
                 do_manual();
+            }
+            // install leu cfg if we have it
+            if ((f = fopen("aliases", "R"))) {
+                fclose(f);                
+                copy_file("aliases", dirname);
+                copy_file("triggers", dirname);
+                copy_file("highlights", dirname);
+                copy_file("script.lua", dirname);
+                // only one of the following is present in any platform
+                copy_file("ggmud.prf", dirname);
+                copy_file("Preference", dirname);
             }
         } else {
             popup_window (ERR, "%s NOT created: %s", dirname, strerror (errno));
@@ -110,6 +141,47 @@ migrate_config(const char *dest_path, ...)
         }
     }
     va_end(va);
+}
+
+
+void add_prefs_path(const char *src, char *path, size_t max_len)
+{
+    const gchar *home = NULL;
+
+#ifndef WIN32
+    const char *dir = "/.ggmud";
+
+    home = getenv ("HOME");
+
+    if (!home_is_program_dir)
+        g_snprintf (path, max_len, "%s%s", home!= NULL ? home : "", dir);
+    else
+        strcpy(path, ".");
+#else
+    static int check_migration = 0;
+    const char *dir = "/ggmud";
+    TCHAR szPath[MAX_PATH];
+
+    if(SUCCEEDED(SHGetFolderPath(NULL, 
+                             CSIDL_APPDATA, 
+                             NULL, 
+                             0, 
+                             szPath))) {
+        home = szPath;
+
+       g_snprintf(path, max_len, "%s/%s", szPath, dir);
+    }
+    else {
+        home = NULL;
+        strcpy(path, ".");
+    }
+#endif
+    if (check_ggmud_dir(path, 1)) return;
+
+    if (home_is_program_dir)
+        g_snprintf (path, max_len, "./%s", src);
+    else
+        g_snprintf (path, max_len, "%s%s/%s", home!= NULL ? home : "", dir, src);
 }
 
 FILE *fileopen (gchar *fname, gchar *mode) {

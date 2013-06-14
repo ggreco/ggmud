@@ -65,6 +65,17 @@ void script_command(char *arg, struct session *ses)
       strcat(left, ".lua");
   }
   
+  if (
+#ifndef WIN32          
+      left[0] != '/'
+#else
+       left[0] != '\\' && left[1] != ':'
+#endif
+     ) {
+     extern void add_prefs_path(const char *, char*, size_t);
+     strcpy(buffer, left);
+     add_prefs_path(buffer, left, sizeof(left));
+  }
   if (luaL_loadfile(mud->lua, left)) {
 
       snprintf(buffer, BUFFER_SIZE, "Unable to load LUA script %s: %s\n", left,

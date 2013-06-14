@@ -262,12 +262,7 @@ void load_prefs ()
             } else if (!strcmp(pref, "DefaultPort")) {            
                 prefs.default_port = atoi(value);
             } else if (!strcmp(pref, "LuaConfig")) {
-                FILE *f = fopen(value, "r");
-
-                if (f) {
-                    fclose(f);
-                    prefs.LuaConfig = strdup(value);
-                }
+                prefs.LuaConfig = strdup(value);
             } else { // import colors
                 int i = 0;
 
