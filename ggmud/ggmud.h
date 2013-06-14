@@ -130,6 +130,8 @@ struct prefs_data {
     gint MSPDownload;
     gint MSPInline;
     gint ShowURL;
+    char default_host[256];
+    gint default_port;
 };
 
 #define WARN GTK_MESSAGE_WARNING
