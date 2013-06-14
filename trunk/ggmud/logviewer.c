@@ -52,8 +52,6 @@ LoadFile (char *sFilename)
     char buffer[BUF_SIZE];
     int nchars;
     FILE *infile;
-    struct stat fileStatus;
-    long fileLen = 0;
 
     GtkTextBuffer *b = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text));
     GtkTextIter begin, end;
@@ -61,9 +59,6 @@ LoadFile (char *sFilename)
     gtk_text_buffer_get_bounds(b, &begin, &end);
     gtk_text_buffer_delete(b, &begin, &end);
     
-    stat (sFilename, &fileStatus);
-    fileLen = fileStatus.st_size;
-
     infile = fopen (sFilename, "r");
       
     if (infile) {
@@ -224,7 +219,6 @@ static void MyCreateMenu (GtkWidget *window, GtkWidget *vbox_main)
 {
     GtkWidget *menubar;
     GtkWidget *menu;
-    GtkWidget *menuitem;
 
     accel_group = gtk_accel_group_new ();
 //    gtk_accel_group_attach (accel_group, GTK_OBJECT (window));
@@ -235,18 +229,18 @@ static void MyCreateMenu (GtkWidget *window, GtkWidget *vbox_main)
 
     menu = CreateBarSubMenu (menubar, "File");
 
-    menuitem = CreateStockMenuItem (menu, GTK_STOCK_OPEN, 
+    CreateStockMenuItem (menu, GTK_STOCK_OPEN, 
                      GTK_SIGNAL_FUNC (menu_Open), "open");
 
-    menuitem = CreateMenuItem (menu, NULL, NULL, 
+    CreateMenuItem (menu, NULL, NULL, 
                      NULL, NULL, NULL);
 
-    menuitem = CreateStockMenuItem (menu, GTK_STOCK_QUIT, 
+    CreateStockMenuItem (menu, GTK_STOCK_QUIT, 
                      GTK_SIGNAL_FUNC (menu_Quit), window);
 
     menu = CreateBarSubMenu (menubar, "Search");
 
-    menuitem = CreateStockMenuItem (menu, GTK_STOCK_FIND, 
+    CreateStockMenuItem (menu, GTK_STOCK_FIND, 
                      GTK_SIGNAL_FUNC (menu_Find), "find");
 
 }

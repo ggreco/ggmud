@@ -815,11 +815,11 @@ char *ParseAnsiColors(const char *txt)
 {
   static char buf[BUFFER_SIZE*2];
   char tmp[256];
-  register int i,l,f=0;
+  register int l,f=0;
 
   *buf = 0;
 
-  for(i=0,l=0;*txt;) {
+  for(l=0;*txt;) {
     if(*txt=='$' && (toupper(*(txt+1)) == 'C' || 
                     (*(txt+1)=='$' && toupper(*(txt+2)) == 'C'))) {
       if(*(txt+1)=='$')

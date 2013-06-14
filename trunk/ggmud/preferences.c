@@ -257,6 +257,10 @@ void load_prefs ()
 
                 if(temp > 10 && temp < 1000)
                     tick_size = temp;
+            } else if (!strcmp(pref, "DefaultHost")) {
+                strncpy(prefs.default_host, value, sizeof(prefs.default_host) - 1);
+            } else if (!strcmp(pref, "DefaultPort")) {            
+                prefs.default_port = atoi(value);
             } else if (!strcmp(pref, "LuaConfig")) {
                 FILE *f = fopen(value, "r");
 

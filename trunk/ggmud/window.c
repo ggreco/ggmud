@@ -624,6 +624,14 @@ void quit (GtkWidget *widget, gpointer data)
 void cbox()
 {
     GtkWidget *w = create_window_connect();
+    if (*prefs.default_host) {
+        gtk_entry_set_text(GTK_ENTRY(lookup_widget(w, "entry_host")), prefs.default_host);
+        if (prefs.default_port > 0 && prefs.default_port < 65536) {
+            char buffer[32];
+            sprintf(buffer, "%d", prefs.default_port);
+            gtk_entry_set_text(GTK_ENTRY(lookup_widget(w, "entry_port")), buffer);
+        }
+    }
     gtk_window_set_skip_taskbar_hint (GTK_WINDOW(w), prefs.SkipTaskbar);
     gtk_widget_show(w);
     gtk_window_set_transient_for(GTK_WINDOW(w), GTK_WINDOW(mud->window));
