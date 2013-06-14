@@ -190,8 +190,26 @@ int do_luaidle(lua_State *s)
     if (mud->lua_idle_function)
         free(mud->lua_idle_function);
     
-    mud->lua_idle_function = strdup(trig);
+    if (trig)
+        mud->lua_idle_function = strdup(trig);
+    else
+        mud->lua_idle_function = NULL;
     
+    return 0;
+}
+
+int do_luafilter(lua_State *s)
+{
+    const char *trig = luaL_checkstring(s, 1);  
+    
+    if (mud->lua_filter_function)
+        free(mud->lua_filter_function);
+    
+    if (trig)
+        mud->lua_filter_function = strdup(trig);
+    else
+        mud->lua_filter_function = NULL;
+
     return 0;
 }
 
@@ -343,6 +361,7 @@ void init_lua()
     lua_register(mud->lua, "send", do_luasend);
     lua_register(mud->lua, "timer", do_luatimer);
     lua_register(mud->lua, "idle_function", do_luaidle);
+    lua_register(mud->lua, "filter_function", do_luafilter);
     lua_register(mud->lua, "clear", do_luaclear);
 }
 

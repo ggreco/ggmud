@@ -124,13 +124,44 @@ void tintin_puts2(const char *cptr, struct session *ses)
   textfield_unfreeze();
 }
 
+int check_lua_filter(const char *cptr)
+{
+#ifdef WITH_LUA
+    if (mud->lua_filter_function) {
+        char buf[BUFFER_SIZE];
+        extern char *strip_ansi(const char *str, char *buffer);
+        strip_ansi(cptr, buf);
+        lua_getglobal(mud->lua, mud->lua_filter_function);
+        lua_pushlstring(mud->lua, buf, strlen(buf));
+
+        if (lua_pcall(mud->lua, 1, 1, 0) != 0) {
+            char buffer[1024];
+            sprintf(buffer, "Error running filter function %s: %s\n", 
+                    mud->lua_filter_function, lua_tostring(mud->lua, -1));
+            textfield_add(mud->text, buffer, MESSAGE_ERR);
+        }
+        else if (!lua_toboolean(mud->lua, -1)) {
+            lua_pop(mud->lua, 1);
+            return 0;
+        }
+        lua_pop(mud->lua, 1);
+    }
+#endif
+    return 1;
+}
+
 void tintin_puts(const char *cptr, struct session *ses)
 {
- /* bug! doesn't do_one_line() sometimes send output to stdout? */
+ if (!check_lua_filter(cptr))
+    return;
+
   if(ses) {
     char buf[BUFFER_SIZE];
+    // truncate if longer (should not happen)
 
-    sprintf(buf, "%s", cptr);
+    buf[BUFFER_SIZE - 1] = 0;
+    strncpy(buf, cptr, BUFFER_SIZE - 1);
+
     do_one_line(buf, ses);
     if(strcmp(buf, "."))
       tintin_puts2(buf, ses);
@@ -581,8 +612,12 @@ static void readmud(struct session *s)
             if(*next_line == '\r')			/* ignore \r's */
                 next_line++;
         }
-        strcpy(linebuf, line);
-        do_one_line(linebuf, s);		/* changes linebuf */
+        if (check_lua_filter(line)) {
+            strcpy(linebuf, line);
+            do_one_line(linebuf, s);		/* changes linebuf */
+        }
+        else // if we are ordered to skip this line, we do the same as the #gag command does
+            strcpy(linebuf, ".");
 
         /* added by DasI */
         if( (s == mud->activesession) || s->snoopstatus )
