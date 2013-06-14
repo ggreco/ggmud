@@ -101,7 +101,7 @@ lua/libluaw32.a: lua/*c
     "AR=$(CROSSDIR)bin/ar rcu" "MYLIBS=-L../sq3 -lsq3w32" "MYLDFLAGS=-s" lua.exe
 
 $(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libzlib.a httpfetch/libfetch.a sq3/libsq3.a
-	$(CC) $(OBJS) -o $(PROJECTNAME) $(LIBS) --as-needed
+	$(CC) $(OBJS) -o $(PROJECTNAME) $(LIBS) 
 	echo -n >ggmud.version "$(VERSION)"
 
 $(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a lua/libluaw32.a zlib/libzw32.a httpfetch/libfetchw32.a sq3/libsq3w32.a

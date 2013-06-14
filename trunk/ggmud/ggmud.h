@@ -80,6 +80,7 @@ typedef struct {
 #ifdef WITH_LUA
     lua_State *lua;
     char *lua_idle_function;
+    char *lua_filter_function;
 #endif
     struct connreq *conn;
     msp_control *msp;

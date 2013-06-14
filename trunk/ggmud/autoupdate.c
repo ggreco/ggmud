@@ -53,8 +53,11 @@ void check_for_updates()
 
     if( http_fetch(buffer, &fileBuf) != -1) {
         if (!strstr(fileBuf, "NEWEST")) {
-            sscanf(fileBuf, "(%[^)])", last_version);
-            need_update = TRUE;
+            // if a firewall refuses the connection do not tell user we need to update!
+            if (strstr(fileBuf, "need to update")) {
+                sscanf(fileBuf, "(%[^)])", last_version);
+                need_update = TRUE;
+            }
         }
     }
 
