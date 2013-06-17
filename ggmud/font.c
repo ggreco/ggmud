@@ -37,7 +37,11 @@ struct GGFont fonts[FONTS_NUM] =
 };
 
 
+#ifdef WIN32
 #define DEFAULT_FONT "Monospace 10"
+#else
+#define DEFAULT_FONT "Monospace 12"
+#endif
 
 static void setfonts()
 {

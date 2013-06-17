@@ -82,7 +82,7 @@ int check_ggmud_dir (gchar *dirname, int silent) {
                 fclose(f);                
                 copy_file("aliases", dirname);
                 copy_file("triggers", dirname);
-                copy_file("highlights", dirname);
+                copy_file("highlight", dirname);
                 copy_file("script.lua", dirname);
                 // only one of the following is present in any platform
                 copy_file("ggmud.prf", dirname);

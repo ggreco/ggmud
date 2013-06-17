@@ -24,8 +24,8 @@ Linux:
 Win32:
  gtk 2.x (builtin in the installer)
 MacOSX:
- Apple or Fink X11 server
- GTK 2.x (builtin in the app bundle)
+ intel x86 processor, OSX 10.5+
+ gtk 2.x (builtin in the application bundle)
 
 Features
 --------
@@ -43,9 +43,9 @@ Features
 - GUI panels to configure colors, aliases and other stuff.
 - Connection wizard with autoconnect.
 - Telnet support
-- (new) Socks 4/5 proxy support
-- (new) Macro editor
-- (new) MCCP mud compression support
+- Socks 4/5 proxy support
+- Macro editor
+- MCCP mud compression support
 
 Documentation
 -------------
