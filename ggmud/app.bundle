@@ -10,13 +10,19 @@
   <plist>${project}/Info.plist</plist>
 
   <!-- The executable for the application -->
-  <main-binary>${prefix}/../../projects/ggmud/ggmud/ggmud</main-binary>
+  <main-binary>${prefix}/../../ggmud/ggmud</main-binary>
 
   <!-- Modules for GTK+ (image loaders, etc) -->
   <binary>${prefix}/lib/gtk-2.0</binary>
   <binary>${prefix}/lib/gdk-pixbuf-2.0</binary>
+  <binary>
+    ${prefix}/lib/${gtkdir}/${pkg:${gtk}:gtk_binary_version}/engines/libclearlooks.so
+</binary>
 
-
+  <!-- Any additional data, like images, or Glade files -->
+  <data dest="${bundle}/Contents/Resources/etc/gtk-2.0/">
+      ${prefix}/share/themes/Clearlooks/gtk-2.0/gtkrc
+  </data>
   <!-- Any additional data, like images, or Glade files -->
   <data dest="${bundle}/Contents/Resources">
     ${project}/gg_help.txt
