@@ -265,12 +265,13 @@ fix_bundle_environment ()
     if (!strstr(execpath, ".app"))
         return;
 
-    fprintf(stderr, "EXECPATH: %s", execpath);
+    fprintf(stderr, "EXECPATH: %s\n", execpath);
     c = strrchr(execpath, '/');
     *c = 0;
+    strcat(execpath, "/../Resources");
     chdir(execpath);
     getcwd(path, sizeof(path));
-    fprintf(stderr, "CWD: %s", path);
+    fprintf(stderr, "CWD: %s\n", path);
 /* 
 	gchar * dir_path = g_path_get_dirname (execpath);
 	strcpy(path, dir_path);

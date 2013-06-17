@@ -123,9 +123,9 @@ dist-linux: ggmud
 	tar czf ../ggmud-linux-$(VERSION).tgz ggmud gg_help.txt README
 
 
-dmg-ige:
+dmg:
 		mkdir -p dest
-	    ige-mac-bundler app.bundle
+	    gtk-mac-bundler app.bundle
 	    mv ~/Desktop/ggmud.app dest/GGMud.app
 	    cp README dest/README.txt
 	    hdiutil makehybrid -hfs -hfs-volume-name GGMud -hfs-openfolder dest dest -o TMP.dmg
@@ -133,7 +133,7 @@ dmg-ige:
 	    rm -rf TMP.dmg dest
 
 
-dmg: ggmud
+dmg-old: ggmud
 	sh makeapp.sh
 	-rm -rf dest TMP.dmg
 	mkdir dest
