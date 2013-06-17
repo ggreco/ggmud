@@ -945,7 +945,7 @@ void popup_window (int type, const gchar *message, ...)
 
     d = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL,
                            type, GTK_BUTTONS_OK, NULL);
-    gtk_message_dialog_set_markup(GTK_DIALOG(d), buf);
+    gtk_message_dialog_set_markup(GTK_MESSAGE_DIALOG(d), buf);
     gtk_dialog_run(GTK_DIALOG(d));
    
     gtk_widget_destroy(d);
