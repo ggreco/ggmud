@@ -20,12 +20,15 @@
 </binary>
 
   <!-- Any additional data, like images, or Glade files -->
-  <data dest="${bundle}/Contents/Resources/etc/gtk-2.0/">
+  <data dest="${bundle}/Contents/Resources/etc/gtk-2.0/gtkrc">
       ${prefix}/share/themes/Clearlooks/gtk-2.0/gtkrc
   </data>
   <!-- Any additional data, like images, or Glade files -->
   <data dest="${bundle}/Contents/Resources">
     ${project}/gg_help.txt
+  </data>
+  <data dest="${bundle}/Contents/Resources">
+    ${project}/leu/*
   </data>
   <data dest="${bundle}/Contents/Resources">
     ${project}/GGMud.icns
