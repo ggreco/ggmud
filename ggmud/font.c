@@ -37,7 +37,7 @@ struct GGFont fonts[FONTS_NUM] =
 };
 
 
-#define DEFAULT_FONT "Monospace 12"
+#define DEFAULT_FONT "Monospace 10"
 
 static void setfonts()
 {
