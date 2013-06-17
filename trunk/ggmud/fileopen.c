@@ -68,7 +68,8 @@ int check_ggmud_dir (gchar *dirname, int silent) {
             popup_window (ERR, "%s already exists and is not a directory!", dirname);
         }
     } else {
-        if (mkdir(dirname, 0777)) {
+        if (mkdir(dirname, 0777) == 0) {
+            
             FILE *f;
         /* this isn't dangerous, umask modifies it */
             if (!silent) {
@@ -77,7 +78,7 @@ int check_ggmud_dir (gchar *dirname, int silent) {
                 do_manual();
             }
             // install leu cfg if we have it
-            if ((f = fopen("aliases", "R"))) {
+            if ((f = fopen("aliases", "r"))) {
                 fclose(f);                
                 copy_file("aliases", dirname);
                 copy_file("triggers", dirname);
@@ -86,6 +87,7 @@ int check_ggmud_dir (gchar *dirname, int silent) {
                 // only one of the following is present in any platform
                 copy_file("ggmud.prf", dirname);
                 copy_file("Preference", dirname);
+                copy_file("connections", dirname);
             }
         } else {
             popup_window (ERR, "%s NOT created: %s", dirname, strerror (errno));
@@ -158,8 +160,7 @@ void add_prefs_path(const char *src, char *path, size_t max_len)
     else
         strcpy(path, ".");
 #else
-    static int check_migration = 0;
-    const char *dir = "/ggmud";
+    const char *dir = "\\ggmud";
     TCHAR szPath[MAX_PATH];
 
     if(SUCCEEDED(SHGetFolderPath(NULL, 
@@ -169,7 +170,7 @@ void add_prefs_path(const char *src, char *path, size_t max_len)
                              szPath))) {
         home = szPath;
 
-       g_snprintf(path, max_len, "%s/%s", szPath, dir);
+       g_snprintf(path, max_len, "%s%s", szPath, dir);
     }
     else {
         home = NULL;
@@ -201,8 +202,7 @@ FILE *fileopen (gchar *fname, gchar *mode) {
 
     if (check_ggmud_dir(path, 0)) return NULL;
 #else
-    static int check_migration = 0;
-    gchar *dir = "/ggmud";
+    gchar *dir = "\\ggmud";
     TCHAR szPath[MAX_PATH];
 
     if(SUCCEEDED(SHGetFolderPath(NULL, 
@@ -212,12 +212,11 @@ FILE *fileopen (gchar *fname, gchar *mode) {
                              szPath))) {
         home = szPath;
 
-        // version 0.7+ changes the location of the configuration files
-        // this routine perform a migration
-        if (!check_migration) {
-            g_snprintf(path, sizeof(path), "%s/%s", szPath, dir);
+        g_snprintf(path, sizeof(path), "%s%s", szPath, dir);
+#if 0
+    static int check_migration = 0;
+        if (!check_migrate) {
             if (check_ggmud_dir(path, 1)) return NULL;
-
             migrate_config(path,
                     "triggers", "aliases", "gag", "font", "macro",
                     "connections", "complete", "highlight",  "ggmud.prf",
@@ -225,6 +224,9 @@ FILE *fileopen (gchar *fname, gchar *mode) {
                     NULL);
             check_migration = 1;
         }
+#else
+        if (check_ggmud_dir(path, 0)) return NULL;
+#endif
     }
     else {
         home = NULL;
