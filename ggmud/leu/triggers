@@ -1,0 +1,12 @@
+#action { perde di intensita'} {#tickset} {tick}
+#action {comincia a sorgere} {#tickset} {tick}
+#action {dissolves into a fertile soil.} {#tickset} {tick}
+#action {e` esattamente sopra di} {#tickset} {tick}
+#action {ei intrappolato da una ragna} {gt Sono webbatooooo! Dispellatemi se potete!} {varie}
+#action {erchi di fuggire verso %1} {#var lastdir {%1}} {varie}
+#action {iniziata stendendo il} {#tickset} {tick}
+#action {luna tramonta lentamente} {#tickset} {tick}
+#action {panico! Non puoi fuggire!} {flee} {autoflee}
+#action {perde intensita} {#tickset} {tick}
+#action {sole cala lentamente scom} {#tickset} {tick}
+

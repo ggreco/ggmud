@@ -1,0 +1,9 @@
+#alias {fl} {flee}
+#alias {fly} {cast 'fly' }
+#alias {gr} {group}
+#alias {heal} {cast 'heal'}
+#alias {knock} {cast 'knock' %1;open %1}
+#alias {leu} {#ses leu {leu.leu.it 6000}}
+#alias {loc} {cast 'locate'}
+#alias {true} {cast 'true sight'}
+#alias {wake} {wak;stand}
