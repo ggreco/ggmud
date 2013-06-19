@@ -258,9 +258,9 @@ winsock_init()
 void
 connection_part_two(int sockfd, struct tempdata *mystr)
 {
-    int onoff = 0;
     int sz = 0x10000;
 
+    int onoff = 0;
     ioctl(sockfd, FIONBIO, (char *)&onoff);
 
     if (mud->conn) {
@@ -450,8 +450,10 @@ void open_connection (const char *name, const char *host, const char *port)
 
         their_addr = sock_server;
     }
-
-    ioctl(sockfd, FIONBIO, (char *)&onoff);
+#ifdef WIN32       
+    else // we want for the win32 version only to do synchronous connect if we are using socks.
+#endif
+        ioctl(sockfd, FIONBIO, (char *)&onoff);
     
     if (connect (sockfd, (struct sockaddr *)&their_addr,
                  sizeof (struct sockaddr)) == -1 ) {

@@ -1,3 +1,27 @@
+0.9.2:
+	- Added new lua command filter_function that let you filter every
+	  line received from the mud with LUA. Filter function MUST return
+	  a boolean, if the boolean is false the filtered text is not
+	  show nor processed by the ggmud internal engine.
+	- Fixed socks support on Windows
+	- Added a new preset of aliases/triggers/lua script for the italian 
+	  mud Lumen & Umbra, while these may not be used directly in other
+	  muds they are useful for learning some GGMud programming basics.
+	- Reduced the size of the default font on Windows.
+	- Increased the default size of the main window from 600x400 to 
+	  800x600.
+	- New build system based on CMake, it allows easily to build on
+	  linux every GGMud version, the old system is still available
+	  using make -f Makefile.legacy.
+	- The lua script you specify on the configuration does not need
+	  anymore a full absolute path to be loaded, if the script has
+	  no path we'll search for it in the GGMud configuration 
+	  directory.
+	- GGMud is now distributed with GTK 2.24.10 on windows.
+	- GGMud for OSX is now an intel only 10.5+ binary (but you can
+	  build yourself an X11 or 10.4 or PPC version from sources 
+	  if you have the skills to do so).
+
 0.9.1:
 	- Added menu option to clear the review buffer.
 	- Some optimizations in network input handling (removed a data
