@@ -47,6 +47,22 @@ Features
 - Macro editor
 - MCCP mud compression support
 
+
+Build
+-----
+
+Recent versions of GGMud are built with CMake.
+
+To build on unix-like platforms:
+
+cd <ggmud_dir>
+mkdir build
+cd build
+cmake ..
+make
+
+Please note that you will need GTK 2.4+ development headers/libraries installed.
+
 Documentation
 -------------
 You can find GGMud documentation at the following URL:
