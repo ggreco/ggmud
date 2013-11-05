@@ -3,6 +3,8 @@ local function dump(name, v)
     show(name .. ": " .. v)
 end
 
+bashok = 0
+bashfail = 0
 combat = false
 in_group = false
 standing = true
@@ -112,6 +114,8 @@ function handle_ask(c, t) handle_speaks(c, t, "$c0006") end
 function handle_say(c, t) handle_speaks(c, t, "$c0015") end
 function handle_gt(c, t) handle_speaks(c, t, "$c0012") end
 
+function bash_ok() bashok = bashok + 1 end
+function bash_ko() bashfail = bashfail + 1 standing = false send("stand") end
 function standing_ok()
 	if standing == false then 
 		standing = true 
