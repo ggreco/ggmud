@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 project(GGMud)
-set(VERSION "0.9.2")
+set(VERSION "0.9.3")
 
 find_package (PkgConfig REQUIRED)
 pkg_check_modules (GTK2 REQUIRED gtk+-2.0)
