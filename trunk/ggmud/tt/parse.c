@@ -87,6 +87,11 @@ extern void chat_command(const char *arg, struct session *ses);
 extern void chatwho_command(const char *arg, struct session *ses);
 extern void chconnect_command(const char *arg,struct session *ses);
 extern void chdisconnect_command(struct session *ses);
+extern void slow_command(const char *, struct session *);
+extern void stop_command(const char *, struct session *);
+extern void step_command(const char *, struct session *);
+extern void ok_command(const char *, struct session *);
+extern int check_msp(char *);
 
 extern char lua_char;
 
