@@ -776,8 +776,8 @@ spawn_gui()
   {
       extern void sync_menu_takeover_menu(GtkMenuShell *);
 
-      GtkWidget *menu = lookup_widget(mud->window, "menubar_main");
-      sync_menu_takeover_menu (GTK_MENU_SHELL(menu));
+//      GtkWidget *menu = lookup_widget(mud->window, "menubar_main");
+//      sync_menu_takeover_menu (GTK_MENU_SHELL(menu));
   }
 #endif
 

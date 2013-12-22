@@ -250,25 +250,14 @@ struct session *new_session(const char *name, const char *address,
   newsession->snoopstatus = FALSE;
   newsession->logfile = NULL;
   newsession->ignore = DEFAULT_IGNORE;
-#if 0
-  newsession->aliases = copy_list(common_aliases, ALPHA);
-  newsession->actions = copy_list(common_actions, PRIORITY);
-  newsession->subs = copy_list(common_subs, ALPHA);
-  newsession->myvars = copy_list(common_myvars, ALPHA);
-  newsession->highs = copy_list(common_highs, ALPHA);
-  newsession->myfuncs = copy_list(common_functions, ALPHA);
-  newsession->pathdirs = copy_list(common_pathdirs, ALPHA);
-  newsession->antisubs = copy_list(common_antisubs, ALPHA);
-#else
   newsession->aliases = common_aliases;
   newsession->actions = common_actions;
-  newsession->subs = common_subs, ALPHA;
+  newsession->subs = common_subs;
   newsession->myvars = common_myvars;
   newsession->highs = common_highs;
   newsession->myfuncs = common_functions;
   newsession->pathdirs = common_pathdirs;
   newsession->antisubs = common_antisubs;
-#endif
   newsession->socket = sock;
   newsession->socketbit = 1<<sock;
   newsession->next = sessionlist;
