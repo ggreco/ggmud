@@ -28,6 +28,10 @@
 #include "include/action.h"
 #include "include/variables.h"
 
+#if defined(__APPLE__) && defined(GTKQUARTZ)
+#include "gtk-mac-menu.h"
+#endif
+
 /* External variables used */
 extern int hide_input;
 
@@ -776,7 +780,12 @@ spawn_gui()
   {
       extern void sync_menu_takeover_menu(GtkMenuShell *);
 
-//      GtkWidget *menu = lookup_widget(mud->window, "menubar_main");
+      GtkWidget *menu = lookup_widget(mud->window, "menubar_main"),
+                *quit_item = lookup_widget(mud->window, "menuitem_quit");
+      if (menu)
+          gtk_mac_menu_set_menu_bar(GTK_MENU_SHELL(menu));
+      if (quit_item)
+          gtk_mac_menu_set_quit_menu_item(GTK_MENU_ITEM(quit_item));
 //      sync_menu_takeover_menu (GTK_MENU_SHELL(menu));
   }
 #endif
