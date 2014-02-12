@@ -560,3 +560,4 @@ window_subs                            (GtkMenuItem     *menuitem,
 void
 on_clear_review_buffer_activate        (GtkMenuItem     *menuitem,
                                         gpointer         user_data);
+
