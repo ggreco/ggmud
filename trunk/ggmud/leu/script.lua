@@ -126,15 +126,12 @@ function standing_ko()
 	if standing == true then 
 		standing = false 
         send("stand")
-
-        check_afk()
 	end 
 end
 
 function disarm_ko()
 	standing = false
 	send("stand")
-    check_afk()
 end
 
 local function color(number)
