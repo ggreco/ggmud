@@ -706,8 +706,7 @@ void send_to_connection (GtkWidget *widget, gpointer data)
     hist_add(entry_text);
 
     if ( prefs.KeepText && !hide_input)
-        gtk_entry_select_region (mud->ent, 0,
-                mud->ent->text_length);
+        gtk_editable_select_region (GTK_EDITABLE(mud->ent), 0, -1);
     else
         gtk_entry_set_text (mud->ent, "");
 
