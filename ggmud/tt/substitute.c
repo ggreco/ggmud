@@ -70,12 +70,18 @@ void parse_sub(const char *arg, struct session *ses)
       tintin_puts2("#THAT SUBSTITUTE IS NOT DEFINED.", ses);
   }
   else {
-    if((ln = searchnode_list(mysubs, left)))
+    extern char *ParseAnsiColors(const char *);
+    char *d;
+
+    if ((ln = searchnode_list(mysubs, left)))
       deletenode_list(mysubs, ln);
-    insertnode_list(mysubs, left, right, "0", ALPHA);
+
+    d = ParseAnsiColors(right);
+
+    insertnode_list(mysubs, left, d, "0", ALPHA);
     subnum++;
     if(strcmp(right, "."))
-      sprintf(result, "#Ok. {%s} now replaces {%s}.", right, left);
+      sprintf(result, "#Ok. {%s} now replaces {%s}.", d, left);
     else
       sprintf(result, "#Ok. {%s} is now gagged.", left);
     if(mesvar[2])

@@ -1,26 +1,33 @@
 <?xml version="1.0"?> <!--*- mode: xml -*-->
 <app-bundle>
   <meta>
-    <prefix>/Users/gabry/gtk/inst</prefix>
+    <prefix name="default">/Users/gabry/gtk/inst</prefix>
     <run-install-name-tool/>
     <image>ggmud.dmg</image>
     <destination overwrite="yes">${env:HOME}/Desktop</destination>
   </meta>
 
-  <plist>${project}/Info.plist</plist>
+  <plist>${project}/build/Info.plist</plist>
 
   <!-- The executable for the application -->
-  <main-binary>${prefix}/../../ggmud/ggmud</main-binary>
+  <main-binary>${prefix}/../../local_projects/ggmud/build/ggmud</main-binary>
 
   <!-- Modules for GTK+ (image loaders, etc) -->
   <binary>${prefix}/lib/gtk-2.0</binary>
-  <binary>${prefix}/lib/gdk-pixbuf-2.0</binary>
   <binary>
-    ${prefix}/lib/${gtkdir}/${pkg:${gtk}:gtk_binary_version}/engines/libclearlooks.so
-</binary>
+    ${prefix}/lib/pango/${pkg:pango:pango_module_version}/modules/
+  </binary>
+
+  <binary>
+      ${prefix}/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so
+  </binary>
+
+  <translations name="gtk20">
+    ${prefix}/share/locale
+  </translations>
 
   <!-- Any additional data, like images, or Glade files -->
-  <data dest="${bundle}/Contents/Resources/etc/gtk-2.0/gtkrc">
+  <data dest="${bundle}/Contents/Resources/etc/${gtkdir}/gtkrc">
       ${prefix}/share/themes/Clearlooks/gtk-2.0/gtkrc
   </data>
   <!-- Any additional data, like images, or Glade files -->
