@@ -272,7 +272,7 @@ fix_bundle_environment ()
     chdir(execpath);
     getcwd(path, sizeof(path));
     fprintf(stderr, "CWD: %s\n", path);
-/* 
+ 
 	gchar * dir_path = g_path_get_dirname (execpath);
 	strcpy(path, dir_path);
 	strcat(path, "/../Frameworks/clearlooks");
@@ -301,6 +301,5 @@ fix_bundle_environment ()
 	strcpy(path + strlen(dir_path), "/../Resources/gdk-pixbuf.loaders");
 	setenv ("GDK_PIXBUF_MODULE_FILE", path, 1);
     g_free(dir_path);
-    */
 }
 #endif

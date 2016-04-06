@@ -776,7 +776,7 @@ spawn_gui()
   mud->window = create_window_main();
   gtk_window_set_skip_taskbar_hint (GTK_WINDOW(mud->window), prefs.SkipTaskbar);
 
-#if defined(__APPLE__) && defined(GTKQUARTZ)
+#if defined(__APPLE__) && defined(GTKQUARTZ) && !defined(__x86_64__)
   {
       extern void sync_menu_takeover_menu(GtkMenuShell *);
 

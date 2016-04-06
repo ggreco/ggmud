@@ -116,10 +116,16 @@ gint change_focus(GtkWidget *w, GdkEventKey *event, gpointer data)
 
   if ( (event->state & GDK_CONTROL_MASK) == GDK_CONTROL_MASK ||
          event->keyval == GDK_Control_L ||
-         event->keyval == GDK_Control_R ) {
+         event->keyval == GDK_Control_R 
+#ifdef __APPLE__
+         || (event->state & GDK_META_MASK) == GDK_META_MASK ||
+         event->keyval == GDK_Meta_L || event->keyval == GDK_Meta_R
+#endif
+         ) {
 
       if(event->keyval == GDK_c ||
-         event->keyval == GDK_C ) {
+         event->keyval == GDK_C        
+         ) {
 //        textfield_add(mud->text, "Grabbato ctrl+c\n", MESSAGE_NORMAL);
 //        gtk_editable_copy_clipboard(GTK_EDITABLE(w)); // it was mud->text
       
