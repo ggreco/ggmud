@@ -1,7 +1,10 @@
 0.9.3:
 	- Fixed behaviour of menu shortcuts on OSX Mavericks
+    - Supported CMD-C/CMD-V copy/paste on OSX
 	- Added a few new menu shortcuts (ALT+m - macros, ALT-g - gags...)
 	- Fixed Lumen & Umbra specific autostand lua trigger.
+    - Added support for https URLs.
+
 0.9.2:
 	- Added new lua command filter_function that let you filter every
 	  line received from the mud with LUA. Filter function MUST return

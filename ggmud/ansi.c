@@ -182,7 +182,9 @@ void check_for_url(GtkTextBuffer *b, int offset)
     if (gtk_text_iter_is_end(&it))
         return;
 
-    while (gtk_text_iter_forward_search(&it, "http:/", 0, &start, &end, NULL)) {
+    // added support for https urls
+    while (gtk_text_iter_forward_search(&it, "http:/", 0, &start, &end, NULL) ||
+           gtk_text_iter_forward_search(&it, "https:/", 0, &start, &end, NULL)) {
         it = end;
         do 
         {
