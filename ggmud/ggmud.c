@@ -277,6 +277,7 @@ fix_bundle_environment ()
 	strcpy(path, dir_path);
 	strcat(path, "/../Frameworks/clearlooks");
 	setenv ("GTK_PATH", path, 1);
+#if 0
 	strcat(path + strlen(dir_path), "/../Resources/locale");
 //	localedir = strdup (path);
 	// write a pango.rc file and tell pango to use it
@@ -290,16 +291,41 @@ fix_bundle_environment ()
     }
 	// gettext charset aliases
 	setenv ("CHARSETALIASDIR", path, 1);
-
-	// data prefix
-	strcpy(path + strlen(dir_path), "/../Resources/share/themes");
-	setenv ("GTK_DATA_PREFIX", path, 1);
-	// font config
+    // set fontconfig
 	strcpy(path + strlen(dir_path), "/../Resources/fonts.conf");
 	setenv ("FONTCONFIG_FILE", path, 1);
 	// GDK Pixbuf loader module file
-	strcpy(path + strlen(dir_path), "/../Resources/gdk-pixbuf.loaders");
-	setenv ("GDK_PIXBUF_MODULE_FILE", path, 1);
+#endif
+	strcpy(path + strlen(dir_path), "/Resources/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache");
+	setenv ("GDK_PIXBUF_MODULE_FILE", path, 1);    
+    // pango prefix
+    strcpy(path + strlen(dir_path), "/Resources/etc");
+    setenv("PANGO_SYSCONFDIR", path, 1);
+    strcpy(path + strlen(dir_path), "/Resources/lib");
+    setenv("PANGO_LIBDIR", path, 1);            
+
+#if 0
+   	strcpy(path + strlen(dir_path), "/../Resources/pango.rc");
+	if ((f = fopen(path, "w"))) {
+        fprintf(f, "[Pango]\nModuleFiles=%s/../Resources/pango.modules\n",
+                dir_path);
+        fclose(f);
+		setenv ("PANGO_RC_FILE", path, 1);
+    }
+    else 
+        fprintf(stderr, "Unable to write to %s\n", path);
+
+   	strcpy(path + strlen(dir_path), "/../Resources/etc/pango.modules");
+	if ((f = fopen(path, "w"))) {
+        fprintf(f, "%s/../Resources/lib/pango/1.8.0/modules/pango-basic-coretext.so BasicScriptEngineCoreText PangoEngineShape PangoRenderCoreText common:\n", dir_path);
+        fclose(f);
+    }
+    else 
+        fprintf(stderr, "Unable to write to %s\n", path);
+#endif
+	// data prefix
+	strcpy(path + strlen(dir_path), "/../Resources/share/themes");
+	setenv ("GTK_DATA_PREFIX", path, 1);
     g_free(dir_path);
 }
 #endif
