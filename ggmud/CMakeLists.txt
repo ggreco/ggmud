@@ -1,4 +1,9 @@
 cmake_minimum_required (VERSION 2.6)
+
+# this must be done before anything else...
+set(CMAKE_OSX_SYSROOT "/Users/gabry/MacOSX10.8.sdk")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.8")
+
 project(GGMud)
 set(VERSION "0.9.3")
 
@@ -26,9 +31,6 @@ else ()
         message(STATUS "OSX compilation detected, gtk libraries: ${GTK2_LIBRARIES}.")
         configure_file(Info.plist.in "${PROJECT_BINARY_DIR}/Info.plist")        
         set(ADDITIONAL_SOURCES gtk-mac-menu.m)
-        set(CARBON_LIBRARY "-framework Carbon")
-        MARK_AS_ADVANCED(CARBON_LIBRARY)
-        message(STATUS "Carbon lib: ${CARBON_LIBRARY}")
         set(ADDITIONAL_LIBS ${CARBON_LIBRARY} ${ADDITIONAL_LIBS} "objc")
     else()
         add_definitions("-DENABLE_BINRELOC -DBR_PTHREADS=0")
