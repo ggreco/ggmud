@@ -43,7 +43,7 @@ Section "GGMud (required)"
   SetOutPath "$INSTDIR\bin"
   
   ; Put file there
-  File "ggmud.exe"
+  File "build_w64\ggmud.exe"
   File "gg_help.txt"
   File "leu\*"
   

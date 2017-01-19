@@ -1,22 +1,28 @@
-# GG: Potrebbe essere necessario cambiare i path e il nome degli eseguibili di seguito
-#     a seconda della posizione del crosscompiler
+# Sample toolchain file for building for Windows from an Ubuntu Linux system.
+#
+# Typical usage:
+#    *) install cross compiler: `sudo apt-get install mingw-w64 g++-mingw-w64`
+#    *) cd build
+#    *) cmake -DCMAKE_TOOLCHAIN_FILE=~/Toolchain-Ubuntu-mingw64.cmake ..
 
-# this one is important
-SET(CMAKE_SYSTEM_NAME Windows)
+set(CMAKE_SYSTEM_NAME Windows)
+set(TOOLCHAIN_PREFIX x86_64-w64-mingw32)
 
-# specify the cross compiler
-SET(CMAKE_C_COMPILER   i686-w64-mingw32-gcc) 
-SET(CMAKE_CXX_COMPILER i686-w64-mingw32-g++)
-SET(CMAKE_RC_COMPILER i686-w64-mingw32-windres)
-SET(CMAKE_RC_COMPILE_OBJECT "${CMAKE_RC_COMPILER} -O coff -I${CMAKE_CURRENT_SOURCE_DIR} <SOURCE> <OBJECT>")
+# cross compilers to use for C and C++
+set(CMAKE_C_COMPILER ${TOOLCHAIN_PREFIX}-gcc)
+set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++)
+set(CMAKE_RC_COMPILER ${TOOLCHAIN_PREFIX}-windres)
 
-# where is the target environment 
-SET(CMAKE_FIND_ROOT_PATH  /usr/i686-w64-mingw32)
+# target environment on the build host system
+#   set 1st to dir with the cross compiler's C/C++ headers/libs
+set(CMAKE_FIND_ROOT_PATH /usr/local/Cellar/mingw-w64/4.0.4/x86_64-w64-mingw32/)
 
-# search for programs in the build host directories
-SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-# for libraries and headers in the target directories
-SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+# modify default behavior of FIND_XXX() commands to
+# search for headers/libs in the target environment and
+# search for programs in the build host environment
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+
 set(ENV{PKG_CONFIG_PATH} ${CMAKE_FIND_ROOT_PATH}/lib/pkgconfig)
 

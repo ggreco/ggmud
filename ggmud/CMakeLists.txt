@@ -5,7 +5,7 @@ set(CMAKE_OSX_SYSROOT "/Users/gabry/MacOSX10.8.sdk")
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.8")
 
 project(GGMud)
-set(VERSION "0.9.3")
+set(VERSION "0.9.4")
 
 find_package (PkgConfig REQUIRED)
 pkg_check_modules (GTK2 REQUIRED gtk+-2.0)
