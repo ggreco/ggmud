@@ -225,11 +225,8 @@ int main(int argc, char **argv)
 
     load_buttons();
 
-    if (prefs.AutoUpdate) {
-        g_thread_init(NULL);
-
-        g_thread_create((GThreadFunc)check_for_updates, NULL, FALSE, NULL);
-    }
+    if (prefs.AutoUpdate) 
+        g_thread_new("Updater", (GThreadFunc)check_for_updates, NULL);
 
     gtk_window_present(GTK_WINDOW(mud->window));
     gtk_key_snooper_install((GtkKeySnoopFunc)snoop_keys, mud);
@@ -256,14 +253,15 @@ fix_bundle_environment ()
 {
 	char execpath[MAXPATHLEN+1];
 	char path[MAXPATHLEN * 4], *c;
-    FILE *f;
 
     uint32_t pathsz = sizeof (execpath);
 	_NSGetExecutablePath (execpath, &pathsz);
 
 // if we are not in a bundle let's use the system GTK enviroment...
-    if (!strstr(execpath, ".app"))
+    if (!strstr(execpath, ".app")) {
+        fprintf(stderr, "Not in bundle, doing normal startup\n");
         return;
+    }
 
     fprintf(stderr, "EXECPATH: %s\n", execpath);
     c = strrchr(execpath, '/');
@@ -273,59 +271,15 @@ fix_bundle_environment ()
     getcwd(path, sizeof(path));
     fprintf(stderr, "CWD: %s\n", path);
  
-	gchar * dir_path = g_path_get_dirname (execpath);
-	strcpy(path, dir_path);
-	strcat(path, "/../Frameworks/clearlooks");
+	strcpy(path, execpath);
+	strcat(path, "/lib/gtk-2.0");
 	setenv ("GTK_PATH", path, 1);
-#if 0
-	strcat(path + strlen(dir_path), "/../Resources/locale");
-//	localedir = strdup (path);
-	// write a pango.rc file and tell pango to use it
-	strcpy(path + strlen(dir_path), "/../Resources/pango.rc");
-
-	if ((f = fopen(path, "w"))) {
-        fprintf(f, "[Pango]\nModuleFiles=%s/../Resources/pango.modules\n",
-                dir_path);
-        fclose(f);
-		setenv ("PANGO_RC_FILE", path, 1);
-    }
-	// gettext charset aliases
-	setenv ("CHARSETALIASDIR", path, 1);
-    // set fontconfig
-	strcpy(path + strlen(dir_path), "/../Resources/fonts.conf");
-	setenv ("FONTCONFIG_FILE", path, 1);
-	// GDK Pixbuf loader module file
-#endif
-	strcpy(path + strlen(dir_path), "/Resources/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache");
+	strcpy(path + strlen(execpath), "/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache");
 	setenv ("GDK_PIXBUF_MODULE_FILE", path, 1);    
     // pango prefix
-    strcpy(path + strlen(dir_path), "/Resources/etc");
+    strcpy(path + strlen(execpath), "/etc");
     setenv("PANGO_SYSCONFDIR", path, 1);
-    strcpy(path + strlen(dir_path), "/Resources/lib");
+    strcpy(path + strlen(execpath), "/lib");
     setenv("PANGO_LIBDIR", path, 1);            
-
-#if 0
-   	strcpy(path + strlen(dir_path), "/../Resources/pango.rc");
-	if ((f = fopen(path, "w"))) {
-        fprintf(f, "[Pango]\nModuleFiles=%s/../Resources/pango.modules\n",
-                dir_path);
-        fclose(f);
-		setenv ("PANGO_RC_FILE", path, 1);
-    }
-    else 
-        fprintf(stderr, "Unable to write to %s\n", path);
-
-   	strcpy(path + strlen(dir_path), "/../Resources/etc/pango.modules");
-	if ((f = fopen(path, "w"))) {
-        fprintf(f, "%s/../Resources/lib/pango/1.8.0/modules/pango-basic-coretext.so BasicScriptEngineCoreText PangoEngineShape PangoRenderCoreText common:\n", dir_path);
-        fclose(f);
-    }
-    else 
-        fprintf(stderr, "Unable to write to %s\n", path);
-#endif
-	// data prefix
-	strcpy(path + strlen(dir_path), "/../Resources/share/themes");
-	setenv ("GTK_DATA_PREFIX", path, 1);
-    g_free(dir_path);
 }
 #endif
