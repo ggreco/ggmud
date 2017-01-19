@@ -1,0 +1,161 @@
+CROSSDIR = /usr/i586-mingw32msvc/
+export CROSSDIR
+
+CROSSCC = $(CROSSDIR)/bin/gcc
+DEBUGFLAG ?= -g
+GLOBAL_CFLAGS = $(DEBUGFLAG) -DTELNET_SUPPORT -Wall -DWITH_LUA -DENABLE_MCCP -I../zlib 
+OBJDIR = obj/
+CC ?= gcc
+CXX ?= g++
+INCDIR = -Itt -Ilua -Izlib -Ihttpfetch -Isq3
+COMMONLIBS = -Ltt -ltt -Llua -llua -Lzlib -lzlib -Lhttpfetch -lfetch -Lsq3 -lsq3
+CFLAGS = $(INCDIR) `pkg-config gtk+-2.0 --cflags` $(GLOBAL_CFLAGS) -DENABLE_BINRELOC -DBR_PTHREADS=0  
+LIBS = $(COMMONLIBS) `pkg-config gtk+-2.0 gthread-2.0 --libs`
+
+VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )
+OS:=	$(uname)
+MAKE=	make
+
+export DEBUGFLAG
+export GLOBAL_CFLAGS
+
+PROJECTNAME = ggmud
+
+C_SRCS = alias.c ansi.c font.c fileopen.c help.c history.c log.c logviewer.c \
+         macro.c net.c preferences.c ggmud.c triggers.c window.c wizard.c \
+         variables.c highlights.c gags.c timers.c complete.c prefix.c \
+         telnet.c lua.c interface.c callbacks.c support.c socks.c pixmaps.c \
+		 buttons.c autoupdate.c msp.c chat.c sub.c
+
+DEP_SRCS = $(CXX_SRCS) $(C_SRCS)
+
+OBJS = $(patsubst %.c, $(OBJDIR)%.o, $(C_SRCS))
+
+WINOBJS = $(OBJDIR)icon.w $(patsubst %.c, $(OBJDIR)%.w, $(C_SRCS))
+
+CROSSCFLAGS = $(INCDIR) -I$(CROSSDIR)/include/glib-2.0  \
+            -I$(CROSSDIR)/lib/glib-2.0/include/  -I$(CROSSDIR)/include/cairo\
+			-I$(CROSSDIR)/include/gtk-2.0 -I$(CROSSDIR)/include/atk-1.0 \
+            -I$(CROSSDIR)/include/pango-1.0 -I$(CROSSDIR)/lib/gtk-2.0/include \
+            -mwindows -mno-cygwin -mms-bitfields $(GLOBAL_CFLAGS)
+
+# -fnative-struct corrispondente di -mms-bifields nel vecchio mingw32 -s
+
+CROSSLIBS = -s -L$(CROSSDIR)/lib/gtk-2.0 -Ltt -Llua -Lzlib -Lhttpfetch -lttw32 \
+            -lluaw32 -lzw32 -lfetchw32 -Lsq3 -lsq3w32 \
+			-lgtk-win32-2.0.dll -lgdk-win32-2.0.dll \
+            -latk-1.0.dll -lgdk_pixbuf-2.0.dll -lpango-1.0.dll -lpangowin32-1.0.dll \
+            -lgmodule-2.0.dll -lgobject-2.0.dll -lgthread-2.0.dll -lglib-2.0.dll \
+			-lws2_32 -lshell32
+
+all: depend $(PROJECTNAME) 
+
+win32: depend $(PROJECTNAME).exe
+
+$(OBJDIR)%.o: %.c
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+$(OBJDIR)%.o: %.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $<
+
+$(OBJDIR)%.w: %.cpp
+	$(CROSSCXX) $(CROSSCFLAGS) -o $@ -c $<
+
+$(OBJDIR)%.w: %.c
+	$(CROSSCC) $(CROSSCFLAGS) -o $@ -c $<
+
+$(OBJDIR)icon.w: icon.rc icon.ico
+	$(CROSSDIR)/bin/windres $< $@
+
+sq3/libsq3.a: sq3/*c
+	$(MAKE) -C sq3
+
+sq3/libsq3w32.a: sq3/*c
+	$(MAKE) -C sq3 win32
+
+tt/libtt.a: tt/*.c
+	$(MAKE) -C tt 
+
+httpfetch/libfetch.a: httpfetch/*.c
+	$(MAKE) -C httpfetch
+
+tt/libttw32.a: tt/*.c
+	$(MAKE) -C tt win32
+
+httpfetch/libfetchw32.a: httpfetch/*.c
+	$(MAKE) -C httpfetch win32
+
+zlib/libzw32.a: zlib/*c
+	OBJEXT=".obj" CC="$(CROSSDIR)bin/gcc -mno-cygwin -mms-bitfields" AR=$(CROSSDIR)/bin/ar RANLIB=$(CROSSDIR)/bin/ranlib $(MAKE) -C zlib libzw32.a
+
+zlib/libzlib.a: zlib/*c
+	$(MAKE) -C zlib libzlib.a
+
+lua/liblua.a:
+	$(MAKE) -C lua linux
+ 
+lua/libluaw32.a: lua/*c
+	$(MAKE) -C lua clean
+	$(MAKE) -C lua "LUA_A=libluaw32.a" "LUA_T=lua.exe" \
+	"CC=$(CROSSDIR)bin/gcc" "MYCFLAGS=-I../sq3 -mno-cygwin -mms-bitfields" "RANLIB=$(CROSSDIR)/bin/ranlib" \
+    "AR=$(CROSSDIR)bin/ar rcu" "MYLIBS=-L../sq3 -lsq3w32" "MYLDFLAGS=-s" lua.exe
+
+$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a zlib/libzlib.a httpfetch/libfetch.a sq3/libsq3.a
+	$(CC) $(OBJS) -o $(PROJECTNAME) $(LIBS) 
+	echo -n >ggmud.version "$(VERSION)"
+
+$(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a lua/libluaw32.a zlib/libzw32.a httpfetch/libfetchw32.a sq3/libsq3w32.a
+	$(CROSSCC) $(CROSSCFLAGS) $(WINOBJS) -o $(PROJECTNAME).exe $(CROSSLIBS)
+
+clean: 
+	$(MAKE) -C httpfetch clean
+	$(MAKE) -C tt clean
+	$(MAKE) -C lua clean
+	$(MAKE) -C zlib clean
+	rm -f $(WINOBJS) $(OBJS) $(PROJECTNAME) $(PROJECTNAME).exe depend 
+
+dist: dist-osx dist-linux dist-win32
+    
+dist-osx: ggmud
+	tar czf ../ggmud-osx-$(VERSION).tgz ggmud gg_help.txt README README.OSX
+
+dist-linux: ggmud
+	tar czf ../ggmud-linux-$(VERSION).tgz ggmud gg_help.txt README
+
+
+dmg:
+		mkdir -p dest
+	    gtk-mac-bundler app.bundle
+	    mv ~/Desktop/ggmud.app dest/GGMud.app
+	    cp README dest/README.txt
+	    hdiutil makehybrid -hfs -hfs-volume-name GGMud -hfs-openfolder dest dest -o TMP.dmg
+	    hdiutil convert -format UDZO TMP.dmg -o GGMud-OSX-$(VERSION).dmg
+	    rm -rf TMP.dmg dest
+
+
+dmg-old: ggmud
+	sh makeapp.sh
+	-rm -rf dest TMP.dmg
+	mkdir dest
+	mv GGMud.app dest
+	cp README dest/README.txt
+	hdiutil makehybrid -hfs -hfs-volume-name GGMud -hfs-openfolder dest dest -o TMP.dmg
+	hdiutil convert -format UDZO TMP.dmg -o GGMud-OSX-$(VERSION).dmg
+	rm -rf TMP.dmg dest
+    
+rpm: ggmud
+	cp ggmud.SPEC ggmud-$(VERSION).SPEC
+	rpmbuild -bb ggmud-$(VERSION).SPEC
+	rm ggmud-$(VERSION).SPEC
+
+dist-win32: ggmud.exe
+	zip -9 ../ggmud-win32-$(VERSION).zip ggmud.exe gg_help.txt README README.W32
+
+depend:	$(C_SRCS) *.h
+	for i in $(C_SRCS); do \
+		$(CC) $(CFLAGS) -c -M $$i; \
+	done >  deptemp
+	sed -f mkdep.sed deptemp >depend
+	rm deptemp
+        
+-include depend

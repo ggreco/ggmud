@@ -1,0 +1,131 @@
+CROSSDIR = /usr/local/cross-gcc33/i386-mingw32msvc/
+CROSSCC = $(CROSSDIR)/bin/gcc
+GLOBAL_CFLAGS = -O2 -DTELNET_SUPPORT -Wall -DWITH_LUA -DENABLE_MCCP -arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk  -mmacosx-version-min=10.4
+OBJDIR = obj/
+GTKBASE = /Users/gabry/gtk/inst
+PKGCONFIG=$(GTKBASE)/bin/pkg-config
+export PATH
+PKG_CONFIG_PATH = $(GTKBASE)/lib/pkgconfig
+export PKG_CONFIG_PATH
+
+CC = gcc-4.0
+CXX = g++-4.0
+export CC
+
+INCDIR = -Itt -Ilua -Ihttpfetch -Isq3
+COMMONLIBS = -Ltt -ltt -Llua -llua -Lhttpfetch -lfetch -Lsq3 -lsq3
+CFLAGS = $(INCDIR) `$(PKGCONFIG) gtk+-2.0 gthread-2.0 --cflags` $(GLOBAL_CFLAGS) \
+         -DGTKQUARTZ 
+
+LIBS = $(COMMONLIBS) `$(PKGCONFIG) gtk+-2.0 gthread-2.0 --libs` -lz -framework Carbon 
+
+VERSION := $(shell grep VERSION config.h | cut -d\" -f2 )
+OS:=	$(uname)
+MAKE=	make
+
+export GLOBAL_CFLAGS
+
+PROJECTNAME = ggmud
+
+C_SRCS = alias.c ansi.c font.c fileopen.c help.c history.c log.c logviewer.c \
+         macro.c net.c preferences.c ggmud.c triggers.c window.c wizard.c \
+         variables.c highlights.c gags.c timers.c complete.c prefix.c \
+         telnet.c lua.c interface.c callbacks.c support.c socks.c pixmaps.c \
+		 sync-menu.c buttons.c autoupdate.c msp.c chat.c sub.c
+
+DEP_SRCS = $(CXX_SRCS) $(C_SRCS)
+
+OBJS = $(patsubst %.c, $(OBJDIR)%.o, $(C_SRCS))
+
+WINOBJS = $(OBJDIR)icon.w $(patsubst %.c, $(OBJDIR)%.w, $(C_SRCS))
+
+CROSSCFLAGS = $(INCDIR) -I$(CROSSDIR)/include/glib-2.0  \
+            -I$(CROSSDIR)/lib/glib-2.0/include/ \
+			-I$(CROSSDIR)/include/gtk-2.0 -I$(CROSSDIR)/include/atk-1.0 \
+            -I$(CROSSDIR)/include/pango-1.0 -I$(CROSSDIR)/lib/gtk-2.0/include \
+            -mwindows -mno-cygwin -mms-bitfields $(GLOBAL_CFLAGS)
+
+# -fnative-struct corrispondente di -mms-bifields nel vecchio mingw32 -s
+
+CROSSLIBS = -s -Ltt -Llua -Lzlib -lttw32 -lluaw32 -lzw32 -lgtk-win32-2.0.dll -lgdk-win32-2.0.dll \
+            -latk-1.0.dll -lgdk_pixbuf-2.0.dll -lpango-1.0.dll -lpangowin32-1.0.dll \
+            -lgmodule-2.0.dll -lgobject-2.0.dll -lglib-2.0.dll -lws2_32 -lshell32
+
+all:  $(PROJECTNAME) 
+
+win32: depend $(PROJECTNAME).exe
+
+$(OBJDIR)%.o: %.c
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+$(OBJDIR)%.o: %.cpp
+	$(CXX) $(CFLAGS) -o $@ -c $<
+
+$(OBJDIR)%.w: %.cpp
+	$(CROSSCXX) $(CROSSCFLAGS) -o $@ -c $<
+
+$(OBJDIR)%.w: %.c
+	$(CROSSCC) $(CROSSCFLAGS) -o $@ -c $<
+
+$(OBJDIR)icon.w: icon.rc icon.ico
+	$(CROSSDIR)/../bin/i386-mingw32msvc-windres $< $@
+
+tt/libtt.a: tt/*.c
+	$(MAKE) -C tt 
+    
+tt/libttw32.a: tt/*.c
+	$(MAKE) -C tt win32
+
+zlib/libzw32.a: zlib/*c
+	$(MAKE) -C zlib clean
+	CC="$(CROSSDIR)bin/gcc -mno-cygwin -mms-bitfields" AR=$(CROSSDIR)/bin/ar RANLIB=$(CROSSDIR)/bin/ranlib $(MAKE) -C zlib libzw32.a
+
+lua/liblua.a:
+	$(MAKE) -C lua linux
+ 
+lua/libluaw32.a: lua/*c
+	$(MAKE) -C lua clean
+	$(MAKE) -C lua "LUA_A=libluaw32.a" "LUA_T=lua.exe" \
+	"CC=$(CROSSDIR)bin/gcc" "MYCFLAGS=-mno-cygwin -mms-bitfields" "RANLIB=$(CROSSDIR)/bin/ranlib" \
+    "AR=$(CROSSDIR)bin/ar rcu" "MYLIBS=" "MYLDFLAGS=-s" lua.exe
+
+httpfetch/libfetch.a: httpfetch/*.c
+	$(MAKE) -C httpfetch
+    
+httpfetch/libfetchw32.a: httpfetch/*.c
+	$(MAKE) -C httpfetch win32
+
+sq3/libsq3.a: sq3/*c
+	$(MAKE) -C sq3
+    
+$(PROJECTNAME): $(OBJS) tt/libtt.a lua/liblua.a httpfetch/libfetch.a sq3/libsq3.a
+	$(CC) $(CFLAGS) $(OBJS) -o $(PROJECTNAME) $(LIBS)
+
+$(PROJECTNAME).exe: $(WINOBJS) tt/libttw32.a lua/libluaw32.a
+	$(CROSSCC) $(CROSSCFLAGS) $(WINOBJS) -o $(PROJECTNAME).exe $(CROSSLIBS)
+
+clean: 
+	$(MAKE) -C tt clean
+	$(MAKE) -C lua clean
+	$(MAKE) -C zlib clean
+	rm -f $(WINOBJS) $(OBJS) $(PROJECTNAME) $(PROJECTNAME).exe depend 
+
+dist: dist-osx dist-linux dist-win32
+    
+dist-osx: ggmud
+	tar czf ../ggmud-osx-$(VERSION).tgz ggmud gg_help.txt README README.OSX
+
+dist-linux: ggmud
+	tar czf ../ggmud-linux-$(VERSION).tgz ggmud gg_help.txt README
+
+dist-win32: ggmud.exe
+	zip -9 ../ggmud-win32-$(VERSION).zip ggmud.exe gg_help.txt README README.W32
+
+depend:	$(C_SRCS) *.h
+	for i in $(C_SRCS); do \
+		$(CC) $(CFLAGS) -c -M $$i; \
+	done >  deptemp
+	sed -f mkdep.sed deptemp >depend
+	rm deptemp
+        
+-include depend

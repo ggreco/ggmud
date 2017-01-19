@@ -1,0 +1,96 @@
+0.9.3:
+	- Fixed behaviour of menu shortcuts on OSX Mavericks
+    - Supported CMD-C/CMD-V copy/paste on OSX
+	- Added a few new menu shortcuts (ALT+m - macros, ALT-g - gags...)
+	- Fixed Lumen & Umbra specific autostand lua trigger.
+    - Added support for https URLs.
+
+0.9.2:
+	- Added new lua command filter_function that let you filter every
+	  line received from the mud with LUA. Filter function MUST return
+	  a boolean, if the boolean is false the filtered text is not
+	  show nor processed by the ggmud internal engine.
+	- Fixed socks support on Windows
+	- Added a new preset of aliases/triggers/lua script for the italian 
+	  mud Lumen & Umbra, while these may not be used directly in other
+	  muds they are useful for learning some GGMud programming basics.
+	- Reduced the size of the default font on Windows.
+	- Increased the default size of the main window from 600x400 to 
+	  800x600.
+	- New build system based on CMake, it allows easily to build on
+	  linux every GGMud version, the old system is still available
+	  using make -f Makefile.legacy.
+	- The lua script you specify on the configuration does not need
+	  anymore a full absolute path to be loaded, if the script has
+	  no path we'll search for it in the GGMud configuration 
+	  directory.
+	- GGMud is now distributed with GTK 2.24.10 on windows.
+	- GGMud for OSX is now an intel only 10.5+ binary (but you can
+	  build yourself an X11 or 10.4 or PPC version from sources 
+	  if you have the skills to do so).
+
+0.9.1:
+	- Added menu option to clear the review buffer.
+	- Some optimizations in network input handling (removed a data
+	  copy).
+	- Implemented #SLOW, #STEP, #STOP, #OK commands with semantics
+	  similar to ZMUD ones:
+	  http://www.zuggsoft.com/modules/mx_kb/kb.php?page=3&mode=doc&k=384
+
+0.9.0:
+	- sqlite3 integrated.
+	- LUA now supports SQL through SQLite3 and the official luasql
+	  interface (http://www.keplerproject.org/luasql/)
+	- Added new panel for adding/editing/removing substitutions.
+	- Variables can now be removed from gui.
+	- Now after you click a button the focus will be moved on 
+	  the input line (and not on the button) and the input line
+	  if not empty will be selected.
+	- Improved #grep behaviour to avoid results relative to previous
+	  searches.
+	- Improved #message command, now the first parameter must be
+	  one of info, warning, error (case insensitive) and it determines
+	  the icon to use for the (not modal) popup.
+
+0.8.1:
+	- Added #grep command to search for strings in your review
+	  buffer.
+	- Now you can specify double quotes or brackets ( "" or [] ) 
+	  around arguments for lua funcions, this allows you to pass
+	  strings containing the , and ) character.
+	- Implemented ZMud like review buffer activation and navigation
+	  with PGUP/DOWN.
+	- Now it's possible to send LARGE quantities of text to the 
+	  mud through cut&paste without crashing it.
+	- New autoupdate function, will ask for the latest version from
+	  a support site, this one will open the download page in your
+	  browser if you choose to update.
+	- Fixed dependencies in makefile.
+	- Initial MSP support.
+	- Fixed crash with MCCP in certain situations.
+	- Added URL detection in output window, URLs will be underlined
+	  and clickable if you enable this.
+	- Implemented command line switch "-nohome" to tell GGMud to use
+	  the program directory to save his config files, this is useful
+	  to be able to have a "portable" GGMud on a USB stick.
+
+0.8.0:
+	- Added button support:
+	  New commands hbutton, vbutton
+	  New gui to create/remove buttons
+	  New config file <dir>/buttons
+	- Added trigger special character '$' that match the end of a line:
+	  example:
+	  #action {says '%1'$} { do_something }
+	  ... will match the whole line also if it contains quotes.
+	- Corrected a bug in the trigger GUI that could crash the client.
+	- Add new config toggle SkipTaskbar and relative option in the 
+	  preferences panel to tell ggmud to skip taskbar for his windows
+	  (useful to "hide" ggmud fast if you are playing in office).
+	- Added new font configuration dialog, now you can have different
+	  fonts for input/output window and GUI.
+
+0.7.2:
+	- Corrected a bug in variables math, worked correctly only from
+	  lua, now the #math command works again.
+	  
