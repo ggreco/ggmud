@@ -34,6 +34,7 @@ else ()
         set(ADDITIONAL_LIBS ${CARBON_LIBRARY} ${ADDITIONAL_LIBS} "objc")
     else()
         add_definitions("-DENABLE_BINRELOC -DBR_PTHREADS=0")
+        set(ADDITIONAL_LIBS dl m)
     endif()
 # kludge necessario perche' cmake al momento non sa della separazione di gdk-pixbuf
     find_path(GDK_PIXBUF_INCLUDE_DIRS NAMES gdk-pixbuf/gdk-pixbuf.h PATHS
