@@ -1,8 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
 
 # this must be done before anything else...
-set(CMAKE_OSX_SYSROOT "/Users/gabry/MacOSX10.8.sdk")
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.8")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
 
 project(GGMud)
 set(VERSION "0.9.4")

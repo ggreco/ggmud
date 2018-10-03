@@ -116,6 +116,8 @@ GdkColor *orig_colors[2][8] =
 
 GtkTextTag *fg_colors[2][8];
 GtkTextTag *bg_colors[2][8];
+GtkTextTag *extended_fg[256];
+GtkTextTag *extended_bg[256];
 GtkTextTag *blink_colors[2][8];
 GtkTextTagTable *tag_table = NULL;
 GtkTextTag *url_tag = NULL;
@@ -306,8 +308,45 @@ void init_colors ()
                 gtk_text_tag_table_add(tag_table, fg_colors[j][i]);
                 gtk_text_tag_table_add(tag_table, bg_colors[j][i]);
                 gtk_text_tag_table_add(tag_table, blink_colors[j][i]);
+                
+                extended_fg[i + 8 * j] = fg_colors[j][i];
+                extended_bg[i + 8 * j] = bg_colors[j][i];
             }
         }
+        // set extended colors (cube)
+        int r, g, b;
+        i = 16;
+        for (r = 0; r < 6; ++r) {
+            for (g = 0; g < 6; ++g) {
+                for (b = 0; b < 6; ++b) {
+                    char color[8];
+                    snprintf(color, sizeof(color), "#%02x%02x%02x", r * 256 / 6, g * 256 / 6, b * 256 / 6);
+                    extended_fg[i] = gtk_text_tag_new(NULL);
+                    extended_bg[i] = gtk_text_tag_new(NULL);
+                    g_object_set(extended_fg[i], "foreground", color, NULL);
+                    g_object_set(extended_bg[i], "background", color, NULL);
+                    gtk_text_tag_table_add(tag_table, extended_bg[i]);
+                    gtk_text_tag_table_add(tag_table, extended_fg[i]);
+                    ++i;
+                }
+            }
+        }
+        i = 232;
+        // set extended colors (grays)
+        for (j = 0; j < 24; ++j) {
+            char color[8];
+            int c = j * 256 / 24;
+            if (c > 255) c = 255;
+            snprintf(color, sizeof(color), "#%02x%02x%02x", c, c, c);
+            extended_fg[i] = gtk_text_tag_new(NULL);
+            extended_bg[i] = gtk_text_tag_new(NULL);
+            g_object_set(extended_fg[i], "foreground", color, NULL);
+            g_object_set(extended_bg[i], "background", color, NULL);
+            gtk_text_tag_table_add(tag_table, extended_bg[i]);
+            gtk_text_tag_table_add(tag_table, extended_fg[i]);
+            ++i;
+        }
+
         fg_col = prefs.DefaultColor = gtk_text_tag_new(NULL);
         g_object_set(prefs.DefaultColor, "foreground-gdk", &color_white, NULL);
         bg_col = prefs.BackgroundColor = gtk_text_tag_new(NULL);
@@ -432,6 +471,7 @@ void test_getcol(const char *code, int n)
     static int grcm = 1;
     const char *final = code + n-1;
     char *next;
+    int ext_fg = 0, ext_bg = 0;
 
 #ifdef debug
     printf("code(%d): %s\n", n, code);
@@ -471,7 +511,23 @@ void test_getcol(const char *code, int n)
         break;
 
       case 'm':  /* Select Graphic Rendition (SGR) */
-        if (attr == 0) /* total reset */
+        if ((ext_bg || ext_fg) && attr == 5) { // extended 256 color codes 
+            int val = strtol(next + 1, &next, 10);
+            if (ext_fg) {
+               if (val >= 0 && val < 256) {
+                   fg_col = extended_fg[val];
+                   fprintf(stderr, "SET FG color: %d\n", val); 
+               }
+            } else {
+               if (val >= 0 && val < 256) {
+                   bg_col = extended_bg[val];
+                   fprintf(stderr, "SET BG color: %d\n", val);
+               }
+            }
+            ext_fg = 0;
+            ext_bg = 0;
+        }
+        else if (attr == 0) /* total reset */
           reset_colors();
         else if (attr == 1) /* change to bright */
           set_fg_bright(1);
@@ -492,6 +548,22 @@ void test_getcol(const char *code, int n)
           set_bg_color(-2);
         else if (attr == 66) /* change bg bright GGMUD EXTENSION */
           set_bg_bright(1);
+        else if (attr == 38) {
+          ext_fg = 1;
+          ext_bg = 0;
+        }
+        else if (attr == 48) {
+          ext_bg = 1;
+          ext_fg = 0;
+        }
+        else if (attr >= 90 && attr <= 97) {
+            set_fg_bright(1);
+            set_fg_color(attr - 90);
+        }
+        else if (attr >= 100 && attr <= 107) {
+            set_bg_bright(1);
+            set_bg_color(attr - 100);
+        }
         break;
       }
 
@@ -523,12 +595,22 @@ void dump_buffer(const char *b, int len)
 
 void local_disp_ansi(int size, const char *in, GtkTextView *target)
 {
+#if debug
+    static FILE *f = NULL;    
+    if (!f)
+        f = fopen("/tmp/ansi.txt", "wb");
+
+    if (f)
+        fwrite(in, 1, size, f);
+#endif
     char buffer[256];
     int bufferpos = 0;
     char ansibuffer[32];
     GtkTextBuffer *tbuff = gtk_text_view_get_buffer(target);
     GtkTextIter iter;
     int n = 0, start = 0;
+
+
 
     gtk_text_buffer_get_end_iter(tbuff, &iter);
 
