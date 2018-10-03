@@ -93,7 +93,7 @@ void script_command(char *arg, struct session *ses)
   }
 }
 
-void gcmp(char *value)
+void gmcp(char *value)
 {
     char buffer[BUFFER_SIZE], *val = value;
     while (*val != ' ' && *val != 0 && *val != '\t')
@@ -110,10 +110,10 @@ void gcmp(char *value)
                 *end = 0;
     }
     char cmd[BUFFER_SIZE];
-    snprintf(cmd, BUFFER_SIZE, "add_gcmp_variable('%s', '%s')", value, val);
+    snprintf(cmd, BUFFER_SIZE, "add_gmcp_variable('%s', '%s')", value, val);
 
     if (luaL_loadstring(mud->lua, cmd)) {
-         snprintf(buffer, BUFFER_SIZE, "Unable to load LUA GCMP variable %s: %s\n", value,
+         snprintf(buffer, BUFFER_SIZE, "Unable to load LUA GMCP variable %s: %s\n", value,
               lua_tostring(mud->lua, -1));
       textfield_add(mud->text, buffer, MESSAGE_ERR);
       lua_pop(mud->lua, 1);
@@ -384,7 +384,7 @@ static int __index(lua_State* L) // object, key
 }
 #endif
 
-static const char *gcmp_support = 
+static const char *gmcp_support = 
 "function string:split(sep)\n\
    local fields = {}\n\
    local pattern = string.format(\"([^%s]+)\", sep)\n\
@@ -392,19 +392,19 @@ static const char *gcmp_support =
    return fields\n\
 end\n\
 \
-function add_gcmp_variable(varname,value)\n\
+function add_gmcp_variable(varname,value)\n\
     local objects = varname:split(\".\")\n\
     \
     if #objects == 1 then\n\
-        gcmp[objects[1]] = value\n\
+        gmcp[objects[1]] = value\n\
     elseif #objects == 2 then\n\
-        if gcmp[objects[1]] == nil then\n\
-            gcmp[objects[1]] = {}\n\
+        if gmcp[objects[1]] == nil then\n\
+            gmcp[objects[1]] = {}\n\
         end\n\
-        gcmp[objects[1]][objects[2]] = value\n\
+        gmcp[objects[1]][objects[2]] = value\n\
     end\n\
 end\n\
-gcmp.version = 1\n";
+gmcp.version = 1\n";
 
 void init_lua()
 {
@@ -430,14 +430,14 @@ void init_lua()
     lua_register(mud->lua, "filter_function", do_luafilter);
     lua_register(mud->lua, "clear", do_luaclear);
 
-    // gcmp support
+    // gmcp support
 
     lua_newtable(mud->lua);
-    lua_setglobal(mud->lua, "gcmp");
+    lua_setglobal(mud->lua, "gmcp");
 
     char buffer[BUFFER_SIZE];
-    if (luaL_loadstring(mud->lua, gcmp_support)) {
-         snprintf(buffer, BUFFER_SIZE, "Unable to load LUA GCMP script: %s\n",
+    if (luaL_loadstring(mud->lua, gmcp_support)) {
+         snprintf(buffer, BUFFER_SIZE, "Unable to load LUA GMCP script: %s\n",
               lua_tostring(mud->lua, -1));
       textfield_add(mud->text, buffer, MESSAGE_ERR);
       lua_pop(mud->lua, 1);

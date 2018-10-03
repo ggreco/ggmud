@@ -68,7 +68,7 @@ static FILE *debugfile = NULL;
 #define END_OF_RECORD       25
 #define NAWS                31
 #define MSP                 90
-#define GCMP               201
+#define GMCP               201
 
 #define IS      0
 #define SEND    1
@@ -129,7 +129,7 @@ const char *option_name(int cp)
     if (cp < len)
         return option_names[cp];
     if (cp == MSP) return "MSP";
-    if (cp == GCMP) return "GCMP";
+    if (cp == GMCP) return "GMCP";
     return "N/A";
 }
 #endif
@@ -255,10 +255,10 @@ int do_telnet_protocol(unsigned char *data,int nb,struct session *ses)
 
         switch(*cp)
         {
-            case GCMP:
+            case GMCP:
                 switch (wt) {
                     case WILL:
-                        fprintf(stderr, "GCMP negotiation: %d\n", wt);
+                        fprintf(stderr, "GMCP negotiation: %d\n", wt);
                         answer[1] = DO;
                         break;
                     case DO:
@@ -388,9 +388,9 @@ sbloop:
                     ++np;
                 }
                 break;
-            case GCMP:
+            case GMCP:
                 ++np;
-                b+= sprintf(b, "GCMP ");
+                b+= sprintf(b, "GMCP ");
                 break;
             }
             while (np-nego<neb)
@@ -405,7 +405,7 @@ sbloop:
             if (*(np+1)==SEND)
                 telnet_send_ttype(ses);
             break;
-         case GCMP:
+         case GMCP:
             {
                unsigned int neb=nb - 3;
                np++;
@@ -413,7 +413,7 @@ sbloop:
                while (np-nego<neb)
                    *b++=*np++;
                *b = 0;
-               gcmp(buf);
+               gmcp(buf);
             }
             break;
         }
@@ -445,7 +445,7 @@ nego_too_long:
 
 void telnet_write_line(char *line, struct session *ses)
 {
-    char outtext[2*BUFFER_SIZE + 2],*out;
+    unsigned char outtext[2*BUFFER_SIZE + 2],*out;
 
     out=outtext;
     while(*line)
