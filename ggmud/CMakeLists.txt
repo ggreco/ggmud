@@ -4,7 +4,7 @@ cmake_minimum_required (VERSION 2.6)
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
 
 project(GGMud)
-set(VERSION "0.9.4")
+set(VERSION "0.9.5")
 
 find_package (PkgConfig REQUIRED)
 pkg_check_modules (GTK2 REQUIRED gtk+-2.0)

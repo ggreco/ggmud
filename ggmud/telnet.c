@@ -68,12 +68,13 @@ static FILE *debugfile = NULL;
 #define END_OF_RECORD       25
 #define NAWS                31
 #define MSP                 90
+#define GCMP               201
 
 #define IS      0
 #define SEND    1
 
 /* sanity check */
-#define MAX_SUBNEGO_LENGTH 64
+#define MAX_SUBNEGO_LENGTH 1024
 
 #ifdef TELNET_DEBUG
 char *will_names[4]={"WILL", "WONT", "DO", "DONT"};
@@ -120,6 +121,17 @@ char *option_names[]=
         "Encryption Option",
         "New Environment Option",
     };
+
+
+const char *option_name(int cp)
+{
+    int len = sizeof(option_names)/sizeof(option_names[0]);
+    if (cp < len)
+        return option_names[cp];
+    if (cp == MSP) return "MSP";
+    if (cp == GCMP) return "GCMP";
+    return "N/A";
+}
 #endif
 
 void telnet_send_naws(struct session *ses)
@@ -235,14 +247,25 @@ int do_telnet_protocol(unsigned char *data,int nb,struct session *ses)
             return -1;
         wt=*(cp++);
 #ifdef TELNET_DEBUG
-        tintin_printf(ses, "~8~[telnet] received: IAC %s <%u> (%s)~-1~",
-                      will_names[wt-251], *cp, option_names[*cp]);
+        fprintf(stderr, "[telnet] received: IAC %s <%u> (%s)\n",
+                      will_names[wt-251], *cp, option_name(*cp));
 #endif
         answer[0]=IAC;
         answer[2]=*cp;
 
         switch(*cp)
         {
+            case GCMP:
+                switch (wt) {
+                    case WILL:
+                        fprintf(stderr, "GCMP negotiation: %d\n", wt);
+                        answer[1] = DO;
+                        break;
+                    case DO:
+                        answer[1] = WILL;
+                        break;
+                }
+                break;
             case MSP:
                 fprintf(stderr, "MSP negotiation: %d\n", wt);
                 switch(wt)
@@ -316,8 +339,8 @@ int do_telnet_protocol(unsigned char *data,int nb,struct session *ses)
         }
         send(ses->socket, answer, 3, 0);
 #ifdef TELNET_DEBUG
-        tintin_printf(ses, "~8~[telnet] sent: IAC %s <%u> (%s)~-1~",
-                      will_names[answer[1]-251], *cp, option_names[*cp]);
+        fprintf(stderr, "[telnet] sent: IAC %s <%u> (%s)\n",
+                      will_names[answer[1]-251], *cp, option_name(*cp));
 #endif
         if (*cp==NAWS)
             telnet_send_naws(ses);
@@ -365,25 +388,40 @@ sbloop:
                     ++np;
                 }
                 break;
+            case GCMP:
+                ++np;
+                b+= sprintf(b, "GCMP ");
+                break;
             }
             while (np-nego<neb)
                 b+=sprintf(b, "<%u> ", *np++);
             b+=sprintf(b, "IAC SE");
-            tintin_printf(ses, "~8~[telnet] received: %s~-1~", buf);
+            fprintf(stderr, "[telnet] received SB data: %s\n", buf);
         }
 #endif
         switch(*(np=nego))
         {
-        case TERMINAL_TYPE:
+         case TERMINAL_TYPE:
             if (*(np+1)==SEND)
                 telnet_send_ttype(ses);
+            break;
+         case GCMP:
+            {
+               unsigned int neb=nb - 3;
+               np++;
+               char buf[BUFFER_SIZE],*b=buf;
+               while (np-nego<neb)
+                   *b++=*np++;
+               *b = 0;
+               gcmp(buf);
+            }
             break;
         }
         return nb+1;
     case GA:
     case EOR:
 #ifdef TELNET_DEBUG
-        tintin_printf(ses, "~8~[telnet] received: IAC %s~-1~",
+       fprintf(stderr, "[telnet] received: IAC %s\n",
             (*cp==GA)?"GA":"EOR");
 #endif
 //        ses->gas=1;
@@ -393,14 +431,14 @@ sbloop:
     default:
         /* other 2-byte command, ignore */
 #ifdef TELNET_DEBUG
-        tintin_printf(ses, "~8~[telnet] received: IAC <%u>~-1~", *cp&255);
+        fprintf(stderr, "~8~[telnet] received: IAC <%u>\n", *cp&255);
 #endif
         return 2;
     }
     return (cp-data);
 nego_too_long:
 #ifdef TELNET_DEBUG
-    tintin_eprintf(ses, "#error: unterminated TELNET subnegotiation received.");
+    fprintf(stderr, "#error: unterminated TELNET subnegotiation received.\n");
 #endif
     return 2; /* we leave everything but IAC SB */
 }

@@ -514,15 +514,11 @@ void test_getcol(const char *code, int n)
         if ((ext_bg || ext_fg) && attr == 5) { // extended 256 color codes 
             int val = strtol(next + 1, &next, 10);
             if (ext_fg) {
-               if (val >= 0 && val < 256) {
+               if (val >= 0 && val < 256) 
                    fg_col = extended_fg[val];
-                   fprintf(stderr, "SET FG color: %d\n", val); 
-               }
             } else {
-               if (val >= 0 && val < 256) {
+               if (val >= 0 && val < 256) 
                    bg_col = extended_bg[val];
-                   fprintf(stderr, "SET BG color: %d\n", val);
-               }
             }
             ext_fg = 0;
             ext_bg = 0;

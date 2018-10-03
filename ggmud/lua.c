@@ -93,6 +93,41 @@ void script_command(char *arg, struct session *ses)
   }
 }
 
+void gcmp(char *value)
+{
+    char buffer[BUFFER_SIZE], *val = value;
+    while (*val != ' ' && *val != 0 && *val != '\t')
+        ++val;
+    if (*val) {
+        *val = 0; ++val;
+        while (*val == ' ' || *val == '\t')
+            ++val;
+    }
+    if (*val == '\"') {
+        char *end;
+        ++val;
+        if ((end = strrchr(val, '\"')))
+                *end = 0;
+    }
+    char cmd[BUFFER_SIZE];
+    snprintf(cmd, BUFFER_SIZE, "add_gcmp_variable('%s', '%s')", value, val);
+
+    if (luaL_loadstring(mud->lua, cmd)) {
+         snprintf(buffer, BUFFER_SIZE, "Unable to load LUA GCMP variable %s: %s\n", value,
+              lua_tostring(mud->lua, -1));
+      textfield_add(mud->text, buffer, MESSAGE_ERR);
+      lua_pop(mud->lua, 1);
+      return;
+    }
+
+    if (lua_pcall(mud->lua, 0, 0, 0)) {
+      snprintf(buffer, BUFFER_SIZE, "Error in LUA script %s: %s\n", cmd,
+		                            lua_tostring(mud->lua, -1));
+      lua_pop(mud->lua, 1);
+      textfield_add(mud->text, buffer, MESSAGE_ERR);
+    }
+}
+
 void lua_command(char *arg, struct session *ses)
 {
   char left[BUFFER_SIZE], buffer[BUFFER_SIZE];
@@ -349,7 +384,27 @@ static int __index(lua_State* L) // object, key
 }
 #endif
 
-
+static const char *gcmp_support = 
+"function string:split(sep)\n\
+   local fields = {}\n\
+   local pattern = string.format(\"([^%s]+)\", sep)\n\
+   self:gsub(pattern, function(c) fields[#fields+1] = c end)\n\
+   return fields\n\
+end\n\
+\
+function add_gcmp_variable(varname,value)\n\
+    local objects = varname:split(\".\")\n\
+    \
+    if #objects == 1 then\n\
+        gcmp[objects[1]] = value\n\
+    elseif #objects == 2 then\n\
+        if gcmp[objects[1]] == nil then\n\
+            gcmp[objects[1]] = {}\n\
+        end\n\
+        gcmp[objects[1]][objects[2]] = value\n\
+    end\n\
+end\n\
+gcmp.version = 1\n";
 
 void init_lua()
 {
@@ -374,6 +429,27 @@ void init_lua()
     lua_register(mud->lua, "idle_function", do_luaidle);
     lua_register(mud->lua, "filter_function", do_luafilter);
     lua_register(mud->lua, "clear", do_luaclear);
+
+    // gcmp support
+
+    lua_newtable(mud->lua);
+    lua_setglobal(mud->lua, "gcmp");
+
+    char buffer[BUFFER_SIZE];
+    if (luaL_loadstring(mud->lua, gcmp_support)) {
+         snprintf(buffer, BUFFER_SIZE, "Unable to load LUA GCMP script: %s\n",
+              lua_tostring(mud->lua, -1));
+      textfield_add(mud->text, buffer, MESSAGE_ERR);
+      lua_pop(mud->lua, 1);
+      return;
+    }
+
+    if (lua_pcall(mud->lua, 0, 0, 0)) {
+      snprintf(buffer, BUFFER_SIZE, "Error in LUA script %s: %s\n", buffer,
+		                            lua_tostring(mud->lua, -1));
+      lua_pop(mud->lua, 1);
+      textfield_add(mud->text, buffer, MESSAGE_ERR);
+    }
 }
 
 void add_lua_global(const char *v1, char **v2)

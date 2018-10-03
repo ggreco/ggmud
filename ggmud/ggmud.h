@@ -277,6 +277,7 @@ extern void connection_send ( gchar *message );
 
 /* lua.c */
 #include "include/lua.h"
+extern void gcmp(char *value);
 
 /* log.c */
 extern void do_log ();
