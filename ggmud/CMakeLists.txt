@@ -68,3 +68,7 @@ add_executable(ggmud WIN32 alias.c ansi.c font.c fileopen.c help.c history.c log
               )
 
 target_link_libraries(ggmud tt lua sq3 httpfetch zlib ${GTK2_LIBRARIES} ${ADDITIONAL_LIBS} ${GTHREAD_LIBRARIES})
+
+
+install(TARGETS ggmud DESTINATION bin)
+install(FILES gg_help.txt DESTINATION bin)
