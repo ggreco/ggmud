@@ -104,7 +104,7 @@ void set_connected(int value)
 }
 
 void printline(const char *str, int isaprompt)
-{    
+{
     textfield_add(mud->text, str, MESSAGE_ANSI);
 
     if (!isaprompt)
@@ -136,7 +136,7 @@ int check_lua_filter(const char *cptr)
 
         if (lua_pcall(mud->lua, 1, 1, 0) != 0) {
             char buffer[1024];
-            sprintf(buffer, "Error running filter function %s: %s\n", 
+            sprintf(buffer, "Error running filter function %s: %s\n",
                     mud->lua_filter_function, lua_tostring(mud->lua, -1));
             textfield_add(mud->text, buffer, MESSAGE_ERR);
         }
@@ -202,13 +202,13 @@ void disconnect ( void )
         gdk_input_remove (mud->input_monitor);
         mud->input_monitor = -1;
     }
-   
+
     while(gtk_events_pending())
         gtk_main_iteration(); // to ensure the input is removed
 
     textfield_add (mud->text,  "\n*** Connection closed.\n", MESSAGE_NORMAL);
     set_connected(FALSE);
-    
+
     gtk_widget_set_sensitive (lookup_widget(mud->window,
                               "menuitem_connect"), TRUE);
     gtk_widget_set_sensitive (lookup_widget(mud->window,
@@ -288,6 +288,8 @@ connection_part_two(int sockfd, struct tempdata *mystr)
     else
         textfield_add (mud->text, "\n*** Connection established.\n", MESSAGE_NORMAL);
 
+    mud->login = time(NULL);
+    
     if ((mud->activesession = new_session(mystr->name, mystr->hostport, mud->activesession)))
         mud->activesession->socket = sockfd;
 
@@ -325,7 +327,7 @@ void stop_connecting(GtkWidget *widget, struct tempdata *data)
 
     textfield_add(mud->text, "\n*** connection ABORTED.\n",
             MESSAGE_NORMAL);
-    
+
     gtk_widget_destroy(data->window);
     free(data);
 }
@@ -339,7 +341,7 @@ void connection_cbk (gpointer data, gint source, GdkInputCondition condition)
     free(data);
 }
 
-int 
+int
 is_valid_ip(char *ip)
 {
 	unsigned long ipaddr;
@@ -350,19 +352,19 @@ is_valid_ip(char *ip)
 
     if (len < 7 || len > 15)
         return FALSE;
-    
+
     for (i = 0; i < len; i++) {
         if (ip[i] == '.') {
-            
+
             dots++;
 
             if (!*start)
                 return FALSE;
-            
+
             ip[i] = 0;
             test = atoi(start);
             ip[i] = '.';
-            
+
             if (test < 0 || test > 255)
                 return FALSE;
 
@@ -379,7 +381,7 @@ is_valid_ip(char *ip)
 
     if ( (ipaddr = inet_addr(ip)) == INADDR_NONE)
         return FALSE;
-       
+
     // vieto gli indirizzi broadcast
     if (((unsigned char *)&ipaddr)[3] == 255)
         return FALSE;
@@ -399,7 +401,7 @@ void open_connection (const char *name, const char *host, const char *port)
                 MESSAGE_NORMAL);
         return;
     }
-    
+
     if(connected) {
 #ifdef USE_NOTEBOOK
         new_view(name);
@@ -408,7 +410,7 @@ void open_connection (const char *name, const char *host, const char *port)
         return;
 #endif
     }
-    
+
     /* strerror(3) */
     if ( ( he = gethostbyname (host) ) == NULL )
     {
@@ -436,25 +438,25 @@ void open_connection (const char *name, const char *host, const char *port)
                 return;
             }
 
-            sock_server.sin_addr   = *((struct in_addr *)he->h_addr);       
+            sock_server.sin_addr   = *((struct in_addr *)he->h_addr);
         }
         else
             sock_server.sin_addr.s_addr   = inet_addr(prefs.socks_addr);
 
         sock_server.sin_family = AF_INET;
         sock_server.sin_port   = htons(prefs.socks_port);
-        
+
         bzero (&(sock_server.sin_zero), 8);
 
         mud->conn = new_socks_request(sockfd, &their_addr, &sock_server);
 
         their_addr = sock_server;
     }
-#ifdef WIN32       
+#ifdef WIN32
     else // we want for the win32 version only to do synchronous connect if we are using socks.
 #endif
         ioctl(sockfd, FIONBIO, (char *)&onoff);
-    
+
     if (connect (sockfd, (struct sockaddr *)&their_addr,
                  sizeof (struct sockaddr)) == -1 ) {
 
@@ -483,7 +485,7 @@ void open_connection (const char *name, const char *host, const char *port)
 
             sprintf(buffer, " Connection to %s:%s in progress... ", host, port);
             label = gtk_label_new (buffer);
-            image = gtk_image_new_from_stock(GTK_STOCK_DIALOG_INFO, 
+            image = gtk_image_new_from_stock(GTK_STOCK_DIALOG_INFO,
                                              GTK_ICON_SIZE_DIALOG);
             gtk_box_pack_start (GTK_BOX (hbox), image, FALSE, FALSE, 5);
             gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 5);
@@ -510,7 +512,7 @@ void open_connection (const char *name, const char *host, const char *port)
     }
     else {
         struct tempdata datas;
-        
+
         strcpy(datas.name, name);
         sprintf(datas.hostport, "%s %s", host, port);
         connection_part_two(sockfd, &datas);
@@ -522,7 +524,7 @@ int check_status(const char *buf, struct session *ses)
 {
   extern char *prompt_line;
 
-  if (check_one_action(buf, prompt_line, ses)) { 
+  if (check_one_action(buf, prompt_line, ses)) {
 //     status_in_splitline(buf, ses);
      return(1);
   }
@@ -535,7 +537,7 @@ int check_status(const char *buf, struct session *ses)
 /* btw: i don't tested my fix very much, so it's up to you.               */
 static void readmud(struct session *s)
 {
-    char *buf, *line, *next_line; 
+    char *buf, *line, *next_line;
     /* char mybuf[512]; */
     char linebuf[BUFFER_SIZE], header[BUFFER_SIZE];
     int rv, headerlen;
@@ -545,7 +547,7 @@ static void readmud(struct session *s)
 
     buf = s->session_buffer;
     rv = read_buffer_mud(buf, s);
-    
+
     if(rv >= SESSION_BUFFER_SIZE) {
         popup_window(ERR, "Received too long buffer, skipping datas to avoid crash!\n\n(please signal this to the developer)");
         return;
@@ -554,18 +556,18 @@ static void readmud(struct session *s)
     if (!rv)
         return;
 
-    if(rv <0) 
+    if(rv <0)
     {
         if (rv != -666) {
             char *e = strerror(errno);
 
-            if (!e) 
+            if (!e)
                 e = "<UNKNOWN>";
 
             popup_window(INFO, "Connection aborted\nError: %s (%d)", e, errno);
         }
         disconnect();
-        
+
         return;
     }
 
@@ -574,7 +576,7 @@ static void readmud(struct session *s)
     // from the mud
     static FILE *f = NULL;
 
-    if (!f) f = fopen("/tmp/txt.log", "w"); 
+    if (!f) f = fopen("/tmp/txt.log", "w");
 
     fprintf(f, "\nBlock of %d bytes (%d more):\n", rv, s->more_coming);
 
@@ -598,14 +600,14 @@ static void readmud(struct session *s)
             s->last_line[0] = '\0';
         }
     }
-    
+
     logit(s, buf);
 
     /* separate into lines and print away */
 
     textfield_freeze();
-    
-    for(line = buf; line && *line; line = next_line) 
+
+    for(line = buf; line && *line; line = next_line)
     {
         if(!(next_line = strchr(line, '\n')) && s->more_coming)
             break;
@@ -632,12 +634,12 @@ static void readmud(struct session *s)
                     printline(header, !next_line );
 
                 header[headerlen] = '\0';
-            } 
+            }
         }
     }
 
     textfield_unfreeze();
-    
+
     if(line && *line)
         sprintf(s->last_line, "%s", line);
 }
@@ -731,7 +733,7 @@ void write_line_mud(const char *line, struct session *ses)
 
   if (!ZOMBI_IS_ALIVE(ses))  /* Fixed. Connection test -- ycjhi */
     return ;
-   
+
   int len = strlen(line);
 
   while (len > 0) {
@@ -749,15 +751,15 @@ void write_line_mud(const char *line, struct session *ses)
 
               return;
           }
-          else 
+          else
               g_usleep(20000);
       }
       else {
           len -= l;
           tosend += l;
 
-          if (len > 0) 
-              g_usleep(20000);         
+          if (len > 0)
+              g_usleep(20000);
       }
   }
   /* lost this fix somehow.  It appears that I lost it during
@@ -768,7 +770,7 @@ void write_line_mud(const char *line, struct session *ses)
   else
     send(ses->socket, "\r\n", 2, 0);
 
-  if(prefs.EchoText && !hide_input) { 
+  if(prefs.EchoText && !hide_input) {
       textfield_add(mud->text, line, MESSAGE_SENT);
       textfield_add(mud->text, "\n", MESSAGE_SENT);
   }
@@ -777,7 +779,7 @@ void write_line_mud(const char *line, struct session *ses)
 /* send the macro and triggered ext to mud! */
 void alt_send_to_connection (gchar *text)
 {
-    if (strlen(text) && mud->activesession) 
+    if (strlen(text) && mud->activesession)
         mud->activesession = parse_input(text, mud->activesession);
 }
 

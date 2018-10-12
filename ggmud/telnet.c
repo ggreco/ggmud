@@ -27,7 +27,7 @@
 //extern void tintin_printf(struct session *ses, char *format, ...);
 //extern void tintin_eprintf(struct session *ses, char *format, ...);
 
-// #define TELNET_DEBUG
+//#define TELNET_DEBUG
 
 #ifdef TELNET_SUPPORT
 
@@ -68,10 +68,14 @@ static FILE *debugfile = NULL;
 #define END_OF_RECORD       25
 #define NAWS                31
 #define MSP                 90
+#define MSSP                70
 #define GMCP               201
 
 #define IS      0
 #define SEND    1
+
+#define MSSP_VAR 1
+#define MSSP_VAL 2
 
 /* sanity check */
 #define MAX_SUBNEGO_LENGTH 1024
@@ -130,6 +134,7 @@ const char *option_name(int cp)
         return option_names[cp];
     if (cp == MSP) return "MSP";
     if (cp == GMCP) return "GMCP";
+    if (cp == MSSP) return "MSSP";
     return "N/A";
 }
 #endif
@@ -137,7 +142,7 @@ const char *option_name(int cp)
 void telnet_send_naws(struct session *ses)
 {
 #ifdef UI_FULLSCREEN
-    unsigned char nego[128],*np;
+    unsigned char nego[MAX_SUBNEGO_LENGTH],*np;
 
 #define PUTBYTE(b)    if ((b)==255) *np++=255;   *np++=(b);
     np=nego;
@@ -170,8 +175,8 @@ void telnet_send_naws(struct session *ses)
 void telnet_send_ttype(struct session *ses)
 {
     static int last_term_type = 0;
-    
-    char nego[128],*ttype;
+
+    char nego[MAX_SUBNEGO_LENGTH],*ttype;
 
     switch(last_term_type++)
     {
@@ -221,15 +226,16 @@ void telnet_resize_all(void)
 int do_telnet_protocol(unsigned char *data,int nb,struct session *ses)
 {
     unsigned char *cp = data+1;
+    int original_nb = nb;
     unsigned char wt;
     unsigned char answer[3];
-    unsigned char nego[128],*np;
+    unsigned char nego[MAX_SUBNEGO_LENGTH * 2],*np;
 
 #ifdef TELNET_DEBUG
     if (!debugfile)
         debugfile = fopen("debug.txt", "w");
 #endif
-    
+
 #define NEXTCH  cp++;               \
                 if (cp-data>=nb)    \
                     return -1;
@@ -256,9 +262,20 @@ int do_telnet_protocol(unsigned char *data,int nb,struct session *ses)
         switch(*cp)
         {
             case GMCP:
+                fprintf(stderr, "GMCP negotiation: %d\n", wt);
                 switch (wt) {
                     case WILL:
-                        fprintf(stderr, "GMCP negotiation: %d\n", wt);
+                        answer[1] = DONT; // DO;
+                        break;
+                    case DO:
+                        answer[1] = WONT; //WILL;
+                        break;
+                }
+                break;
+            case MSSP:
+                fprintf(stderr, "MSSP negotiation: %d\n", wt);
+                switch (wt) {
+                    case WILL:
                         answer[1] = DO;
                         break;
                     case DO:
@@ -271,17 +288,17 @@ int do_telnet_protocol(unsigned char *data,int nb,struct session *ses)
                 switch(wt)
                 {
                     case DO:    answer[1]=WONT; break;
-                    case WILL:  
+                    case WILL:
                                 if (prefs.UseMSP) {
-                                    answer[1]=DO; 
+                                    answer[1]=DO;
                                     if (!mud->msp)
-                                        mud->msp = init_msp(); 
+                                        mud->msp = init_msp();
                                 }
-                                else 
+                                else
                                     answer[1]=DONT;
                                 break;
-                    case WONT:  
-                                answer[1]=DONT; 
+                    case WONT:
+                                answer[1]=DONT;
                                 if (mud->msp) {
                                         free(mud->msp);
                                         mud->msp = NULL;
@@ -291,10 +308,21 @@ int do_telnet_protocol(unsigned char *data,int nb,struct session *ses)
                 };
                 break;
             case ECHO:
+                fprintf(stderr, "Echo changed: %d\n", wt);
+
+                {
+                    fprintf(stderr, "Buffer size %d bytes: ", nb);
+                    for (int i = 0; i < original_nb; ++i)
+                        fprintf(stderr, "%02x ", (unsigned int)data[i]);
+                    fprintf(stderr, "\n");
+                }
                 switch(wt)
                 {
                     case DO:    answer[1]=WONT; break;
-                    case WILL:  answer[1]=DO; mud->ent->visible=0; input_line_visible(FALSE); break;
+                    case WILL:  answer[1]=DO;
+                        if ((time(NULL) - mud->login) < 10)
+                            mud->ent->visible=0; input_line_visible(FALSE);
+                        break;
                     case WONT:  answer[1]=DONT; if (!mud->ent->visible) { mud->ent->visible=1; input_line_visible(TRUE); } break;
                     case DONT:  answer[1]=WONT; break;
                 };
@@ -308,7 +336,7 @@ int do_telnet_protocol(unsigned char *data,int nb,struct session *ses)
                     case DONT:  answer[1]=WONT; break;
                 };
                 break;
-#ifdef UI_FULLSCREEN    
+#ifdef UI_FULLSCREEN
             case NAWS:
                 switch(wt)
                 {
@@ -392,6 +420,9 @@ sbloop:
                 ++np;
                 b+= sprintf(b, "GMCP ");
                 break;
+            case MSSP:
+                ++np;
+                b+= sprintf(b, "MSSP ");
             }
             while (np-nego<neb)
                 b+=sprintf(b, "<%u> ", *np++);
@@ -405,6 +436,39 @@ sbloop:
             if (*(np+1)==SEND)
                 telnet_send_ttype(ses);
             break;
+         case MSSP:
+            {
+                unsigned int neb=nb - 3, done = 0;
+                np++;
+                char vname[BUFFER_SIZE] = {0}, val[BUFFER_SIZE] = {0};
+                while (!done) {
+                    char *n = vname, *v = val;
+                    if (*np != MSSP_VAR)
+                        done = 1;
+                    else {
+                        ++np;
+                        while (*np >= 32)
+                            *n++ = *np++;
+                        if (*np != MSSP_VAL)
+                            done = 1;
+                        else {
+                            *n = 0;
+                            ++np;
+                            while (*np >= 32)
+                                *v++ = *np++;
+                            *v = 0;
+
+                            if (vname[0] && val[0]) {
+                                char buffer[BUFFER_SIZE * 2];
+                                sprintf(buffer, "#var {%s} {%s}", vname, val);
+
+                                parse_input(buffer, mud->activesession);
+                            }
+                        }
+                    }
+                }
+            }
+            break;
          case GMCP:
             {
                unsigned int neb=nb - 3;
@@ -413,6 +477,7 @@ sbloop:
                while (np-nego<neb)
                    *b++=*np++;
                *b = 0;
+               fprintf(stderr, "Passing <%s> to gmcp...\n", buf);
                gmcp(buf);
             }
             break;

@@ -1,4 +1,4 @@
-/*  GGMud 
+/*  GGMud
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -90,6 +90,8 @@ typedef struct {
     int chat_size;
     int chat_offset;
     char *chat_buffer;
+    // login time
+    time_t login;
 } ggmud;
 
 typedef struct alias_data  ALIAS_DATA;
@@ -223,7 +225,7 @@ extern gint check_macro(gint, gint);
 /* win.c */
 typedef struct {
     char name[32];
-    GtkWidget *listptr;    
+    GtkWidget *listptr;
 } window_entry;
 
 extern void spawn_gui( void );
@@ -277,7 +279,7 @@ extern void connection_send ( gchar *message );
 
 /* lua.c */
 #include "include/lua.h"
-extern void gmcp(char *value);
+extern void gmcp(const char *value);
 
 /* log.c */
 extern void do_log ();

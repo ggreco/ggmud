@@ -22,7 +22,7 @@ save_variables (GtkWidget *button, gpointer data) {
             if ( !gtk_clist_get_text ((GtkCList*) data, row, 0, &alias)
                 || !gtk_clist_get_text ((GtkCList*) data, row, 1, &replace) )
                 break;
-            
+
             if (!alias[0]) {
                 done = TRUE;
                 break;
@@ -31,7 +31,7 @@ save_variables (GtkWidget *button, gpointer data) {
             row++;
         }
         fclose (fp);
-    }    
+    }
 }
 
 void save_vars()
@@ -82,11 +82,11 @@ static void variable_selection_made (GtkWidget *clist, gint row, gint column,
                            GdkEventButton *event, gpointer data)
 {
     gchar *text;
-    
+
     if ( (GtkCList*) data )
     {
         gtk_object_set_user_data(GTK_OBJECT(clist), GINT_TO_POINTER( row));
-        
+
         gtk_clist_get_text ((GtkCList*) data, row, 0, &text);
         gtk_entry_set_text (GTK_ENTRY (textvariable), text);
         gtk_clist_get_text ((GtkCList*) data, row, 1, &text);
@@ -97,7 +97,7 @@ static void variable_selection_made (GtkWidget *clist, gint row, gint column,
 static void  add_variable (const char *alias, const char *replacement)
 {
     char buffer[1024];
-    
+
     sprintf(buffer, "#var {%s} {%s}", alias, replacement);
 
     parse_input(buffer, mud->activesession);
@@ -137,7 +137,7 @@ static void variable_button_add (GtkWidget *button, GtkCList *data)
         popup_window (ERR, "Variable name too big.");
         return;
     }
-    
+
     if ( strlen (text[1]) > VALUE_LEN)    {
         popup_window (ERR, "Variable value too big.");
         return;
@@ -151,13 +151,13 @@ static void variable_button_add (GtkWidget *button, GtkCList *data)
 static void variable_button_delete (GtkWidget *button, gpointer data) {
     gchar *word;
     int selected_row = GPOINTER_TO_INT( gtk_object_get_user_data(GTK_OBJECT(data)));
-    
+
     if ( selected_row == -1 ) {
         popup_window (WARN, "No selection made.");
     }
     else {
         char buffer[VAR_LEN + 20];
-        
+
         gtk_clist_get_text ((GtkCList*) data, selected_row, 0, &word);
 
         sprintf(buffer, "#unvar {%s}", word);
@@ -194,7 +194,7 @@ variables_window(GtkWidget *w, gpointer data)
                                GTK_SIGNAL_FUNC(close_window), variable_window );
     gtk_signal_connect (GTK_OBJECT (variable_window), "destroy",
                                GTK_SIGNAL_FUNC(kill_window), &variable_window );
-    gtk_widget_set_usize (variable_window, 450, 320);			       
+    gtk_widget_set_usize (variable_window, 450, 320);
     vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (vbox), 0);
     gtk_container_add (GTK_CONTAINER (variable_window), vbox);
@@ -231,12 +231,12 @@ variables_window(GtkWidget *w, gpointer data)
     gtk_box_pack_start (GTK_BOX (vbox), hbox3, FALSE, FALSE, 0);
     gtk_widget_show (hbox3);
 
-    
+
     label = gtk_label_new ("Variable");
     gtk_table_attach(GTK_TABLE(hbox3), label, 0, 1, 0, 1,
                         /*GTK_FILL*/ 0L, /*GTK_FILL*/ 0L, 2, 2);
     gtk_widget_show (label);
-    
+
     label = gtk_label_new ("value");
     gtk_table_attach(GTK_TABLE(hbox3), label, 1, 2, 0, 1,
                         GTK_FILL | GTK_EXPAND, /*GTK_FILL*/ 0L, 2, 2);
@@ -252,7 +252,7 @@ variables_window(GtkWidget *w, gpointer data)
     gtk_table_attach(GTK_TABLE(hbox3), textvariablevalue, 1, 2, 1, 2,
                         GTK_FILL | GTK_EXPAND, /*GTK_FILL*/ 0L, 2, 2);
     gtk_widget_show (textvariablevalue);
-    
+
     AddButtonBar(vbox, (gpointer)clist,
             GTK_SIGNAL_FUNC(variable_button_add),
             GTK_SIGNAL_FUNC(variable_button_delete),

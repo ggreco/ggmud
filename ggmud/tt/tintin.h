@@ -299,7 +299,7 @@ struct session {
 };
 
 #ifdef TELNET_SUPPORT
-#define INPUT_CHUNK 512
+#define INPUT_CHUNK 1024
 #endif
 
 /* DSC: for the chat module */
