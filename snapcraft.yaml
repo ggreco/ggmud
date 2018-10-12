@@ -1,0 +1,25 @@
+name: ggmud
+version: 0.9.5
+summary: a light mud client compatibile with tintin
+description: GGMud is a complete MUD client built on tintin++ foundation that includes a modern ANSI 256 color interface, LUA scripting, MCCP and more!
+confinement: devmode
+grade: devel
+icon: ggmud.png
+
+apps:
+    ggmud:
+        command: desktop-launch ggmud
+        plugs: [home,network,x11]
+
+parts:
+    ggmud:
+        source: https://github.com/ggreco/ggmud.git
+        plugin: cmake
+        source-subdir: ggmud
+        build-packages:
+            - g++
+            - libgtk2.0-dev
+        stage-packages:
+            - libgtk2.0-0
+            - libpango-1.0-0
+        after: [desktop-gtk2]
